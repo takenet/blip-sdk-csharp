@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Take.Blip.Client
+namespace Take.Blip.Client.Activation
 {
     /// <summary>
     /// Defines a factory for instance of <see cref="T"/>.

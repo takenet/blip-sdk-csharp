@@ -17,6 +17,13 @@
           "type": "text/plain",
           "content": "Olá, como posso ajudar?"
         },
+        "invokeReceiver": {
+          "type": "PlainTextMessageReceiver",
+          "settings": {
+            "key1": "value1"
+          },
+          "settingsType": "Settings"
+        },
         "outState": "greeting-sent"
       }
     }

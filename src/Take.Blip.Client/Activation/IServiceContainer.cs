@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Take.Blip.Client
+namespace Take.Blip.Client.Activation
 {
     /// <summary>
     /// Defines a service container that allows the registration of service type instances.
