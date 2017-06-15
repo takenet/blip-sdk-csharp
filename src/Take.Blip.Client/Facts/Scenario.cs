@@ -34,7 +34,7 @@ namespace Take.Blip.Client.Facts
             
         }      
 
-        public abstract Task<bool> IsMatchAsync(object fact, IDictionary<string, object> context, CancellationToken cancellationToken);
+        public abstract Task<bool> IsMatchAsync(object factProperty, IDictionary<string, object> context, CancellationToken cancellationToken);
 
     }
 
@@ -46,7 +46,7 @@ namespace Take.Blip.Client.Facts
 
         }
 
-        public abstract Task ExecuteAsync(object fact, IDictionary<string, object> context, CancellationToken cancellationToken);
+        public abstract Task ExecuteAsync(IDictionary<string, object> fact, IDictionary<string, object> context, CancellationToken cancellationToken);
     }
 
     public class NamedEntity
