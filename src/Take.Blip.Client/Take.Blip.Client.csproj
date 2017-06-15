@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <Version>0.1.0</Version>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Authors>takenet</Authors>
+    <Company>takenet</Company>
+    <Product>BLiP</Product>
+    <PackageProjectUrl>https://blip.ai</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/takenet/blip-sdk-csharp</RepositoryUrl>
+    <PackageLicenseUrl>https://github.com/takenet/blip-sdk-csharp/blob/master/LICENSE</PackageLicenseUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lime.Messaging" Version="0.7.148" />
+    <PackageReference Include="Lime.Protocol" Version="0.7.148" />
+    <PackageReference Include="Lime.Transport.Tcp" Version="0.7.148" />
+    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>
