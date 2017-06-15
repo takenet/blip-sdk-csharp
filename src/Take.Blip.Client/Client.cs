@@ -4,47 +4,81 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Client;
+using Lime.Protocol.Listeners;
 using Lime.Protocol.Network;
 using Lime.Protocol.Util;
 
 namespace Take.Blip.Client
 {
-    public class OnDemandClientChannelClientAdapter : IClient
+    /// <summary>
+    /// Implements a client for BLiP connections.
+    /// For creating new instances, use the <see cref="ClientBuilder"/> class.
+    /// </summary>
+    public class Client : IClient
     {
         private static readonly TimeSpan ChannelDiscardedDelay = TimeSpan.FromSeconds(5);
-        private bool _isStopping;
-
+        
         private readonly IOnDemandClientChannel _onDemandClientChannel;
+        private readonly SemaphoreSlim _semaphore;
 
-        public OnDemandClientChannelClientAdapter(IOnDemandClientChannel onDemandClientChannel)
+        private bool _isStopping;
+        private IChannelListener _channelListener;
+
+        public Client(IOnDemandClientChannel onDemandClientChannel)
         {
-            _onDemandClientChannel = onDemandClientChannel;
-
+            _onDemandClientChannel = onDemandClientChannel ?? throw new ArgumentNullException(nameof(onDemandClientChannel));
+            _semaphore = new SemaphoreSlim(1, 1);
             _onDemandClientChannel.ChannelCreatedHandlers.Add(ChannelCreatedAsync);
             _onDemandClientChannel.ChannelCreationFailedHandlers.Add(ChannelCreationFailedAsync);
             _onDemandClientChannel.ChannelDiscardedHandlers.Add(ChannelDiscardedAsync);
             _onDemandClientChannel.ChannelOperationFailedHandlers.Add(ChannelOperationFailedAsync);
         }
 
-        public Task<Command> ProcessCommandAsync(Command command, CancellationToken cancellationToken = default(CancellationToken)) 
+        public Task<Command> ProcessCommandAsync(Command command, CancellationToken cancellationToken)
             => _onDemandClientChannel.ProcessCommandAsync(command, cancellationToken);
 
-        public Task SendCommandResponseAsync(Command command, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SendCommandAsync(Command command, CancellationToken cancellationToken)
             => _onDemandClientChannel.SendCommandAsync(command, cancellationToken);
 
-        public Task SendMessageAsync(Message message, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SendMessageAsync(Message message, CancellationToken cancellationToken)
             => _onDemandClientChannel.SendMessageAsync(message, cancellationToken);
 
-        public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken)
             => _onDemandClientChannel.SendNotificationAsync(notification, cancellationToken);
 
-        public Task StartAsync(CancellationToken cancellationToken)
-            => _onDemandClientChannel.EstablishAsync(cancellationToken);
-
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(IChannelListener channelListener, CancellationToken cancellationToken)
         {
-            _isStopping = true;
-            return _onDemandClientChannel.FinishAsync(cancellationToken);
+            if (_channelListener != null) throw new InvalidOperationException("The client is already started");
+
+            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                _channelListener = channelListener ?? throw new ArgumentNullException(nameof(channelListener));                
+                _channelListener.Start(_onDemandClientChannel);
+                await _onDemandClientChannel.EstablishAsync(cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            if (_channelListener == null) throw new InvalidOperationException("The client is not started");
+
+            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                _isStopping = true;
+                _channelListener?.Stop();
+                await _onDemandClientChannel.FinishAsync(cancellationToken).ConfigureAwait(false);
+                _channelListener = null;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         private Task ChannelCreatedAsync(ChannelInformation channelInformation)

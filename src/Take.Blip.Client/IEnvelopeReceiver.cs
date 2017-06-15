@@ -13,6 +13,6 @@ namespace Take.Blip.Client
         /// <param name="envelope">Envelope type</param>
         /// <param name="cancellationToken">A cancellation token to allow the task to be canceled</param>
         /// <returns>Task representing the receive operation</returns>
-        Task ReceiveAsync(TEnvelope envelope, CancellationToken cancellationToken = default(CancellationToken));
+        Task ReceiveAsync(TEnvelope envelope, CancellationToken cancellationToken);
     }
 }

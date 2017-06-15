@@ -1,0 +1,24 @@
+﻿{
+  "scenarios": [
+    {
+      "with": {
+        "priority": 0
+      },
+      "when": {
+        "state": "default",
+        "messageReceived": {
+          "type": "text/plain",
+          "content": "Olá"
+        }
+      },
+      "do": {
+        "sendMessage": {
+          "id": "${newId}",
+          "type": "text/plain",
+          "content": "Olá, como posso ajudar?"
+        },
+        "outState": "greeting-sent"
+      }
+    }
+  ]
+}

@@ -18,6 +18,12 @@ namespace Take.Blip.Client
     {
         private readonly ITransportFactory _transportFactory;
 
+        public ClientBuilder()
+            : this(new TcpTransportFactory())
+        {
+
+        }
+
         public ClientBuilder(ITransportFactory transportFactory)
         {
             _transportFactory = transportFactory ?? throw new ArgumentNullException(nameof(transportFactory));
@@ -96,10 +102,8 @@ namespace Take.Blip.Client
         {
             if (string.IsNullOrEmpty(identifier)) throw new ArgumentNullException(nameof(identifier));
             if (string.IsNullOrEmpty(accessKey)) throw new ArgumentNullException(nameof(accessKey));
-
             Identifier = identifier;
             AccessKey = accessKey;
-
             return this;
         }
 
@@ -125,7 +129,6 @@ namespace Take.Blip.Client
         public ClientBuilder UsingHostName(string hostName)
         {
             if (string.IsNullOrEmpty(hostName)) throw new ArgumentNullException(nameof(hostName));
-
             HostName = hostName;
             return this;
         }
@@ -133,7 +136,6 @@ namespace Take.Blip.Client
         public ClientBuilder UsingPort(int port)
         {
             if (port <= 0) throw new ArgumentOutOfRangeException(nameof(port));
-
             Port = port;
             return this;
         }
@@ -141,7 +143,6 @@ namespace Take.Blip.Client
         public ClientBuilder UsingDomain(string domain)
         {
             if (string.IsNullOrEmpty(domain)) throw new ArgumentNullException(nameof(domain));
-
             Domain = domain;
             return this;
         }
@@ -161,7 +162,6 @@ namespace Take.Blip.Client
         public ClientBuilder WithChannelCount(int channelCount)
         {
             if (channelCount <= 0) throw new ArgumentOutOfRangeException(nameof(channelCount));
-
             ChannelCount = channelCount;
             return this;
         }
@@ -169,7 +169,6 @@ namespace Take.Blip.Client
         public ClientBuilder WithSendTimeout(TimeSpan timeout)
         {
             if (timeout == default(TimeSpan)) throw new ArgumentOutOfRangeException(nameof(timeout));
-
             SendTimeout = timeout;
             return this;
         }
@@ -240,7 +239,7 @@ namespace Take.Blip.Client
             }
 
             IOnDemandClientChannel onDemandClientChannel = CreateOnDemandClientChannel(establishedClientChannelBuilder);
-            return new OnDemandClientChannelClientAdapter(onDemandClientChannel);
+            return new Client(onDemandClientChannel);
         }
 
         private Authentication GetAuthenticationScheme()
