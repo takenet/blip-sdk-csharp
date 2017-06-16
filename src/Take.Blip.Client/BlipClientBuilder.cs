@@ -12,19 +12,19 @@ using Lime.Protocol.Security;
 namespace Take.Blip.Client
 {
     /// <summary>
-    /// Defines a service for building instances of <see cref="IClient"/>.
+    /// Defines a service for building instances of <see cref="IBlipClient"/>.
     /// </summary>
-    public sealed class ClientBuilder
+    public sealed class BlipClientBuilder
     {
         private readonly ITransportFactory _transportFactory;
 
-        public ClientBuilder()
+        public BlipClientBuilder()
             : this(new TcpTransportFactory())
         {
 
         }
 
-        public ClientBuilder(ITransportFactory transportFactory)
+        public BlipClientBuilder(ITransportFactory transportFactory)
         {
             _transportFactory = transportFactory ?? throw new ArgumentNullException(nameof(transportFactory));
 
@@ -81,7 +81,7 @@ namespace Take.Blip.Client
 
         public Event[] ReceiptEvents { get; private set; }
 
-        public ClientBuilder UsingPassword(string identifier, string password)
+        public BlipClientBuilder UsingPassword(string identifier, string password)
         {
             if (string.IsNullOrEmpty(identifier)) throw new ArgumentNullException(nameof(identifier));
             if (string.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
@@ -92,13 +92,13 @@ namespace Take.Blip.Client
             return this;
         }
 
-        public ClientBuilder UsingGuest()
+        public BlipClientBuilder UsingGuest()
         {
             Identifier = Guid.NewGuid().ToString();
             return this;
         }
 
-        public ClientBuilder UsingAccessKey(string identifier, string accessKey)
+        public BlipClientBuilder UsingAccessKey(string identifier, string accessKey)
         {
             if (string.IsNullOrEmpty(identifier)) throw new ArgumentNullException(nameof(identifier));
             if (string.IsNullOrEmpty(accessKey)) throw new ArgumentNullException(nameof(accessKey));
@@ -107,85 +107,85 @@ namespace Take.Blip.Client
             return this;
         }
 
-        public ClientBuilder UsingInstance(string instance)
+        public BlipClientBuilder UsingInstance(string instance)
         {
             Instance = instance;
             return this;
         }
 
-        public ClientBuilder UsingRoutingRule(RoutingRule routingRule)
+        public BlipClientBuilder UsingRoutingRule(RoutingRule routingRule)
         {
             RoutingRule = routingRule;
             return this;
         }
 
-        public ClientBuilder UsingScheme(string scheme)
+        public BlipClientBuilder UsingScheme(string scheme)
         {
             if (string.IsNullOrEmpty(scheme)) throw new ArgumentNullException(nameof(scheme));
             Scheme = scheme;
             return this;
         }
 
-        public ClientBuilder UsingHostName(string hostName)
+        public BlipClientBuilder UsingHostName(string hostName)
         {
             if (string.IsNullOrEmpty(hostName)) throw new ArgumentNullException(nameof(hostName));
             HostName = hostName;
             return this;
         }
 
-        public ClientBuilder UsingPort(int port)
+        public BlipClientBuilder UsingPort(int port)
         {
             if (port <= 0) throw new ArgumentOutOfRangeException(nameof(port));
             Port = port;
             return this;
         }
 
-        public ClientBuilder UsingDomain(string domain)
+        public BlipClientBuilder UsingDomain(string domain)
         {
             if (string.IsNullOrEmpty(domain)) throw new ArgumentNullException(nameof(domain));
             Domain = domain;
             return this;
         }
 
-        public ClientBuilder UsingEncryption(SessionEncryption sessionEncryption)
+        public BlipClientBuilder UsingEncryption(SessionEncryption sessionEncryption)
         {
             Encryption = sessionEncryption;
             return this;
         }
 
-        public ClientBuilder UsingCompression(SessionCompression sessionCompression)
+        public BlipClientBuilder UsingCompression(SessionCompression sessionCompression)
         {
             Compression = sessionCompression;
             return this;
         }
 
-        public ClientBuilder WithChannelCount(int channelCount)
+        public BlipClientBuilder WithChannelCount(int channelCount)
         {
             if (channelCount <= 0) throw new ArgumentOutOfRangeException(nameof(channelCount));
             ChannelCount = channelCount;
             return this;
         }
 
-        public ClientBuilder WithSendTimeout(TimeSpan timeout)
+        public BlipClientBuilder WithSendTimeout(TimeSpan timeout)
         {
             if (timeout == default(TimeSpan)) throw new ArgumentOutOfRangeException(nameof(timeout));
             SendTimeout = timeout;
             return this;
         }
 
-        public ClientBuilder WithAutoNotify(bool enabled)
+        public BlipClientBuilder WithAutoNotify(bool enabled)
         {
             AutoNotify = enabled;
             return this;
         }
 
-        public ClientBuilder WithReceiptEvents(Event[] events)
+        public BlipClientBuilder WithReceiptEvents(Event[] events)
         {
             ReceiptEvents = events;
             return this;
         }
 
-        public ClientBuilder WithMaxConnectionRetries(int maxConnectionRetries)
+        public BlipClientBuilder WithMaxConnectionRetries(int maxConnectionRetries)
         {
             if (maxConnectionRetries < 1) throw new ArgumentOutOfRangeException(nameof(maxConnectionRetries));
             if (maxConnectionRetries > 5) throw new ArgumentOutOfRangeException(nameof(maxConnectionRetries));
@@ -194,7 +194,7 @@ namespace Take.Blip.Client
             return this;
         }
 
-        public ClientBuilder WithThroughput(int throughput)
+        public BlipClientBuilder WithThroughput(int throughput)
         {
             Throughput = throughput;
             return this;
@@ -204,7 +204,7 @@ namespace Take.Blip.Client
         /// Builds a <see cref="IMessagingHubConnection">connection</see> with the configured parameters
         /// </summary>
         /// <returns>An inactive connection with the Messaging Hub. Call <see cref="IMessagingHubConnection.ConnectAsync"/> to activate it</returns>
-        public IClient Build()
+        public IBlipClient Build()
         {
             var channelBuilder = ClientChannelBuilder
                 .Create(() => _transportFactory.Create(EndPoint), EndPoint)
@@ -239,7 +239,7 @@ namespace Take.Blip.Client
             }
 
             IOnDemandClientChannel onDemandClientChannel = CreateOnDemandClientChannel(establishedClientChannelBuilder);
-            return new Client(onDemandClientChannel);
+            return new BlipClient(onDemandClientChannel);
         }
 
         private Authentication GetAuthenticationScheme()

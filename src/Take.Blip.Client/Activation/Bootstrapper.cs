@@ -25,7 +25,7 @@ namespace Take.Blip.Client.Activation
         /// <param name="application">The application instance. If not defined, the class will look for an application.json file in the current directory.</param>
         /// <param name="builder">The builder instance to be used.</param>
         /// <param name="typeResolver">The resolver for type names.</param>
-        public static async Task<IStoppable> StartAsync(CancellationToken cancellationToken, Application application = null, ClientBuilder builder = null, ITypeResolver typeResolver = null)
+        public static async Task<IStoppable> StartAsync(CancellationToken cancellationToken, Application application = null, BlipClientBuilder builder = null, ITypeResolver typeResolver = null)
         {
             if (application == null)
             {
@@ -36,7 +36,7 @@ namespace Take.Blip.Client.Activation
                 application = Application.ParseFromJsonFile(DefaultApplicationFileName);
             }
 
-            if (builder == null) builder = new ClientBuilder();
+            if (builder == null) builder = new BlipClientBuilder();
             if (application.Identifier != null)
             {
                 if (application.Password != null)
@@ -77,7 +77,7 @@ namespace Take.Blip.Client.Activation
             if (typeResolver == null) typeResolver = TypeResolver.Instance;
             var localServiceProvider = BuildServiceProvider(application, typeResolver);
 
-            localServiceProvider.RegisterService(typeof(ClientBuilder), builder);
+            localServiceProvider.RegisterService(typeof(BlipClientBuilder), builder);
 
             var client = await BuildClientAsync(application, builder.Build, localServiceProvider, typeResolver);
 
@@ -144,9 +144,9 @@ namespace Take.Blip.Client.Activation
             return startable;
         }
 
-        public static async Task<IClient> BuildClientAsync(
+        public static async Task<IBlipClient> BuildClientAsync(
             Application application,
-            Func<IClient> builder,
+            Func<IBlipClient> builder,
             IServiceContainer serviceContainer,
             ITypeResolver typeResolver,
             Action<IServiceContainer> serviceOverrides = null)

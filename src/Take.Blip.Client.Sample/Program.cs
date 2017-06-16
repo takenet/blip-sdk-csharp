@@ -15,7 +15,7 @@ namespace Take.Blip.Client.Sample
 
         static async Task MainAsync(string[] args, CancellationToken cancellationToken)
         {
-            var client = new ClientBuilder()
+            var client = new BlipClientBuilder()
                 .UsingAccessKey("animaisdemo", "V01WNEJtVDBvRVRod1Bycm11Umw=")
                 .Build();
 

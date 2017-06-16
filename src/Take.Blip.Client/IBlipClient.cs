@@ -10,7 +10,7 @@ namespace Take.Blip.Client
     /// <summary>
     /// Defines a BLiP client service.
     /// </summary>
-    public interface IClient : ISender, IStoppable
+    public interface IBlipClient : ISender, IStoppable
     {
         /// <summary>
         /// Starts the client with the specified listener instance.
@@ -33,7 +33,7 @@ namespace Take.Blip.Client
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         public static Task StartAsync(
-            this IClient client,
+            this IBlipClient client,
             Func<Message, Task<bool>> messageConsumer,
             Func<Notification, Task<bool>> notificationConsumer,
             Func<Command, Task<bool>> commandConsumer,

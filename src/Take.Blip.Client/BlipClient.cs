@@ -12,9 +12,9 @@ namespace Take.Blip.Client
 {
     /// <summary>
     /// Implements a client for BLiP connections.
-    /// For creating new instances, use the <see cref="ClientBuilder"/> class.
+    /// For creating new instances, use the <see cref="BlipClientBuilder"/> class.
     /// </summary>
-    public class Client : IClient
+    public class BlipClient : IBlipClient
     {
         private static readonly TimeSpan ChannelDiscardedDelay = TimeSpan.FromSeconds(5);
         
@@ -24,7 +24,7 @@ namespace Take.Blip.Client
         private bool _isStopping;
         private IChannelListener _channelListener;
 
-        public Client(IOnDemandClientChannel onDemandClientChannel)
+        public BlipClient(IOnDemandClientChannel onDemandClientChannel)
         {
             _onDemandClientChannel = onDemandClientChannel ?? throw new ArgumentNullException(nameof(onDemandClientChannel));
             _semaphore = new SemaphoreSlim(1, 1);
