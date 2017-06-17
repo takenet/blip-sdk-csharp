@@ -37,13 +37,13 @@ namespace Take.Blip.Client.Sample
                 },
                 cancellationToken);
 
-            Console.WriteLine("Client started. Press any key to stop.");
-            Console.Read();
+            Console.WriteLine("Client started. Press enter to stop.");
+            Console.ReadLine();
 
             await client.StopAsync(cancellationToken);
 
-            Console.WriteLine("Client stopped. Press any key to exit.");
-            Console.Read();
+            Console.WriteLine("Client stopped. Press enter to exit.");
+            Console.ReadLine();
         }
     }
 }

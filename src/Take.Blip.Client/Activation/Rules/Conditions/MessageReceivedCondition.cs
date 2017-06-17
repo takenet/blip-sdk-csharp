@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Util;
 
-namespace Take.Blip.Client.Facts.Conditions
+namespace Take.Blip.Client.Activation.Rules.Conditions
 {
-    public class MessageReceivedCondition : Condition
+    public class MessageReceivedCondition : ConditionBase
     {
         public const string NAME = "messageReceived";
 

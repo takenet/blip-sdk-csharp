@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 
-namespace Take.Blip.Client.Facts.Conditions
+namespace Take.Blip.Client.Activation.Rules.Conditions
 {
 
     public class MessageReceivedConditionFilter : EnvelopeReceivedConditionFilter

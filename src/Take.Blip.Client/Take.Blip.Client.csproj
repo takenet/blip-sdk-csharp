@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Facts\Actions\" />
+    <Folder Include="Activation\Rules\Actions\" />
   </ItemGroup>
 
 </Project>
