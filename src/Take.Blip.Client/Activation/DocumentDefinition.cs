@@ -5,7 +5,7 @@ using Lime.Protocol;
 using Take.Blip.Client.Extensions.Resource;
 using Takenet.Iris.Messaging.Contents;
 
-namespace Take.Blip.Client.Activation.Legacy
+namespace Take.Blip.Client.Activation
 {
     public class DocumentDefinition
     {

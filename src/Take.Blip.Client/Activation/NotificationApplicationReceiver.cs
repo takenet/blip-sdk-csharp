@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Lime.Protocol;
 
-namespace Take.Blip.Client.Activation.Legacy
+namespace Take.Blip.Client.Activation
 {
     public class NotificationApplicationReceiver : ApplicationReceiver
     {

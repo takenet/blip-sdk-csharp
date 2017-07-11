@@ -5,7 +5,6 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using Take.Blip.Client.Activation.Legacy;
 
 namespace Take.Blip.Client.Activation
 {
@@ -101,7 +100,6 @@ namespace Take.Blip.Client.Activation
         /// <value>
         /// The receivers.
         /// </value>
-        [Obsolete("Use the Rules property instead")]
         public MessageApplicationReceiver[] MessageReceivers { get; set; }
 
         /// <summary>
@@ -110,13 +108,11 @@ namespace Take.Blip.Client.Activation
         /// <value>
         /// The receivers.
         /// </value>
-        [Obsolete("Use the Rules property instead")]
         public NotificationApplicationReceiver[] NotificationReceivers { get; set; }
 
         /// <summary>
         /// Gets or sets the command receivers
         /// </summary>
-        [Obsolete("Use the Rules property instead")]
         public CommandApplicationReceiver[] CommandReceivers { get; set; }
 
         /// <summary>

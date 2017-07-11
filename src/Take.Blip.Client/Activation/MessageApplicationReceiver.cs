@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Take.Blip.Client.Activation.Legacy
+namespace Take.Blip.Client.Activation
 {
     public class MessageApplicationReceiver : ApplicationReceiver
     {

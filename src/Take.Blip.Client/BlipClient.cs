@@ -86,14 +86,11 @@ namespace Take.Blip.Client
             Trace.TraceInformation("Channel '{0}' created", channelInformation.SessionId);
             return Task.CompletedTask;
         }
-        /// <summary>
-        /// In this context, a LimeException usually means that some credential information is wrong, and should be checked.
-        /// </summary>
-        /// <param name="failedChannelInformation">Information about the failure</param>
+
         private async Task<bool> ChannelCreationFailedAsync(FailedChannelInformation failedChannelInformation)
         {
             Trace.TraceError("Channel '{0}' operation failed: {1}", failedChannelInformation.SessionId, failedChannelInformation.Exception);
-            if (failedChannelInformation.Exception is LimeException) return false;
+            if (failedChannelInformation.Exception is LimeException ex && ex.Reason.Code == ReasonCodes.SESSION_AUTHENTICATION_FAILED) return false;
             await Task.Delay(ChannelDiscardedDelay).ConfigureAwait(false);
             return !_isStopping;
         }
