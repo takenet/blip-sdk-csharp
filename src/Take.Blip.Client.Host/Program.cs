@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using CommandLine;
@@ -37,7 +38,16 @@ namespace Take.Blip.Client.Host
         {
             try
             {
-                if (!File.Exists(options.ApplicationJsonPath))
+                var applicationJsonPath = options.ApplicationJsonPath;
+
+                if (string.IsNullOrWhiteSpace(Path.GetDirectoryName(applicationJsonPath)))
+                {
+                    applicationJsonPath = Path.Combine(
+                        Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                        applicationJsonPath);
+                }
+
+                if (!File.Exists(applicationJsonPath))
                 {
                     WriteLine($"Could not find the {options.ApplicationJsonPath} file", ConsoleColor.Red);
                     return;
@@ -48,7 +58,7 @@ namespace Take.Blip.Client.Host
 
                 using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(options.StartTimeout)))
                 {
-                    stopabble = await StartAsync(options.ApplicationJsonPath, cts.Token).ConfigureAwait(false);
+                    stopabble = await StartAsync(applicationJsonPath, cts.Token).ConfigureAwait(false);
                 }
 
                 WriteLine("Application started. Press any key to stop.", HIGHLIGHT_COLOR);

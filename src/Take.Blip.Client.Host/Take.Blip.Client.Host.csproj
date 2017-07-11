@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Samples\Navigation\Navigation.csproj" />
     <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 

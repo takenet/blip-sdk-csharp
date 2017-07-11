@@ -158,7 +158,7 @@ namespace Take.Blip.Client.Activation
             serviceContainer.RegisterService(typeof(IServiceProvider), serviceContainer);
             serviceContainer.RegisterService(typeof(IServiceContainer), serviceContainer);
             serviceContainer.RegisterService(typeof(Application), application);
-            serviceContainer.RegisterService(typeof(IStateManager), () => new BucketStateManager(serviceContainer.GetService<IBucketExtension>()));
+            //serviceContainer.RegisterService(typeof(IStateManager), () => new BucketStateManager(serviceContainer.GetService<IBucketExtension>()));
 
             var client = builder();
             serviceContainer.RegisterService(typeof(ISender), client);
