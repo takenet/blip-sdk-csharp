@@ -34,7 +34,8 @@ namespace Take.Blip.Client.Extensions.Bucket
 
             var getResponseCommand = await _sender.ProcessCommandAsync(
                 getRequestCommand,
-                cancellationToken);
+                cancellationToken)
+                .ConfigureAwait(false);
 
             if (getResponseCommand.Status != CommandStatus.Success)
             {
