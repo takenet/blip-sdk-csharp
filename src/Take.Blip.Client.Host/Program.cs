@@ -87,14 +87,13 @@ namespace Take.Blip.Client.Host
         }
 
 
-        public static Task<IStoppable> StartAsync(string applicationFileName, CancellationToken cancellationToken)
+        private static Task<IStoppable> StartAsync(string applicationFileName, CancellationToken cancellationToken)
         {
-            //ConfigureWorkingDirectory(applicationFileName);
             var application = Application.ParseFromJsonFile(applicationFileName);
             return Bootstrapper.StartAsync(cancellationToken, application);
         }
 
-        static void WriteLine(string value = "", ConsoleColor color = ConsoleColor.White)
+        private static void WriteLine(string value = "", ConsoleColor color = ConsoleColor.White)
         {
             var foregroundColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
