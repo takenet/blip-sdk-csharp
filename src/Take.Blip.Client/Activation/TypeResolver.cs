@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Take.Blip.Client.Activation
 {
@@ -23,11 +22,12 @@ namespace Take.Blip.Client.Activation
         {
             var types = LoadedTypes
                 .Value
-                .Where(t => t.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
+                .Where(t => t.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
 
-            if (types.Count() == 1) return types.First();
-            else if (types.Count() == 0) return Type.GetType(typeName, true, true);
-            else throw new Exception($"There are multiple types named {typeName}");
+            if (types.Length == 1) return types[0];
+            else if (types.Length == 0) return Type.GetType(typeName, true, true);
+            else throw new Exception($"There are multiple types named '{typeName}'");
         }
 
         private static IEnumerable<Type> LoadTypes()
@@ -59,7 +59,7 @@ namespace Take.Blip.Client.Activation
 #if NETSTANDARD1_6
             var assemblyName = System.Runtime.Loader.AssemblyLoadContext.GetAssemblyName(assemblyPath);
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
-#else
+#elif NET461
             var assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
             return Assembly.Load(assemblyName);
 #endif

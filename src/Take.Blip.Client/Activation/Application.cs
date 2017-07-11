@@ -171,6 +171,12 @@ namespace Take.Blip.Client.Activation
         public Event[] ReceiptEvents { get; set; }
 
         /// <summary>
+        /// Indicates if the tunnel receivers for automatically forwarding envelopes
+        /// should be registered.
+        /// </summary>
+        public bool RegisterTunnelReceivers { get; set; }
+
+        /// <summary>
         /// Creates an instance of <see cref="Application"/> from a JSON input.
         /// </summary>
         /// <param name="json">The json.</param>

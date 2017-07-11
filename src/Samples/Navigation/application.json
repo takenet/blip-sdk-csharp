@@ -1,0 +1,151 @@
+﻿{
+  "identifier": "navigationsample",
+  "accessKey": "QkRYOHAz",
+  "messageReceivers": [
+    {
+      "mediaType": "text/plain",
+      "content": "(inicio|iniciar|começar|ajuda)",
+      "response": {
+        "mediaType": "application/vnd.lime.select+json",
+        "jsonContent": {
+          "text": "Olá, seja bem-vindo ao serviço de ajuda do Messaging Hub. Escolha o que você deseja receber:",
+          "options": [
+            {
+              "order": 1,
+              "text": "Um TEXTO",
+              "type": "text/plain",
+              "value": "texto"
+            },
+            {
+              "order": 2,
+              "text": "Uma IMAGEM",
+              "type": "text/plain",
+              "value": "imagem"
+            },
+            {
+              "order": 3,
+              "text": "A DATA atual",
+              "type": "text/plain",
+              "value": "data"
+            }
+          ]
+        }
+      },
+      "outState": "answer"
+    },
+    {
+      "mediaType": "text/plain",
+      "content": "^(texto|um texto|1)$",
+      "state": "answer",
+      "response": {
+        "mediaType": "text/plain",
+        "plainContent": "Este é um texto simples, sem nada de especial."
+      }
+    },
+    {
+      "mediaType": "text/plain",
+      "content": "^(imagem|uma imagem|2)$",
+      "state": "answer",
+      "response": {
+        "mediaType": "application/vnd.lime.media-link+json",
+        "jsonContent": {
+          "type": "image/jpeg",
+          "uri": "http://static.boredpanda.com/blog/wp-content/uploads/2015/09/Instagrams-most-famous-cat-Nala165604f5fc88e5f.jpg",
+          "text": "Miau!"
+        }
+      }
+    },
+    {
+      "mediaType": "text/plain",
+      "content": "^(data|a data atual|3)$",
+      "state": "answer",
+      "type": "DateMessageReceiver",
+      "settings": {
+        "culture": "pt-BR",
+        "message": "A data atual é {0}."
+      }
+    },
+    {
+      "mediaType": "text/plain",
+      "content": "(start|help|begin|activate)",
+      "culture": "en-US",
+      "response": {
+        "mediaType": "application/vnd.lime.select+json",
+        "jsonContent": {
+          "text": "Hello and welcome to the Messaging Hub help service. Please choose which kind of content you want to receive:",
+          "options": [
+            {
+              "order": 1,
+              "text": "A TEXT",
+              "type": "text/plain",
+              "value": "text"
+            },
+            {
+              "order": 2,
+              "text": "An IMAGE",
+              "type": "text/plain",
+              "value": "image"
+            },
+            {
+              "order": 3,
+              "text": "The current DATE",
+              "type": "text/plain",
+              "value": "date"
+            }
+          ]
+        }
+      },
+      "outState": "answer"
+    },
+    {
+      "mediaType": "text/plain",
+      "content": "^(text|a text)$",
+      "state": "answer",
+      "response": {
+        "mediaType": "text/plain",
+        "plainContent": "This is a simple text, with nothing of special."
+      }
+    },
+    {
+      "mediaType": "text/plain",
+      "content": "^(image|an image)$",
+      "state": "answer",
+      "response": {
+        "mediaType": "application/vnd.lime.media-link+json",
+        "jsonContent": {
+          "type": "image/jpeg",
+          "uri": "http://static.boredpanda.com/blog/wp-content/uploads/2015/09/Instagrams-most-famous-cat-Nala165604f5fc88e5f.jpg",
+          "text": "Meow!"
+        }
+      }
+    },
+    {
+      "mediaType": "text/plain",
+      "content": "^(date|the current date)$",
+      "state": "answer",
+      "type": "DateMessageReceiver",
+      "settings": {
+        "culture": "en-US",
+        "message": "The current date is {0}."
+      }
+    },
+    {
+      "mediaType": "text/plain",
+      "content": "^(sair|parar|cancelar)$",
+      "state": "answer",
+      "response": {
+        "mediaType": "text/plain",
+        "plainContent": "Obrigado por usar nosso serviço. Volte sempre!"
+      },
+      "outState": "default"
+    },
+    {
+      "priority": "100",
+      "response": {
+        "mediaType": "text/plain",
+        "plainContent": "Ops, não entendi o que você quis dizer. Envie a palavra AJUDA caso precise.\nOps, I didn't understand what you said. You can try send the word HELP if you are lost."
+      }
+    }
+  ],
+  "schemaVersion": 2
+}
