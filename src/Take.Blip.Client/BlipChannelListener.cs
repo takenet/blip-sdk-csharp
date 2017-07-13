@@ -64,7 +64,7 @@ namespace Take.Blip.Client
         {
             lock (_syncRoot)
             {
-                if (_cts == null) throw new InvalidOperationException("The listener is not started");                
+                if (_cts == null) throw new InvalidOperationException("The listener is not started");
                 _channelListener.Stop();
                 _cts.Cancel();
                 _cts.Dispose();

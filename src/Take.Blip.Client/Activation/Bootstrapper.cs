@@ -27,7 +27,11 @@ namespace Take.Blip.Client.Activation
         /// <param name="application">The application instance. If not defined, the class will look for an application.json file in the current directory.</param>
         /// <param name="builder">The builder instance to be used.</param>
         /// <param name="typeResolver">The resolver for type names.</param>
-        public static async Task<IStoppable> StartAsync(CancellationToken cancellationToken, Application application = null, BlipClientBuilder builder = null, ITypeResolver typeResolver = null)
+        public static async Task<IStoppable> StartAsync(
+            CancellationToken cancellationToken,
+            Application application = null,
+            BlipClientBuilder builder = null,
+            ITypeResolver typeResolver = null)
         {
             if (application == null)
             {
@@ -76,7 +80,7 @@ namespace Take.Blip.Client.Activation
             else if (application.ReceiptEvents != null)
                 builder = builder.WithReceiptEvents(new[] { Event.Failed });
 
-            if (typeResolver == null) typeResolver = TypeResolver.Instance;
+            if (typeResolver == null) typeResolver = new TypeResolver();
             var localServiceProvider = BuildServiceProvider(application, typeResolver);
 
             localServiceProvider.RegisterService(typeof(BlipClientBuilder), builder);

@@ -248,8 +248,7 @@ namespace Take.Blip.Client
 
             if (IsGuest(Identifier))
             {
-                var guestAuthentication = new GuestAuthentication();
-                result = guestAuthentication;
+                result = new GuestAuthentication();
             }
 
             if (Password != null)
@@ -261,8 +260,7 @@ namespace Take.Blip.Client
 
             if (AccessKey != null)
             {
-                var keyAuthentication = new KeyAuthentication { Key = AccessKey };
-                result = keyAuthentication;
+                result = new KeyAuthentication { Key = AccessKey };
             }
 
             if (result == null)

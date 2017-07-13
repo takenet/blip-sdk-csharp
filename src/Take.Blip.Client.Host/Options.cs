@@ -8,7 +8,7 @@ namespace Take.Blip.Client.Host
 {
     public class Options
     {
-        [Option(HelpText = "The path of the application host JSON file", Default = Bootstrapper.DefaultApplicationFileName)]
+        [Value(0, HelpText = "The path of the application host JSON file", Default = Bootstrapper.DefaultApplicationFileName)]
         public string ApplicationJsonPath { get; set; }
 
         [Option(HelpText = "The timeout in seconds to wait for the startup of the application", Default = 30)]

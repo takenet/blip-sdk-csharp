@@ -9,19 +9,25 @@ namespace Take.Blip.Client.Activation
 {
     public sealed class TypeResolver : ITypeResolver
     {
-        private TypeResolver()
+        private readonly string _workingDir;
+
+        public TypeResolver()
+            : this(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location))
         {
-            LoadedTypes = new Lazy<IEnumerable<Type>>(LoadTypes);
+
         }
 
-        public Lazy<IEnumerable<Type>> LoadedTypes { get; }
+        public TypeResolver(string workingDir)
+        {
+            _workingDir = workingDir;
+            LoadedTypes = LoadTypes();
+        }
 
-        public static TypeResolver Instance => new TypeResolver();
+        public IEnumerable<Type> LoadedTypes { get; }
 
         public Type Resolve(string typeName)
         {
             var types = LoadedTypes
-                .Value
                 .Where(t => t.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
@@ -30,8 +36,8 @@ namespace Take.Blip.Client.Activation
             else throw new Exception($"There are multiple types named '{typeName}'");
         }
 
-        private static IEnumerable<Type> LoadTypes()
-            => LoadAssemblies(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location))
+        private IEnumerable<Type> LoadTypes()
+            => LoadAssemblies(_workingDir)
             .SelectMany(a => a.GetTypes())
             .ToList();
 
@@ -42,8 +48,8 @@ namespace Take.Blip.Client.Activation
                 Assembly assembly = null;
 
                 try
-                {
-                    assembly = LoadAssembly(assemblyPath);
+                {                    
+                    assembly = LoadAssembly(Path.GetFullPath(assemblyPath));
                 }
                 catch (Exception ex)
                 {
@@ -57,8 +63,7 @@ namespace Take.Blip.Client.Activation
         private static Assembly LoadAssembly(string assemblyPath)
         {
 #if NETSTANDARD1_6
-            var assemblyName = System.Runtime.Loader.AssemblyLoadContext.GetAssemblyName(assemblyPath);
-            return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
+            return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 #elif NET461
             var assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
             return Assembly.Load(assemblyName);
