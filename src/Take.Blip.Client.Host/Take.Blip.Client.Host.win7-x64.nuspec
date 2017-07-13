@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Take.Blip.Client.Host.win7-x64</id>
+    <version>0.1.0-alpha</version>
+    <title>BLiP host for Windows</title>
+    <authors>takenet</authors>
+    <owners>takenet</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>BLiP host for Windows</description>
+    <releaseNotes />
+    <copyright>Copyright 2017 Take</copyright>
+    <tags>blip,bot,chatbot</tags>
+    <dependencies>
+      <dependency id="Take.Blip.Client" version="0.1.0-alpha" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\netcoreapp1.1\win7-x64\bliphost.deps.json" target="tools\bliphost.deps.json" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\bliphost.dll" target="tools\bliphost.dll" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\bliphost.exe" target="tools\bliphost.exe" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\bliphost.pdb" target="tools\bliphost.pdb" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\bliphost.runtimeconfig.dev.json" target="tools\bliphost.runtimeconfig.dev.json" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\bliphost.runtimeconfig.json" target="tools\bliphost.runtimeconfig.json" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\hostfxr.dll" target="tools\hostfxr.dll" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\hostpolicy.dll" target="tools\hostpolicy.dll" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\Take.Blip.Client.dll" target="tools\Take.Blip.Client.dll" />
+    <file src="bin\Release\netcoreapp1.1\win7-x64\Take.Blip.Client.pdb" target="tools\Take.Blip.Client.pdb" />
+  </files>
+</package>

@@ -27,7 +27,6 @@ namespace Take.Blip.Client.Host
             {
                 var helpText = HelpText.AutoBuild(optionsParserResult);
                 Console.Write(helpText);
-                Console.Read();
                 return;
             }
             var parsedOptions = (Parsed<Options>)optionsParserResult;
@@ -42,14 +41,12 @@ namespace Take.Blip.Client.Host
 
                 if (string.IsNullOrWhiteSpace(Path.GetDirectoryName(applicationJsonPath)))
                 {
-                    applicationJsonPath = Path.Combine(
-                        Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
-                        applicationJsonPath);
+                    applicationJsonPath = Path.GetFullPath(applicationJsonPath);
                 }
 
                 if (!File.Exists(applicationJsonPath))
                 {
-                    WriteLine($"Could not find the {options.ApplicationJsonPath} file", ConsoleColor.Red);
+                    WriteLine($"Could not find the {options.ApplicationJsonPath} file in {applicationJsonPath} path.", ConsoleColor.Red);
                     return;
                 }
 
