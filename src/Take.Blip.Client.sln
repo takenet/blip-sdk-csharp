@@ -1,19 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.0
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.Sample", "Take.Blip.Client.Sample\Take.Blip.Client.Sample.csproj", "{067EC865-E230-4DB3-87FD-EFE0D4210020}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Sample", "Take.Blip.Client.Sample\Take.Blip.Client.Sample.csproj", "{067EC865-E230-4DB3-87FD-EFE0D4210020}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{9A7ECD2D-523B-47A2-B905-88407B124192}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Navigation", "Samples\Navigation\Navigation.csproj", "{F00D45F1-1380-4D18-B6D7-E6587536A44E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navigation", "Samples\Navigation\Navigation.csproj", "{F00D45F1-1380-4D18-B6D7-E6587536A44E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.Host", "Take.Blip.Client.Host\Take.Blip.Client.Host.csproj", "{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Host", "Take.Blip.Client.Host\Take.Blip.Client.Host.csproj", "{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo", "Echo\Echo.csproj", "{7CC9A613-3A4F-4486-B5A4-2158B0445E25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Echo", "Samples\Echo\Echo.csproj", "{03B3184A-D320-4EF9-8CBC-92BABD08EA13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,16 +37,16 @@ Global
 		{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7CC9A613-3A4F-4486-B5A4-2158B0445E25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7CC9A613-3A4F-4486-B5A4-2158B0445E25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7CC9A613-3A4F-4486-B5A4-2158B0445E25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7CC9A613-3A4F-4486-B5A4-2158B0445E25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03B3184A-D320-4EF9-8CBC-92BABD08EA13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03B3184A-D320-4EF9-8CBC-92BABD08EA13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03B3184A-D320-4EF9-8CBC-92BABD08EA13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03B3184A-D320-4EF9-8CBC-92BABD08EA13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F00D45F1-1380-4D18-B6D7-E6587536A44E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
-		{7CC9A613-3A4F-4486-B5A4-2158B0445E25} = {9A7ECD2D-523B-47A2-B905-88407B124192}
+		{03B3184A-D320-4EF9-8CBC-92BABD08EA13} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 	EndGlobalSection
 EndGlobal

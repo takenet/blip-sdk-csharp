@@ -65,8 +65,7 @@ namespace Take.Blip.Client.Activation
 #if NETSTANDARD1_6
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 #elif NET461
-            var assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
-            return Assembly.Load(assemblyName);
+            return Assembly.LoadFrom(assemblyPath);
 #endif
         }
     }

@@ -1,16 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFrameworks>netstandard1.6;net461</TargetFrameworks>
     <Version>0.1.0-alpha</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Authors>takenet</Authors>
-    <Company>takenet</Company>
+    <Company>take</Company>
     <Product>BLiP</Product>
     <PackageProjectUrl>https://blip.ai</PackageProjectUrl>
     <RepositoryUrl>https://github.com/takenet/blip-sdk-csharp</RepositoryUrl>
     <PackageLicenseUrl>https://github.com/takenet/blip-sdk-csharp/blob/master/LICENSE</PackageLicenseUrl>
+    <Description>BLiP C# client</Description>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,13 +23,16 @@
     <PackageReference Include="Lime.Transport.Tcp" Version="0.7.173-beta" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="1.1.2" />
     <PackageReference Include="SmartFormat.NET" Version="2.0.0" />
-    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
-    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Activation\Rules\Actions\" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <Reference Include="System.ComponentModel" />
   </ItemGroup>
 
 </Project>
