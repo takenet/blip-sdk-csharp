@@ -10,12 +10,12 @@ namespace Take.Blip.Client
 {
     internal abstract class EnvelopeReceivedHandler<TEnvelope> where TEnvelope : Envelope, new()
     {
-        private readonly EnvelopeReceiverManager _registrar;
+        private readonly EnvelopeReceiverManager _envelopeReceiverManager;
         private readonly ActionBlock<Tuple<TEnvelope, CancellationToken>> _envelopeActionBlock;
 
         protected EnvelopeReceivedHandler(EnvelopeReceiverManager registrar)
         {
-            _registrar = registrar;
+            _envelopeReceiverManager = registrar;
             _envelopeActionBlock = new ActionBlock<Tuple<TEnvelope, CancellationToken>>(async item =>
             {
                 try
@@ -40,20 +40,20 @@ namespace Take.Blip.Client
 
         protected virtual async Task CallReceiversAsync(TEnvelope envelope, CancellationToken cancellationToken)
         {
-            var receivers = await _registrar.GetReceiversAsync(envelope);
+            var receivers = await _envelopeReceiverManager.GetReceiversAsync(envelope);
+
             // Gets the first non empty group, ordered by priority
             var receiverGroup = receivers
-                                .GroupBy(r => r.Priority)
-                                .OrderBy(r => r.Key)
-                                .First(r => r.Any());
+                .GroupBy(r => r.Priority)
+                .OrderBy(r => r.Key)
+                .First(r => r.Any());
 
             await Task.WhenAll(
-                    receiverGroup.Select(r => CallReceiverAsync(r.ReceiverFactory(), envelope, cancellationToken)));
+                receiverGroup.Select(r => 
+                    CallReceiverAsync(r.ReceiverFactory(), envelope, cancellationToken)));
         }
 
-        protected Task CallReceiverAsync(IEnvelopeReceiver<TEnvelope> envelopeReceiver, TEnvelope envelope, CancellationToken cancellationToken)
-        {
-            return envelopeReceiver.ReceiveAsync(envelope, cancellationToken);
-        }
+        protected Task CallReceiverAsync(IEnvelopeReceiver<TEnvelope> envelopeReceiver, TEnvelope envelope, CancellationToken cancellationToken) 
+            => envelopeReceiver.ReceiveAsync(envelope, cancellationToken);
     }
 }

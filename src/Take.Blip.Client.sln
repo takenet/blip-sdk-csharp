@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Navigation", "Samples\Navig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.Host", "Take.Blip.Client.Host\Take.Blip.Client.Host.csproj", "{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo", "Echo\Echo.csproj", "{7CC9A613-3A4F-4486-B5A4-2158B0445E25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,11 +37,16 @@ Global
 		{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37AF0F02-0A9E-40F9-B529-EFBFE1EC168B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CC9A613-3A4F-4486-B5A4-2158B0445E25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CC9A613-3A4F-4486-B5A4-2158B0445E25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CC9A613-3A4F-4486-B5A4-2158B0445E25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CC9A613-3A4F-4486-B5A4-2158B0445E25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F00D45F1-1380-4D18-B6D7-E6587536A44E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
+		{7CC9A613-3A4F-4486-B5A4-2158B0445E25} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 	EndGlobalSection
 EndGlobal

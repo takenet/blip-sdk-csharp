@@ -14,12 +14,12 @@ namespace Take.Blip.Client.Host
     {
         const ConsoleColor HIGHLIGHT_COLOR = ConsoleColor.DarkCyan;
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            MainAsync(args).GetAwaiter().GetResult();
+            return MainAsync(args).GetAwaiter().GetResult();
         }
 
-        static async Task MainAsync(string[] args)
+        static async Task<int> MainAsync(string[] args)
         {
             var optionsParserResult = Parser.Default.ParseArguments<Options>(args);
             
@@ -27,13 +27,13 @@ namespace Take.Blip.Client.Host
             {
                 var helpText = HelpText.AutoBuild(optionsParserResult);
                 Console.Write(helpText);
-                return;
+                return 0;
             }
             var parsedOptions = (Parsed<Options>)optionsParserResult;
-            await Run(parsedOptions.Value).ConfigureAwait(false);
+            return await RunAsync(parsedOptions.Value).ConfigureAwait(false);
         }
 
-        private static async Task Run(Options options)
+        private static async Task<int> RunAsync(Options options)
         {
             try
             {
@@ -46,8 +46,8 @@ namespace Take.Blip.Client.Host
 
                 if (!File.Exists(applicationJsonPath))
                 {
-                    WriteLine($"Could not find the {options.ApplicationJsonPath} file in {applicationJsonPath} path.", ConsoleColor.Red);
-                    return;
+                    WriteLine($"Could not find the '{options.ApplicationJsonPath}' file in '{applicationJsonPath}' path.", ConsoleColor.Red);
+                    return -1;
                 }
 
                 WriteLine("Starting application...", HIGHLIGHT_COLOR);
@@ -63,15 +63,18 @@ namespace Take.Blip.Client.Host
                 WriteLine("Stopping application...", HIGHLIGHT_COLOR);
                 await stopabble.StopAsync();
                 WriteLine("Application stopped.", HIGHLIGHT_COLOR);
+                return 0;
             }
             catch (OperationCanceledException)
             {
                 WriteLine("Could not start the application in the configured timeout", ConsoleColor.Red);
+                return -1;
             }
             catch (Exception ex)
             {
                 WriteLine("Application failed:");
                 WriteLine(ex.ToString(), ConsoleColor.Red);
+                return -1;
             }
             finally
             {
