@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Take.Blip.Client.ConsoleTemplate</id>
+    <version>$version$</version>
+    <title>BLiP host for Windows</title>
+    <authors>takenet</authors>
+    <owners>takenet</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>BLiP host for Windows</description>
+    <summary>A host implementation to run libraries that use the BLiP Client</summary>
+    <copyright>Copyright 2017 Take</copyright>
+    <tags>blip,bot,chatbot</tags>
+    <dependencies>
+      <dependency id="Take.Blip.Client" version="$version$" />
+      <dependency id="Take.Blip.ConsoleHost" version="$version$" />
+    </dependencies>
+  </metadata>  
+  <files>
+    <file src="application.json" target="content\application.json"/>
+    <file src="PlainTextMessageReceiver.cs.pp" target="content\PlainTextMessageReceiver.cs.pp"/>
+    <file src="Program.cs.pp" target="content\Program.cs.pp"/>
+    <file src="Readme.txt" target="" />
+    <file src="Startup.cs.pp" target="content\Startup.cs.pp"/>
+  </files>
+</package>

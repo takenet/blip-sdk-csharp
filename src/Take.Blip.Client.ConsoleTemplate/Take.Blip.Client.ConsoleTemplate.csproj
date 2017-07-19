@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;netcoreapp1.1</TargetFrameworks>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>0.1.1-alpha</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="application.json" />
+    <None Remove="PlainTextMessageReceiver.cs.pp" />
+    <None Remove="Program.cs.pp" />
+    <None Remove="Readme.txt" />
+    <None Remove="Startup.cs.pp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="application.json" />
+    <Content Include="PlainTextMessageReceiver.cs.pp" />
+    <Content Include="Program.cs.pp" />
+    <Content Include="Readme.txt" />
+    <Content Include="Startup.cs.pp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Take.Blip.Client.ConsoleHost\Take.Blip.Client.ConsoleHost.csproj" />
+    <ProjectReference Include="..\Take.Blip.Client.Host\Take.Blip.Client.ConsoleHost.csproj" />
+    <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
+  </ItemGroup>
+
+  
+
+</Project>

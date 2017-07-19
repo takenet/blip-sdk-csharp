@@ -8,21 +8,24 @@ using CommandLine.Text;
 using Lime.Protocol.Server;
 using Take.Blip.Client.Activation;
 
-namespace Take.Blip.Client.Host
+namespace Take.Blip.Client.ConsoleHost
 {
-    class Program
+    /// <summary>
+    /// Defines a service for running BLiP applications in a console environment.
+    /// </summary>
+    public static class ConsoleRunner
     {
         const ConsoleColor HIGHLIGHT_COLOR = ConsoleColor.DarkCyan;
-
-        static int Main(string[] args)
-        {
-            return MainAsync(args).GetAwaiter().GetResult();
-        }
-
-        static async Task<int> MainAsync(string[] args)
+    
+        /// <summary>
+        /// Runs an console application with the specified arguments.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public static async Task<int> RunAsync(string[] args)
         {
             var optionsParserResult = Parser.Default.ParseArguments<Options>(args);
-            
+
             if (optionsParserResult.Tag == ParserResultType.NotParsed)
             {
                 var helpText = HelpText.AutoBuild(optionsParserResult);
@@ -33,7 +36,12 @@ namespace Take.Blip.Client.Host
             return await RunAsync(parsedOptions.Value).ConfigureAwait(false);
         }
 
-        private static async Task<int> RunAsync(Options options)
+        /// <summary>
+        /// Runs an console application with the specified options.
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static async Task<int> RunAsync(Options options)
         {
             try
             {
@@ -85,7 +93,6 @@ namespace Take.Blip.Client.Host
                 }
             }
         }
-
 
         private static Task<IStoppable> StartAsync(string applicationFileName, CancellationToken cancellationToken)
         {

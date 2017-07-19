@@ -1,7 +1,7 @@
 ﻿using CommandLine;
 using Take.Blip.Client.Activation;
 
-namespace Take.Blip.Client.Host
+namespace Take.Blip.Client.ConsoleHost
 {
     public class Options
     {

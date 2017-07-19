@@ -2,9 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;net461</TargetFrameworks>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.1.1-alpha</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Authors>takenet</Authors>
     <Company>take</Company>
     <Product>BLiP</Product>
