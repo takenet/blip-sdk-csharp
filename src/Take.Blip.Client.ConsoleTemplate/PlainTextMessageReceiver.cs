@@ -5,7 +5,7 @@ using Lime.Protocol;
 using System.Diagnostics;
 using Take.Blip.Client;
 
-namespace $rootnamespace$
+namespace Take.Blip.Client.ConsoleTemplate
 {
     public class PlainTextMessageReceiver : IMessageReceiver
     {

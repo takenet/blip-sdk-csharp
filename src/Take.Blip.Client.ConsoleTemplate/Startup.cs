@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Lime.Protocol.Server;
 using Take.Blip.Client;
 
-namespace $rootnamespace$
+namespace Take.Blip.Client.ConsoleTemplate
 {
     public class Startup : IStartable
     {

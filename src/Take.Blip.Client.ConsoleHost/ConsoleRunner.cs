@@ -49,7 +49,9 @@ namespace Take.Blip.Client.ConsoleHost
 
                 if (string.IsNullOrWhiteSpace(Path.GetDirectoryName(applicationJsonPath)))
                 {
-                    applicationJsonPath = Path.GetFullPath(applicationJsonPath);
+                    applicationJsonPath = Path.Combine(
+                        Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                        applicationJsonPath);
                 }
 
                 if (!File.Exists(applicationJsonPath))

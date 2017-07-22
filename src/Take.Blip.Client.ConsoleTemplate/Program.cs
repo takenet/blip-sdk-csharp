@@ -1,7 +1,7 @@
 ﻿using System;
 using Take.Blip.Client.ConsoleHost;
 
-namespace $rootnamespace$
+namespace Take.Blip.Client.ConsoleTemplate
 {
     class Program
     {
