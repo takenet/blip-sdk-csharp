@@ -71,7 +71,7 @@ namespace Take.Blip.Client.ConsoleHost
                 WriteLine("Application started. Press any key to stop.", HIGHLIGHT_COLOR);
                 Console.Read();
                 WriteLine("Stopping application...", HIGHLIGHT_COLOR);
-                await stopabble.StopAsync();
+                await stopabble.StopAsync().ConfigureAwait(false);
                 WriteLine("Application stopped.", HIGHLIGHT_COLOR);
                 return 0;
             }
@@ -101,8 +101,6 @@ namespace Take.Blip.Client.ConsoleHost
             var application = Application.ParseFromJsonFile(applicationFileName);
             var workingDir = Path.GetDirectoryName(applicationFileName);
             if (string.IsNullOrWhiteSpace(workingDir)) workingDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-
-
             return Bootstrapper.StartAsync(cancellationToken, application, typeResolver: new TypeResolver(workingDir));
         }
 

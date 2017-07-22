@@ -1,20 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputType>exe</OutputType>
-  </PropertyGroup>
-
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <ApplicationIcon />
-    <OutputTypeEx>exe</OutputTypeEx>
-    <StartupObject />
+    <Version>0.1.1-alpha</Version>    
+    <OutputType>Exe</OutputType>    
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Diagnostics.TextWriterTraceListener" Version="4.3.0" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\..\Take.Blip.Client.ConsoleHost\Take.Blip.Client.ConsoleHost.csproj" />
     <ProjectReference Include="..\..\Take.Blip.Client\Take.Blip.Client.csproj" />

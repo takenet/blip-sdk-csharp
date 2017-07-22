@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
+    <ProjectReference Include="..\..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 
 </Project>
