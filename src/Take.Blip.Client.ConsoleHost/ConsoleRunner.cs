@@ -47,8 +47,9 @@ namespace Take.Blip.Client.ConsoleHost
         /// <returns></returns>
         public static async Task<int> RunAsync(Options options)
         {
-            if (options.Install) return RegisterService(options);
-            if (options.Uninstall) return UnregisterService(options);
+            if (options.RunAsService) return RunAsService(options);
+            if (options.Install) return InstallService(options);
+            if (options.Uninstall) return UninstallService(options);
             
 
             try
@@ -121,7 +122,20 @@ namespace Take.Blip.Client.ConsoleHost
             Console.Out.Flush();
         }
 
-        private static int RegisterService(Options options)
+        private static int RunAsService(Options options)
+        {
+            if (string.IsNullOrWhiteSpace(options.ServiceName))
+            {
+                WriteLine("Service name is required for uninstall", ConsoleColor.Red);
+                return -1;
+            }
+
+            var service = new BlipService(options);
+            var serviceHost = new Win32ServiceHost(service);
+            return serviceHost.Run();
+        }
+
+        private static int InstallService(Options options)
         {
             if (string.IsNullOrWhiteSpace(options.ServiceName))
             {
@@ -166,7 +180,7 @@ namespace Take.Blip.Client.ConsoleHost
             return 0;
         }
 
-        private static int UnregisterService(Options options)
+        private static int UninstallService(Options options)
         {
             if (string.IsNullOrWhiteSpace(options.ServiceName))
             {

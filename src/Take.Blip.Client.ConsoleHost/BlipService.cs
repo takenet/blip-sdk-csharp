@@ -7,15 +7,15 @@ namespace Take.Blip.Client.ConsoleHost
 {
     internal class BlipService : IWin32Service
     {
-        public BlipService(string serviceName)
+        public BlipService(Options options)
         {
-            ServiceName = serviceName;
+            ServiceName = options.ServiceName;
         }
 
         public string ServiceName { get; }
 
         public void Start(string[] startupArguments, ServiceStoppedCallback serviceStoppedCallback)
-        {
+        {            
             throw new NotImplementedException();
         }
 
