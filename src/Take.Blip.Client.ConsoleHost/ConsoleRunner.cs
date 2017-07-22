@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
+using DasMulli.Win32.ServiceUtils;
 using Lime.Protocol.Server;
 using Take.Blip.Client.Activation;
 
@@ -43,6 +47,10 @@ namespace Take.Blip.Client.ConsoleHost
         /// <returns></returns>
         public static async Task<int> RunAsync(Options options)
         {
+            if (options.Install) return RegisterService(options);
+            if (options.Uninstall) return UnregisterService(options);
+            
+
             try
             {
                 var applicationJsonPath = options.ApplicationJsonPath;
@@ -111,6 +119,74 @@ namespace Take.Blip.Client.ConsoleHost
             Console.WriteLine(value);
             Console.ForegroundColor = foregroundColor;
             Console.Out.Flush();
+        }
+
+        private static int RegisterService(Options options)
+        {
+            if (string.IsNullOrWhiteSpace(options.ServiceName))
+            {
+                WriteLine("Service name is required for install", ConsoleColor.Red);
+                return -1;
+            }
+
+            options.ServiceDisplayName = options.ServiceDisplayName ?? options.ServiceName;
+
+            // Environment.GetCommandLineArgs() includes the current DLL from a "dotnet my.dll --register-service" call, which is not passed to Main()
+            var remainingArgs = Environment.GetCommandLineArgs()
+                .Where(arg => arg != "--install")
+                .Select(EscapeCommandLineArgument)
+                .ToList();
+
+            remainingArgs.Add(Options.RUN_AS_SERVICE_FLAG);
+
+            var host = Process.GetCurrentProcess().MainModule.FileName;
+
+            if (!host.EndsWith("dotnet.exe", StringComparison.OrdinalIgnoreCase))
+            {
+                // For self-contained apps, skip the dll path
+                remainingArgs = remainingArgs.Skip(1).ToList();
+            }
+
+            var fullServiceCommand = host + " " + string.Join(" ", remainingArgs);
+
+            // Do not use LocalSystem in production.. but this is good for demos as LocalSystem will have access to some random git-clone path
+            // Note that when the service is already registered and running, it will be reconfigured but not restarted
+            new Win32ServiceManager()
+                .CreateService(
+                    options.ServiceName,
+                    options.ServiceDisplayName,
+                    options.ServiceDescription,
+                    fullServiceCommand,
+                    Win32ServiceCredentials.LocalSystem,
+                    autoStart: true,
+                    errorSeverity: ErrorSeverity.Normal
+                );
+
+            WriteLine($@"Successfully registered service ""{options.ServiceDisplayName}""");
+            return 0;
+        }
+
+        private static int UnregisterService(Options options)
+        {
+            if (string.IsNullOrWhiteSpace(options.ServiceName))
+            {
+                WriteLine("Service name is required for uninstall", ConsoleColor.Red);
+                return -1;
+            }
+
+            new Win32ServiceManager()
+                .DeleteService(options.ServiceName);
+
+            Console.WriteLine($@"Successfully unregistered service ""{options.ServiceDisplayName}""");
+            return 0;
+        }
+
+        private static string EscapeCommandLineArgument(string arg)
+        {
+            // http://stackoverflow.com/a/6040946/784387
+            arg = Regex.Replace(arg, @"(\\*)" + "\"", @"$1$1\" + "\"");
+            arg = "\"" + Regex.Replace(arg, @"(\\+)$", @"$1$1") + "\"";
+            return arg;
         }
     }
 }
