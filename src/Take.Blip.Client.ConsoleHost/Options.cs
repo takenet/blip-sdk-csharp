@@ -8,6 +8,7 @@ namespace Take.Blip.Client.ConsoleHost
     /// </summary>
     public class Options
     {
+        public const string SERVICE_NAME_FLAG = "service-name";
         public const string RUN_AS_SERVICE_FLAG = "run-as-service";
         public const string INSTALL_FLAG = "install";
         public const string UNINSTALL_FLAG = "uninstall";
@@ -21,16 +22,16 @@ namespace Take.Blip.Client.ConsoleHost
         [Option(HelpText = "Wait for a key input before exiting the process.", Default = false)]
         public bool Pause { get; set; }
 
-        [Option(HelpText = "Runs the application as a service (only on Windows)", Default = false, SetName = RUN_AS_SERVICE_FLAG)]
+        [Option(RUN_AS_SERVICE_FLAG, HelpText = "Runs the application as a service (only on Windows)", Default = false)]
         public bool RunAsService { get; set; }
 
-        [Option(HelpText = "Install the application as service (only on Windows)", Default = false, SetName = INSTALL_FLAG)]
+        [Option(INSTALL_FLAG, HelpText = "Install the application as service (only on Windows)", Default = false)]
         public bool Install { get; set; }
 
-        [Option(HelpText = "Uninstall a previously installed service (only on Windows)", Default = false, SetName = UNINSTALL_FLAG)]
+        [Option(UNINSTALL_FLAG, HelpText = "Uninstall a previously installed service (only on Windows)", Default = false)]
         public bool Uninstall { get; set; }
 
-        [Option(HelpText = "The service name for installation or uninstallation")]
+        [Option(SERVICE_NAME_FLAG, HelpText = "The service name for installation or uninstallation")]
         public string ServiceName { get; set; }
 
         [Option(HelpText = "The service display name for installation")]

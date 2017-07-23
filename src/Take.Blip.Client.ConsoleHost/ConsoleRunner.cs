@@ -26,18 +26,17 @@ namespace Take.Blip.Client.ConsoleHost
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static async Task<int> RunAsync(string[] args)
+        public static Task<int> RunAsync(string[] args)
         {
             var optionsParserResult = Parser.Default.ParseArguments<Options>(args);
-
             if (optionsParserResult.Tag == ParserResultType.NotParsed)
             {
-                var helpText = HelpText.AutoBuild(optionsParserResult);
-                Console.Write(helpText);
-                return 0;
+                HelpText.AutoBuild(optionsParserResult);
+                Console.Read();
+                return Task.FromResult(0);
             }
             var parsedOptions = (Parsed<Options>)optionsParserResult;
-            return await RunAsync(parsedOptions.Value).ConfigureAwait(false);
+            return RunAsync(parsedOptions.Value);
         }
 
         /// <summary>
@@ -51,17 +50,9 @@ namespace Take.Blip.Client.ConsoleHost
             if (options.Install) return InstallService(options);
             if (options.Uninstall) return UninstallService(options);
             
-
             try
             {
-                var applicationJsonPath = options.ApplicationJsonPath;
-
-                if (string.IsNullOrWhiteSpace(Path.GetDirectoryName(applicationJsonPath)))
-                {
-                    applicationJsonPath = Path.Combine(
-                        Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
-                        applicationJsonPath);
-                }
+                string applicationJsonPath = GetApplicationJsonPath(options);
 
                 if (!File.Exists(applicationJsonPath))
                 {
@@ -105,7 +96,21 @@ namespace Take.Blip.Client.ConsoleHost
             }
         }
 
-        private static Task<IStoppable> StartAsync(string applicationFileName, CancellationToken cancellationToken)
+        internal static string GetApplicationJsonPath(Options options)
+        {
+            var applicationJsonPath = options.ApplicationJsonPath;
+
+            if (string.IsNullOrWhiteSpace(Path.GetDirectoryName(applicationJsonPath)))
+            {
+                applicationJsonPath = Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    applicationJsonPath);
+            }
+
+            return applicationJsonPath;
+        }
+
+        internal static Task<IStoppable> StartAsync(string applicationFileName, CancellationToken cancellationToken)
         {
             var application = Application.ParseFromJsonFile(applicationFileName);
             var workingDir = Path.GetDirectoryName(applicationFileName);
@@ -130,7 +135,7 @@ namespace Take.Blip.Client.ConsoleHost
                 return -1;
             }
 
-            var service = new BlipService(options);
+            var service = new BlipService(options.ServiceName);
             var serviceHost = new Win32ServiceHost(service);
             return serviceHost.Run();
         }
@@ -147,11 +152,11 @@ namespace Take.Blip.Client.ConsoleHost
 
             // Environment.GetCommandLineArgs() includes the current DLL from a "dotnet my.dll --register-service" call, which is not passed to Main()
             var remainingArgs = Environment.GetCommandLineArgs()
-                .Where(arg => arg != "--install")
+                .Where(arg => arg != $"--{Options.INSTALL_FLAG}")
                 .Select(EscapeCommandLineArgument)
                 .ToList();
 
-            remainingArgs.Add(Options.RUN_AS_SERVICE_FLAG);
+            remainingArgs.Add($"\"--{Options.RUN_AS_SERVICE_FLAG}\"");
 
             var host = Process.GetCurrentProcess().MainModule.FileName;
 
