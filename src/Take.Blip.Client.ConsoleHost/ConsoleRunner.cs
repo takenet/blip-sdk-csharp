@@ -32,7 +32,6 @@ namespace Take.Blip.Client.ConsoleHost
             if (optionsParserResult.Tag == ParserResultType.NotParsed)
             {
                 HelpText.AutoBuild(optionsParserResult);
-                Console.Read();
                 return Task.FromResult(0);
             }
             var parsedOptions = (Parsed<Options>)optionsParserResult;
@@ -46,12 +45,12 @@ namespace Take.Blip.Client.ConsoleHost
         /// <returns></returns>
         public static async Task<int> RunAsync(Options options)
         {
-            if (options.RunAsService) return RunAsService(options);
-            if (options.Install) return InstallService(options);
-            if (options.Uninstall) return UninstallService(options);
-            
             try
             {
+                if (options.RunAsService) return RunAsService(options);
+                if (options.Install) return InstallService(options);
+                if (options.Uninstall) return UninstallService(options);
+            
                 string applicationJsonPath = GetApplicationJsonPath(options);
 
                 if (!File.Exists(applicationJsonPath))

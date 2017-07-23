@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <Version>0.1.1-alpha</Version>    
+    <Version>0.1.2-beta</Version>    
     <OutputType>Exe</OutputType>    
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\Take.Blip.Client.ConsoleHost\Take.Blip.Client.ConsoleHost.csproj" />
-    <ProjectReference Include="..\..\Take.Blip.Client\Take.Blip.Client.csproj" />
+    <PackageReference Include="Take.Blip.Client.ConsoleHost" Version="0.1.2-beta" />
+    <PackageReference Include="Take.Blip.Client" Version="0.1.2-beta" />
   </ItemGroup>
 
   <ItemGroup>

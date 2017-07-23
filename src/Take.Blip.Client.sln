@@ -13,6 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.ConsoleHos
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{D04C4C36-8D2F-42EB-8D33-B221495DBFE2}"
 	ProjectSection(SolutionItems) = preProject
+		InstallTemplates.md = InstallTemplates.md
 		Templates\Take.Blip.Client.ConsoleTemplate.nuspec = Templates\Take.Blip.Client.ConsoleTemplate.nuspec
 	EndProjectSection
 EndProject
