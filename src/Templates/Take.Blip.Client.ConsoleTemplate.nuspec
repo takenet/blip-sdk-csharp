@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Take.Blip.Client.ConsoleTemplate</id>
-    <version>0.1.2  </version>
+    <version>0.1.2.1</version>
     <description>Template for BLiP console.</description>
     <authors>take</authors>
     <summary>.NET Core Windows service templates</summary>
