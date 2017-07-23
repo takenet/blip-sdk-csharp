@@ -8,15 +8,18 @@ namespace Take.Blip.Client.ConsoleHost
     /// </summary>
     public class Options
     {
-        public const string SERVICE_NAME_FLAG = "service-name";
+        public const string START_TIMEOUT_FLAG = "start-timeout";
         public const string RUN_AS_SERVICE_FLAG = "run-as-service";
         public const string INSTALL_FLAG = "install";
         public const string UNINSTALL_FLAG = "uninstall";
+        public const string SERVICE_NAME_FLAG = "service-name";
+        public const string SERVICE_DISPLAY_NAME_FLAG = "service-display-name";
+        public const string SERVICE_DESCRIPTION_FLAG = "service-description";
 
         [Value(0, HelpText = "The path of the application host JSON file.", Default = Bootstrapper.DefaultApplicationFileName)]
         public string ApplicationJsonPath { get; set; }
 
-        [Option(HelpText = "The timeout in seconds to wait for the startup of the application.", Default = 30)]
+        [Option(START_TIMEOUT_FLAG, HelpText = "The timeout in seconds to wait for the startup of the application.", Default = 30)]
         public int StartTimeout { get; set; }
 
         [Option(HelpText = "Wait for a key input before exiting the process.", Default = false)]
@@ -34,10 +37,10 @@ namespace Take.Blip.Client.ConsoleHost
         [Option(SERVICE_NAME_FLAG, HelpText = "The service name for installation or uninstallation")]
         public string ServiceName { get; set; }
 
-        [Option(HelpText = "The service display name for installation")]
+        [Option(SERVICE_DISPLAY_NAME_FLAG, HelpText = "The service display name for installation")]
         public string ServiceDisplayName { get; set; }
 
-        [Option(HelpText = "The service description for installation")]
+        [Option(SERVICE_DESCRIPTION_FLAG, HelpText = "The service description for installation")]
         public string ServiceDescription { get; set; }
     }
 }
