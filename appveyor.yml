@@ -1,0 +1,46 @@
+version: 0.1.{build}-beta
+image: Visual Studio 2017
+configuration: Release
+platform: Any CPU
+cache: src/packages
+branches:
+  only:
+    - master
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_file_version: '{version}'
+  assembly_version: '{version}'
+  assembly_informational_version: '{version}'
+before_build:
+- ps: |
+    function UpdateProjectVersion($xmlPath, $version)
+    {
+        $xml = [xml](get-content $xmlPath)
+        $propertyGroup = $xml.Project.PropertyGroup | Where { $_.Version}
+        $propertyGroup.Version = $version
+        $xml.Save($xmlPath)
+    }
+    UpdateProjectVersion "$env:appveyor_build_folder/src/Take.Blip.Client/Take.Blip.Client.csproj" $env:appveyor_build_version
+    UpdateProjectVersion "$env:appveyor_build_folder/src/Take.Blip.Client.ConsoleHost/Take.Blip.Client.ConsoleHost.csproj" $env:appveyor_build_version
+    UpdateProjectVersion "$env:appveyor_build_folder/src/Templates/Take.Blip.Client.ConsoleTemplate/Take.Blip.Client.ConsoleTemplate.csproj" $env:appveyor_build_version
+
+- dotnet restore src/Take.Blip.Client.sln
+build:
+  parallel: true
+  project: src/Take.Blip.Client.sln
+  verbosity: normal
+after_build:
+- dotnet pack src/Take.Blip.Client/Take.Blip.Client.csproj --configuration Release /p:Version=%APPVEYOR_BUILD_VERSION%
+- dotnet pack src/Take.Blip.Client.ConsoleHost/Take.Blip.Client.ConsoleHost.csproj --configuration Release /p:Version=%APPVEYOR_BUILD_VERSION%
+- 
+test:
+  assemblies:    
+    - '**\*Tests.dll'
+artifacts:
+  - path: '**\Take.Blip*.nupkg'
+deploy:
+- provider: NuGet
+  api_key:
+    secure: 0huvVwDjQ/i7FNOrby1sd/KJ1NaSFNOmTh4uUuS/kp7K7W2O3sDdnEeeYz8MwAzb
+  skip_symbols: false

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26403.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
 EndProject
@@ -22,6 +22,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Programmatically", "Samples\Programmatically\Programmatically.csproj", "{DCAAB449-D608-4945-8453-A4098F74978E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "Samples\ClassLibrary\ClassLibrary\ClassLibrary.csproj", "{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{61D24704-48AA-48C4-AB39-3C5404F9EFCF}"
+	ProjectSection(SolutionItems) = preProject
+		..\appveyor.yml = ..\appveyor.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
