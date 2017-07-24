@@ -9,7 +9,7 @@
     <PackageProjectUrl>https://blip.ai</PackageProjectUrl>
     <RepositoryUrl>https://github.com/takenet/blip-sdk-csharp</RepositoryUrl>
     <PackageLicenseUrl>https://github.com/takenet/blip-sdk-csharp/blob/master/LICENSE</PackageLicenseUrl>
-    <Description>BLiP C# client console host</Description>
+    <Description>BLiP C# client console</Description>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
