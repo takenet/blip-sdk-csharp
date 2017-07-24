@@ -1,4 +1,4 @@
-﻿namespace Take.Blip.Client.ConsoleHost
+﻿namespace Take.Blip.Client.Console.Host
 {
     class Program
     {

@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Take.Blip.Client.ConsoleHost;
+using Take.Blip.Client.Console;
 
 namespace Navigation
 {

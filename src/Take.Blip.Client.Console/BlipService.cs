@@ -6,7 +6,7 @@ using CommandLine;
 using DasMulli.Win32.ServiceUtils;
 using Lime.Protocol.Server;
 
-namespace Take.Blip.Client.ConsoleHost
+namespace Take.Blip.Client.Console
 {
     internal class BlipService : IWin32Service
     {

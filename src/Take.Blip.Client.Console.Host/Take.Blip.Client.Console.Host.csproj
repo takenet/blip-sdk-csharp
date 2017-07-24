@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>netcoreapp1.1;net461</TargetFrameworks>
+    <AssemblyName>bliphost</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Take.Blip.Client.Console\Take.Blip.Client.Console.csproj" />
+  </ItemGroup>
+
+</Project>

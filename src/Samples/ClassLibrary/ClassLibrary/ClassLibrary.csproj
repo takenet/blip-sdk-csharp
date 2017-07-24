@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Take.Blip.Client.ConsoleHost\Take.Blip.Client.ConsoleHost.csproj" />
+    <ProjectReference Include="..\..\..\Take.Blip.Client.Console.Host\Take.Blip.Client.Console.Host.csproj" />
+    <ProjectReference Include="..\..\..\Take.Blip.Client.Console\Take.Blip.Client.Console.csproj" />
     <ProjectReference Include="..\..\..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 

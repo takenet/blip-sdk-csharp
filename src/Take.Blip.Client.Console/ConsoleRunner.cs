@@ -12,7 +12,7 @@ using DasMulli.Win32.ServiceUtils;
 using Lime.Protocol.Server;
 using Take.Blip.Client.Activation;
 
-namespace Take.Blip.Client.ConsoleHost
+namespace Take.Blip.Client.Console
 {
     /// <summary>
     /// Defines a service for running BLiP applications in a console environment.
@@ -68,7 +68,7 @@ namespace Take.Blip.Client.ConsoleHost
                 }
 
                 WriteLine("Application started. Press any key to stop.", HIGHLIGHT_COLOR);
-                Console.Read();
+                System.Console.Read();
                 WriteLine("Stopping application...", HIGHLIGHT_COLOR);
                 await stopabble.StopAsync().ConfigureAwait(false);
                 WriteLine("Application stopped.", HIGHLIGHT_COLOR);
@@ -90,7 +90,7 @@ namespace Take.Blip.Client.ConsoleHost
                 if (options.Pause)
                 {
                     WriteLine("Press any key to exit.");
-                    Console.ReadKey(true);
+                    System.Console.ReadKey(true);
                 }
             }
         }
@@ -119,11 +119,11 @@ namespace Take.Blip.Client.ConsoleHost
 
         private static void WriteLine(string value = "", ConsoleColor color = ConsoleColor.White)
         {
-            var foregroundColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.WriteLine(value);
-            Console.ForegroundColor = foregroundColor;
-            Console.Out.Flush();
+            var foregroundColor = System.Console.ForegroundColor;
+            System.Console.ForegroundColor = color;
+            System.Console.WriteLine(value);
+            System.Console.ForegroundColor = foregroundColor;
+            System.Console.Out.Flush();
         }
 
         private static int RunAsService(Options options)
@@ -192,7 +192,7 @@ namespace Take.Blip.Client.ConsoleHost
             new Win32ServiceManager()
                 .DeleteService(options.ServiceName);
 
-            Console.WriteLine($@"Successfully unregistered service ""{options.ServiceDisplayName}""");
+            System.Console.WriteLine($@"Successfully unregistered service ""{options.ServiceDisplayName}""");
             return 0;
         }
 
