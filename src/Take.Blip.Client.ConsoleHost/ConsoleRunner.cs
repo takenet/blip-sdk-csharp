@@ -130,7 +130,7 @@ namespace Take.Blip.Client.ConsoleHost
         {
             if (string.IsNullOrWhiteSpace(options.ServiceName))
             {
-                WriteLine("Service name is required for uninstall", ConsoleColor.Red);
+                WriteLine("Service name is required for uninstalling", ConsoleColor.Red);
                 return -1;
             }
 
@@ -143,13 +143,12 @@ namespace Take.Blip.Client.ConsoleHost
         {
             if (string.IsNullOrWhiteSpace(options.ServiceName))
             {
-                WriteLine("Service name is required for install", ConsoleColor.Red);
+                WriteLine("Service name is required for installing", ConsoleColor.Red);
                 return -1;
             }
 
             options.ServiceDisplayName = options.ServiceDisplayName ?? options.ServiceName;
 
-            // Environment.GetCommandLineArgs() includes the current DLL from a "dotnet my.dll --register-service" call, which is not passed to Main()
             var remainingArgs = Environment.GetCommandLineArgs()
                 .Where(arg => arg != $"--{Options.INSTALL_FLAG}")
                 .Select(EscapeCommandLineArgument)
@@ -167,8 +166,6 @@ namespace Take.Blip.Client.ConsoleHost
 
             var fullServiceCommand = host + " " + string.Join(" ", remainingArgs);
 
-            // Do not use LocalSystem in production.. but this is good for demos as LocalSystem will have access to some random git-clone path
-            // Note that when the service is already registered and running, it will be reconfigured but not restarted
             new Win32ServiceManager()
                 .CreateService(
                     options.ServiceName,

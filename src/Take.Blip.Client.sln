@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.0
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.ConsoleTemplate", "Templates\Take.Blip.Client.ConsoleTemplate\Take.Blip.Client.ConsoleTemplate.csproj", "{9758D0C5-C9E1-446D-A660-ECAAF3BE30F1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Programmatically", "Samples\Programmatically\Programmatically.csproj", "{DCAAB449-D608-4945-8453-A4098F74978E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "Samples\ClassLibrary\ClassLibrary\ClassLibrary.csproj", "{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,5 +61,6 @@ Global
 		{F00D45F1-1380-4D18-B6D7-E6587536A44E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 		{9758D0C5-C9E1-446D-A660-ECAAF3BE30F1} = {D04C4C36-8D2F-42EB-8D33-B221495DBFE2}
 		{DCAAB449-D608-4945-8453-A4098F74978E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
+		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 	EndGlobalSection
 EndGlobal

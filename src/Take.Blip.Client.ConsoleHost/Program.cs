@@ -1,7 +1,4 @@
-﻿using System;
-using Take.Blip.Client.ConsoleHost;
-
-namespace Take.Blip.Client.ConsoleTemplate
+﻿namespace Take.Blip.Client.ConsoleHost
 {
     class Program
     {

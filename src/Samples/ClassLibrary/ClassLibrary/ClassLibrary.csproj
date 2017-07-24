@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Take.Blip.Client.ConsoleHost\Take.Blip.Client.ConsoleHost.csproj" />
+    <ProjectReference Include="..\..\..\Take.Blip.Client\Take.Blip.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="application.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
