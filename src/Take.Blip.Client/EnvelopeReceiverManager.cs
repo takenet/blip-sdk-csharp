@@ -43,7 +43,6 @@ namespace Take.Blip.Client
         internal void AddCommandReceiver(Func<ICommandReceiver> receiverFactory, Func<Command, Task<bool>> predicate, int priority) =>
             AddEnvelopeReceiver(_commandReceivers, receiverFactory, predicate, priority);
 
-
         /// <summary>
         /// Add a notification receiver listener to handle received notifications.
         /// </summary>
@@ -115,17 +114,15 @@ namespace Take.Blip.Client
         {
             public ReceiverFactoryPredicate(Func<IEnvelopeReceiver<T>> receiverFactory, Func<T, Task<bool>> predicate, int priority)
             {
-                if (receiverFactory == null) throw new ArgumentNullException(nameof(receiverFactory));
-                if (predicate == null) throw new ArgumentNullException(nameof(predicate));
-
-                ReceiverFactory = receiverFactory;
-                Predicate = predicate;
+                ReceiverFactory = receiverFactory ?? throw new ArgumentNullException(nameof(receiverFactory));
+                Predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
                 Priority = priority;
             }
 
             public Func<IEnvelopeReceiver<T>> ReceiverFactory { get; }
 
             public Func<T, Task<bool>> Predicate { get; }
+
             public int Priority { get; set; }
         }
     }

@@ -13,7 +13,7 @@ namespace Take.Blip.Client
         private readonly IChannelListener _channelListener;
 
         private CancellationTokenSource _cts;
-        private object _syncRoot = new object();
+        private readonly object _syncRoot = new object();
         
         public BlipChannelListener(ISender sender, bool autoNotify)
         {

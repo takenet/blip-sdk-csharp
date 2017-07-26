@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Client;
@@ -13,23 +10,18 @@ using Xunit;
 
 namespace Take.Blip.Client.UnitTests
 {
-    public class BlipClientTests : IDisposable
+    public class BlipClientTests : TestsBase
     {
 
         public BlipClientTests()
         {
             OnDemandClientChannel = Substitute.For<IOnDemandClientChannel>();
             ChannelListener = Substitute.For<IChannelListener>();
-            CancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         }
 
         public IOnDemandClientChannel OnDemandClientChannel { get; }
 
         public IChannelListener ChannelListener { get; set; }
-
-        public CancellationTokenSource CancellationTokenSource { get; }
-
-        public CancellationToken CancellationToken => CancellationTokenSource.Token;
 
         public BlipClient GetTarget() => new BlipClient(OnDemandClientChannel);
 
