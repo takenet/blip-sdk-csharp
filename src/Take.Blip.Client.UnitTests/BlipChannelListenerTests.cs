@@ -6,5 +6,6 @@ namespace Take.Blip.Client.UnitTests
 {
     public class BlipChannelListenerTests : TestsBase
     {
+
     }
 }

@@ -36,20 +36,15 @@ namespace Take.Blip.Client
         public Task<Command> CommandListenerTask => _channelListener.CommandListenerTask;
 
         public void AddMessageReceiver(IMessageReceiver messageReceiver, Func<Message, Task<bool>> messageFilter, int priority = 0)
-        {
-            _envelopeReceiverManager.AddMessageReceiver(() => messageReceiver, messageFilter, priority);
-        }
-
+            => _envelopeReceiverManager.AddMessageReceiver(() => messageReceiver, messageFilter, priority);
+        
         public void AddNotificationReceiver(INotificationReceiver notificationReceiver, Func<Notification, Task<bool>> notificationFilter, int priority = 0)
-        {
-            _envelopeReceiverManager.AddNotificationReceiver(() => notificationReceiver, notificationFilter, priority);
-        }
+            => _envelopeReceiverManager.AddNotificationReceiver(() => notificationReceiver, notificationFilter, priority);
+        
 
         public void AddCommandReceiver(ICommandReceiver commandReceiver, Func<Command, Task<bool>> commandFilter, int priority = 0)
-        {
-            _envelopeReceiverManager.AddCommandReceiver(() => commandReceiver, commandFilter, priority);
-        }
-
+            => _envelopeReceiverManager.AddCommandReceiver(() => commandReceiver, commandFilter, priority);
+        
         public void Start(IEstablishedReceiverChannel channel)
         {
             lock (_syncRoot)

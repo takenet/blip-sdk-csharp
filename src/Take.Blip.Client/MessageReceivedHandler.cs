@@ -36,10 +36,10 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
-                Reason reason = null;
-                if (ex is LimeException)
+                Reason reason;
+                if (ex is LimeException limeException)
                 {
-                    reason = ((LimeException)ex).Reason;
+                    reason = limeException.Reason;
                 }
                 else
                 {
