@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Console", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Console.Host", "Take.Blip.Client.Console.Host\Take.Blip.Client.Console.Host.csproj", "{AA089237-AE14-4F55-9B05-03A023460DED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.UnitTests", "Take.Blip.Client.UnitTests\Take.Blip.Client.UnitTests.csproj", "{BDEAF148-3799-4A6D-9564-D25D45176832}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,10 @@ Global
 		{AA089237-AE14-4F55-9B05-03A023460DED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA089237-AE14-4F55-9B05-03A023460DED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA089237-AE14-4F55-9B05-03A023460DED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDEAF148-3799-4A6D-9564-D25D45176832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDEAF148-3799-4A6D-9564-D25D45176832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDEAF148-3799-4A6D-9564-D25D45176832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDEAF148-3799-4A6D-9564-D25D45176832}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
