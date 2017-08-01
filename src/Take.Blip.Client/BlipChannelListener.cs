@@ -260,15 +260,9 @@ namespace Take.Blip.Client
                 .First(r => r.Any());
 
             await Task.WhenAll(
-                receiverGroup.Select(r =>
-                    CallReceiverAsync(r.ReceiverFactory(), envelope, cancellationToken)));
+                receiverGroup.Select(r => r.ReceiverFactory().ReceiveAsync(envelope, cancellationToken)));
         }
-
-        private Task CallReceiverAsync<TEnvelope>(IEnvelopeReceiver<TEnvelope> envelopeReceiver, TEnvelope envelope, CancellationToken cancellationToken)
-            where TEnvelope : Envelope, new()
-            => envelopeReceiver.ReceiveAsync(envelope, cancellationToken);
-
-
+        
         private class ReceiverFactoryPredicate<T> where T : Envelope, new()
         {
             public ReceiverFactoryPredicate(Func<IEnvelopeReceiver<T>> receiverFactory, Func<T, Task<bool>> predicate, int priority)
