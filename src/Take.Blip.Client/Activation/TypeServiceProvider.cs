@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Take.Blip.Client.Activation
 {
@@ -51,16 +50,14 @@ namespace Take.Blip.Client.Activation
         public virtual void RegisterService(Type serviceType, object instance)
         {
             if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
-            if (instance == null) throw new ArgumentNullException(nameof(instance));
-            TypeDictionary.Add(serviceType, instance);
+            TypeDictionary[serviceType] = instance ?? throw new ArgumentNullException(nameof(instance));
             (SecondaryServiceProvider as IServiceContainer)?.RegisterService(serviceType, instance);
         }
 
         public virtual void RegisterService(Type serviceType, Func<object> instanceFactory)
         {
             if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
-            if (instanceFactory == null) throw new ArgumentNullException(nameof(instanceFactory));
-            TypeDictionary.Add(serviceType, instanceFactory);
+            TypeDictionary[serviceType] = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
             (SecondaryServiceProvider as IServiceContainer)?.RegisterService(serviceType, instanceFactory);
         }
     }

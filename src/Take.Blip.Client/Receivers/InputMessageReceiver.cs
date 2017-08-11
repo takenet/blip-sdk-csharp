@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Takenet.MessagingHub.Client.Sender;
 using Lime.Messaging.Contents;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;

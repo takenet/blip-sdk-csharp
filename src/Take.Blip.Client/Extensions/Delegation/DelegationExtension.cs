@@ -2,8 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Lime.Protocol.Network;
-using Takenet.MessagingHub.Client.Sender;
 
 namespace Take.Blip.Client.Extensions.Delegation
 {

@@ -2,8 +2,6 @@
 using Lime.Protocol;
 using System.Threading;
 using System.Threading.Tasks;
-using Takenet.MessagingHub.Client.Sender;
-using System;
 
 namespace Take.Blip.Client.Extensions.Profile
 {

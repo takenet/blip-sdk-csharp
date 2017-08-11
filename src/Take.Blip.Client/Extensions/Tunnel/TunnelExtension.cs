@@ -2,7 +2,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Takenet.MessagingHub.Client.Sender;
 
 namespace Take.Blip.Client.Extensions.Tunnel
 {

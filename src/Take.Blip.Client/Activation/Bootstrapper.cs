@@ -156,13 +156,13 @@ namespace Take.Blip.Client.Activation
         {
             RegisterSettingsContainer(application, serviceContainer, typeResolver);
             RegisterSettingsTypes(application, serviceContainer, typeResolver);
+            RegisterStateManager(application, serviceContainer, typeResolver);
 
             serviceContainer.RegisterExtensions();
-            serviceContainer.RegisterSession();
             serviceContainer.RegisterService(typeof(IServiceProvider), serviceContainer);
             serviceContainer.RegisterService(typeof(IServiceContainer), serviceContainer);
             serviceContainer.RegisterService(typeof(Application), application);
-            //serviceContainer.RegisterService(typeof(IStateManager), () => new BucketStateManager(serviceContainer.GetService<IBucketExtension>()));
+            serviceContainer.RegisterService(typeof(ISessionManager), () => new SessionManager(serviceContainer.GetService<IBucketExtension>()));
 
             var client = builder();
             serviceContainer.RegisterService(typeof(ISender), client);
@@ -214,6 +214,20 @@ namespace Take.Blip.Client.Activation
                 RegisterSettingsContainer(applicationReceiver, serviceContainer, typeResolver);
             }
         }
+
+        public static void RegisterStateManager(Application application, IServiceContainer serviceContainer, ITypeResolver typeResolver)
+        {
+            if (string.IsNullOrWhiteSpace(application.StateManagerType))
+            {
+                serviceContainer.RegisterService(typeof(IStateManager), () => new BucketStateManager(serviceContainer.GetService<IBucketExtension>()));
+            }
+            else
+            {
+                var stateManagerType = typeResolver.Resolve(application.StateManagerType);
+                serviceContainer.RegisterService(typeof(IStateManager), () => serviceContainer.GetService(stateManagerType));
+            }
+        }
+
 
         private static void RegisterTunnelReceivers(Application application)
         {

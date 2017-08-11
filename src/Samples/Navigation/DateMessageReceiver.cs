@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Take.Blip.Client;
-using Takenet.MessagingHub.Client.Sender;
 
 namespace Navigation
 {

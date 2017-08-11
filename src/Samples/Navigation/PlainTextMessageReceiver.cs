@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Takenet.MessagingHub.Client.Sender;
 using System.Diagnostics;
 using Take.Blip.Client;
 

@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Takenet.MessagingHub.Client.Sender;
 using System.Diagnostics;
 
 namespace Take.Blip.Client.Receivers
@@ -25,9 +24,7 @@ namespace Take.Blip.Client.Receivers
         /// <exception cref="System.ArgumentNullException"></exception>
         public HandleExceptionMessageReceiver(IMessageReceiver receiver, ISender sender, Document exceptionDocument)
         {
-            if (receiver == null) throw new ArgumentNullException(nameof(receiver));
-
-            _receiver = receiver;
+            _receiver = receiver ?? throw new ArgumentNullException(nameof(receiver));
             _sendResponseMessageReceiver = new SendResponseMessageReceiver(sender, exceptionDocument);
         }
 

@@ -1,5 +1,4 @@
 ﻿using Take.Blip.Client.Extensions.Bucket;
-using Takenet.MessagingHub.Client.Sender;
 
 namespace Take.Blip.Client.Extensions.Resource
 {

@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
+using Lime.Protocol.Server;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Take.Blip.Client.Session;
 
 namespace Take.Blip.Client.Activation
 {
@@ -118,7 +121,7 @@ namespace Take.Blip.Client.Activation
         /// <summary>
         /// Gets or sets the type for the startup .NET type. It must implement <see cref="IStartable"/> or <see cref="IFactory{IStartable}"/>.
         /// The start is called before the start of the sender.
-        /// The type constructor must be parameterless or receive only a <see cref="IServiceProvider"/> instance plus a <see cref="IDictionary{string, object}"/> settings instance.
+        /// The type constructor must be parameterless or receive only a <see cref="IServiceProvider"/> instance plus a <see cref="IDictionary{TKey,TValue}"/> settings instance.
         /// </summary>
         /// <value>
         /// The type of the startup.
@@ -129,6 +132,11 @@ namespace Take.Blip.Client.Activation
         /// Gets or sets a type to be used as a service provider for dependency injection. It must be an implementation of <see cref="IServiceProvider"/>.
         /// </summary>
         public string ServiceProviderType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a type to be used as the state manager for message receivers. It must be an implementation of <see cref="IStateManager"/>.
+        /// </summary>
+        public string StateManagerType { get; set; }
 
         /// <summary>
         /// Gets or sets the session encryption mode to be used

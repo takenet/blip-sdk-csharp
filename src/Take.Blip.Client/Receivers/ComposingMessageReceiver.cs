@@ -3,7 +3,6 @@ using Lime.Protocol;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Takenet.MessagingHub.Client.Sender;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -22,8 +21,7 @@ namespace Take.Blip.Client.Receivers
         /// <exception cref="System.ArgumentNullException"></exception>
         public ComposingMessageReceiver(ISender sender)
         {
-            if (sender == null) throw new ArgumentNullException(nameof(sender));
-            _sender = sender;
+            _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
 
         public virtual Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = new CancellationToken())

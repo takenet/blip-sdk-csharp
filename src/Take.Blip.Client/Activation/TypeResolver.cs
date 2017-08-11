@@ -14,7 +14,7 @@ namespace Take.Blip.Client.Activation
         public TypeResolver()
             : this(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location))
         {
-
+            
         }
 
         public TypeResolver(string workingDir)
@@ -27,13 +27,14 @@ namespace Take.Blip.Client.Activation
 
         public Type Resolve(string typeName)
         {
+            if (typeName == null) throw new ArgumentNullException(nameof(typeName));
             var types = LoadedTypes
                 .Where(t => t.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
             if (types.Length == 1) return types[0];
-            else if (types.Length == 0) return Type.GetType(typeName, true, true);
-            else throw new Exception($"There are multiple types named '{typeName}'");
+            if (types.Length == 0) return Type.GetType(typeName, true, true);
+            throw new Exception($"There are multiple types named '{typeName}'");
         }
 
         private IEnumerable<Type> LoadTypes()

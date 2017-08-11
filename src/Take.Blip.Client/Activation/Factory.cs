@@ -70,9 +70,9 @@ namespace Take.Blip.Client.Activation
 
                 return Activator.CreateInstance(serviceType, serviceArgs);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new ArgumentException($"Could not instantiate type {serviceType.FullName}!", e);
+                throw new ArgumentException($"Could not instantiate type {serviceType.FullName}", ex);
             }
         }
     }
