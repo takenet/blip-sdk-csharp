@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Take.Blip.Client.UnitTests
 {
-    public class BlipClientBuilderTests : IDisposable
+    public class BlipClientBuilderTests : TestsBase
     {
         public BlipClientBuilderTests()
         {
@@ -20,17 +20,11 @@ namespace Take.Blip.Client.UnitTests
                 m => TaskUtil.TrueCompletedTask,
                 n => TaskUtil.TrueCompletedTask,
                 c => TaskUtil.TrueCompletedTask);
-            CancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             Server = new DummyServer();
-
             Lime.Messaging.Registrator.RegisterDocuments();
         }
 
         public IChannelListener ChannelListener { get; }
-
-        public CancellationTokenSource CancellationTokenSource { get; }
-
-        public CancellationToken CancellationToken => CancellationTokenSource.Token;
 
         public DummyServer Server { get; }
 
@@ -157,11 +151,16 @@ namespace Take.Blip.Client.UnitTests
             }
         }
 
-        public void Dispose()
+        public override void Dispose(bool disposing)
         {
-            Server.StopAsync(CancellationToken).Wait();
-            CancellationTokenSource.Dispose();
-            Server.Dispose();
+            if (disposing)
+            {
+                Server.StopAsync(CancellationToken).Wait();
+                Server.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
+
     }
 }

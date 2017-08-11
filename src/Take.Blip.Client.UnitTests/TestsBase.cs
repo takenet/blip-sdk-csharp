@@ -18,7 +18,16 @@ namespace Take.Blip.Client.UnitTests
 
         public void Dispose()
         {
-            CancellationTokenSource.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                CancellationTokenSource.Dispose();
+            }
         }
     }
 }
