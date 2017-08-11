@@ -4,6 +4,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -63,17 +65,38 @@ namespace Take.Blip.Client.UnitTests
         {
             // Arrange
             var target = GetTarget();
-            var messageReceiver = Substitute.For<IMessageReceiver>();
-            target.AddMessageReceiver(messageReceiver);
+            var messageReceiver = Substitute.For<IMessageReceiver>();            
             var message = Dummy.CreateMessage();
             await EstablishedReceiverChannel.MessageBuffer.SendAsync(message);
 
             // Act
+            target.AddMessageReceiver(messageReceiver);
             target.Start(EstablishedReceiverChannel);
 
             // Assert
             await Task.Delay(250);
             messageReceiver.Received(1).ReceiveAsync(message, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task RegisteringMessageReceiverWithTextTypePredicateShouldBeCalledWhenTextMessageIsReceived()
+        {
+            // Arrange
+            var target = GetTarget();
+            var messageReceiver = Substitute.For<IMessageReceiver>();            
+            var chatStateMessage = Dummy.CreateMessage(Dummy.CreateChatState());
+            var textMessage = Dummy.CreateMessage(Dummy.CreateTextContent());
+            await EstablishedReceiverChannel.MessageBuffer.SendAsync(chatStateMessage);
+            await EstablishedReceiverChannel.MessageBuffer.SendAsync(textMessage);
+
+            // Act
+            target.AddMessageReceiver(messageReceiver, m => m.Type.Equals(PlainText.MediaType).AsCompletedTask());
+            target.Start(EstablishedReceiverChannel);
+
+            // Assert
+            await Task.Delay(250);
+            messageReceiver.Received(1).ReceiveAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
+            messageReceiver.Received(1).ReceiveAsync(textMessage, Arg.Any<CancellationToken>());
         }
     }
 }
