@@ -40,7 +40,7 @@ namespace Take.Blip.Client
             RoutingRule = RoutingRule.Identity;
             AutoNotify = true;
             ChannelCount = 1;
-            ReceiptEvents = new Event[] { Event.Accepted, Event.Dispatched, Event.Received, Event.Consumed, Event.Failed };
+            ReceiptEvents = new [] { Event.Accepted, Event.Dispatched, Event.Received, Event.Consumed, Event.Failed };
         }
 
         public string Identifier { get; private set; }
@@ -201,9 +201,8 @@ namespace Take.Blip.Client
         }
 
         /// <summary>
-        /// Builds a <see cref="IMessagingHubConnection">connection</see> with the configured parameters
+        /// Builds an <see cref="IBlipClient" /> with the configured parameters
         /// </summary>
-        /// <returns>An inactive connection with the Messaging Hub. Call <see cref="IMessagingHubConnection.ConnectAsync"/> to activate it</returns>
         public IBlipClient Build()
         {
             var channelBuilder = ClientChannelBuilder
@@ -214,16 +213,9 @@ namespace Take.Blip.Client
                 .AddBuiltHandler(
                     (c, t) =>
                     {
-                        if (Throughput > 0)
-                        {
-                            throw new NotSupportedException("Throughput is not supported yet");
-                            // TODO: Not supported on LIME for .NET standard
-                            //ThroughputControlChannelModule.CreateAndRegister(c, Throughput);
-                        }
-
+                        if (Throughput > 0) ThroughputControlChannelModule.CreateAndRegister(c, Throughput);
                         return Task.CompletedTask;
                     });
-
 
             var establishedClientChannelBuilder = new EstablishedClientChannelBuilder(channelBuilder)
                 .WithIdentity(Identity)
@@ -238,7 +230,7 @@ namespace Take.Blip.Client
                 establishedClientChannelBuilder = establishedClientChannelBuilder.WithInstance(Instance);
             }
 
-            IOnDemandClientChannel onDemandClientChannel = CreateOnDemandClientChannel(establishedClientChannelBuilder);
+            var onDemandClientChannel = CreateOnDemandClientChannel(establishedClientChannelBuilder);
             return new BlipClient(onDemandClientChannel);
         }
 
@@ -264,7 +256,10 @@ namespace Take.Blip.Client
             }
 
             if (result == null)
-                throw new InvalidOperationException($"A password or accessKey should be defined. Please use the '{nameof(UsingPassword)}' or '{nameof(UsingAccessKey)}' methods for that.");
+            {
+                throw new InvalidOperationException(
+                    $"A password or accessKey should be defined. Please use the '{nameof(UsingPassword)}' or '{nameof(UsingAccessKey)}' methods for that.");
+            }
 
             return result;
         }
@@ -282,7 +277,7 @@ namespace Take.Blip.Client
         private async Task SetReceiptAsync(IClientChannel clientChannel, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (!IsGuest(clientChannel.LocalNode.Name))
-                if (ReceiptEvents.Any())
+                if (ReceiptEvents.Length > 0)
                 {
                     await clientChannel.SetResourceAsync(
                             LimeUri.Parse(UriTemplates.RECEIPT),
