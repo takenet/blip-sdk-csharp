@@ -14,7 +14,7 @@ using Lime.Transport.Tcp;
 
 namespace Take.Blip.Client.UnitTests
 {
-    public sealed class DummyServer : IDisposable, IStartable, IStoppable
+    public sealed class DummyServer : IStartable, IStoppable, IDisposable
     {
         private readonly CancellationTokenSource _cts;
         private readonly TcpTransportListener _transportListener;
@@ -32,7 +32,11 @@ namespace Take.Blip.Client.UnitTests
             ListenerUri = listenerUri;
             _cts = new CancellationTokenSource();
             _transportListener = new TcpTransportListener(ListenerUri, null, new JsonNetSerializer());
-            Channels = new List<ServerChannel>();
+            Channels = new Queue<ServerChannel>();
+            Authentications = new Queue<Authentication>();
+            Messages = new Queue<Message>();
+            Notifications = new Queue<Notification>();
+            Commands = new Queue<Command>();
         }
 
         public Uri ListenerUri { get; }
@@ -66,13 +70,26 @@ namespace Take.Blip.Client.UnitTests
                             AuthenticationScheme.Plain,
                             AuthenticationScheme.Transport,
                         },
-                        (n, a) => new AuthenticationResult(null, n), _cts.Token);
+                        (n, a) =>
+                        {
+                            Authentications.Enqueue(a);
+                            return new AuthenticationResult(null, n);
+                        }, _cts.Token);
                    
                     var channelListener = new ChannelListener(
-                        m => TaskUtil.TrueCompletedTask,
-                        n => TaskUtil.TrueCompletedTask,
+                        m =>
+                        {
+                            Messages.Enqueue(m);
+                            return TaskUtil.TrueCompletedTask;
+                        },
+                        n =>
+                        {
+                            Notifications.Enqueue(n);
+                            return TaskUtil.TrueCompletedTask;
+                        },
                         async c =>
                         {
+                            Commands.Enqueue(c);
                             if (c.Status == CommandStatus.Pending)
                             {
                                 await serverChannel.SendCommandAsync(
@@ -87,14 +104,22 @@ namespace Take.Blip.Client.UnitTests
                         });
 
                     channelListener.Start(serverChannel);
-                    Channels.Add(serverChannel);
+                    Channels.Enqueue(serverChannel);
 
                     return true;
                 },
                 _cts.Token);
         }
 
-        public ICollection<ServerChannel> Channels { get; }
+        public Queue<ServerChannel> Channels { get; }
+
+        public Queue<Authentication> Authentications { get; }
+
+        public Queue<Message> Messages { get; }
+
+        public Queue<Notification> Notifications { get; }
+
+        public Queue<Command> Commands { get; }
 
         public async Task StopAsync(CancellationToken cancellationToken = default(CancellationToken))
         {

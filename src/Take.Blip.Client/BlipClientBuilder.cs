@@ -38,6 +38,7 @@ namespace Take.Blip.Client
             Compression = SessionCompression.None;
             Encryption = SessionEncryption.TLS;
             RoutingRule = RoutingRule.Identity;
+            RoundRobin = true;
             AutoNotify = true;
             ChannelCount = 1;
             ReceiptEvents = new [] { Event.Accepted, Event.Dispatched, Event.Received, Event.Consumed, Event.Failed };
@@ -68,6 +69,8 @@ namespace Take.Blip.Client
         public SessionEncryption Encryption { get; private set; }
 
         public RoutingRule RoutingRule { get; private set; }
+
+        public bool RoundRobin { get; private set; }
 
         public int Throughput { get; private set; }
 
@@ -116,6 +119,12 @@ namespace Take.Blip.Client
         public BlipClientBuilder UsingRoutingRule(RoutingRule routingRule)
         {
             RoutingRule = routingRule;
+            return this;
+        }
+
+        public BlipClientBuilder UsingRoundRobin(bool roundRobin)
+        {
+            RoundRobin = roundRobin;
             return this;
         }
 
@@ -181,7 +190,7 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder WithReceiptEvents(Event[] events)
         {
-            ReceiptEvents = events;
+            ReceiptEvents = events ?? throw new ArgumentNullException(nameof(events));
             return this;
         }
 
@@ -245,9 +254,10 @@ namespace Take.Blip.Client
 
             if (Password != null)
             {
-                var plainAuthentication = new PlainAuthentication();
-                plainAuthentication.SetToBase64Password(Password);
-                result = plainAuthentication;
+                result = new PlainAuthentication()
+                {
+                    Password = Password
+                };
             }
 
             if (AccessKey != null)
@@ -266,32 +276,28 @@ namespace Take.Blip.Client
 
         private async Task SetPresenceAsync(IClientChannel clientChannel, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (!IsGuest(clientChannel.LocalNode.Name))
-                await clientChannel.SetResourceAsync(
-                        LimeUri.Parse(UriTemplates.PRESENCE),
-                        new Presence { Status = PresenceStatus.Available, RoutingRule = RoutingRule, RoundRobin = true },
-                        cancellationToken)
-                        .ConfigureAwait(false);
+            if (IsGuest(clientChannel.LocalNode.Name)) return;
+            
+            await clientChannel.SetResourceAsync(
+                    LimeUri.Parse(UriTemplates.PRESENCE),
+                    new Presence {Status = PresenceStatus.Available, RoutingRule = RoutingRule, RoundRobin = RoundRobin},
+                    cancellationToken)
+                .ConfigureAwait(false);   
         }
 
         private async Task SetReceiptAsync(IClientChannel clientChannel, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (!IsGuest(clientChannel.LocalNode.Name))
-                if (ReceiptEvents.Length > 0)
-                {
-                    await clientChannel.SetResourceAsync(
-                            LimeUri.Parse(UriTemplates.RECEIPT),
-                            new Receipt { Events = ReceiptEvents },
-                            cancellationToken)
-                            .ConfigureAwait(false);
-                }
+            if (IsGuest(clientChannel.LocalNode.Name)
+                || ReceiptEvents.Length == 0) return;
+                        
+            await clientChannel.SetResourceAsync(
+                    LimeUri.Parse(UriTemplates.RECEIPT),
+                    new Receipt { Events = ReceiptEvents },
+                    cancellationToken)
+                    .ConfigureAwait(false);            
         }
 
-        private static bool IsGuest(string name)
-        {
-            Guid g;
-            return Guid.TryParse(name, out g);
-        }
+        private static bool IsGuest(string name) => Guid.TryParse(name, out var _);
 
         private IOnDemandClientChannel CreateOnDemandClientChannel(IEstablishedClientChannelBuilder establishedClientChannelBuilder)
         {
