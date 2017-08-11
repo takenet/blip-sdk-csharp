@@ -193,6 +193,8 @@ namespace Take.Blip.Client.UnitTests
             return cts.Token;
         }
 
+        public static Message CreateMessage() => CreateMessage(CreateTextContent());
+
         public static Message CreateMessage(Document content)
         {
             return new Message()
@@ -256,6 +258,8 @@ namespace Take.Blip.Client.UnitTests
                 CreatePlainMediaType());
         }
 
+
+        public static Notification CreateNotification() => CreateNotification(Event.Received);
 
         public static Notification CreateNotification(Event @event)
         {

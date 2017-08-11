@@ -8,6 +8,7 @@ using System.Threading.Tasks.Dataflow;
 using Lime.Protocol;
 using Lime.Protocol.Listeners;
 using Lime.Protocol.Network;
+using Lime.Protocol.Util;
 using Take.Blip.Client.Receivers;
 
 namespace Take.Blip.Client
@@ -54,11 +55,14 @@ namespace Take.Blip.Client
             };
 
             _messageActionBlock = new ActionBlock<Message>(
-                m => HandleMessageAsync(m, _cts.Token));
+                m => HandleMessageAsync(m, _cts.Token),
+                dataflowBlockOptions);
             _notificationActionBlock = new ActionBlock<Notification>(
-                m => HandleNotificationAsync(m, _cts.Token));
+                m => HandleNotificationAsync(m, _cts.Token),
+                dataflowBlockOptions);
             _commandActionBlock = new ActionBlock<Command>(
-                m => HandleCommandAsync(m, _cts.Token));
+                m => HandleCommandAsync(m, _cts.Token),
+                dataflowBlockOptions);
             _channelListener = new DataflowChannelListener(
                 _messageActionBlock,
                 _notificationActionBlock,
@@ -71,13 +75,13 @@ namespace Take.Blip.Client
 
         public Task<Command> CommandListenerTask => _channelListener.CommandListenerTask;
 
-        public void AddMessageReceiver(IMessageReceiver messageReceiver, Func<Message, Task<bool>> messageFilter, int priority = 0)
+        public void AddMessageReceiver(IMessageReceiver messageReceiver, Func<Message, Task<bool>> messageFilter = null, int priority = 0)
             => AddEnvelopeReceiver(_messageReceivers, () => messageReceiver, messageFilter, priority);
 
-        public void AddNotificationReceiver(INotificationReceiver notificationReceiver, Func<Notification, Task<bool>> notificationFilter, int priority = 0)
+        public void AddNotificationReceiver(INotificationReceiver notificationReceiver, Func<Notification, Task<bool>> notificationFilter = null, int priority = 0)
             => AddEnvelopeReceiver(_notificationReceivers, () => notificationReceiver, notificationFilter, priority);
 
-        public void AddCommandReceiver(ICommandReceiver commandReceiver, Func<Command, Task<bool>> commandFilter, int priority = 0)
+        public void AddCommandReceiver(ICommandReceiver commandReceiver, Func<Command, Task<bool>> commandFilter = null, int priority = 0)
             => AddEnvelopeReceiver(_commandReceivers, () => commandReceiver, commandFilter, priority);
 
         public void Start(IEstablishedReceiverChannel channel)
@@ -119,7 +123,7 @@ namespace Take.Blip.Client
             int priority) where T : Envelope, new()
         {
             if (receiverFactory == null) throw new ArgumentNullException(nameof(receiverFactory));
-            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
+            if (predicate == null) predicate = envelope => TaskUtil.TrueCompletedTask;
 
             var predicateReceiverFactory = new ReceiverFactoryPredicate<T>(receiverFactory, predicate, priority);
             envelopeReceivers.Add(predicateReceiverFactory);

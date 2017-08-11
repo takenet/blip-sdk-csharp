@@ -12,16 +12,9 @@ namespace Take.Blip.Client.UnitTests
 {
     public class BlipClientTests : TestsBase
     {
+        public IOnDemandClientChannel OnDemandClientChannel { get; } = Substitute.For<IOnDemandClientChannel>();
 
-        public BlipClientTests()
-        {
-            OnDemandClientChannel = Substitute.For<IOnDemandClientChannel>();
-            ChannelListener = Substitute.For<IChannelListener>();
-        }
-
-        public IOnDemandClientChannel OnDemandClientChannel { get; }
-
-        public IChannelListener ChannelListener { get; set; }
+        public IChannelListener ChannelListener { get; set; } = Substitute.For<IChannelListener>();
 
         public BlipClient GetTarget() => new BlipClient(OnDemandClientChannel);
 
