@@ -24,7 +24,7 @@ namespace Take.Blip.Client.UnitTests.Activation
         public DummyServer Server { get; }
 
         public ITypeResolver TypeResolver { get; } =
-            new TypeResolver(Path.GetDirectoryName(typeof(BootstrapperTests).GetTypeInfo().Assembly.Location));
+            new TypeResolver(new AssemblyProvider(typeof(BootstrapperTests).GetTypeInfo().Assembly, typeof(BlipClient).GetTypeInfo().Assembly));
 
 
         [Fact]
@@ -438,7 +438,7 @@ namespace Take.Blip.Client.UnitTests.Activation
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(CancellationToken, application);
 
             // Assert
             actual.ShouldNotBeNull();
