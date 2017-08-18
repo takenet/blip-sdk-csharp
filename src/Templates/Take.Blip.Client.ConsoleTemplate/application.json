@@ -1,4 +1,5 @@
 ﻿{
+  /* TODO: Put your chatbot identifier and accessKey bellow. */
   "identifier": "",
   "accessKey": "",
   "messageReceivers": [
@@ -8,8 +9,9 @@
     }
   ],
   "settings": {
-    "setting1": "value1"
+    "key1": "value1",
+    "key2": 2
   },
-  "startupType": "Startup",
-  "schemaVersion": 2
+  "settingsType": "Settings",
+  "startupType": "Startup"
 }

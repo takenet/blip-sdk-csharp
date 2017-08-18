@@ -7,12 +7,15 @@ using Take.Blip.Client;
 
 namespace Take.Blip.Client.ConsoleTemplate
 {
+    /// <summary>
+    /// Defines a type that is called once during the application initialization.
+    /// </summary>
     public class Startup : IStartable
     {
         private readonly ISender _sender;
-        private readonly IDictionary<string, object> _settings;
+        private readonly Settings _settings;
 
-        public Startup(ISender sender, IDictionary<string, object> settings)
+        public Startup(ISender sender, Settings settings)
         {
             _sender = sender;
             _settings = settings;
