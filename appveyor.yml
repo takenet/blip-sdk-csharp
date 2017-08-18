@@ -26,7 +26,6 @@ before_build:
     }
     UpdateProjectVersion "$env:appveyor_build_folder/src/Take.Blip.Client/Take.Blip.Client.csproj" $env:appveyor_build_version
     UpdateProjectVersion "$env:appveyor_build_folder/src/Take.Blip.Client.Console/Take.Blip.Client.Console.csproj" $env:appveyor_build_version
-    UpdateProjectVersion "$env:appveyor_build_folder/src/Take.Blip.Client.Console.Host/Take.Blip.Client.Console.Host.csproj" $env:appveyor_build_version
     UpdatePackageReferenceVersion "$env:appveyor_build_folder/src/Templates/Take.Blip.Client.ConsoleTemplate/Take.Blip.Client.ConsoleTemplate.csproj" $env:appveyor_build_version
 
 - dotnet restore src/Take.Blip.Client.sln
@@ -37,7 +36,6 @@ build:
 after_build:
 - dotnet pack src/Take.Blip.Client/Take.Blip.Client.csproj --configuration Release /p:Version=%APPVEYOR_BUILD_VERSION%
 - dotnet pack src/Take.Blip.Client.Console/Take.Blip.Client.Console.csproj --configuration Release /p:Version=%APPVEYOR_BUILD_VERSION%
-- dotnet pack src/Take.Blip.Client.Console.Host/Take.Blip.Client.Console.Host.csproj --configuration Release /p:Version=%APPVEYOR_BUILD_VERSION%
 - nuget pack src/Templates/Take.Blip.Client.ConsoleTemplate.nuspec -Version %APPVEYOR_BUILD_VERSION%
 test:
   assemblies:    
