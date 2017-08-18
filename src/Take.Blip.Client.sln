@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navigation", "Samples\Navig
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Programmatically", "Samples\Programmatically\Programmatically.csproj", "{DCAAB449-D608-4945-8453-A4098F74978E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary", "Samples\ClassLibrary\ClassLibrary\ClassLibrary.csproj", "{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{61D24704-48AA-48C4-AB39-3C5404F9EFCF}"
 	ProjectSection(SolutionItems) = preProject
 		..\appveyor.yml = ..\appveyor.yml
@@ -40,10 +38,6 @@ Global
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{41B72CE9-1BC9-4F0A-8B87-FA15505ADA1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{41B72CE9-1BC9-4F0A-8B87-FA15505ADA1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41B72CE9-1BC9-4F0A-8B87-FA15505ADA1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -59,7 +53,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F00D45F1-1380-4D18-B6D7-E6587536A44E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 		{DCAAB449-D608-4945-8453-A4098F74978E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF2B5E4C-5153-491A-85E2-BF747D45BFC3}
