@@ -24,6 +24,7 @@ namespace Take.Blip.Client.Activation
         /// <summary>
         /// Creates and starts an application with the given settings.
         /// </summary>
+        /// <param name="cancellationToken"></param>
         /// <param name="application">The application instance. If not defined, the class will look for an application.json file in the current directory.</param>
         /// <param name="builder">The builder instance to be used.</param>
         /// <param name="typeResolver">The resolver for type names.</param>

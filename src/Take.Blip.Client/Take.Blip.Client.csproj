@@ -15,10 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lime.Messaging" Version="0.7.173-beta" />
-    <PackageReference Include="Lime.Protocol" Version="0.7.173-beta" />
-    <PackageReference Include="Lime.Protocol.Serialization" Version="0.7.173-beta" />
-    <PackageReference Include="Lime.Transport.Tcp" Version="0.7.173-beta" />
+    <PackageReference Include="Lime.Messaging" Version="0.7.195" />
+    <PackageReference Include="Lime.Protocol" Version="0.7.195" />
+    <PackageReference Include="Lime.Protocol.Serialization" Version="0.7.195" />
+    <PackageReference Include="Lime.Transport.Tcp" Version="0.7.195" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="SmartFormat.NET" Version="2.0.0" />
