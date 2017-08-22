@@ -7,8 +7,10 @@ namespace Take.Blip.Client.Web
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddBlipClient(this IServiceCollection serviceCollection)
-        {            
+        public static IServiceCollection AddBlip(this IServiceCollection serviceCollection)
+        {
+
+            serviceCollection.AddSingleton<IEnvelopeBuffer, EnvelopeBuffer>();
             return serviceCollection;
         }
     }

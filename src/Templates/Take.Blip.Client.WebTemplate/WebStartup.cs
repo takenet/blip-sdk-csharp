@@ -24,8 +24,9 @@ namespace Take.Blip.Client.WebTemplate
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddBlip();
             services.AddMvc();
-            services.AddBlipClient();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

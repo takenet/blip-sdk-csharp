@@ -5,16 +5,24 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
+using Lime.Protocol.Serialization;
+using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Client.Web
 {
     public sealed class WebTransport : TransportBase, ITransport
     {
-        private readonly IEnvelopeBuffer _envelopeBuffer;
+        private const string DefaultBaseUrl = "https://msging.net";
 
-        public WebTransport(IEnvelopeBuffer envelopeBuffer)
+        private readonly IEnvelopeBuffer _envelopeBuffer;
+        private readonly IEnvelopeSerializer _serializer;
+        private readonly Application _applicationSettings;
+
+        public WebTransport(IEnvelopeBuffer envelopeBuffer, IEnvelopeSerializer serializer, Application applicationSettings)
         {
             _envelopeBuffer = envelopeBuffer;
+            _serializer = serializer;
+            _applicationSettings = applicationSettings;
         }
 
         public override Task SendAsync(Envelope envelope, CancellationToken cancellationToken)
@@ -22,10 +30,8 @@ namespace Take.Blip.Client.Web
             throw new NotImplementedException();
         }
 
-        public override Task<Envelope> ReceiveAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+        public override Task<Envelope> ReceiveAsync(CancellationToken cancellationToken) 
+            => _envelopeBuffer.ReceiveAsync(cancellationToken);
 
         protected override Task PerformCloseAsync(CancellationToken cancellationToken)
         {
