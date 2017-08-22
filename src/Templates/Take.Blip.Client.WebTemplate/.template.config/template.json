@@ -1,0 +1,12 @@
+﻿{
+  "author": "take",
+  "classifications": [ "Bots" ],
+  "name": "BLiP Web (.NET Core)",
+  "identity": "Take.Blip.Client.WebTemplate",
+  "shortName": "blip-web",
+  "tags": {
+    "language": "C#"
+  },
+  "sourceName": "Take.Blip.Client.WebTemplate",
+  "preferNameDirectory": true
+}

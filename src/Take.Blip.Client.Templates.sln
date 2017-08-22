@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.ConsoleTemplate", "Templates\Take.Blip.Client.ConsoleTemplate\Take.Blip.Client.ConsoleTemplate.csproj", "{165A8197-8671-43D3-8521-72D4DC2BAA1C}"
 EndProject
@@ -10,6 +10,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		InstallTemplates.md = InstallTemplates.md
 		Templates\Take.Blip.Client.ConsoleTemplate.nuspec = Templates\Take.Blip.Client.ConsoleTemplate.nuspec
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.WebTemplate", "Templates\Take.Blip.Client.WebTemplate\Take.Blip.Client.WebTemplate.csproj", "{10407EF8-BDF6-4A68-8F0C-F59C34542B0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.Web", "Take.Blip.Client.Web\Take.Blip.Client.Web.csproj", "{AFEC8870-A24D-46D3-8AC2-B63CBB34ECDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.WebTemplate.Old", "Templates\Take.Blip.Client.WebTemplate.Old\Take.Blip.Client.WebTemplate.Old.csproj", "{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +27,23 @@ Global
 		{165A8197-8671-43D3-8521-72D4DC2BAA1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{165A8197-8671-43D3-8521-72D4DC2BAA1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{165A8197-8671-43D3-8521-72D4DC2BAA1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10407EF8-BDF6-4A68-8F0C-F59C34542B0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10407EF8-BDF6-4A68-8F0C-F59C34542B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10407EF8-BDF6-4A68-8F0C-F59C34542B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10407EF8-BDF6-4A68-8F0C-F59C34542B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFEC8870-A24D-46D3-8AC2-B63CBB34ECDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFEC8870-A24D-46D3-8AC2-B63CBB34ECDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFEC8870-A24D-46D3-8AC2-B63CBB34ECDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFEC8870-A24D-46D3-8AC2-B63CBB34ECDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7031495E-3E4B-4644-BD09-31573AEE9E1A}
 	EndGlobalSection
 EndGlobal
