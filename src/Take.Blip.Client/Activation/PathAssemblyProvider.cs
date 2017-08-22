@@ -42,7 +42,7 @@ namespace Take.Blip.Client.Activation
         {
 #if NET461
             return Assembly.LoadFrom(assemblyPath);
-#elif NETSTANDARD1_6
+#elif NETSTANDARD2_0
             var fileName = Path.GetFileNameWithoutExtension(assemblyPath);
             var runtimeLibrary = Microsoft.Extensions.DependencyModel.DependencyContext.Default.RuntimeLibraries.FirstOrDefault(l => l.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
             if (runtimeLibrary != null) return Assembly.Load(new AssemblyName(runtimeLibrary.Name));
