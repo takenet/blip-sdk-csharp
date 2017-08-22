@@ -8,12 +8,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C46C8B4B-CABC-451B-8411-CDDE3055F4EA}"
 	ProjectSection(SolutionItems) = preProject
 		InstallTemplates.md = InstallTemplates.md
-		Templates\Take.Blip.Client.ConsoleTemplate.nuspec = Templates\Take.Blip.Client.ConsoleTemplate.nuspec
+		Templates\Take.Blip.Client.Templates.nuspec = Templates\Take.Blip.Client.Templates.nuspec
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.WebTemplate", "Templates\Take.Blip.Client.WebTemplate\Take.Blip.Client.WebTemplate.csproj", "{10407EF8-BDF6-4A68-8F0C-F59C34542B0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.WebTemplate", "Templates\Take.Blip.Client.WebTemplate\Take.Blip.Client.WebTemplate.csproj", "{10407EF8-BDF6-4A68-8F0C-F59C34542B0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.Web", "Take.Blip.Client.Web\Take.Blip.Client.Web.csproj", "{AFEC8870-A24D-46D3-8AC2-B63CBB34ECDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Web", "Take.Blip.Client.Web\Take.Blip.Client.Web.csproj", "{AFEC8870-A24D-46D3-8AC2-B63CBB34ECDF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.WebTemplate.Old", "Templates\Take.Blip.Client.WebTemplate.Old\Take.Blip.Client.WebTemplate.Old.csproj", "{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}"
 EndProject

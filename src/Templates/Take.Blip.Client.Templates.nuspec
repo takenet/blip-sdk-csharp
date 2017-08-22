@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Take.Blip.Client.ConsoleTemplate</id>
+    <id>Take.Blip.Client.Templates</id>
     <version>$version$</version>
-    <description>Template for BLiP console.</description>
+    <description>Templates for BLiP projets.</description>
     <authors>take</authors>
-    <summary>.NET Core Windows service templates</summary>
+    <summary>.NET Core bot templates</summary>
     <tags>blip bot chatbots</tags>
     <projectUrl>https://github.com/takenet/blip-sdk-csharp</projectUrl>
     <licenseUrl>https://github.com/takenet/blip-sdk-csharp/blob/master/LICENSE</licenseUrl>
