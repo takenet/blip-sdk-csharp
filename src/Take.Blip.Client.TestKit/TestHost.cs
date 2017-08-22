@@ -19,7 +19,7 @@ namespace Take.Blip.Client.TestKit
         private readonly TimeSpan _messageWaitTimeout;
         private readonly TimeSpan _notificationWaitTimeout;
         private readonly Assembly _assembly;
-        private readonly TypeResolver _typeResolver;
+        private readonly ITypeResolver _typeResolver;
 
         private InternalOnDemandClientChannel _onDemandClientChannel;        
         private IBlipClient _client;
@@ -29,12 +29,15 @@ namespace Take.Blip.Client.TestKit
         /// In-memory host for a Blip SDK chatbot implementation
         /// </summary>
         /// <param name="assembly">The assembly for the full chatbot implementation</param>
-        public TestHost(Assembly assembly, TimeSpan? messageWaitTimeout = null, TimeSpan? notificationWaitTimeout = null)
+        /// <param name="messageWaitTimeout"></param>
+        /// <param name="notificationWaitTimeout"></param>
+        /// <param name="typeResolver"></param>
+        public TestHost(Assembly assembly, TimeSpan? messageWaitTimeout = null, TimeSpan? notificationWaitTimeout = null, ITypeResolver typeResolver = null)
         {
             _assembly = assembly;
             _messageWaitTimeout = messageWaitTimeout ?? DefaultTimeout;
             _notificationWaitTimeout = notificationWaitTimeout ?? DefaultTimeout;
-            _typeResolver = new TypeResolver(new AssemblyProvider(typeof(BlipClient).Assembly));
+            _typeResolver = typeResolver ?? new TypeResolver(new AssemblyProvider(typeof(BlipClient).Assembly));
         }
 
         public async Task<IServiceContainer> StartAsync(Action<IServiceContainer> serviceOverrides = null, CancellationToken cancellationToken = default(CancellationToken))
@@ -43,12 +46,12 @@ namespace Take.Blip.Client.TestKit
             var application = Application.ParseFromJsonFile(Path.Combine(GetAssemblyRoot(), applicationFileName));
             var typeResolver = new AggregateTypeResolver(new TypeResolver(new AssemblyProvider(_assembly)), _typeResolver);
 
-            var localServiceProvider = BuildServiceContainer(application, _typeResolver);
+            var localServiceProvider = BuildServiceContainer(application, typeResolver);
             localServiceProvider.RegisterService(typeof(IServiceProvider), localServiceProvider);
             localServiceProvider.RegisterService(typeof(IServiceContainer), localServiceProvider);
             localServiceProvider.RegisterService(typeof(Application), application);
 
-            Bootstrapper.RegisterSettingsContainer(application, localServiceProvider, _typeResolver);
+            Bootstrapper.RegisterSettingsContainer(application, localServiceProvider, typeResolver);
 
             var serializer = new JsonNetSerializer();
             _onDemandClientChannel = new InternalOnDemandClientChannel(serializer, application);
@@ -56,13 +59,15 @@ namespace Take.Blip.Client.TestKit
                 application,
                 () => new BlipClient(new InternalOnDemandClientChannel(serializer, application)),
                 localServiceProvider,
-                _typeResolver,
+                typeResolver,
                 cancellationToken,
                 serviceOverrides);
+
+            // The listener should be active?
             _blipChannelListener = new BlipChannelListener(_client, !application.DisableNotify);
 
             await _client.StartAsync(_blipChannelListener, cancellationToken).ConfigureAwait(false);
-            await Bootstrapper.BuildStartupAsync(application, localServiceProvider, _typeResolver);
+            await Bootstrapper.BuildStartupAsync(application, localServiceProvider, typeResolver);
             Identity = Identity.Parse($"{application.Identifier}@{application.Domain ?? "msging.net"}");
             return localServiceProvider;
         }
@@ -116,7 +121,7 @@ namespace Take.Blip.Client.TestKit
         }
 
 
-        private IServiceContainer BuildServiceContainer(Application application, TypeResolver typeResolver)
+        private IServiceContainer BuildServiceContainer(Application application, ITypeResolver typeResolver)
         {
             var serviceProviderType = typeResolver.Resolve(application.ServiceProviderType);
             var serviceProvider = (IServiceProvider)Activator.CreateInstance(serviceProviderType);
