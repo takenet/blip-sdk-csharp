@@ -1,0 +1,12 @@
+﻿{
+  "author": "take",
+  "classifications": [ "Bots" ],
+  "name": "BLiP Class Library (.NET Standard)",
+  "identity": "Take.Blip.Client.ClassLibraryTemplate",
+  "shortName": "blip-class-library",
+  "tags": {
+    "language": "C#"
+  },
+  "sourceName": "Take.Blip.Client.ClassLibraryTemplate",
+  "preferNameDirectory": true
+}

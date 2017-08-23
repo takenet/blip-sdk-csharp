@@ -22,6 +22,7 @@ namespace Take.Blip.Client.Session
         /// Gets the last known node state.
         /// </summary>
         /// <param name="identity">The identity.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException"></exception>
         Task<string> GetStateAsync(Identity identity, CancellationToken cancellationToken);
@@ -31,12 +32,14 @@ namespace Take.Blip.Client.Session
         /// </summary>
         /// <param name="identity">The identity.</param>
         /// <param name="state">The state.</param>
+        /// <param name="cancellationToken"></param>
         Task SetStateAsync(Identity identity, string state, CancellationToken cancellationToken);
 
         /// <summary>
         /// Resets the node state to the default value.
         /// </summary>
         /// <param name="identity">The identity.</param>
+        /// <param name="cancellationToken"></param>
         Task ResetStateAsync(Identity identity, CancellationToken cancellationToken);
 
         /// <summary>
@@ -61,10 +64,8 @@ namespace Take.Blip.Client.Session
         /// </exception>
         public StateEventArgs(Identity identity, string state)
         {
-            if (identity == null) throw new ArgumentNullException(nameof(identity));
-            if (state == null) throw new ArgumentNullException(nameof(state));
-            Identity = identity;
-            State = state;
+            Identity = identity ?? throw new ArgumentNullException(nameof(identity));
+            State = state ?? throw new ArgumentNullException(nameof(state));
         }
 
         /// <summary>
