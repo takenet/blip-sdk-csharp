@@ -19,7 +19,7 @@ namespace Take.Blip.Client.WebTemplate
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<WebStartup>()
+                .UseStartup<Startup>()
                 .Build();
     }
 }

@@ -15,5 +15,5 @@
     "key2": 2
   },
   "settingsType": "Settings",
-  "startupType": "Startup"
+  "startupType": "BotStartup"
 }

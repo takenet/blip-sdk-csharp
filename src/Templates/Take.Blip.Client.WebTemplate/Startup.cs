@@ -1,29 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Lime.Protocol.Server;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Take.Blip.Client.Web;
 
 namespace Take.Blip.Client.WebTemplate
 {
-    /// <summary>
-    /// Defines a type that is called once during the application initialization.
-    /// </summary>
-    public class Startup : IStartable
+    public class Startup
     {
-        private readonly ISender _sender;
-        private readonly Settings _settings;
-
-        public Startup(ISender sender, Settings settings)
+        public Startup(IConfiguration configuration)
         {
-            _sender = sender;
-            _settings = settings;
+            Configuration = configuration;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
         {
-            return Task.CompletedTask;
+            services.AddBlip();
+            services.AddMvc();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseBlip();
+            app.UseMvc();
         }
     }
 }
