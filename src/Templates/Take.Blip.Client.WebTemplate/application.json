@@ -1,9 +1,8 @@
 ﻿{
-  /* TODO: Put your chatbot identifier and accessKey bellow. */
-  "identifier": "",
-  "accessKey": "",
+  /* TODO: Put your chatbot webhook authorization header value bellow  (including the 'Key' scheme). */
+  "authorization": "",
   "scheme": "https",
-  "host": "msging.net",
+  "hostName": "msging.net",
   "port": 443,
   "messageReceivers": [
     {

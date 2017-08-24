@@ -26,7 +26,6 @@ namespace Take.Blip.Client.WebTemplate
         {
             services.AddBlip();
             services.AddMvc();
-            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,6 +36,7 @@ namespace Take.Blip.Client.WebTemplate
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseBlip();
             app.UseMvc();
         }
     }
