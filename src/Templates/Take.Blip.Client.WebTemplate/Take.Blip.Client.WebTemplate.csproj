@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="application.json" />
+  </ItemGroup>
+
   <ItemGroup>    
     <PackageReference Include="Take.Blip.Client" Version="0.1.42" />
     <PackageReference Include="Take.Blip.Client.Web" Version="0.1.42" />
@@ -17,9 +21,9 @@
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <None Update="application.json">
+    <None Include="application.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
