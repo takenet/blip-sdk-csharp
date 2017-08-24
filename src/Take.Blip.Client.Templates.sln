@@ -17,10 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Web", "Tak
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.WebTemplate.Old", "Templates\Take.Blip.Client.WebTemplate.Old\Take.Blip.Client.WebTemplate.Old.csproj", "{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.ClassLibraryTemplate", "Templates\Take.Blip.Client.ClassLibraryTemplate\Take.Blip.Client.ClassLibraryTemplate.csproj", "{A5B8E179-38DA-40D5-91A2-5C4946130E0C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.ConsoleHostTemplate", "Templates\Take.Blip.Client.ConsoleHostTemplate\Take.Blip.Client.ConsoleHostTemplate.csproj", "{D68B4F63-C2EE-4A67-B176-7FA2F845872C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,14 +39,6 @@ Global
 		{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21F2E2C1-04EF-4C71-B201-AF18B46E1D2D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A5B8E179-38DA-40D5-91A2-5C4946130E0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5B8E179-38DA-40D5-91A2-5C4946130E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A5B8E179-38DA-40D5-91A2-5C4946130E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A5B8E179-38DA-40D5-91A2-5C4946130E0C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D68B4F63-C2EE-4A67-B176-7FA2F845872C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D68B4F63-C2EE-4A67-B176-7FA2F845872C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D68B4F63-C2EE-4A67-B176-7FA2F845872C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D68B4F63-C2EE-4A67-B176-7FA2F845872C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

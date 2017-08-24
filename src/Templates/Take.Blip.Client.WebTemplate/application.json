@@ -2,6 +2,9 @@
   /* TODO: Put your chatbot identifier and accessKey bellow. */
   "identifier": "",
   "accessKey": "",
+  "scheme": "https",
+  "host": "msging.net",
+  "port": 443,
   "messageReceivers": [
     {
       "type": "PlainTextMessageReceiver",
