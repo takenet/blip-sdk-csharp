@@ -11,6 +11,4 @@
     <PackageReference Include="Take.Blip.Client" Version="0.1.29" />        
   </ItemGroup>
   
-
-
 </Project>
