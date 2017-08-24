@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol.Server;
+using Take.Blip.Client;
 
 namespace Take.Blip.Client.WebTemplate
 {

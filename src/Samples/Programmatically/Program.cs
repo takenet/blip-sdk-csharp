@@ -23,7 +23,7 @@ namespace Take.Blip.Client.Sample
                 m =>
                 {
                     Console.WriteLine("Message '{0}' received from '{1}': {2}", m.Id, m.From, m.Content);
-                    return TaskUtil.TrueCompletedTask;
+                    return client.SendMessageAsync("Pong!", message.From, cancellationToken);
                 },
                 n =>
                 {
