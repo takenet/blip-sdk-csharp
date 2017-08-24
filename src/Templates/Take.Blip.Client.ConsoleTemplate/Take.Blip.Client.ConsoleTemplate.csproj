@@ -6,7 +6,8 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Take.Blip.Client.Console" Version="0.1.7-beta" />
+    <PackageReference Include="Take.Blip.Client" Version="0.1.42" />
+    <PackageReference Include="Take.Blip.Client.Console" Version="0.1.42" />
   </ItemGroup>
 
   <ItemGroup>

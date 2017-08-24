@@ -20,7 +20,7 @@ before_build:
         $xml = [xml](get-content $xmlPath)
         foreach ($package in $xml.Project.ItemGroup[0].PackageReference) 
         { 
-            if ($package.Include.StartsWith("Take.Blip", "CurrentCultureIgnoreCase"))
+            if ($package.Include.StartsWith("Take.Blip"))
             {
                 $package.Version = $version
             }
