@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using SmartFormat;
+using static Lime.Messaging.Resources.UriTemplates;
 
 namespace Take.Blip.Client.Extensions.Contacts
 {
@@ -22,7 +23,7 @@ namespace Take.Blip.Client.Extensions.Contacts
             if (identity == null) throw new ArgumentNullException(nameof(identity));
 
             var requestCommand = CreateGetCommandRequest(
-                Smart.Format(UriTemplates.CONTACT, new { contactIdentity = Uri.EscapeDataString(identity.ToString()) }));
+                Smart.Format(CONTACT, new { contactIdentity = Uri.EscapeDataString(identity.ToString()) }));
 
             return ProcessCommandAsync<Contact>(requestCommand, cancellationToken);
         }
@@ -34,7 +35,7 @@ namespace Take.Blip.Client.Extensions.Contacts
 
             var requestCommand = CreateSetCommandRequest(
                 contact,
-                UriTemplates.CONTACTS);
+                CONTACTS);
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }
@@ -44,7 +45,7 @@ namespace Take.Blip.Client.Extensions.Contacts
             if (identity == null) throw new ArgumentNullException(nameof(identity));
 
             var requestCommand = CreateDeleteCommandRequest(
-                Smart.Format(UriTemplates.CONTACT, new { contactIdentity = Uri.EscapeDataString(identity.ToString()) }));
+                Smart.Format(CONTACT, new { contactIdentity = Uri.EscapeDataString(identity.ToString()) }));
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }
