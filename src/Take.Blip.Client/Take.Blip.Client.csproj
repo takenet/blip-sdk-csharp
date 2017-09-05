@@ -15,14 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lime.Messaging" Version="0.7.195" />
-    <PackageReference Include="Lime.Protocol" Version="0.7.195" />
-    <PackageReference Include="Lime.Protocol.Serialization" Version="0.7.195" />
-    <PackageReference Include="Lime.Transport.Tcp" Version="0.7.195" />
+    <PackageReference Include="Lime.Messaging" Version="0.7.197" />
+    <PackageReference Include="Lime.Protocol" Version="0.7.197" />
+    <PackageReference Include="Lime.Protocol.Serialization" Version="0.7.197" />
+    <PackageReference Include="Lime.Transport.Tcp" Version="0.7.197" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="SmartFormat.NET" Version="2.0.0" />
-    <PackageReference Include="Takenet.Iris.Messaging" Version="1.8.518" />
+    <PackageReference Include="Takenet.Iris.Messaging" Version="1.8.521" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
