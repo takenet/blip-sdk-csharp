@@ -352,8 +352,11 @@ namespace Take.Blip.Client.Activation
                     else
                     {
                         var receiverType = typeResolver.Resolve(applicationReceiver.Type);
-                        receiver = await BuildByLifetimeAsync(applicationReceiver.Lifetime, receiverType, applicationReceiver.Settings, serviceContainer)
-                                            .ConfigureAwait(false);
+                        receiver = await BuildByLifetimeAsync(
+                            applicationReceiver.Lifetime ?? application.DefaultMessageReceiverLifetime,
+                            receiverType,
+                            applicationReceiver.Settings,
+                            serviceContainer);
                     }
 
                     if (applicationReceiver.OutState != null)
@@ -499,16 +502,17 @@ namespace Take.Blip.Client.Activation
             return instance;
         }
 
-        private static Task<IMessageReceiver> BuildByLifetimeAsync(string lifetime, Type receiverType, IDictionary<string, object> settings, IServiceContainer serviceContainer)
+        private static Task<IMessageReceiver> BuildByLifetimeAsync(ReceiverLifetime lifetime, Type receiverType, IDictionary<string, object> settings, IServiceContainer serviceContainer)
         {
-            if ("scoped".Equals(lifetime, StringComparison.InvariantCultureIgnoreCase))
+            switch (lifetime)
             {
-                var messageReceiverFactory = GetMessageReceiverFactory(serviceContainer);
-                return Task.FromResult<IMessageReceiver>(new ScopedMessageReceiverWrapper(messageReceiverFactory, receiverType, settings));
-            }
-            else
-            {
-                return CreateAsync<IMessageReceiver>(receiverType, serviceContainer, settings);
+                case ReceiverLifetime.Scoped:
+                    var messageReceiverFactory = GetMessageReceiverFactory(serviceContainer);
+                    return Task.FromResult<IMessageReceiver>(new ScopedMessageReceiverWrapper(messageReceiverFactory, receiverType, settings));
+
+                case ReceiverLifetime.Singleton:
+                default:
+                    return CreateAsync<IMessageReceiver>(receiverType, serviceContainer, settings);
             }
         }
 
@@ -608,7 +612,9 @@ namespace Take.Blip.Client.Activation
                 }
                 finally
                 {
-                    await _messageReceiverFactory.ReleaseAsync(receiver);
+                    await _messageReceiverFactory
+                            .ReleaseAsync(receiver)
+                            .ConfigureAwait(false);
                 }
             }
         }
@@ -619,7 +625,7 @@ namespace Take.Blip.Client.Activation
 
             public MessageReceiverFactory(IServiceProvider provider)
             {
-                this._provider = provider;
+                _provider = provider;
             }
 
             public Task<IMessageReceiver> CreateAsync(Type receiverType, IDictionary<string, object> settings)

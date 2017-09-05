@@ -246,7 +246,7 @@ namespace Take.Blip.Client.UnitTests.Activation
                     {
                         Type = typeof(TestMessageReceiver).Name,
                         MediaType = "text/plain",
-                        Lifetime = "scoped"
+                        Lifetime = ReceiverLifetime.Scoped
                     },
                     new MessageApplicationReceiver()
                     {

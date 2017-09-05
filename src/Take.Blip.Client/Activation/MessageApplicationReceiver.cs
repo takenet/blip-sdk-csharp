@@ -25,9 +25,9 @@ namespace Take.Blip.Client.Activation
         /// <summary>
         /// Gets or sets the lifetime of the receiver instance.
         /// Options:
-        /// - singleton (default)
-        /// - scoped (an instance per message request)
+        /// - Singleton (default)
+        /// - Scoped (an instance per message request)
         /// </summary>
-        public string Lifetime { get; set; }
+        public ReceiverLifetime? Lifetime { get; set; }
     }
 }
