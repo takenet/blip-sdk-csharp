@@ -21,5 +21,13 @@ namespace Take.Blip.Client.Activation
         /// The text regex.
         /// </value>
         public string Content { get; set; }
+
+        /// <summary>
+        /// Gets or sets the lifetime of the receiver instance.
+        /// Options:
+        /// - Singleton (default)
+        /// - Scoped (an instance per message request)
+        /// </summary>
+        public ReceiverLifetime? Lifetime { get; set; }
     }
 }
