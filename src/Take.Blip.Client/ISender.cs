@@ -23,28 +23,8 @@ namespace Take.Blip.Client
         /// <param name="content">The content of the message</param>
         /// <param name="to">The destination of the message</param>
         /// <param name="cancellationToken">A cancellation token to allow the task to be canceled</param>
-        public static Task SendMessageAsync(this ISender sender, string content, string to, CancellationToken cancellationToken = default(CancellationToken))
-            => sender.SendMessageAsync(content, Node.Parse(to), cancellationToken);
-
-        /// <summary>
-        /// Send a message through the available connection.
-        /// </summary>
-        /// <param name="sender">The sender of the message</param>
-        /// <param name="content">The content of the message</param>
-        /// <param name="to">The destination of the message</param>
-        /// <param name="cancellationToken">A cancellation token to allow the task to be canceled</param>
         public static Task SendMessageAsync(this ISender sender, string content, Node to, CancellationToken cancellationToken = default(CancellationToken))
             => sender.SendMessageAsync(CreatePlainTextContent(content) as Document, to, cancellationToken);
-
-        /// <summary>
-        /// Send a message through the available connection.
-        /// </summary>
-        /// <param name="sender">The sender of the message</param>
-        /// <param name="content">The content of the message</param>
-        /// <param name="to">The destination of the message</param>
-        /// <param name="cancellationToken">A cancellation token to allow the task to be canceled</param>
-        public static Task SendMessageAsync(this ISender sender, Document content, string to, CancellationToken cancellationToken = default(CancellationToken))
-            => sender.SendMessageAsync(content, Node.Parse(to), cancellationToken);
 
         /// <summary>
         /// Send a message through the available connection.
