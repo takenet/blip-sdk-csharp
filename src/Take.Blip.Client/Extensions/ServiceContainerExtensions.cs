@@ -21,6 +21,7 @@ namespace Take.Blip.Client.Extensions
         internal static IServiceContainer RegisterExtensions(this IServiceContainer serviceContainer)
         {
             Lime.Messaging.Registrator.RegisterDocuments();
+            Takenet.Iris.Messaging.Registrator.RegisterDocuments();
             Registrator.RegisterDocuments();
 
             Func<ISender> senderFactory = () => serviceContainer.GetService<ISender>();
