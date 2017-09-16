@@ -11,7 +11,7 @@ namespace Take.Blip.Client
     {
         public ITransport Create(Uri endpoint)
         {
-            if (endpoint.Scheme != "net.tcp")
+            if (endpoint.Scheme != Uri.UriSchemeNetTcp)
             {
                 throw new NotSupportedException($"Unsupported URI scheme '{endpoint.Scheme}'");
             }

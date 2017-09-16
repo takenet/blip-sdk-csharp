@@ -24,7 +24,7 @@ namespace Take.Blip.Client.UnitTests.Activation
         public DummyServer Server { get; }
 
         public ITypeResolver TypeResolver { get; } =
-            new TypeResolver(Path.GetDirectoryName(typeof(BootstrapperTests).GetTypeInfo().Assembly.Location));
+            new TypeResolver(new AssemblyProvider(typeof(BootstrapperTests).GetTypeInfo().Assembly, typeof(BlipClient).GetTypeInfo().Assembly));
 
 
         [Fact]
@@ -233,6 +233,44 @@ namespace Take.Blip.Client.UnitTests.Activation
         }
 
         [Fact]
+        public async Task CreateWithMessageReceiverTypeAndScopedLifetimeShouldNotReturn_Instance()
+        {
+            // Arrange
+            var application = new Application()
+            {
+                Identifier = "testlogin",
+                AccessKey = "12345".ToBase64(),
+                MessageReceivers = new[]
+                {
+                    new MessageApplicationReceiver()
+                    {
+                        Type = typeof(TestMessageReceiver).Name,
+                        MediaType = "text/plain",
+                        Lifetime = ReceiverLifetime.Scoped
+                    },
+                    new MessageApplicationReceiver()
+                    {
+                        Type = typeof(TestMessageReceiver).Name,
+                        MediaType = "application/json"
+                    },
+                    new MessageApplicationReceiver()
+                    {
+                        Type = typeof(TestMessageReceiver).AssemblyQualifiedName
+                    }
+                },
+                HostName = Server.ListenerUri.Host
+            };
+
+            // Act
+            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+
+            // Assert
+            actual.ShouldNotBeNull();
+            TestMessageReceiver.InstanceCount.ShouldBe(2);
+        }
+
+
+        [Fact]
         public async Task CreateWithRegisteringTunnelShouldAddReceiver()
         {
             // Arrange
@@ -438,7 +476,7 @@ namespace Take.Blip.Client.UnitTests.Activation
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(CancellationToken, application);
 
             // Assert
             actual.ShouldNotBeNull();

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
 EndProject
@@ -11,18 +11,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navigation", "Samples\Navig
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Programmatically", "Samples\Programmatically\Programmatically.csproj", "{DCAAB449-D608-4945-8453-A4098F74978E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary", "Samples\ClassLibrary\ClassLibrary\ClassLibrary.csproj", "{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{61D24704-48AA-48C4-AB39-3C5404F9EFCF}"
 	ProjectSection(SolutionItems) = preProject
 		..\appveyor.yml = ..\appveyor.yml
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Console", "Take.Blip.Client.Console\Take.Blip.Client.Console.csproj", "{41B72CE9-1BC9-4F0A-8B87-FA15505ADA1A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Console.Host", "Take.Blip.Client.Console.Host\Take.Blip.Client.Console.Host.csproj", "{AA089237-AE14-4F55-9B05-03A023460DED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.UnitTests", "Take.Blip.Client.UnitTests\Take.Blip.Client.UnitTests.csproj", "{BDEAF148-3799-4A6D-9564-D25D45176832}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Client.UnitTests", "Take.Blip.Client.UnitTests\Take.Blip.Client.UnitTests.csproj", "{BDEAF148-3799-4A6D-9564-D25D45176832}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.TestKit", "Take.Blip.Client.TestKit\Take.Blip.Client.TestKit.csproj", "{EBC3B0CE-1FDB-4303-A8F4-8CB173CB027F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Web", "Take.Blip.Client.Web\Take.Blip.Client.Web.csproj", "{ABC433EC-8417-415B-97B2-45C727934FA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,22 +43,22 @@ Global
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCAAB449-D608-4945-8453-A4098F74978E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{41B72CE9-1BC9-4F0A-8B87-FA15505ADA1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{41B72CE9-1BC9-4F0A-8B87-FA15505ADA1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41B72CE9-1BC9-4F0A-8B87-FA15505ADA1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41B72CE9-1BC9-4F0A-8B87-FA15505ADA1A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AA089237-AE14-4F55-9B05-03A023460DED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AA089237-AE14-4F55-9B05-03A023460DED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AA089237-AE14-4F55-9B05-03A023460DED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AA089237-AE14-4F55-9B05-03A023460DED}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BDEAF148-3799-4A6D-9564-D25D45176832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BDEAF148-3799-4A6D-9564-D25D45176832}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BDEAF148-3799-4A6D-9564-D25D45176832}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BDEAF148-3799-4A6D-9564-D25D45176832}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBC3B0CE-1FDB-4303-A8F4-8CB173CB027F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBC3B0CE-1FDB-4303-A8F4-8CB173CB027F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBC3B0CE-1FDB-4303-A8F4-8CB173CB027F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBC3B0CE-1FDB-4303-A8F4-8CB173CB027F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABC433EC-8417-415B-97B2-45C727934FA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABC433EC-8417-415B-97B2-45C727934FA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABC433EC-8417-415B-97B2-45C727934FA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABC433EC-8417-415B-97B2-45C727934FA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,6 +66,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F00D45F1-1380-4D18-B6D7-E6587536A44E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 		{DCAAB449-D608-4945-8453-A4098F74978E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
-		{698464DE-1B8B-4CC9-A0FE-93DE7871BACC} = {9A7ECD2D-523B-47A2-B905-88407B124192}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BF2B5E4C-5153-491A-85E2-BF747D45BFC3}
 	EndGlobalSection
 EndGlobal

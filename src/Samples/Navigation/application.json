@@ -1,6 +1,6 @@
 ﻿{
-  "identifier": "navigationsample",
-  "accessKey": "QkRYOHAz",
+  "identifier": "",
+  "accessKey": "",
   "messageReceivers": [
     {
       "mediaType": "text/plain",
@@ -8,7 +8,7 @@
       "response": {
         "mediaType": "application/vnd.lime.select+json",
         "jsonContent": {
-          "text": "Olá, seja bem-vindo ao serviço de ajuda do Messaging Hub. Escolha o que você deseja receber:",
+          "text": "Olá, seja bem-vindo ao serviço de ajuda do BLiP. Escolha o que você deseja receber:",
           "options": [
             {
               "order": 1,
@@ -72,7 +72,7 @@
       "response": {
         "mediaType": "application/vnd.lime.select+json",
         "jsonContent": {
-          "text": "Hello and welcome to the Messaging Hub help service. Please choose which kind of content you want to receive:",
+          "text": "Hello and welcome to the BLiP help service. Please choose which kind of content you want to receive:",
           "options": [
             {
               "order": 1,
@@ -141,11 +141,18 @@
     },
     {
       "priority": "100",
+      "culture": "en-US",
       "response": {
         "mediaType": "text/plain",
-        "plainContent": "Ops, não entendi o que você quis dizer. Envie a palavra AJUDA caso precise.\nOps, I didn't understand what you said. You can try send the word HELP if you are lost."
+        "plainContent": "Ops, I didn't understand what you said. You can try send the word HELP if you are lost."
+      }
+    },
+    {
+      "priority": "101",
+      "response": {
+        "mediaType": "text/plain",
+        "plainContent": "Ops, não entendi o que você quis dizer. Envie a palavra AJUDA caso precise."
       }
     }
-  ],
-  "schemaVersion": 2
+  ]
 }

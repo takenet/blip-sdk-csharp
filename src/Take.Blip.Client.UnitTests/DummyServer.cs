@@ -73,7 +73,7 @@ namespace Take.Blip.Client.UnitTests
                         (n, a) =>
                         {
                             Authentications.Enqueue(a);
-                            return new AuthenticationResult(null, n);
+                            return new AuthenticationResult(null, n).AsCompletedTask();
                         }, _cts.Token);
                    
                     var channelListener = new ChannelListener(

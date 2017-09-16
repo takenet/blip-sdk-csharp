@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol.Util;
+using Take.Blip.Client;
 
-namespace Take.Blip.Client.Sample
+namespace Programmatically
 {
     class Program
     {
@@ -22,10 +22,11 @@ namespace Take.Blip.Client.Sample
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
             await client.StartAsync(
-                m =>
+                async m =>
                 {
                     Console.WriteLine("Message '{0}' received from '{1}': {2}", m.Id, m.From, m.Content);
-                    return TaskUtil.TrueCompletedTask;
+                    await client.SendMessageAsync("Pong!", m.From, cancellationToken);
+                    return true;
                 },
                 n =>
                 {

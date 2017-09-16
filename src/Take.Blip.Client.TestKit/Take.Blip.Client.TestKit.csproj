@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>0.1.0</Version>
+    <Authors>takenet</Authors>
+    <Company>Take</Company>
+    <Product>Blip SDK Test helper</Product>
+    <Description>A testing host for applications using BLiP SDK to ease integration testing. This host fakes the server incoming and outgoing message transport so you can control the delivery of messages to your chatbot and inspect which messages are produced by it.</Description>
+    <PackageTags>blip messagingHub</PackageTags>
+    <Copyright>Copyright © 2017 Curupira S/A</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,19 @@
+﻿{
+  /* TODO: Put your chatbot webhook authorization header value bellow  (including the 'Key' scheme). */
+  "authorization": "",
+  "scheme": "https",
+  "hostName": "msging.net",
+  "port": 443,
+  "messageReceivers": [
+    {
+      "type": "PlainTextMessageReceiver",
+      "mediaType": "text/plain"
+    }
+  ],
+  "settings": {
+    "key1": "value1",
+    "key2": 2
+  },
+  "settingsType": "Settings",
+  "startupType": "BotStartup"
+}

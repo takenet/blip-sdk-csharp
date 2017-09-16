@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Listeners;
 using Lime.Protocol.Server;
+using Lime.Protocol.Util;
 
 namespace Take.Blip.Client
 {
@@ -23,6 +24,19 @@ namespace Take.Blip.Client
 
     public static class ClientExtensions
     {
+        /// <summary>
+        /// Starts the client with no envelope consumers.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        public static Task StartAsync(this IBlipClient client, CancellationToken cancellationToken)
+            => client.StartAsync(
+                m => TaskUtil.TrueCompletedTask,
+                n => TaskUtil.TrueCompletedTask,
+                c => TaskUtil.TrueCompletedTask,
+                cancellationToken);
+
         /// <summary>
         /// Starts the client with the specified envelope consumers.
         /// </summary>

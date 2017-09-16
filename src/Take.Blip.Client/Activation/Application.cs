@@ -98,6 +98,14 @@ namespace Take.Blip.Client.Activation
         public int SendTimeout { get; set; }
 
         /// <summary>
+        /// Gets or sets the default lifetime for MessageReceivers.
+        /// </summary>
+        /// <value>
+        /// The lifetime.
+        /// </value>
+        public ReceiverLifetime DefaultMessageReceiverLifetime { get; set; }
+
+        /// <summary>
         /// Gets or sets the messages receivers.
         /// </summary>
         /// <value>

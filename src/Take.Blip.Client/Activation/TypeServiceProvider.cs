@@ -6,7 +6,7 @@ namespace Take.Blip.Client.Activation
     /// <summary>
     /// Defines a simple type service provider.
     /// </summary>
-    /// <seealso cref="Takenet.MessagingHub.Client.Host.IServiceContainer" />
+    /// <seealso cref="IServiceContainer" />
     public class TypeServiceProvider : IServiceContainer
     {
         protected readonly Dictionary<Type, object> TypeDictionary;

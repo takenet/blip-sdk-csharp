@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,18 +8,24 @@ namespace Take.Blip.Client.Activation
 {
     public sealed class TypeResolver : ITypeResolver
     {
-        private readonly string _workingDir;
-
         public TypeResolver()
-            : this(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location))
+            : this(Path.GetDirectoryName((Assembly.GetEntryAssembly() ?? typeof(TypeResolver).GetTypeInfo().Assembly).Location))
         {
             
         }
 
         public TypeResolver(string workingDir)
+            : this(new PathAssemblyProvider(workingDir))
         {
-            _workingDir = workingDir;
-            LoadedTypes = LoadTypes();
+            
+        }
+
+        public TypeResolver(IAssemblyProvider assemblyProvider)
+        {
+            if (assemblyProvider == null) throw new ArgumentNullException(nameof(assemblyProvider));
+            LoadedTypes = assemblyProvider.GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .ToList();
         }
 
         public IEnumerable<Type> LoadedTypes { get; }
@@ -35,42 +40,6 @@ namespace Take.Blip.Client.Activation
             if (types.Length == 1) return types[0];
             if (types.Length == 0) return Type.GetType(typeName, true, true);
             throw new Exception($"There are multiple types named '{typeName}'");
-        }
-
-        private IEnumerable<Type> LoadTypes()
-            => LoadAssemblies(_workingDir)
-            .SelectMany(a => a.GetTypes())
-            .ToList();
-
-        private static IEnumerable<Assembly> LoadAssemblies(string path = ".", string searchPattern = "*.dll")
-        {
-            foreach (var assemblyPath in Directory.GetFiles(path, searchPattern))
-            {
-                Assembly assembly = null;
-
-                try
-                {                    
-                    assembly = LoadAssembly(Path.GetFullPath(assemblyPath));
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError(ex.ToString());
-                }
-
-                if (assembly != null) yield return assembly;
-            }
-        }
-
-        private static Assembly LoadAssembly(string assemblyPath)
-        {
-#if NETSTANDARD1_6
-            var fileName = Path.GetFileNameWithoutExtension(assemblyPath);
-            var runtimeLibrary = Microsoft.Extensions.DependencyModel.DependencyContext.Default.RuntimeLibraries.FirstOrDefault(l => l.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
-            if (runtimeLibrary != null) return Assembly.Load(new AssemblyName(runtimeLibrary.Name));
-            return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
-#elif NET461
-            return Assembly.LoadFrom(assemblyPath);
-#endif
         }
     }
 }
