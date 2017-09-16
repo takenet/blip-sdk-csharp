@@ -24,7 +24,7 @@ namespace Take.Blip.Client
         /// <param name="to">The destination of the message</param>
         /// <param name="cancellationToken">A cancellation token to allow the task to be canceled</param>
         public static Task SendMessageAsync(this ISender sender, string content, Node to, CancellationToken cancellationToken = default(CancellationToken))
-            => sender.SendMessageAsync(CreatePlainTextContent(content) as Document, to, cancellationToken);
+            => sender.SendMessageAsync(new PlainText { Text = content } as Document, to, cancellationToken);
 
         /// <summary>
         /// Send a message through the available connection.
@@ -44,7 +44,5 @@ namespace Take.Blip.Client
             };
             return sender.SendMessageAsync(message, cancellationToken);
         }
-
-        private static PlainText CreatePlainTextContent(string content) => new PlainText { Text = content };
     }
 }
