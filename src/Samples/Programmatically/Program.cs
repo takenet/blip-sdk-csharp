@@ -19,6 +19,8 @@ namespace Programmatically
                 .UsingAccessKey("animaisdemo", "V01WNEJtVDBvRVRod1Bycm11Umw=")
                 .Build();
 
+            Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+
             await client.StartAsync(
                 async m =>
                 {
