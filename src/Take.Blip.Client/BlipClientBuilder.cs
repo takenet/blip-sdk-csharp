@@ -78,7 +78,7 @@ namespace Take.Blip.Client
 
         public int ChannelCount { get; private set; }
 
-        public Identity Identity => Identity.Parse($"{Identifier}@{Domain}");
+        public Identity Identity => new Identity(Identifier, Domain);
 
         public Uri EndPoint => new Uri($"{Scheme}://{HostName}:{Port}");
 
@@ -230,9 +230,9 @@ namespace Take.Blip.Client
                 .WithIdentity(Identity)
                 .WithAuthentication(GetAuthenticationScheme())
                 .WithCompression(Compression)
+                .WithEncryption(Encryption)
                 .AddEstablishedHandler(SetPresenceAsync)
-                .AddEstablishedHandler(SetReceiptAsync)
-                .WithEncryption(Encryption);
+                .AddEstablishedHandler(SetReceiptAsync);
 
             if (Instance != null)
             {
