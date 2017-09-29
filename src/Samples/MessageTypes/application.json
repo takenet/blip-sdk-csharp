@@ -1,0 +1,57 @@
+﻿{
+  /* TODO: Put your chatbot identifier and accessKey bellow. */
+  "identifier": "tiposdemensagens",
+  "accessKey": "dWg3SlFxdjJyZEExZWJ5TTJBdnA=",
+  "messageReceivers": [
+    {
+      "type": "MainMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^((?!^cs([0-9]?)|(^pt(\\d+)?)|(^ml(\\d+)?)|(^wl(\\d+)?)|(^l(\\d+)?)|(^c(\\d+)?)|(^p(\\d+)?)).)*$"
+    },
+    {
+      "type": "OptionChatStateMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^cs(\\d+)?"
+    }, 
+    {
+      "type": "OptionPlainTextMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^pt(\\d+)?"
+    },
+    {
+      "type": "OptionMediaLinkMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^ml(\\d+)?"
+    },
+    {
+      "type": "OptionWebLinkMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^wl(\\d+)?"
+    },
+    {
+      "type": "OptionLocationMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^l(\\d+)?"
+    },
+    {
+      "type": "OptionCollectionMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^dc(\\d+)?"
+    },
+    {
+      "type": "OptionPaymentMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^p(\\d+)?"
+    },
+    {
+      "type": "PaymentReceiptMessageReceiver",
+      "mediaType": "application/vnd.lime.invoice-status\\+json"
+    }
+  ],
+  "settings": {
+    "key1": "value1",
+    "key2": 2
+  },
+  "settingsType": "Settings",
+  "startupType": "Startup"
+}
