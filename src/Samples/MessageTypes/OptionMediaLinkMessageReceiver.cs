@@ -27,11 +27,11 @@ namespace MessageTypes
             {
                 Title = "Gato",
                 Text = "Segue uma imagem de um gato",
-                Size = 227791,
                 Type = MediaType.Parse("image/jpeg"),
-                PreviewUri = imageUri,
                 Uri = imageUri,
-                AspectRatio = "1:1"
+                AspectRatio = "1:1",
+                Size = 227791,
+                PreviewUri = imageUri
             };
 
             await _sender.SendMessageAsync(imageMediaLink, message.From, cancellationToken);

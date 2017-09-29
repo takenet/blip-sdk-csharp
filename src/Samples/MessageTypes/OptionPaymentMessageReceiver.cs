@@ -67,6 +67,7 @@ namespace MessageTypes
                     await _sender.SendMessageAsync("Obrigado pelo seu pagamento, mas como isso � apenas um teste, voc� pode pedir o ressarcimento do valor pago ao PagSeguro. Em todo caso, segue o seu recibo:", message.From, cancellationToken);
                     var paymentReceipt = new PaymentReceipt
                     {
+                        
                         Currency = "BLR",
                         Items =
                             new[]
