@@ -15,6 +15,8 @@ namespace MessageTypes
             _sender = sender;
         }
 
+        
+
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             var plainText = new PlainText
