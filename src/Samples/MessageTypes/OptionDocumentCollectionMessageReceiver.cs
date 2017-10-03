@@ -35,11 +35,11 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            var plainText = new DocumentCollection
+            var document = new DocumentCollection
             {
                 Items = documents
             };
-            await _sender.SendMessageAsync(plainText, message.From, cancellationToken);
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
     }
 
@@ -82,11 +82,11 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            var plainText = new DocumentCollection
+            var document = new DocumentCollection
             {
                 Items = documents
             };
-            await _sender.SendMessageAsync(plainText, message.From, cancellationToken);
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
     }
 
@@ -152,6 +152,47 @@ namespace MessageTypes
                         }   
                     }
                 },
+                new DocumentSelect
+                {
+                    Header = 
+                    {
+                        Value = new MediaLink
+                        {
+                            Title = "Title 2",
+                            Text = "This is another item",
+                            Type = "image/jpeg",
+                            Uri = new Uri("http://www.freedigitalphotos.net/images/img/homepage/87357.jpg")
+                        }
+                    },
+                    Options = new DocumentSelectOption[] 
+                    {
+                        new DocumentSelectOption
+                        {
+                            Label = 
+                            {
+                                Value = new WebLink 
+                                {
+                                    Title = "Second link",
+                                    Text = "Weblink",
+                                    Uri = new Uri("https://server.com/second/link2")
+                                }
+                            }
+                        },
+                        new DocumentSelectOption
+                        {
+                            Label =
+                            {
+                                Value = new PlainText {
+                                    Text = "Second text"
+                                }
+                            },
+                            Value = 
+                            {
+                                Value = JsonDocuments
+                            }
+                        }
+                    }
+                }
                 
             };
         }
@@ -161,11 +202,11 @@ namespace MessageTypes
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
 
-            var documentCollection = new DocumentCollection
+            var document = new DocumentCollection
             {
                 Items = documents,
             };
-            await _sender.SendMessageAsync(documentCollection, message.From, cancellationToken);
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
     }
 }

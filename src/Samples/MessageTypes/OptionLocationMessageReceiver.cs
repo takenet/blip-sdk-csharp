@@ -28,4 +28,32 @@ namespace MessageTypes
             await _sender.SendMessageAsync(location, message.From, cancellationToken);
         }
     }
+
+     public class RequestLocation : IMessageReceiver
+    {
+        private readonly ISender _sender;
+
+        public RequestLocation(ISender sender)
+        {
+            _sender = sender;
+        }
+
+        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
+        {
+            var location = new Input
+            {
+                Label = {
+                    Value = new PlainText {
+                        Text = "Send your location please!"
+                    }
+                },
+                Validation = {
+                    Rule = InputValidationRule.Type,
+                    Type = "application/vnd.lime.location+json" //checar se é necessário
+                }
+            };
+
+            await _sender.SendMessageAsync(location, message.From, cancellationToken);
+        }
+    }
 }
