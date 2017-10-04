@@ -18,7 +18,7 @@ namespace MessageTypes
             _sender = sender;
         }
 
-        DocumentSelectOption[] options = new DocumentSelectOption[]{
+        DocumentSelectOption[] options = {
             new DocumentSelectOption 
             {
                 Label = 

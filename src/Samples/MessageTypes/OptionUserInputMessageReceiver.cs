@@ -7,11 +7,11 @@ using Take.Blip.Client;
 
 namespace MessageTypes
 {
-    public class OptionUserInputMessaReceiver : IMessageReceiver
+    public class OptionUserInputMessageReceiver : IMessageReceiver
     {
         private readonly ISender _sender;
 
-        public OptionUserInputMessaReceiver(ISender sender)
+        public OptionUserInputMessageReceiver(ISender sender)
         {
             _sender = sender;
         }
@@ -33,11 +33,11 @@ namespace MessageTypes
     }
 
     
-    public class UserInputLocationReceiver : IMessageReceiver
+    public class UserInputLocationReceiver2 : IMessageReceiver
     {
         private readonly ISender _sender;
 
-        public UserInputLocationReceiver(ISender sender)
+        public UserInputLocationReceiver2(ISender sender)
         {
             _sender = sender;
         }

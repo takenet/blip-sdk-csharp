@@ -5,7 +5,6 @@ using Lime.Protocol;
 using System.Diagnostics;
 using Take.Blip.Client;
 
-
 namespace MessageTypes
 {
     /// <summary>
@@ -15,12 +14,10 @@ namespace MessageTypes
     public class MainMessageReceiver : IMessageReceiver
     {
         private readonly ISender _sender;
-
         public MainMessageReceiver(ISender sender)
         {
             _sender = sender;
         }
-
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             Trace.TraceInformation($"From: {message.From} \tContent: {message.Content}");

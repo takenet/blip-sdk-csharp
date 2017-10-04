@@ -6,42 +6,76 @@
     {
       "type": "MainMessageReceiver",
       "mediaType": "text/plain",
-      "content": "^((?!^cs([0-9]?)|(^pt(\\d+)?)|(^ml(\\d+)?)|(^wl(\\d+)?)|(^l(\\d+)?)|(^c(\\d+)?)|(^p(\\d+)?)).)*$"
+      "content": "^((?!(^cs([0-9]?))|(^pt(\\d+)?)|(^ml(\\d+)?)|(^wl(\\d+)?)|(^l(\\d+)?)|(^c(\\d+)?)|(^p(\\d+)?)|(^mm(\\d+)?)|(^li(\\d+)?)|(^nc(\\d+)?)|(^re(\\d+)?)|(^res(\\d+)?)|(^ui(\\d+)?)|(^se(\\d+)?)|(^dc(\\d+)?)).)*$"
     },
     {
       "type": "OptionChatStateMessageReceiver",
       "mediaType": "text/plain",
       "content": "^cs(\\d+)?"
-    }, 
-    {
-      "type": "OptionPlainTextMessageReceiver",
-      "mediaType": "text/plain",
-      "content": "^pt(\\d+)?"
     },
     {
-      "type": "OptionMediaLinkMessageReceiver",
+      "type": "OptionDocumentCollectionMessageReceiver",
       "mediaType": "text/plain",
-      "content": "^ml(\\d+)?"
+      "content": "^dc(\\d+)?"
     },
-   
+    {
+      "type": "OptionListMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^li(\\d+)?"
+    },
     {
       "type": "OptionLocationMessageReceiver",
       "mediaType": "text/plain",
       "content": "^l(\\d+)?"
     },
     {
-      "type": "OptionCollectionMessageReceiver",
+      "type": "OptionMediaLinkMessageReceiver",
       "mediaType": "text/plain",
-      "content": "^dc(\\d+)?"
+      "content": "^ml(\\d+)?"
+    },
+    {
+      "type": "OptionMultimidiaMenuMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^mm(\\d+)?"
+    },
+    {
+      "type": "OptionNativeContentReceiver",
+      "mediaType": "text/plain",
+      "content": "^nc(\\d+)?"
     },
     {
       "type": "OptionPaymentMessageReceiver",
-      "mediaType": "text/plain",
-      "content": "^p(\\d+)?"
+      "mediaType": "application/vnd.lime.invoice-status\\+json"
     },
     {
-      "type": "PaymentReceiptMessageReceiver",
-      "mediaType": "application/vnd.lime.invoice-status\\+json"
+      "type": "OptionPlainTextMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^pt(\\d+)?"
+    },
+    {
+      "type": "OptionRedirectMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^re(\\d+)?"
+    },
+    {
+      "type": "OptionResourceMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^res(\\d+)?"
+    },
+    {
+      "type": "OptionSensitiveMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^se(\\d+)?"
+    },
+    {
+      "type": "OptionUserInputMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^ui(\\d+)?"
+    },
+    {
+      "type": "OptionWebLinkMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^wl(\\d+)?"
     }
   ],
   "settings": {
