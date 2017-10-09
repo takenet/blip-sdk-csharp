@@ -11,109 +11,107 @@ namespace MessageTypes
     public class OptionDocumentCollectionMessageReceiver : IMessageReceiver
     {
         private readonly ISender _sender;
+        private readonly JsonDocument jsonDocuments;
+        Document[] documents;
+        JsonDocument JsonDocuments;
 
         public OptionDocumentCollectionMessageReceiver(ISender sender)
         {
             _sender = sender;
         }
 
-        PlainText[] documents = new PlainText[] 
-        {
-            new PlainText 
-            {
-                Text = "Text 1"
-            },
-            new PlainText
-            {
-                Text = "Text 2"
-            },
-            new PlainText 
-            {
-                Text = "Text 3"
-            }
-        };
-
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            var document = new DocumentCollection
-            {
-                Items = documents
-            };
+            DocumentCollection document;
+
+             if (message.Content.ToString().Equals("dc1"))
+                document = GetDocumentCollectionText();
+            else if(message.Content.ToString().Equals("dc2"))
+                document = GetDocumentCollectionWithDiferentTypes();
+                else  
+                document = getDocumentCollectionMenuMultimidia();
+
             await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
-    }
 
-    public class CollectionWithDiferentTypes : IMessageReceiver
-    {
-        private readonly ISender _sender;
-
-        public CollectionWithDiferentTypes(ISender sender)
+        public DocumentCollection GetDocumentCollectionText()
         {
-            _sender = sender;
+            PlainText[] documents = new PlainText[]
+            {
+                new PlainText
+                {
+                    Text = "Text 1"
+                },
+                new PlainText
+                {
+                    Text = "Text 2"
+                },
+                new PlainText
+                {
+                    Text = "Text 3"
+                }
+            };
+
+             var document = new DocumentCollection
+            {
+                ItemType = "text/plain",
+                Items = documents
+            };
+            return document;
         }
 
-        Document[] documents = new Document[] 
+        public DocumentCollection GetDocumentCollectionWithDiferentTypes()
         {
-            new MediaLink
+            DocumentContainer[] documents = new DocumentContainer[]
             {
-                Uri = new Uri("http://petersapparel.parseapp.com/img/item100-thumb.png"),
-                Text = "Welcome to our store!",
-                Type = "image/jpeg"
-            },
-            new Select
-            {
-                Text = "Choice what you need",
-                Options = new SelectOption[] 
-                {
-                    new SelectOption 
+                new DocumentContainer{
+                    Value = new MediaLink
                     {
-                        Order = 1,
-                        Text = "See our stock"
-                    },
-                    new SelectOption
+                        Uri = new Uri("http://www.petshoplovers.com/wp-content/uploads/2014/03/CUIDADOS-B%C3%81SICOS-PARA-CRIAR-COELHOS.jpg"),
+                        Text = "Welcome to our store!",
+                        Type = "image/jpeg"
+                    }
+                },
+                new DocumentContainer{
+                    Value = new Select
                     {
-                        Order = 2,
-                        Text = "Follow an order"
+                        Text = "Choice what you need",
+                        Options = new SelectOption[]
+                        {
+                            new SelectOption
+                            {
+                                Order = 1,
+                                Text = "See our stock"
+                            },
+                            new SelectOption
+                            {
+                                Order = 2,
+                                Text = "Follow an order"
+                            }
+                        }
+
                     }
                 }
-                
-            }
-        };
-
-        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
-        {
+            };
             var document = new DocumentCollection
             {
+                ItemType = "application/vnd.lime.container+json",
                 Items = documents
             };
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+
+            return document;
         }
-    }
 
-    public class CollectionMultimidiaMenu : IMessageReceiver
-    {
-        private readonly ISender _sender;
-
-        Document[] documents;
-        JsonDocument JsonDocuments; 
-
-        public CollectionMultimidiaMenu(ISender sender)
+        public DocumentCollection getDocumentCollectionMenuMultimidia()
         {
-            _sender = sender;   
-            initDocument();
-        }
-
-        private void initDocument(){
             JsonDocument JsonDocuments = new JsonDocument();
             JsonDocuments.Add("Key1", "value1");
-            JsonDocuments.Add("Key2", 2);
-
-
-            DocumentSelect[] documents = new DocumentSelect[] 
-            {
+            JsonDocuments.Add("Key2", "2");
+            DocumentSelect[] documents = new DocumentSelect[]
+             {
                 new DocumentSelect
                 {
-                    Header = 
+                    Header = new DocumentContainer
                     {
                         Value = new MediaLink
                         {
@@ -127,7 +125,7 @@ namespace MessageTypes
                     {
                         new DocumentSelectOption
                         {
-                            Label = 
+                            Label = new DocumentContainer
                             {
                                 Value = new WebLink
                                 {
@@ -138,23 +136,23 @@ namespace MessageTypes
                         },
                         new DocumentSelectOption
                         {
-                            Label =
+                            Label = new DocumentContainer
                             {
                                 Value = new PlainText
                                 {
                                     Text = "Text 1"
                                 }
                             },
-                            Value = 
+                            Value = new DocumentContainer
                             {
                                 Value = JsonDocuments
                             }
-                        }   
+                        }
                     }
                 },
                 new DocumentSelect
                 {
-                    Header = 
+                    Header = new DocumentContainer
                     {
                         Value = new MediaLink
                         {
@@ -164,13 +162,13 @@ namespace MessageTypes
                             Uri = new Uri("http://www.freedigitalphotos.net/images/img/homepage/87357.jpg")
                         }
                     },
-                    Options = new DocumentSelectOption[] 
+                    Options = new DocumentSelectOption[]
                     {
                         new DocumentSelectOption
                         {
-                            Label = 
+                            Label = new DocumentContainer
                             {
-                                Value = new WebLink 
+                                Value = new WebLink
                                 {
                                     Title = "Second link",
                                     Text = "Weblink",
@@ -180,33 +178,29 @@ namespace MessageTypes
                         },
                         new DocumentSelectOption
                         {
-                            Label =
+                            Label = new DocumentContainer
                             {
                                 Value = new PlainText {
                                     Text = "Second text"
                                 }
                             },
-                            Value = 
+                            Value = new DocumentContainer
                             {
                                 Value = JsonDocuments
                             }
                         }
                     }
                 }
-                
+
             };
-        }
 
-        
-    
-        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
-        {
-
-            var document = new DocumentCollection
+           var document = new DocumentCollection
             {
+                ItemType = "application/vnd.lime.document-select+json",
                 Items = documents,
             };
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+
+            return document;
         }
     }
 }

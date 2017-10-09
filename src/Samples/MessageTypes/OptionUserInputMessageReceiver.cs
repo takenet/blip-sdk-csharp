@@ -15,15 +15,16 @@ namespace MessageTypes
         {
             _sender = sender;
         }
-
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             var document = new Input
             {
-                Label = {
-                    Value = "What is your name?"
+                Label = new DocumentContainer{
+                    Value = new PlainText {
+                       Text = "What is your name?"
+                    } 
                 },
-                Validation = {
+                Validation = new InputValidation{
                     Rule = InputValidationRule.Text
                 } 
             };
@@ -32,7 +33,6 @@ namespace MessageTypes
         }
     }
 
-    
     public class UserInputLocationReceiver2 : IMessageReceiver
     {
         private readonly ISender _sender;
@@ -46,12 +46,12 @@ namespace MessageTypes
         {
             var document = new Input
             {
-                Label = {
+                Label = new DocumentContainer{
                     Value = "Send your location please!"
                 },
-                Validation = {
+                Validation = new InputValidation{
                     Rule = InputValidationRule.Type,
-                    Type = "application/vnd.lime.location+json"//confirmar se esse type é necessario <<
+                    Type = "application/vnd.lime.location+json"
                 } 
             };
 

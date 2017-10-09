@@ -12,47 +12,95 @@ namespace MessageTypes
     public class OptionMultimidiaMenuMessageReceiver : IMessageReceiver
     {
         private readonly ISender _sender;
+        private DocumentSelectOption[] document2;
 
         public OptionMultimidiaMenuMessageReceiver(ISender sender)
         {
             _sender = sender;
         }
-
-        DocumentSelectOption[] options = {
-            new DocumentSelectOption 
-            {
-                Label = 
-                {
-                    Value = new WebLink 
-                    {
-                        Text = "Go to your site",
-                        Uri = new Uri("https://petersapparel.parseapp.com/view_item?item_id=100")
-                    }
-                }
-            },
-            new DocumentSelectOption 
-            {
-                Label = 
-                {
-                    Value = new PlainText 
-                    {
-                        Text = "Show stock"
-                    }
-                },
-                Value = 
-                {
-                    Value = new JsonDocument()
-                }
-            }
-            
-            
-        };
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+            DocumentSelect document;
+
+            if (message.Content.ToString().Equals("mm1"))
+                document = GetDocumentSelectWithImage();
+            else
+                document = GetDocumentSelectWithLocation();
+
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+        }
+
+        //metodo atualmente não funcionando corretamente
+        public DocumentSelect GetDocumentSelectWithLocation()
+        {
+            return new DocumentSelect
+            {
+                Header = new DocumentContainer
+                {
+                    Value = new PlainText
+                    {
+                        Text = "Please, share your location"
+                    }
+                },
+                Options = new DocumentSelectOption[]{
+                    new DocumentSelectOption {
+                        Label = new DocumentContainer{
+                            Value = new Input {
+                                Label = new DocumentContainer {
+                                    Value = new PlainText {
+                                        Text = "Teste"
+                                    }
+                                },
+                                Validation = new InputValidation
+                                {
+                                    Type = Location.MediaType,
+                                    Rule = InputValidationRule.Type
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        public DocumentSelect GetDocumentSelectWithImage()
+        {
+
+            document2 = new DocumentSelectOption[]
+            {
+                new DocumentSelectOption
+                {
+                    Label = new DocumentContainer
+                    {
+                        Value = new WebLink
+                        {
+                            Text = "Go to your site",
+                            Uri = new Uri("https://meusanimais.com.br/14-nomes-criativos-para-o-seu-gato/")
+                        }
+                    }
+                },
+                new DocumentSelectOption
+                {
+                    Label = new DocumentContainer
+                    {
+                        Value = new PlainText
+                        {
+                            Text = "Show stock here!"
+                        }
+                    },
+                    Value = new DocumentContainer
+                    {
+                        Value = new JsonDocument()
+                    }
+                }
+            };
+
             var document = new DocumentSelect
             {
-                Header = {
-                    Value = new MediaLink{
+                Header = new DocumentContainer
+                {
+                    Value = new MediaLink
+                    {
                         Title = "Welcome to mad hatter",
                         Text = "Here we have the best hats for your head.",
                         Type = "image/jpeg",
@@ -60,48 +108,10 @@ namespace MessageTypes
                         AspectRatio = "1.1"
                     }
                 },
-                Options = options
+                Options = document2
             };
 
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+            return document;
         }
     }
-
-     public class MenuMultimidiaGetLocation : IMessageReceiver
-    {
-        private readonly ISender _sender;
-
-        public MenuMultimidiaGetLocation(ISender sender)
-        {
-            _sender = sender;
-        }
-
-        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
-        {
-            var document = new DocumentSelect
-            {
-                Header = {
-                    Value = new PlainText{
-                        Text = "Please, share your location"
-                    }
-                },
-                Options = new DocumentSelectOption[]{
-                    new DocumentSelectOption {
-                        Label = {
-                            Value = new Input {
-                                Validation = {
-                                    Rule = InputValidationRule.Type,
-                                    Type = "application/vnd.lime.location+json"
-                                }
-                            }
-                        }
-                    }
-                }
-                
-            };
-
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
-        }
-    }
-
 }

@@ -43,7 +43,8 @@ namespace MessageTypes
             var location = new Input
             {
                 Label = {
-                    Value = new PlainText {
+                    Value = new PlainText 
+                    {
                         Text = "Send your location please!"
                     }
                 },

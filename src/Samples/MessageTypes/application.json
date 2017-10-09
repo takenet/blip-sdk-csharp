@@ -6,7 +6,7 @@
     {
       "type": "MainMessageReceiver",
       "mediaType": "text/plain",
-      "content": "^((?!(^cs([0-9]?))|(^pt(\\d+)?)|(^ml(\\d+)?)|(^wl(\\d+)?)|(^l(\\d+)?)|(^c(\\d+)?)|(^p(\\d+)?)|(^mm(\\d+)?)|(^li(\\d+)?)|(^nc(\\d+)?)|(^re(\\d+)?)|(^res(\\d+)?)|(^ui(\\d+)?)|(^se(\\d+)?)|(^dc(\\d+)?)).)*$"
+      "content": "^((?!(^cs([0-9]?))|(^pt(\\d+)?)|(^ml(\\d+)?)|(^wl(\\d+)?)|(^l(\\d+)?)|(^c(\\d+)?)|(^p(\\d+)?)|(^mm(\\d+)?)|(^nc(\\d+)?)|(^re(\\d+)?)|(^ui(\\d+)?)|(^se(\\d+)?)|(^dc(\\d+)?)).)*$"
     },
     {
       "type": "OptionChatStateMessageReceiver",
@@ -26,7 +26,7 @@
     {
       "type": "OptionLocationMessageReceiver",
       "mediaType": "text/plain",
-      "content": "^l(\\d+)?"
+      "content": "^lo(\\d+)?"
     },
     {
       "type": "OptionMediaLinkMessageReceiver",
@@ -55,7 +55,7 @@
     {
       "type": "OptionRedirectMessageReceiver",
       "mediaType": "text/plain",
-      "content": "^re(\\d+)?"
+      "content": "^red(\\d+)?"
     },
     {
       "type": "OptionResourceMessageReceiver",
