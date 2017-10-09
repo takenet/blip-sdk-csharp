@@ -20,28 +20,27 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+            Document document;
+            if (message.Content.ToString().Equals("red1"))
+                document = GetRedirect();
+            else
+                document = GetSpecificRedirect();
 
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+        }
+
+        public Redirect GetRedirect()
+        {
             var document = new Redirect
             {
                 Address = new Node("1545282125497371", "@messenger.gw.msging.net", null)
             };
-
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+            return document;
         }
-    }
 
-    public class SpecificRedirectPassingContext : IMessageReceiver
+        public Redirect GetSpecificRedirect()
         {
-            private readonly ISender _sender;
-
-            public SpecificRedirectPassingContext(ISender sender)
-            {
-                _sender = sender;
-            }
-
-            public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
-            {
-                var document = new Redirect
+            var document = new Redirect
                 {
                     Address = new Node("1545282125497371", "@messenger.gw.msging.net", null),
                     Context = new DocumentContainer {
@@ -50,8 +49,7 @@ namespace MessageTypes
                         }
                     }
                 };
-
-                await _sender.SendMessageAsync(document, message.From, cancellationToken);
-            }
+            return document;
         }
+    }
 }

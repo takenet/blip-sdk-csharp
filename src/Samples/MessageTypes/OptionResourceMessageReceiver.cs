@@ -20,38 +20,38 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+
+            Document document;
+            var openWith = new Dictionary<string, string>();//using System.Collections.Generic
+            openWith.Add("name", message.From.Name);//checar mais tarde <<
+
+            if (message.Content.ToString().Equals("res1"))
+                document = GetResource();
+            else
+                document = GetResourceMessageReplace(openWith);
+
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+        }
+
+        public Resource GetResource()
+        {
             var document = new Resource
             {
                 Key = "welcome-message" //recurso previamente adicionado com extensão 'recursos' ou através do portal
             };
 
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
-        }
-    }
-
-    public class ResourceMessageReplace : IMessageReceiver
-    {
-        private readonly ISender _sender;
-
-        public ResourceMessageReplace(ISender sender)
-        {
-            _sender = sender;
+            return document;
         }
 
-        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
+         public Resource GetResourceMessageReplace(Dictionary<string,string> openWith)
         {
-            var openWith = new Dictionary<string, string>();//using System.Collections.Generic
-            openWith.Add("name",message.From.Name);//checar mais tarde <<
-
             var document = new Resource
             {
                 Key = "welcome-message",
                 Variables = openWith
-            
             };
 
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+            return document;
         }
     }
-
 }

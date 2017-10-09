@@ -17,45 +17,48 @@ namespace MessageTypes
         }
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            var document = new Input
-            {
-                Label = new DocumentContainer{
-                    Value = new PlainText {
-                       Text = "What is your name?"
-                    } 
-                },
-                Validation = new InputValidation{
-                    Rule = InputValidationRule.Text
-                } 
-            };
+            Document document;
+            if (message.Content.ToString().Equals("ui1"))
+                document = getUserName();
+            else
+                document = getUserInputLocation();
 
             await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
-    }
 
-    public class UserInputLocationReceiver2 : IMessageReceiver
-    {
-        private readonly ISender _sender;
-
-        public UserInputLocationReceiver2(ISender sender)
-        {
-            _sender = sender;
-        }
-
-        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
+        public Input getUserName()
         {
             var document = new Input
             {
-                Label = new DocumentContainer{
+                Label = new DocumentContainer
+                {
+                    Value = new PlainText 
+                    {
+                       Text = "What is your name?"
+                    } 
+                },
+                Validation = new InputValidation
+                {
+                    Rule = InputValidationRule.Text
+                } 
+            };
+            return document;
+        }
+        public Input getUserInputLocation()
+        {
+            var document = new Input
+            {
+                Label = new DocumentContainer
+                {
                     Value = "Send your location please!"
                 },
-                Validation = new InputValidation{
+                Validation = new InputValidation
+                {
                     Rule = InputValidationRule.Type,
                     Type = "application/vnd.lime.location+json"
                 } 
             };
-
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+            return document;
         }
     }
 }

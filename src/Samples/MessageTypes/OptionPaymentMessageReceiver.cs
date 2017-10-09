@@ -18,7 +18,23 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+            Document document;
             // O método de pagamento deve ser informado no portal do Messaging Hub
+            if (message.Content.ToString().Equals("pm1"))
+            {
+                document = getPaymentInvoice();
+                var toPagseguro = $"{Uri.EscapeDataString(message.From.ToIdentity().ToString())}@pagseguro.gw.msging.net";
+                await _sender.SendMessageAsync(document, toPagseguro, cancellationToken);
+            }
+            else
+                document = await getPaymentReceipt(message, cancellationToken);
+
+
+            // O fluxo continua o Option6Part2MessageReceiver
+        }
+
+        public Invoice getPaymentInvoice()
+        {
             var invoice = new Invoice
             {
                 Currency = "BLR",
@@ -36,25 +52,10 @@ namespace MessageTypes
                     },
                 Total = 1
             };
-
-            var toPagseguro = $"{Uri.EscapeDataString(message.From.ToIdentity().ToString())}@pagseguro.gw.msging.net";
-            await _sender.SendMessageAsync(invoice, toPagseguro, cancellationToken);
-
-            // O fluxo continua o Option6Part2MessageReceiver
-        }
-    }
-
-
-    public class PaymentReceiptMessageReceiver : IMessageReceiver
-    {
-        private readonly ISender _sender;
-
-        public PaymentReceiptMessageReceiver(ISender sender)
-        {
-            _sender = sender;
+            return invoice;
         }
 
-        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
+        public async Task<InvoiceStatus> getPaymentReceipt(Message message, CancellationToken cancellationToken)
         {
             var invoiceStatus = message.Content as InvoiceStatus;
             switch (invoiceStatus?.Status)
@@ -88,6 +89,7 @@ namespace MessageTypes
                     await _sender.SendMessageAsync("Pronto. O valor que voc� me pagou j� foi ressarcido pelo PagSeguro!", message.From, cancellationToken);
                     break;
             }
+            return invoiceStatus;
         }
     }
 }

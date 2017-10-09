@@ -11,9 +11,8 @@ namespace MessageTypes
     public class OptionDocumentCollectionMessageReceiver : IMessageReceiver
     {
         private readonly ISender _sender;
-        private readonly JsonDocument jsonDocuments;
         Document[] documents;
-        JsonDocument JsonDocuments;
+        JsonDocument jsonDocuments;
 
         public OptionDocumentCollectionMessageReceiver(ISender sender)
         {
@@ -22,7 +21,7 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            DocumentCollection document;
+            Document document;
 
              if (message.Content.ToString().Equals("dc1"))
                 document = GetDocumentCollectionText();
@@ -104,9 +103,9 @@ namespace MessageTypes
 
         public DocumentCollection getDocumentCollectionMenuMultimidia()
         {
-            JsonDocument JsonDocuments = new JsonDocument();
-            JsonDocuments.Add("Key1", "value1");
-            JsonDocuments.Add("Key2", "2");
+            jsonDocuments = new JsonDocument();
+            jsonDocuments.Add("Key1", "value1");
+            jsonDocuments.Add("Key2", "2");
             DocumentSelect[] documents = new DocumentSelect[]
              {
                 new DocumentSelect
@@ -145,7 +144,7 @@ namespace MessageTypes
                             },
                             Value = new DocumentContainer
                             {
-                                Value = JsonDocuments
+                                Value = jsonDocuments
                             }
                         }
                     }
@@ -186,7 +185,7 @@ namespace MessageTypes
                             },
                             Value = new DocumentContainer
                             {
-                                Value = JsonDocuments
+                                Value = jsonDocuments
                             }
                         }
                     }

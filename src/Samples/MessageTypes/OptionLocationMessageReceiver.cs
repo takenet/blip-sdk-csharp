@@ -18,6 +18,17 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+            Document document;
+
+            if (message.Content.ToString().Equals("lo1"))
+                document = getLocation();
+            else
+                document = getInputLocation();
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+        }
+
+        public Document getLocation()
+        {
             var location = new Location
             {
                 Latitude = -22.121944,
@@ -25,36 +36,27 @@ namespace MessageTypes
                 Altitude = 1143
             };
 
-            await _sender.SendMessageAsync(location, message.From, cancellationToken);
-        }
-    }
-
-     public class RequestLocation : IMessageReceiver
-    {
-        private readonly ISender _sender;
-
-        public RequestLocation(ISender sender)
-        {
-            _sender = sender;
+            return location;
         }
 
-        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
+        public Document getInputLocation()
         {
             var location = new Input
             {
-                Label = {
+                Label = new DocumentContainer{
                     Value = new PlainText 
                     {
                         Text = "Send your location please!"
                     }
                 },
-                Validation = {
+                Validation = new InputValidation{
                     Rule = InputValidationRule.Type,
                     Type = "application/vnd.lime.location+json" //checar se é necessário
                 }
             };
 
-            await _sender.SendMessageAsync(location, message.From, cancellationToken);
+            return location;
         }
+
     }
 }

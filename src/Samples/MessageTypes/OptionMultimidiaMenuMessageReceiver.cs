@@ -20,7 +20,7 @@ namespace MessageTypes
         }
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            DocumentSelect document;
+            Document document;
 
             if (message.Content.ToString().Equals("mm1"))
                 document = GetDocumentSelectWithImage();
@@ -65,7 +65,8 @@ namespace MessageTypes
 
         public DocumentSelect GetDocumentSelectWithImage()
         {
-
+            JsonDocument jsonDocuments = new JsonDocument();
+            jsonDocuments.Add("action", "show-items");
             document2 = new DocumentSelectOption[]
             {
                 new DocumentSelectOption
@@ -90,7 +91,7 @@ namespace MessageTypes
                     },
                     Value = new DocumentContainer
                     {
-                        Value = new JsonDocument()
+                        Value = jsonDocuments
                     }
                 }
             };

@@ -18,26 +18,25 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+            Document document;
+            if (message.Content.ToString().Equals("se1"))
+                document = getSensitivePassword();
+            else
+                document = getSensitiveWeblink();
 
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+        }
+
+        public Document getSensitivePassword()
+        {
             var document = new SensitiveContainer
             {
                 Value = "Your password is 123456"
             };
-
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
-        }
-    }
-    //Sending a Weblink sensitive
-    public class SensitiveWeblinkMessage : IMessageReceiver
-    {
-        private readonly ISender _sender;
-
-        public SensitiveWeblinkMessage(ISender sender)
-        {
-            _sender = sender;
+            return document;
         }
 
-        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
+        public Document getSensitiveWeblink()
         {
             var url = new Uri("https://mystore.com/checkout?ID=A8DJS1JFV98AJKS9");
             var document = new SensitiveContainer
@@ -48,9 +47,7 @@ namespace MessageTypes
                     Uri = url
                 }
             };
-
-            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+            return document;
         }
     }
-
 }
