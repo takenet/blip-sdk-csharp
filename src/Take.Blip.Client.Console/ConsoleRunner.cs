@@ -67,12 +67,37 @@ namespace Take.Blip.Client.Console
                     stopabble = await StartAsync(applicationJsonPath, cts.Token).ConfigureAwait(false);
                 }
 
+#if !NET461
+                //is non-interactive mode?
+                if (options.NonInteractive)
+                {
+                    using (var semaphore = new SemaphoreSlim(0))
+                    {
+                        System.Runtime.Loader.AssemblyLoadContext.Default.Unloading += ctx =>
+                        {
+                            semaphore.Release();
+
+                        };
+                        WriteLine("Application started. Waiting for SIGTERM.", HIGHLIGHT_COLOR);
+                        await semaphore.WaitAsync();
+                    }
+                }
+                else
+                {
+                    WriteLine("Application started. Press any key to stop.", HIGHLIGHT_COLOR);
+                    System.Console.Read();
+                }
+#else
                 WriteLine("Application started. Press any key to stop.", HIGHLIGHT_COLOR);
-                System.Console.Read();
+                    System.Console.Read();
+#endif
+
+
                 WriteLine("Stopping application...", HIGHLIGHT_COLOR);
                 await stopabble.StopAsync().ConfigureAwait(false);
                 WriteLine("Application stopped.", HIGHLIGHT_COLOR);
                 return 0;
+
             }
             catch (OperationCanceledException)
             {
