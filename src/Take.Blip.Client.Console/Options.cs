@@ -15,6 +15,8 @@ namespace Take.Blip.Client.Console
         public const string SERVICE_NAME_FLAG = "service-name";
         public const string SERVICE_DISPLAY_NAME_FLAG = "service-display-name";
         public const string SERVICE_DESCRIPTION_FLAG = "service-description";
+        public const string NON_INTERACTIVE_FLAG = "non-interactive";
+
 
         [Value(0, HelpText = "The path of the application host JSON file.", Default = Bootstrapper.DefaultApplicationFileName)]
         public string ApplicationJsonPath { get; set; }
@@ -42,5 +44,8 @@ namespace Take.Blip.Client.Console
 
         [Option(SERVICE_DESCRIPTION_FLAG, HelpText = "The service description for installation")]
         public string ServiceDescription { get; set; }
+
+        [Option(NON_INTERACTIVE_FLAG, HelpText = "The app is running in non-interactive mode, i.e., the app doesn't wait for a key press to stop itself", Default = false)]
+        public bool NonInteractive { get; set; }
     }
 }
