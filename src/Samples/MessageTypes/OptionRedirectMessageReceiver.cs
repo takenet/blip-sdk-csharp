@@ -22,27 +22,27 @@ namespace MessageTypes
         {
             Document document;
             if (message.Content.ToString().Equals("red1"))
-                document = GetRedirect();
+                document = getRedirect();
             else
-                document = GetSpecificRedirect();
+                document = getRedirectWithContext();
 
             await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
 
-        public Redirect GetRedirect()
+        public Redirect getRedirect()
         {
             var document = new Redirect
             {
-                Address = new Node("1545282125497371", "@messenger.gw.msging.net", null)
+                Address = "atendimento"
             };
             return document;
         }
 
-        public Redirect GetSpecificRedirect()
+        public Redirect getRedirectWithContext()
         {
             var document = new Redirect
                 {
-                    Address = new Node("1545282125497371", "@messenger.gw.msging.net", null),
+                    Address = "mysdkbot@msging.net",
                     Context = new DocumentContainer {
                         Value = new PlainText {
                             Text = "Get Started"

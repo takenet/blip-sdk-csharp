@@ -19,11 +19,11 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            var plainText = new PlainText
+            var document = new PlainText
             {
-                Text = "... Inspiração, e um pouco de café! E isso me basta!"
+                Text = "Welcome to our service! How can I help you?"
             };
-            await _sender.SendMessageAsync(plainText, message.From, cancellationToken);
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
 
     }

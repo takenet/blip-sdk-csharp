@@ -31,9 +31,10 @@ namespace MessageTypes
         {
             var location = new Location
             {
-                Latitude = -22.121944,
-                Longitude = -45.128889,
-                Altitude = 1143
+                Latitude = -19.918899,
+                Longitude = -43.959275,
+                Altitude = 853,
+                Text = "Take's place"
             };
 
             return location;
@@ -51,7 +52,6 @@ namespace MessageTypes
                 },
                 Validation = new InputValidation{
                     Rule = InputValidationRule.Type,
-                    Type = "application/vnd.lime.location+json" //checar se é necessário
                 }
             };
 

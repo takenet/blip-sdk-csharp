@@ -13,6 +13,8 @@ namespace MessageTypes
         private readonly ISender _sender;
         Document[] documents;
         JsonDocument jsonDocuments;
+        JsonDocument jsonDocuments2;
+        JsonDocument jsonDocuments3;
 
         public OptionDocumentCollectionMessageReceiver(ISender sender)
         {
@@ -104,8 +106,18 @@ namespace MessageTypes
         public DocumentCollection getDocumentCollectionMenuMultimidia()
         {
             jsonDocuments = new JsonDocument();
+            jsonDocuments2 = new JsonDocument();    
+            jsonDocuments3 = new JsonDocument();
+
             jsonDocuments.Add("Key1", "value1");
             jsonDocuments.Add("Key2", "2");
+
+            jsonDocuments2.Add("Key3", "value3");
+            jsonDocuments2.Add("Key4", "4");
+
+            jsonDocuments3.Add("Key5", "value5");
+            jsonDocuments3.Add("Key6", "6");
+
             DocumentSelect[] documents = new DocumentSelect[]
              {
                 new DocumentSelect
@@ -129,7 +141,7 @@ namespace MessageTypes
                                 Value = new WebLink
                                 {
                                     Title = "Link",
-                                    Uri = new Uri("https://server.com/first/link1")
+                                    Uri = new Uri("http://www.adoteumgatinho.org.br/")
                                 }
                             }
                         },
@@ -171,7 +183,7 @@ namespace MessageTypes
                                 {
                                     Title = "Second link",
                                     Text = "Weblink",
-                                    Uri = new Uri("https://server.com/second/link2")
+                                    Uri = new Uri("https://pt.dreamstime.com/foto-de-stock-brinquedo-pl%C3%A1stico-amarelo-do-pato-image44982058")
                                 }
                             }
                         },
@@ -185,7 +197,20 @@ namespace MessageTypes
                             },
                             Value = new DocumentContainer
                             {
-                                Value = jsonDocuments
+                                Value = jsonDocuments2
+                            }
+                        },
+                        new DocumentSelectOption
+                        {
+                            Label = new DocumentContainer
+                            {
+                                Value = new PlainText {
+                                    Text = "More one text"
+                                }
+                            },
+                            Value = new DocumentContainer
+                            {
+                                Value = jsonDocuments3
                             }
                         }
                     }

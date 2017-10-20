@@ -18,6 +18,18 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+            Document document;
+
+            if (message.Content.ToString().Equals("ml1"))
+                document = getImage();
+            else
+                document = getAudio();
+
+            await _sender.SendMessageAsync(document, message.From, cancellationToken);
+        }
+
+        public MediaLink getImage()
+        {
             var imageUri =
                 new Uri("http://2.bp.blogspot.com/-pATX0YgNSFs/VP-82AQKcuI/AAAAAAAALSU/Vet9e7Qsjjw/s1600/Cat-hd-wallpapers.jpg");
             var previewUri =
@@ -25,27 +37,26 @@ namespace MessageTypes
 
             var imageMediaLink = new MediaLink
             {
-                Title = "Gato",
-                Text = "Segue uma imagem de um gato",
+                Title = "Cat",
+                Text = "Here is a cat image for you!",
                 Type = MediaType.Parse("image/jpeg"),
-                Uri = imageUri,
                 AspectRatio = "1:1",
                 Size = 227791,
-                PreviewUri = imageUri
+                Uri = imageUri,
+                PreviewUri = previewUri
             };
+            return imageMediaLink;
+        }
 
-            await _sender.SendMessageAsync(imageMediaLink, message.From, cancellationToken);
-
+        public MediaLink getAudio()
+        {
             var audioMediaLink = new MediaLink
             {
-                Title = "Audio",
                 Type = MediaType.Parse("audio/mp3"),
                 Uri = new Uri("http://blaamandagjazzband.dk/jazz/mp3/basin_street_blues.mp3"),
                 Size = 3124123,
-                AspectRatio = "1:1"
             };
-
-            await _sender.SendMessageAsync(audioMediaLink, message.From, cancellationToken);
+            return audioMediaLink;
         }
     }
 }

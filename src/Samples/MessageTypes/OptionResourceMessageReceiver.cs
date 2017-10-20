@@ -26,14 +26,14 @@ namespace MessageTypes
             openWith.Add("name", message.From.Name);//checar mais tarde <<
 
             if (message.Content.ToString().Equals("res1"))
-                document = GetResource();
+                document = getResource();
             else
-                document = GetResourceMessageReplace(openWith);
+                document = getResourceMessageReplace(openWith);
 
             await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
 
-        public Resource GetResource()
+        public Resource getResource()
         {
             var document = new Resource
             {
@@ -43,7 +43,7 @@ namespace MessageTypes
             return document;
         }
 
-         public Resource GetResourceMessageReplace(Dictionary<string,string> openWith)
+         public Resource getResourceMessageReplace(Dictionary<string,string> openWith)
         {
             var document = new Resource
             {

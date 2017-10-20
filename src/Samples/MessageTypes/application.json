@@ -6,7 +6,7 @@
     {
       "type": "MainMessageReceiver",
       "mediaType": "text/plain",
-      "content": "^((?!(^cs([0-9]?))|(^pt(\\d+)?)|(^ml(\\d+)?)|(^wl(\\d+)?)|(^l(\\d+)?)|(^c(\\d+)?)|(^p(\\d+)?)|(^mm(\\d+)?)|(^nc(\\d+)?)|(^re(\\d+)?)|(^ui(\\d+)?)|(^se(\\d+)?)|(^dc(\\d+)?)).)*$"
+      "content": "^((?!(^cs([0-9]?))|(^pt(\\d+)?)|(^ml(\\d+)?)|(^wl(\\d+)?)|(^l(\\d+)?)|(^c(\\d+)?)|(^p(\\d+)?)|(^mm(\\d+)?)|(^nc(\\d+)?)|(^re(\\d+)?)|(^ui(\\d+)?)|(^sen(\\d+)?)|(^sel(\\d+)?)|(^dc(\\d+)?)).)*$"
     },
     {
       "type": "OptionChatStateMessageReceiver",
@@ -65,7 +65,12 @@
     {
       "type": "OptionSensitiveMessageReceiver",
       "mediaType": "text/plain",
-      "content": "^se(\\d+)?"
+      "content": "^sen(\\d+)?"
+    },
+    {
+      "type": "OptionSelectMessageReceiver",
+      "mediaType": "text/plain",
+      "content": "^sel(\\d+)?"
     },
     {
       "type": "OptionUserInputMessageReceiver",

@@ -44,10 +44,10 @@ namespace MessageTypes
                         new InvoiceItem
                         {
                             Currency = "BRL",
-                            Unit = 1,
-                            Description = "Servi�os de Teste de Tipos Can�nicos",
+                            Unit = 10,
+                            Description = "Subscription for product: Hit",
                             Quantity = 1,
-                            Total = 1
+                            Total = 10
                         }
                     },
                 Total = 1
@@ -69,19 +69,19 @@ namespace MessageTypes
                     {
                         
                         Currency = "BLR",
+                        Total = 10,
                         Items =
                             new[]
                             {
                                 new InvoiceItem
                                 {
                                     Currency = "BRL",
-                                    Unit = 1,
-                                    Description = "Servi�os de Teste de Tipos Can�nicos",
+                                    Unit = 10,
+                                    Description = "Item 1",
                                     Quantity = 1,
-                                    Total = 1
+                                    Total = 10
                                 }
                             },
-                        Total = 1
                     };
                     await _sender.SendMessageAsync(paymentReceipt, message.From, cancellationToken);
                     break;

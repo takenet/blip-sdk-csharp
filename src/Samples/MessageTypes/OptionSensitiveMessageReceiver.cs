@@ -19,7 +19,7 @@ namespace MessageTypes
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             Document document;
-            if (message.Content.ToString().Equals("se1"))
+            if (message.Content.ToString().Equals("sen1"))
                 document = getSensitivePassword();
             else
                 document = getSensitiveWeblink();
