@@ -39,6 +39,19 @@ namespace Take.Blip.Client.Extensions.Broadcast
             await ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
+        public Task<DocumentCollection> GetRecipientsAsynGetAllDistributionListAsync(int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var requestCommand = new Command()
+            {
+                Id = EnvelopeId.NewId(),
+                To = DistributionListAddress,
+                Method = CommandMethod.Get,
+                Uri = new LimeUri("/lists"),
+            };
+
+            return ProcessCommandAsync<DocumentCollection>(requestCommand, cancellationToken);
+        }
+
         public async Task DeleteDistributionListAsync(string listName, CancellationToken cancellationToken = default(CancellationToken))
         {
             var listIdentity = GetListIdentity(listName);
