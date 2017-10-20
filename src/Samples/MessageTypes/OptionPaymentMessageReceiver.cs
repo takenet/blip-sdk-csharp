@@ -39,7 +39,7 @@ namespace MessageTypes
             {
                 Currency = "BLR",
                 DueTo = DateTime.Now.AddDays(1),
-                Items = new[]
+                Items = new InvoiceItem[]
                     {
                         new InvoiceItem
                         {

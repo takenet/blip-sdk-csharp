@@ -31,9 +31,9 @@ namespace MessageTypes
         {
             var location = new Location
             {
-                Latitude = -19.918899,
-                Longitude = -43.959275,
-                Altitude = 853,
+                Latitude = -22.121944,
+                Longitude = -45.128889,
+                Altitude = 1143,
                 Text = "Take's place"
             };
 
