@@ -21,6 +21,15 @@ namespace Take.Blip.Client.Extensions.Broadcast
         Task CreateDistributionListAsync(string listName, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
+        /// Gets all existing distribution lists.
+        /// </summary>
+        /// <param name="skip">The number of  skip.</param>
+        /// <param name="take">The take.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>DocumentCollection of IdentityDocuments</returns>
+        Task<DocumentCollection> GetRecipientsAsynGetAllDistributionListAsync(int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
         /// Deletes an existing distribution list.
         /// </summary>
         /// <param name="listName">Name of the list.</param>
