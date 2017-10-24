@@ -20,12 +20,12 @@ namespace MessageTypes
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             jsonDocuments = new JsonDocument();
-
             jsonDocuments.Add("Key1", "value1");
             jsonDocuments.Add("Key2", "2");
 
             var document = new Select
             {
+                //Scope = SelectScope.Immediate, (create a quickreply instead menu)
                 Text = "Choice an option:",
                 Options = new SelectOption[]
                 {

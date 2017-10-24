@@ -31,9 +31,9 @@ namespace MessageTypes
         {
             var location = new Location
             {
-                Latitude = -22.121944,
-                Longitude = -45.128889,
-                Altitude = 1143,
+                Latitude = -19.919715,
+                Longitude = -43.959753,
+                Altitude = 853,
                 Text = "Take's place"
             };
 
@@ -44,14 +44,15 @@ namespace MessageTypes
         {
             var location = new Input
             {
-                Label = new DocumentContainer{
-                    Value = new PlainText 
+                Label = new DocumentContainer {
+                    Value = new PlainText
                     {
                         Text = "Send your location please!"
                     }
                 },
-                Validation = new InputValidation{
+                Validation = new InputValidation {
                     Rule = InputValidationRule.Type,
+                    Type = Location.MediaType
                 }
             };
 

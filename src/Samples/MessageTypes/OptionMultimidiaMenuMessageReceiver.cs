@@ -75,7 +75,7 @@ namespace MessageTypes
                     {
                         Value = new WebLink
                         {
-                            Text = "Go to your site",
+                            Title = "Go to your site",
                             Uri = new Uri("https://meusanimais.com.br/14-nomes-criativos-para-o-seu-gato/")
                         }
                     }
