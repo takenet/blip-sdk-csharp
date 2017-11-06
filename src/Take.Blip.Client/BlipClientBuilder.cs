@@ -12,7 +12,7 @@ using Lime.Protocol.Security;
 namespace Take.Blip.Client
 {
     /// <summary>
-    /// Defines a service for building instances of <see cref="IBlipClient"/>.
+    /// Utility for building instances of <see cref="IBlipClient"/>.
     /// </summary>
     public sealed class BlipClientBuilder
     {

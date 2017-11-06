@@ -9,7 +9,7 @@ using Lime.Protocol.Util;
 namespace Take.Blip.Client
 {
     /// <summary>
-    /// Defines a BLiP client service.
+    /// Defines a BLiP client to manage the connection with the service and to send and receive envelopes.
     /// </summary>
     public interface IBlipClient : ISender, IStoppable
     {
