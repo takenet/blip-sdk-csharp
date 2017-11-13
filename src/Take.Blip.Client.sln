@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.TestKit", "Take.Blip.Client.TestKit\Take.Blip.Client.TestKit.csproj", "{EBC3B0CE-1FDB-4303-A8F4-8CB173CB027F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Web", "Take.Blip.Client.Web\Take.Blip.Client.Web.csproj", "{ABC433EC-8417-415B-97B2-45C727934FA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Builder", "Take.Blip.Builder\Take.Blip.Builder.csproj", "{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{ABC433EC-8417-415B-97B2-45C727934FA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABC433EC-8417-415B-97B2-45C727934FA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABC433EC-8417-415B-97B2-45C727934FA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
