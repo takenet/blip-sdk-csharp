@@ -5,7 +5,7 @@ using System.Text;
 namespace Take.Blip.Builder
 {
     /// <summary>
-    /// Output condition abstraction
+    /// Defines a conditions to be evaluated using the conversation context.
     /// </summary>
     public class Condition
     {
@@ -15,7 +15,7 @@ namespace Take.Blip.Builder
         public string Variable { get; set; }
 
         /// <summary>
-        /// The type of the variable comparison. Optional.
+        /// The type of the comparison. Optional. The default value is <see cref="ConditionComparison.Equals"/>.
         /// </summary>
         public ConditionComparison Comparison { get; set; }
 

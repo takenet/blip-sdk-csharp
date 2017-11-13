@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 namespace Take.Blip.Builder
 {
     /// <summary>
-    /// An action to be executed when a state is activated.
+    /// Defines an action to be executed when a state is activated.
     /// </summary>
     public class Action
     {
@@ -16,7 +16,7 @@ namespace Take.Blip.Builder
         public int Order { get; set; }
         
         /// <summary>
-        /// The action type. Can be 'SendMessage', 'TrackEvent', 'ProcessHttp', 'AddToList', 'RemoveFromList'.
+        /// The action type.
         /// </summary>
         public string Type { get; set; }
 

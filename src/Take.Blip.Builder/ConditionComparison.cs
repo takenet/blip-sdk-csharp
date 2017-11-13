@@ -12,5 +12,4 @@ namespace Take.Blip.Builder
         EndsWith,
         Matches
     }
-
 }

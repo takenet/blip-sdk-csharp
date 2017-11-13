@@ -5,7 +5,7 @@ using System.Text;
 namespace Take.Blip.Builder
 {
     /// <summary>
-    /// State output abstraction
+    /// Defines an output path from a state.
     /// </summary>
     public class Output
     {
@@ -15,7 +15,7 @@ namespace Take.Blip.Builder
         public int Order { get; set; }
 
         /// <summary>
-        /// An array of <see cref="Condition"/>. Optional.
+        /// The conditions of the conversation context to be evaluated in order to consider the current output valid. Optional.
         /// </summary>
         public Condition[] Conditions { get; set; }
 

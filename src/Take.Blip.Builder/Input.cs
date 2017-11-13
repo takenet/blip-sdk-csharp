@@ -6,7 +6,7 @@ using Lime.Messaging.Contents;
 namespace Take.Blip.Builder
 {
     /// <summary>
-    /// Abstraction of user input
+    /// Defines rules for handling the user input in a <see cref="State"/>.
     /// </summary>
     public class Input
     {
@@ -16,12 +16,12 @@ namespace Take.Blip.Builder
         public bool Bypass { get; set; }
 
         /// <summary>
-        /// Indicates where the user input value will be saved. Optional
+        /// Indicates the variable name where the user input value should be saved. Optional.
         /// </summary>
         public string Variable { get; set; }
 
         /// <summary>
-        /// Input validation rule. Optional
+        /// Determine the rules for validate the user input. Optional.
         /// </summary>
         public InputValidation Validation { get; set; }
     }
