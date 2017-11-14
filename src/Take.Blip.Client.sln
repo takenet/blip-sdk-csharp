@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.TestKit", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Web", "Take.Blip.Client.Web\Take.Blip.Client.Web.csproj", "{ABC433EC-8417-415B-97B2-45C727934FA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Builder", "Take.Blip.Builder\Take.Blip.Builder.csproj", "{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Builder", "Take.Blip.Builder\Take.Blip.Builder.csproj", "{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Builder.Console", "Samples\Builder.Console\Builder.Console.csproj", "{DDA1D829-6762-4F36-BCA5-295C2566FF84}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +67,10 @@ Global
 		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +78,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F00D45F1-1380-4D18-B6D7-E6587536A44E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 		{DCAAB449-D608-4945-8453-A4098F74978E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF2B5E4C-5153-491A-85E2-BF747D45BFC3}

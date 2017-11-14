@@ -21,11 +21,6 @@
         public Action[] Actions { get; set; }
 
         /// <summary>
-        /// Determines how the user input should be handled in the current state. Optional.
-        /// </summary>
-        public Input Input { get; set; }
-
-        /// <summary>
         /// Determines the possible outputs and its conditions from the current state. Optional.
         /// Array of <see cref="Output"/>. Optional.
         /// </summary>

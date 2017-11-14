@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder
 {
@@ -10,6 +7,11 @@ namespace Take.Blip.Builder
     /// </summary>
     public class Action
     {
+        /// <summary>
+        /// The unique identifier of the action.
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>
         /// The action execution order, relative to the others in the same state. Optional.
         /// </summary>
