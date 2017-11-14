@@ -1,4 +1,5 @@
 ﻿using Lime.Protocol;
+using Lime.Protocol.Network;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,6 +35,18 @@ namespace Take.Blip.Client.Extensions.Threads
             }
             var requestCommand = CreateGetCommandRequest(requestUri);
             return ProcessCommandAsync<DocumentCollection>(requestCommand, cancellationToken);
+        }
+
+        public Task<Document> GetTranscriptionAsync(Identity identity, string accessKey, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if ("".Equals(accessKey) || accessKey == null)
+            {
+                throw new LimeException(ReasonCodes.COMMAND_INVALID_ARGUMENT, "Invalid value for accessKey: " + accessKey);
+            }
+
+            var requestUri = $"/threads/{identity}/transcription?accessKey={accessKey}";
+            var requestCommand = CreateGetCommandRequest(requestUri);
+            return ProcessCommandAsync<Document>(requestCommand, cancellationToken);
         }
     }
 }
