@@ -18,13 +18,13 @@ namespace Take.Blip.Builder
         public int Order { get; set; }
         
         /// <summary>
-        /// The action type.
+        /// The action name.
         /// </summary>
-        public string Type { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
-        /// The action settings for the specified type.
+        /// The action argument for the specified type.
         /// </summary>
-        public JObject Settings { get; set; }
+        public JObject Argument { get; set; }
     }
 }

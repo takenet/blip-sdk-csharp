@@ -11,14 +11,14 @@ namespace Take.Blip.Builder
         private readonly IContextProvider _contextProvider;
         private readonly IFlow _flow;
         private readonly IDistributedMutex _distributedMutex;
-        private readonly IActionFactory _actionFactory;
+        private readonly IActionProvider _actionProvider;
 
-        public FlowManager(IContextProvider contextProvider, IFlow flow, IDistributedMutex distributedMutex, IActionFactory actionFactory)
+        public FlowManager(IContextProvider contextProvider, IFlow flow, IDistributedMutex distributedMutex, IActionProvider actionProvider)
         {
             _contextProvider = contextProvider;
             _flow = flow;
             _distributedMutex = distributedMutex;
-            _actionFactory = actionFactory;
+            _actionProvider = actionProvider;
         }
 
         public async Task ProcessAsync(string user, CancellationToken cancellationToken)
@@ -54,17 +54,15 @@ namespace Take.Blip.Builder
 
             // Execute all state actions
             foreach (var stateAction in state.Actions.OrderBy(a => a.Order).Where(a => a.Order >= actionOrder))
-            {
-                var action = GetAction(stateAction);
+            {                
+                var action = _actionProvider.Get(stateAction.Name);
 
-                // If the action is not ready to execute, suspend the execution
-                if (!await action.CanExecuteAsync(context, cancellationToken))
+                // If the action is not able to execute, suspend the flow.
+                if (!await action.ExecuteAsync(context, stateAction.Argument, cancellationToken))
                 {
                     await context.SetActionIdAsync(stateAction.Id, cancellationToken);
                     return false;
                 }
-
-                await action.ExecuteAsync(context, cancellationToken);
             }
 
             // Reset the action id
@@ -106,10 +104,6 @@ namespace Take.Blip.Builder
             return state;
         }
 
-        public IAction GetAction(Action action)
-        {
-            return _actionFactory.Create(action.Type, action.Settings);
-        }
 
         public async Task<bool> EvaluateConditionAsync(Condition condition, IContext context, CancellationToken cancellationToken)
         {

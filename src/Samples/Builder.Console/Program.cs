@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using SimpleInjector;
 using Take.Blip.Builder;
+using Take.Blip.Builder.Actions;
 
 namespace Builder.Console
 {
@@ -23,6 +24,7 @@ namespace Builder.Console
             container.RegisterSingleton<IFlowManager, FlowManager>();
             container.RegisterSingleton<IContextProvider, BucketContextProvider>();
             container.RegisterSingleton<IDistributedMutex, DistributedMutex>();
+            container.RegisterSingleton<IActionProvider, ActionProvider>();
         }
     }
 }

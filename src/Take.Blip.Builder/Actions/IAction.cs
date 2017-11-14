@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Actions
 {
     public interface IAction
     {
-        Task<bool> CanExecuteAsync(IContext context, CancellationToken cancellationToken);
+        string Name { get; }
 
-        Task ExecuteAsync(IContext context, CancellationToken cancellationToken);
+        Task<bool> ExecuteAsync(IContext context, JObject argument, CancellationToken cancellationToken);
     }
 }

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Lime.Protocol.Util;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions
@@ -12,24 +9,20 @@ namespace Take.Blip.Builder.Actions
     public class SendMessageAction : IAction
     {
         private readonly ISender _sender;
-        private readonly Message _message;
 
-        public SendMessageAction(ISender sender, Message message)
+        public SendMessageAction(ISender sender)
         {
             _sender = sender;
-            _message = message;
         }
 
-        public Task<bool> CanExecuteAsync(IContext context, CancellationToken cancellationToken)
-        {
-            return TaskUtil.TrueCompletedTask;
-        }
+        public string Name => "SendMessage";
 
-        public Task ExecuteAsync(IContext context, CancellationToken cancellationToken)
+        public async Task<bool> ExecuteAsync(IContext context, JObject argument, CancellationToken cancellationToken)
         {
-            var executionMessage = _message.ShallowCopy();
-            executionMessage.To = context.User;
-            return _sender.SendMessageAsync(executionMessage, cancellationToken);
+            var message = argument.ToObject<Message>();
+            message.To = context.User;
+            await _sender.SendMessageAsync(message, cancellationToken);
+            return true;
         }
     }
 }

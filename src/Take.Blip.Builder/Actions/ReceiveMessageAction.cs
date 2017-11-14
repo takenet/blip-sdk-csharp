@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Lime.Protocol;
+using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Actions
 {
@@ -15,16 +16,18 @@ namespace Take.Blip.Builder.Actions
         public ReceiveMessageAction(BufferBlock<Message> messageBufferBlock)
         {
             _messageBufferBlock = messageBufferBlock;
-        } 
-
-        public Task<bool> CanExecuteAsync(IContext context, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(_messageBufferBlock.Count == 0);
         }
 
-        public Task ExecuteAsync(IContext context, CancellationToken cancellationToken)
+        public string Name => "ReceiveMessage";
+
+        public async Task<bool> ExecuteAsync(IContext context, JObject argument, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            if (!_messageBufferBlock.TryReceive(m => true, out Message message))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
