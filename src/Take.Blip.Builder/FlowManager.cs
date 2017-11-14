@@ -10,18 +10,20 @@ namespace Take.Blip.Builder
     {
         private readonly IContextProvider _contextProvider;
         private readonly IFlow _flow;
-        private readonly INamedLock _namedLock;
+        private readonly IDistributedMutex _distributedMutex;
+        private readonly IActionFactory _actionFactory;
 
-        public FlowManager(IContextProvider contextProvider, IFlow flow, INamedLock namedLock)
+        public FlowManager(IContextProvider contextProvider, IFlow flow, IDistributedMutex distributedMutex, IActionFactory actionFactory)
         {
             _contextProvider = contextProvider;
             _flow = flow;
-            _namedLock = namedLock;
+            _distributedMutex = distributedMutex;
+            _actionFactory = actionFactory;
         }
 
         public async Task ProcessAsync(string user, CancellationToken cancellationToken)
         {
-            using (await _namedLock.AcquireAsync(user, cancellationToken))
+            using (await _distributedMutex.WaitAsync(user, TimeSpan.FromSeconds(60), cancellationToken))
             {
                 var context = await _contextProvider.GetContextAsync(user, cancellationToken);
 
@@ -87,7 +89,7 @@ namespace Take.Blip.Builder
                     {
                         foreach (var outputCondition in output.Conditions)
                         {
-                            isValidOutput = await EvaluateConditionAsync(outputCondition, context);
+                            isValidOutput = await EvaluateConditionAsync(outputCondition, context, cancellationToken);
                             if (!isValidOutput) break;
                         }
                     }
@@ -104,14 +106,21 @@ namespace Take.Blip.Builder
             return state;
         }
 
-        public IAction GetAction(Take.Blip.Builder.Action action)
+        public IAction GetAction(Action action)
         {
-            return null;
+            return _actionFactory.Create(action.Type, action.Settings);
         }
 
-        public async Task<bool> EvaluateConditionAsync(Condition condition, IContext context)
+        public async Task<bool> EvaluateConditionAsync(Condition condition, IContext context, CancellationToken cancellationToken)
         {
-            return true;
+            switch (condition.Comparison)
+            {
+                case ConditionComparison.Equals:
+                    var variableValue = context.GetVariableAsync(condition.Variable, cancellationToken);
+                    break;
+            }
+            throw new NotImplementedException();
+
         }
 
 

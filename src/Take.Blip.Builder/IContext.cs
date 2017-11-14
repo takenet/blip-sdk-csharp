@@ -7,9 +7,9 @@ namespace Take.Blip.Builder
     {
         string User { get; }
 
-        Task SetVariableAsync<T>(string name, T value, CancellationToken cancellationToken);
+        Task SetVariableAsync(string name, string value, CancellationToken cancellationToken);
 
-        Task<T> GetVariableAsync<T>(string name, CancellationToken cancellationToken);
+        Task<string> GetVariableAsync(string name, CancellationToken cancellationToken);
 
         Task<string> GetStateIdAsync(CancellationToken cancellationToken);
 

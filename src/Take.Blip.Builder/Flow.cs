@@ -3,6 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder
 {
@@ -11,22 +12,6 @@ namespace Take.Blip.Builder
     /// </summary>
     public class Flow : IFlow
     {
-        public static JsonSerializerSettings SerializerSettings { get; }
-
-        static Flow()
-        {
-            SerializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            };
-            SerializerSettings.Converters.Add(
-                new StringEnumConverter
-                {
-                    CamelCaseText = true,
-                    AllowIntegerValues = true
-                });
-        }
-
         /// <summary>
         /// The flow states. Required.
         /// </summary>
@@ -40,7 +25,7 @@ namespace Take.Blip.Builder
         public static Flow ParseFromJson(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
-            return JsonConvert.DeserializeObject<Flow>(json, SerializerSettings);
+            return JsonConvert.DeserializeObject<Flow>(json, JsonSerializerSettingsContainer.SerializerSettings);
         }
 
         /// <summary>
