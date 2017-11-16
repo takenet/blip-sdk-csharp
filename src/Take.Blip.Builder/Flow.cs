@@ -34,7 +34,6 @@ namespace Take.Blip.Builder
             }
         }
 
-
         /// <summary>
         /// Creates an instance of <see cref="Flow"/> from a JSON input.
         /// </summary>

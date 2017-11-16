@@ -17,6 +17,6 @@ namespace Take.Blip.Builder
         /// <param name="user"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task ExecuteAsync(Flow flow, string user, CancellationToken cancellationToken);
+        Task<bool> TryExecuteAsync(Flow flow, string user, CancellationToken cancellationToken);
     }
 }

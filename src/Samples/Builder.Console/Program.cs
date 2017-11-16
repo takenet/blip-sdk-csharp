@@ -2,6 +2,7 @@
 using SimpleInjector;
 using Take.Blip.Builder;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Hosting;
 
 namespace Builder.Console
 {
@@ -17,10 +18,12 @@ namespace Builder.Console
 
             // 1.0
             var container = new Container();
+            container.RegisterBuilder();
 
 
 
             var flow = Flow.ParseFromJsonFile("Flow.json");
+            flow.Validate();
 
         }
     }

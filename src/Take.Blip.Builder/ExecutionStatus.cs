@@ -18,9 +18,9 @@ namespace Take.Blip.Builder
         Executing,
 
         /// <summary>
-        /// The process is active but suspended.
+        /// The process is not active due to cancellation.
         /// </summary>
-        Suspended,
+        Cancelled,
 
         /// <summary>
         /// The process is not active due to an execution error.
@@ -35,7 +35,7 @@ namespace Take.Blip.Builder
             switch (executionStatus)
             {
                 case ExecutionStatus.Stopped:
-                case ExecutionStatus.Suspended:
+                case ExecutionStatus.Cancelled:
                 case ExecutionStatus.Failed:
                     return currentExecutionStatus == ExecutionStatus.Executing;
                 case ExecutionStatus.Executing:

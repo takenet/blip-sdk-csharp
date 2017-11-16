@@ -29,20 +29,18 @@ namespace Take.Blip.Builder
             _actionProvider = actionProvider;
         }
 
-        public async Task ExecuteAsync(Flow flow, string user, CancellationToken cancellationToken)
+        public async Task<bool> TryExecuteAsync(Flow flow, string user, CancellationToken cancellationToken)
         {
             if (flow == null) throw new ArgumentNullException(nameof(flow));
             if (user == null) throw new ArgumentNullException(nameof(user));
             flow.Validate();
 
-            ExecutionStatus currentExecutionStatus;
-
             var handle = await GetSynchronizationHandleAsync(flow, user, cancellationToken);
             try
             {
-                currentExecutionStatus = await _storageManager.GetExecutionStatusAsync(flow.Id, user, cancellationToken);
+                var currentExecutionStatus = await _storageManager.GetExecutionStatusAsync(flow.Id, user, cancellationToken);
                 // Ignores if the execution is already in progress
-                if (currentExecutionStatus == ExecutionStatus.Executing) return;
+                if (currentExecutionStatus == ExecutionStatus.Executing) return false;
                 
                 await _storageManager.SetExecutionStatusAsync(flow.Id, user, ExecutionStatus.Executing, cancellationToken);
             }
@@ -53,20 +51,9 @@ namespace Take.Blip.Builder
 
             try
             {
-                State state = null;
-
-                // If already executing, try retrieve the stored state
-                if (currentExecutionStatus == ExecutionStatus.Suspended)
-                {
-                    var stateId = await _storageManager.GetStateIdAsync(flow.Id, user, cancellationToken);
-                    state = flow.States.FirstOrDefault(s => s.Id == stateId);
-                }
-
-                if (state == null)
-                {
-                    // Use the flow root state
-                    state = flow.States.Single(s => s.Root);
-                }
+                // Try restore a stored state
+                var stateId = await _storageManager.GetStateIdAsync(flow.Id, user, cancellationToken);
+                var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                 // Load the user context
                 var context = await _contextProvider.GetContextAsync(flow.Id, user, cancellationToken);
@@ -76,21 +63,21 @@ namespace Take.Blip.Builder
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if (!await ProcessActionsAsync(context, flow, state, cancellationToken))
-                    {
-                        // Change the execution status to Suspended for the current user
-                        await SynchronizedSetExecutionStatusAsync(flow, user, ExecutionStatus.Suspended, cancellationToken);
-                        return;
-                    }
+                    await ProcessActionsAsync(context, flow, state, cancellationToken);
                     state = await ProcessOutputsAsync(context, flow, state, cancellationToken);
                 }
 
                 // Change the execution status to Stopped for the current user
                 await SynchronizedSetExecutionStatusAsync(flow, user, ExecutionStatus.Stopped, cancellationToken);
+                return true;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                await SynchronizedSetExecutionStatusAsync(flow, user, ExecutionStatus.Cancelled, CancellationToken.None);
+                throw;
             }
             catch
             {
-                if (cancellationToken.IsCancellationRequested) cancellationToken = CancellationToken.None;
                 await SynchronizedSetExecutionStatusAsync(flow, user, ExecutionStatus.Failed, cancellationToken);
                 throw;
             }
@@ -119,7 +106,7 @@ namespace Take.Blip.Builder
             return _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.ExecutionSemaphoreExpiration, cancellationToken);            
         }
 
-        private async Task<bool> ProcessActionsAsync(IContext context, Flow flow, State state, CancellationToken cancellationToken)
+        private async Task ProcessActionsAsync(IContext context, Flow flow, State state, CancellationToken cancellationToken)
         {
             var actionOrder = 0;
 
@@ -133,18 +120,11 @@ namespace Take.Blip.Builder
             foreach (var stateAction in state.Actions.OrderBy(a => a.Order).Where(a => a.Order >= actionOrder))
             {                
                 var action = _actionProvider.Get(stateAction.Name);
-
-                // If the action is not able to execute, suspend the flow execution.
-                if (!await action.ExecuteAsync(context, stateAction.Argument, cancellationToken))
-                {
-                    await _storageManager.SetActionIdAsync(flow.Id, context.User, stateAction.Id, cancellationToken);
-                    return false;
-                }
+                await action.ExecuteAsync(context, stateAction.Argument, cancellationToken);
             }
 
             // Reset the action id
             await _storageManager.DeleteActionIdAsync(flow.Id, context.User, cancellationToken);
-            return true;
         }
 
         private async Task<State> ProcessOutputsAsync(IContext context, Flow flow, State state, CancellationToken cancellationToken)

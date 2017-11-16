@@ -1,4 +1,5 @@
 ﻿{
+  "id": "flow-0",
   "states": [
     {
       // Default state
@@ -14,207 +15,29 @@
       "id": "start",
       "actions": [
         {
-          // A send message action
+          //"id": "action-0",
           "order": 0,
-          "type": "TrackEvent",
-          "arg": {
-            "category": "start",
-            "action": "abc",
-            "trackUser": true
-          }
-        },
-        {
-          // A send message action
-          "order": 1,
-          "type": "SendMessage",
-          "arg": {
+          "name": "SendMessage",
+          "argument": {
             "type": "text/plain",
-            "content": "Sobre quais dos assuntos abaixo você quer conversar?"
+            "content": "Olá, tudo bem?"
           }
         },
         {
-          "order": 2,
-          "type": "ProcessHttp",
-          "arg": {
-            "method": "POST",
-            "uri": "https://google.com/api",
-            "headers": {
-              "Content-Type": "application/json",
-              "Authorization": "Basic 12ioajdlasd"
-            },
-            "body": "{\"abc\":\"${input.content}\"}",
-            "variable": "myRequestResult"
+          // A receive message action
+          "id": "action-01",
+          "order": 1,
+          "name": "ReceiveMessage",
+          "argument": {
+            "type": "text/plain",
+            "content": "Olá, tudo bem?"
           }
         }
-      ],
-      "input": {
-        //"bypass": true,
-        "validation": {
-          "rule": "Regex",
-          "pattern": "(bla)",
-          "error": "Por favor, envie no formato 'bla'."
-        },
-        "variable": "blablabla" // variable to be set on context
-      },
-      "outputs": [
-        {
-          "stateId": "get-started"
-        }
-      ]
-    },
-    {
-      // First state
-      "id": "get-started",
-      "actions": [
-        {
-          // A send message action
-          "order": 0,
-          "type": "SendMessage",
-          "arg": {
-            "type": "application/vnd.lime.select+json",
-            "content": {
-              "text": "${contact.name}, qual o seu nível de conhecimento em programação?",
-              "options": [
-                {
-                  "text": "Pouca coisa",
-                  "value": {
-                    "type": "application/vnd.blip.set-variable+json",
-                    "value": {
-                      "name": "next-state",
-                      "value": "get-started-template"
-                    }
-                  }
-                },
-                {
-                  "text": "Sei o suficiente",
-                  "value": {
-                    "type": "application/vnd.blip.set-variable+json",
-                    "value": {
-                      "name": "next-state",
-                      "value": "get-started-dev"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        }
+
       ],
       "outputs": [
         {
-          "order": 0,
-          "conditions": [
-            {
-              "variable": "next-state",
-              "comparison": "equals",
-              "value": "get-started-template"
-            }
-          ],
-          "stateId": "get-started-template"
-        },
-        {
-          "order": 1,
-          "conditions": [
-            {
-              "variable": "next-state",
-              "comparison": "equals",
-              "value": "get-started-dev"
-            }
-          ],
-          "stateId": "get-started-dev"
-        },
-        {
-          "order": 2,
-          "conditions": [
-            {
-              "variable": "input.intention",
-              "comparison": "equals",
-              "value": "DuvidaSDK"
-            }
-          ],
-          "stateId": "get-started-dev"
-        },
-        {
-          "order": 100,
-          "stateId": "fallback"
-        }
-      ]
-    },
-    {
-      "id": "get-started-template",
-      "actions": [
-        {
-          "order": 0,
-          "type": "SendMessage",
-          "arg": {
-            "type": "text/plain",
-            "content": "Vamos lá."
-          }
-        },
-        {
-          "order": 1,
-          "type": "SendMessage",
-          "arg": {
-            "type": "text/plain",
-            "content": "O BLiP tem..."
-          }
-        }
-      ]
-    },
-    {
-      "id": "get-started-dev",
-      "actions": [
-        {
-          // A send message action
-          "order": 0,
-          "type": "SendMessage",
-          "arg": {
-            "type": "application/vnd.lime.select+json",
-            "content": {
-              "text": "Conheçe de C# ou JS?",
-              "options": [
-                {
-                  "text": "Sim",
-                  "value": {
-                    "type": "application/vnd.blip.set-variable+json",
-                    "value": {
-                      "name": "next-state",
-                      "value": "sdk"
-                    }
-                  }
-                },
-                {
-                  "text": "Não",
-                  "value": {
-                    "type": "application/vnd.blip.set-variable+json",
-                    "value": {
-                      "name": "next-state",
-                      "value": ""
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "fallback",
-      "outputs": [
-        {
-          "conditions": [
-            {
-              "variable": "<input.intention>",
-              "value": "sdk"
-            },
-            {
-              "variable": "input.content",
-              "comparison": "contains",
-              "value": "sdk,ajuda,socorro"
-            }
-          ],
-          "stateId": "dev"
+          "stateId": "onboarding"
         }
       ]
     }
