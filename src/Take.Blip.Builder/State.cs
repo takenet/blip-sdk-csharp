@@ -1,4 +1,6 @@
-﻿namespace Take.Blip.Builder
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Take.Blip.Builder
 {
     /// <summary>
     /// Defines a state in the conversation state machine.
@@ -8,6 +10,7 @@
         /// <summary>
         /// Unique id for the state. Required.
         /// </summary>
+        [Required]
         public string Id { get; set; }
         
         /// <summary>

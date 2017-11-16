@@ -1,4 +1,6 @@
-﻿namespace Take.Blip.Builder
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Take.Blip.Builder
 {
     /// <summary>
     /// Defines an output path from a state.
@@ -18,6 +20,7 @@
         /// <summary>
         /// The id of the state to be activated in case of success evaluation of the conditions. Required.
         /// </summary>
+        [Required]
         public string StateId { get; set; }
     }
 }

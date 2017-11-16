@@ -14,17 +14,14 @@ namespace Builder.Console
 
         static async Task MainAsync(string[] args)
         {
-            var flow = Flow.ParseFromJsonFile("Flow.json");
 
             // 1.0
             var container = new Container();
 
-            container.RegisterSingleton<IFlow>(flow);
 
-            container.RegisterSingleton<IFlowManager, FlowManager>();
-            container.RegisterSingleton<IContextProvider, BucketContextProvider>();
-            container.RegisterSingleton<IDistributedMutex, DistributedMutex>();
-            container.RegisterSingleton<IActionProvider, ActionProvider>();
+
+            var flow = Flow.ParseFromJsonFile("Flow.json");
+
         }
     }
 }

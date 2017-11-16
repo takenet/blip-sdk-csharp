@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
@@ -9,15 +6,15 @@ namespace Take.Blip.Builder.Utils
 {
     public static class JsonSerializerSettingsContainer
     {
-        public static JsonSerializerSettings SerializerSettings { get; }
+        public static JsonSerializerSettings Settings { get; }
 
         static JsonSerializerSettingsContainer()
         {
-            SerializerSettings = new JsonSerializerSettings
+            Settings = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
             };
-            SerializerSettings.Converters.Add(
+            Settings.Converters.Add(
                 new StringEnumConverter
                 {
                     CamelCaseText = true,

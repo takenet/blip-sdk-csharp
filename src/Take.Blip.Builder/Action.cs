@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder
 {
@@ -8,18 +9,20 @@ namespace Take.Blip.Builder
     public class Action
     {
         /// <summary>
-        /// The unique identifier of the action.
+        /// The unique identifier of the action. Required.
         /// </summary>
+        [Required]
         public string Id { get; set; }
 
         /// <summary>
         /// The action execution order, relative to the others in the same state. Optional.
         /// </summary>
         public int Order { get; set; }
-        
+
         /// <summary>
         /// The action name.
         /// </summary>
+        [Required]
         public string Name { get; set; }
 
         /// <summary>

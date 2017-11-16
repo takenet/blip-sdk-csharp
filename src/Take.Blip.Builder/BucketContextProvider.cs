@@ -13,7 +13,7 @@ namespace Take.Blip.Builder
             _bucketExtension = bucketExtension;
         }
 
-        public Task<IContext> GetContextAsync(string user, CancellationToken cancellationToken)
+        public Task<IContext> GetContextAsync(string flowId, string user, CancellationToken cancellationToken)
         {
             return Task.FromResult<IContext>(new BucketContext(_bucketExtension, user));
         }

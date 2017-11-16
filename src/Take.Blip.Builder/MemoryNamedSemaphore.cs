@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace Take.Blip.Builder
 {
-    public sealed class DistributedMutex : IDistributedMutex
+    public sealed class MemoryNamedSemaphore : INamedSemaphore
     {
         private readonly ConcurrentDictionary<string, AsyncDisposableSemaphore> _handleSemaphoreDictionary;
 
-        public DistributedMutex()
+        public MemoryNamedSemaphore()
         {
             _handleSemaphoreDictionary = new ConcurrentDictionary<string, AsyncDisposableSemaphore>();
         }
