@@ -1,4 +1,5 @@
-﻿using SimpleInjector;
+﻿using Lime.Protocol.Serialization;
+using SimpleInjector;
 using Take.Blip.Builder.Actions;
 
 
@@ -13,6 +14,8 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IContextProvider, ContextProvider>();
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
             container.RegisterSingleton<IActionProvider, ActionProvider>();
+            container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
+            container.RegisterSingleton<IConfiguration, ConventionsConfiguration>();
 
             container.RegisterCollection<IAction>(new[] 
             {

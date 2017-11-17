@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json.Linq;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Take.Blip.Builder.Models
 {
@@ -8,12 +8,6 @@ namespace Take.Blip.Builder.Models
     /// </summary>
     public class Action
     {
-        /// <summary>
-        /// The unique identifier of the action. Required.
-        /// </summary>
-        [Required]
-        public string Id { get; set; }
-
         /// <summary>
         /// The action execution order, relative to the others in the same state. Optional.
         /// </summary>
@@ -28,6 +22,6 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The action settings for the specified type.
         /// </summary>
-        public JObject Settings { get; set; }
+        public IDictionary<string, object> Settings { get; set; }
     }
 }

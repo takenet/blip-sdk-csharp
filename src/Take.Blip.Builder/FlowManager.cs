@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Lime.Protocol.Serialization;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -21,6 +22,7 @@ namespace Take.Blip.Builder
         private readonly INamedSemaphore _namedSemaphore;
         private readonly IActionProvider _actionProvider;
         private readonly ISender _sender;
+        private readonly IDocumentSerializer _documentSerializer;
 
         public FlowManager(
             IConfiguration configuration,
@@ -28,7 +30,8 @@ namespace Take.Blip.Builder
             IContextProvider contextProvider, 
             INamedSemaphore namedSemaphore, 
             IActionProvider actionProvider,
-            ISender sender)
+            ISender sender,
+            IDocumentSerializer documentSerializer)
         {
             _configuration = configuration;
             _storageManager = storageManager;
@@ -36,6 +39,7 @@ namespace Take.Blip.Builder
             _namedSemaphore = namedSemaphore;
             _actionProvider = actionProvider;
             _sender = sender;
+            _documentSerializer = documentSerializer;
         }
 
         public async Task ProcessInputAsync(Document input, Identity user, Flow flow, CancellationToken cancellationToken)
@@ -45,6 +49,7 @@ namespace Take.Blip.Builder
             if (flow == null) throw new ArgumentNullException(nameof(flow));
             flow.Validate();
 
+            // Synchronize to avoid concurrency issues on multiple running instances
             var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.ExecutionSemaphoreExpiration, cancellationToken);
             try
             {
@@ -74,6 +79,12 @@ namespace Take.Blip.Builder
                         break;
                     }
 
+                    // Set the input in the context
+                    if (!string.IsNullOrEmpty(state.Input?.Variable))
+                    {
+                        await context.SetVariableAsync(state.Input.Variable, _documentSerializer.Serialize(input), cancellationToken);
+                    }
+
                     // Prepare to leave the current state executing the output actions
                     if (state.OutputActions != null)
                     {
@@ -83,7 +94,15 @@ namespace Take.Blip.Builder
                     // Determine the next state
                     state = await ProcessOutputsAsync(input, context, flow, state, cancellationToken);
 
-                    await _storageManager.SetStateIdAsync(flow.Id, context.User, state?.Id, cancellationToken);
+                    // Store the next state
+                    if (state != null)
+                    {
+                        await _storageManager.SetStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
+                    }
+                    else
+                    {
+                        await _storageManager.DeleteStateIdAsync(flow.Id, context.User, cancellationToken);
+                    }
 
                     // Process the next state input actions
                     if (state?.InputActions != null)
@@ -91,6 +110,8 @@ namespace Take.Blip.Builder
                         await ProcessActionsAsync(context, state.InputActions, cancellationToken);
 
                     }
+
+                    // Continue processing if the next has do not expect the user input
                 } while (state != null && (state.Input == null || state.Input.Bypass));
             }
             finally
@@ -171,7 +192,7 @@ namespace Take.Blip.Builder
             string comparisonValue;
             if (condition.Variable == null)
             {
-                comparisonValue = input.ToString();
+                comparisonValue = _documentSerializer.Serialize(input);
             }
             else
             {

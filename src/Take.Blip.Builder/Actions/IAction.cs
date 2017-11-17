@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -8,6 +9,6 @@ namespace Take.Blip.Builder.Actions
     {
         string Type { get; }
 
-        Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken);
+        Task ExecuteAsync(IContext context, IDictionary<string, object> settings, CancellationToken cancellationToken);
     }
 }

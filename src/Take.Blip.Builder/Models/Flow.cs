@@ -34,12 +34,12 @@ namespace Take.Blip.Builder.Models
         {
             Validator.ValidateObject(this, new ValidationContext(this));
 
-            var rootState = States.SingleOrDefault(s => s.Root);
-            if (rootState == null)
+            if (States.Count(s => s.Root) != 1)
             {
                 throw new ValidationException("The flow must have one root state");
             }
 
+            var rootState = States.First(s => s.Root);
             if (rootState.Input == null || rootState.Input.Bypass)
             {
                 throw new ValidationException("The root state must expect an input");

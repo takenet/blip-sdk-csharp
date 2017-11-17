@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Newtonsoft.Json.Linq;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions
@@ -18,7 +17,7 @@ namespace Take.Blip.Builder.Actions
 
         public string Type => "SendMessage";
 
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(IContext context, IDictionary<string, object> settings, CancellationToken cancellationToken)
         {
             var message = new Message(EnvelopeId.NewId())
             {
@@ -27,15 +26,15 @@ namespace Take.Blip.Builder.Actions
             };
 
             var mediaType = MediaType.Parse((string)settings[Message.TYPE_KEY]);
-            var contentJToken = settings[Message.CONTENT_KEY];
+            var rawContent = settings[Message.CONTENT_KEY];
 
             if (mediaType.IsJson)
             {
-                message.Content = new JsonDocument(contentJToken.ToObject<IDictionary<string, object>>(), mediaType);
+                message.Content = new JsonDocument((IDictionary<string, object>)rawContent, mediaType);
             }
             else
             {
-                message.Content = new PlainDocument(contentJToken.ToObject<string>(), mediaType);
+                message.Content = new PlainDocument(rawContent.ToString(), mediaType);
             }
             
             await _sender.SendMessageAsync(message, cancellationToken);
