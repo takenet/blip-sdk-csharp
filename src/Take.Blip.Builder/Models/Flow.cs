@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The unique identifier of the flow. Required.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "The flow id is required")]
         public string Id { get; set; }
 
         /// <summary>
@@ -79,9 +79,13 @@ namespace Take.Blip.Builder.Models
                             throw new ValidationException($"The output state id '{output.StateId}' is invalid");
                         }
 
-                        if (CanBeReached(state, output))
+                        if (state.Input == null || state.Input.Bypass)
                         {
-                            throw new ValidationException($"The state '{state.Id}' has a loop without inputs to itself in the flow");
+                            if (CanBeReached(state, output))
+                            {
+                                throw new ValidationException(
+                                    $"There is a loop from the state '{state.Id}' to itself that do not require user input");
+                            }
                         }
                     }
                 }

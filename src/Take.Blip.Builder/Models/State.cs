@@ -10,7 +10,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// Unique id for the state. Required.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "The state id is required")]
         public string Id { get; set; }
         
         /// <summary>

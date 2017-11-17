@@ -149,9 +149,7 @@
               "type": "SendMessage",
               "settings": {
                 "type": "text/plain",
-                "content": {
-                  "text": "Qual a sua dúvida?"
-                }
+                "content": "Qual a sua dúvida?"
               }
             }
           ],
@@ -175,25 +173,22 @@
               "type": "SendMessage",
               "settings": {
                 "type": "text/plain",
-                "content": {
-                  "text": "Opa, sugestões são sempre bem vindas"
-                }
+                "content": "Opa, sugestões são sempre bem vindas"
+                
               }
             },
             {
               "type": "Pause",
               "settings": {
                 "sendComposing": true,
-                "interval": 500 
+                "randomize": true
               }
             },
             {
               "type": "SendMessage",
               "settings": {
                 "type": "text/plain",
-                "content": {
-                  "text": "Pode falar."
-                }
+                "content":  "Pode falar."
               }
             }
           ],

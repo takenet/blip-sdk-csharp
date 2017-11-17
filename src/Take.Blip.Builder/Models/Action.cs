@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The action type name. Required.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "The action type is required")]
         public string Type { get; set; }
 
         /// <summary>

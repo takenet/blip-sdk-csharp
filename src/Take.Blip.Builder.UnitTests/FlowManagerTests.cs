@@ -28,6 +28,12 @@ namespace Take.Blip.Builder.UnitTests
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             Sender = Substitute.For<ISender>();
             StorageManager = Substitute.For<IStorageManager>();
+            ContextProvider = Substitute.For<IContextProvider>();
+            Context = Substitute.For<IContext>();
+            ContextProvider
+                .GetContext(Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<IDictionary<string, string>>())
+                .Returns(Context);
+
             CancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         }
 
@@ -38,6 +44,10 @@ namespace Take.Blip.Builder.UnitTests
         public ISender Sender { get; set; }
 
         public IStorageManager StorageManager { get; set; }
+
+        public IContextProvider ContextProvider { get; set; }
+
+        public IContext Context { get; set; }
 
         public CancellationToken CancellationToken => CancellationTokenSource.Token;
 
@@ -50,6 +60,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterBuilder();
             container.RegisterSingleton(BucketExtension);
             container.RegisterSingleton(ArtificialIntelligenceExtension);
+            container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StorageManager);
             return container.GetInstance<IFlowManager>();
@@ -105,6 +116,7 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, user, flow, CancellationToken);
 
             // Assert
+            ContextProvider.Received(1).GetContext(user, flow.Id, flow.Variables);
             StorageManager.Received(1).SetStateIdAsync(flow.Id, user, "ping", CancellationToken);
             StorageManager.Received(1).DeleteStateIdAsync(flow.Id, user, CancellationToken);
             Sender
@@ -116,6 +128,40 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Type.ToString().Equals(messageType) 
                         && m.Content.ToString() == messageContent), 
                     CancellationToken);
+        }
+
+        [Fact]
+        public async Task FlowWithInputVariableShouldSaveInContext()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var user = new Identity("user", "domain");
+            var variableName = "MyVariable";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Variable = variableName
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(input, user, flow, CancellationToken);
+
+            // Assert
+            ContextProvider.Received(1).GetContext(user, flow.Id, flow.Variables);
+            Context.SetVariableAsync(variableName, input.Text, CancellationToken);
+            StorageManager.Received(0).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]

@@ -25,7 +25,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The value to be used by the comparison with the context value. Required.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "The condition value is required")]
         public string Value { get; set; }
 
         public void Validate()

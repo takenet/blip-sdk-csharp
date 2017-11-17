@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,9 @@ namespace Take.Blip.Builder.Actions
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (settings == null) throw new ArgumentNullException(nameof(settings), "The settings are required for 'SendMessage' action");
+
             var message = new Message(EnvelopeId.NewId())
             {
                 Id = EnvelopeId.NewId(),
