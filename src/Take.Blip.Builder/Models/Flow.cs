@@ -11,8 +11,10 @@ namespace Take.Blip.Builder.Models
     /// <summary>
     /// Defines a conversational state machine.
     /// </summary>
-    public class Flow
+    public class Flow : IValidable
     {
+        private bool _isValid;
+
         /// <summary>
         /// The unique identifier of the flow. Required.
         /// </summary>
@@ -32,7 +34,11 @@ namespace Take.Blip.Builder.Models
 
         public void Validate()
         {
-            Validator.ValidateObject(this, new ValidationContext(this));
+            // Optimization to avoid multiple validations.
+            // It can lead to errors if any property is changed meanwhile...
+            if (_isValid) return;
+
+            this.ValidateObject();
 
             if (States.Count(s => s.Root) != 1)
             {
@@ -44,6 +50,13 @@ namespace Take.Blip.Builder.Models
             {
                 throw new ValidationException("The root state must expect an input");
             }
+
+            foreach (var state in States)
+            {
+                state.Validate();
+            }
+
+            _isValid = true;
         }
 
         /// <summary>

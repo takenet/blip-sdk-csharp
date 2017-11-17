@@ -5,7 +5,7 @@ namespace Take.Blip.Builder.Models
     /// <summary>
     /// Defines an output path from a state.
     /// </summary>
-    public class Output
+    public class Output : IValidable
     {
         /// <summary>
         /// The output execution order, relative to the others in the same state. Optional.
@@ -22,5 +22,18 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         [Required]
         public string StateId { get; set; }
+
+        public void Validate()
+        {
+            this.ValidateObject();
+
+            if (Conditions != null)
+            {
+                foreach (var condition in Conditions)
+                {
+                    condition.Validate();
+                }
+            }
+        }
     }
 }

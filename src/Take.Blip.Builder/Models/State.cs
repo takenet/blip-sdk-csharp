@@ -5,7 +5,7 @@ namespace Take.Blip.Builder.Models
     /// <summary>
     /// Defines a state in the conversation state machine.
     /// </summary>
-    public class State
+    public class State : IValidable
     {
         /// <summary>
         /// Unique id for the state. Required.
@@ -19,7 +19,7 @@ namespace Take.Blip.Builder.Models
         public bool Root { get; set; }
 
         /// <summary>
-        /// Determine the actions that should be executed before awaiting for the user input. Optional.
+        /// Determine the actions that should be executed when entering the state. Optional.
         /// </summary>
         public Action[] InputActions { get; set; }
 
@@ -29,7 +29,7 @@ namespace Take.Blip.Builder.Models
         public Input Input { get; set; }
 
         /// <summary>
-        /// Determine the actions that should be executed after receiving the user input. Optional.
+        /// Determine the actions that should be executed before evaluate the state output. Optional.
         /// </summary>
         public Action[] OutputActions { get; set; }
 
@@ -38,5 +38,38 @@ namespace Take.Blip.Builder.Models
         /// Array of <see cref="Output"/>. Optional.
         /// </summary>
         public Output[] Outputs { get; set; }
+
+        public void Validate()
+        {
+            this.ValidateObject();
+            if (Root && InputActions != null)
+            {
+                throw new ValidationException("The root state cannot have input actions");
+            }
+
+            if (InputActions != null)
+            {
+                foreach (var inputAction in InputActions)
+                {
+                    inputAction.Validate();
+                }
+            }
+
+            if (OutputActions != null)
+            {
+                foreach (var outputAction in OutputActions)
+                {
+                    outputAction.Validate();
+                }
+            }
+
+            if (Outputs != null)
+            {
+                foreach (var outputs in Outputs)
+                {
+                    outputs.Validate();
+                }
+            }
+        }
     }
 }

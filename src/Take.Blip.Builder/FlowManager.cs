@@ -10,6 +10,8 @@ using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client;
+using Take.Blip.Client.Extensions.ArtificialIntelligence;
+using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -23,6 +25,7 @@ namespace Take.Blip.Builder
         private readonly IActionProvider _actionProvider;
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
+        private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
 
         public FlowManager(
             IConfiguration configuration,
@@ -31,7 +34,8 @@ namespace Take.Blip.Builder
             INamedSemaphore namedSemaphore, 
             IActionProvider actionProvider,
             ISender sender,
-            IDocumentSerializer documentSerializer)
+            IDocumentSerializer documentSerializer,
+            IArtificialIntelligenceExtension artificialIntelligenceExtension)
         {
             _configuration = configuration;
             _storageManager = storageManager;
@@ -40,6 +44,7 @@ namespace Take.Blip.Builder
             _actionProvider = actionProvider;
             _sender = sender;
             _documentSerializer = documentSerializer;
+            _artificialIntelligenceExtension = artificialIntelligenceExtension;
         }
 
         public async Task ProcessInputAsync(Document input, Identity user, Flow flow, CancellationToken cancellationToken)
@@ -190,13 +195,29 @@ namespace Take.Blip.Builder
         public async Task<bool> EvaluateConditionAsync(Condition condition, Document input, IContext context, CancellationToken cancellationToken)
         {
             string comparisonValue;
-            if (condition.Variable == null)
+
+            switch (condition.Source)
             {
-                comparisonValue = _documentSerializer.Serialize(input);
-            }
-            else
-            {
-                comparisonValue = await context.GetVariableAsync(condition.Variable, cancellationToken);
+                case ValueSource.Input:
+                    comparisonValue = _documentSerializer.Serialize(input);
+                    break;
+
+                case ValueSource.Context:
+                    comparisonValue = await context.GetVariableAsync(condition.Variable, cancellationToken);
+                    break;
+
+                case ValueSource.Intention:
+                    var analysisResponse = await _artificialIntelligenceExtension.AnalyzeAsync(
+                        new AnalysisRequest
+                        {
+                            Text = _documentSerializer.Serialize(input)
+                        },
+                        cancellationToken);
+
+                    comparisonValue = analysisResponse.Intentions.OrderBy(i => i.Score).FirstOrDefault()?.Name;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             switch (condition.Comparison)
@@ -208,16 +229,16 @@ namespace Take.Blip.Builder
                     return comparisonValue != condition.Value;
 
                 case ConditionComparison.Contains:
-                    return comparisonValue.Contains(condition.Value);
+                    return comparisonValue != null && comparisonValue.Contains(condition.Value);
 
                 case ConditionComparison.StartsWith:
-                    return comparisonValue.StartsWith(condition.Value);
+                    return comparisonValue != null && comparisonValue.StartsWith(condition.Value);
 
                 case ConditionComparison.EndsWith:
-                    return comparisonValue.EndsWith(condition.Value);
+                    return comparisonValue != null && comparisonValue.EndsWith(condition.Value);
 
                 case ConditionComparison.Matches:
-                    return Regex.IsMatch(comparisonValue, condition.Value);
+                    return comparisonValue != null && Regex.IsMatch(comparisonValue, condition.Value);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(condition));
