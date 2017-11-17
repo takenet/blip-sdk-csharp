@@ -9,6 +9,6 @@ namespace Take.Blip.Builder.Actions
     {
         string Type { get; }
 
-        Task ExecuteAsync(IContext context, IDictionary<string, object> settings, CancellationToken cancellationToken);
+        Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken);
     }
 }

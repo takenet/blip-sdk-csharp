@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Newtonsoft.Json.Linq;
 using NSubstitute;
 using SimpleInjector;
 using Take.Blip.Builder.Hosting;
@@ -88,7 +89,7 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new Dictionary<string, object>
+                                Settings = new JObject()
                                 {
                                     {"type", messageType},
                                     {"content", messageContent}
@@ -170,7 +171,7 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new Dictionary<string, object>
+                                Settings = new JObject()
                                 {
                                     {"type", messageType},
                                     {"content", pongMessageContent}
@@ -186,7 +187,7 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new Dictionary<string, object>
+                                Settings = new JObject()
                                 {
                                     {"type", messageType},
                                     {"content", poloMessageContent}
@@ -270,7 +271,7 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new Dictionary<string, object>
+                                Settings = new JObject()
                                 {
                                     {"type", messageType},
                                     {"content", pongMessageContent}
@@ -286,7 +287,7 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new Dictionary<string, object>
+                                Settings = new JObject()
                                 {
                                     {"type", messageType},
                                     {"content", poloMessageContent}

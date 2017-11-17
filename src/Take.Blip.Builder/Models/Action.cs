@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Models
 {
@@ -22,7 +23,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The action settings for the specified type. Optional.
         /// </summary>
-        public IDictionary<string, object> Settings { get; set; }
+        public JObject Settings { get; set; }
 
         public void Validate()
         {
