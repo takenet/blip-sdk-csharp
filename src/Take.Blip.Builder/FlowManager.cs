@@ -113,7 +113,6 @@ namespace Take.Blip.Builder
                     if (state?.InputActions != null)
                     {
                         await ProcessActionsAsync(context, state.InputActions, cancellationToken);
-
                     }
 
                     // Continue processing if the next has do not expect the user input

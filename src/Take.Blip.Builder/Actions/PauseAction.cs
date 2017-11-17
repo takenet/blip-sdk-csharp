@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Newtonsoft.Json.Linq;
@@ -24,6 +25,9 @@ namespace Take.Blip.Builder.Actions
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
             var pauseActionSettings = settings.ToObject<PauseActionSettings>();
 
             if (pauseActionSettings.SendComposing)
