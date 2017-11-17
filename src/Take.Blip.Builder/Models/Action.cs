@@ -20,10 +20,10 @@ namespace Take.Blip.Builder.Models
         public int Order { get; set; }
 
         /// <summary>
-        /// The action name.
+        /// The action type name.
         /// </summary>
         [Required]
-        public string Name { get; set; }
+        public string Type { get; set; }
 
         /// <summary>
         /// The action settings for the specified type.

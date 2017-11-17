@@ -6,7 +6,7 @@ namespace Take.Blip.Builder.Actions
 {
     public interface IAction
     {
-        string Name { get; }
+        string Type { get; }
 
         Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken);
     }

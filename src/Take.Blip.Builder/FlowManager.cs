@@ -128,7 +128,7 @@ namespace Take.Blip.Builder
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {                
-                var action = _actionProvider.Get(stateAction.Name);
+                var action = _actionProvider.Get(stateAction.Type);
                 await action.ExecuteAsync(context, stateAction.Settings, cancellationToken);
             }            
         }
