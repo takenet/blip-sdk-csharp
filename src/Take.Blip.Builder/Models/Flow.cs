@@ -54,6 +54,11 @@ namespace Take.Blip.Builder.Models
             foreach (var state in States)
             {
                 state.Validate();
+
+                if (States.Count(s => s.Id == state.Id) > 1)
+                {
+                    throw new ValidationException($"The state id '{state.Id}' is not unique in the flow");
+                }
             }
 
             _isValid = true;

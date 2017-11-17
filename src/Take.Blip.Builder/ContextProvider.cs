@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Lime.Protocol;
+using Take.Blip.Builder.Models;
 using Take.Blip.Client.Extensions.Bucket;
 
 namespace Take.Blip.Builder
@@ -13,9 +14,9 @@ namespace Take.Blip.Builder
             _bucketExtension = bucketExtension;
         }
 
-        public IContext GetContext(Identity user, IDictionary<string, string> flowVariables)
+        public IContext GetContext(Identity user, string flowId, IDictionary<string, string> flowVariables)
         {
-            return new Context(_bucketExtension, user, flowVariables);
+            return new Context(_bucketExtension, user, flowId, flowVariables);
         }
     }
 }

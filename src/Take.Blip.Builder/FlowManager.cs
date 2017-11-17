@@ -63,7 +63,7 @@ namespace Take.Blip.Builder
                 var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                 // Load the user context
-                var context = _contextProvider.GetContext(user, flow.Variables);
+                var context = _contextProvider.GetContext(user, flow.Id, flow.Variables);
 
                 do
                 {
@@ -214,7 +214,7 @@ namespace Take.Blip.Builder
                         },
                         cancellationToken);
 
-                    comparisonValue = analysisResponse.Intentions.OrderBy(i => i.Score).FirstOrDefault()?.Name;
+                    comparisonValue = analysisResponse.Intentions.OrderByDescending(i => i.Score).FirstOrDefault()?.Id;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

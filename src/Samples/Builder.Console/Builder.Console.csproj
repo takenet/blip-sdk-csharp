@@ -11,11 +11,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Take.Blip.Builder\Take.Blip.Builder.csproj" />
+    <ProjectReference Include="..\..\Take.Blip.Client.Console\Take.Blip.Client.Console.csproj" />
+    <ProjectReference Include="..\..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Flow.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="application.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

@@ -12,7 +12,7 @@ namespace Take.Blip.Builder
         private readonly IBucketExtension _bucketExtension;
         private readonly IDictionary<string, string> _flowVariables;
 
-        public Context(IBucketExtension bucketExtension, Identity user, IDictionary<string, string> flowVariables)
+        public Context(IBucketExtension bucketExtension, Identity user, string flowId, IDictionary<string, string> flowVariables)
         {
             _bucketExtension = bucketExtension;
             _flowVariables = flowVariables;

@@ -1,0 +1,93 @@
+﻿{
+  "identifier": "blipsdkdemo",
+  "accessKey": "Mm10THlXd085aXdjeXlPZlBsbTM=",
+  "messageReceivers": [
+    {
+      "type": "BuilderMessageReceiver"
+    }
+  ],
+  "serviceProviderType": "BuilderServiceProvider",
+  "settingsType": "BuilderSettings",
+  "settings": {
+    "flow": {
+      "id": "0",
+      "states": [
+        {
+          "id": "root",
+          "root": true,
+          "input": {
+            "variable": "input" 
+          },
+          "outputs": [
+            {
+              "conditions": [
+                { "value": "Ping!" }
+              ],
+              "stateId": "pong"
+            },
+            {
+              "conditions": [
+                { "value": "Marco!" }
+              ],
+              "stateId": "polo"
+            },
+            {
+              "stateId": "hein"
+            }
+          ]
+        },
+        {
+          "id": "pong",
+          "inputActions": [
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "text/plain",
+                "content": "Pong!"
+              }
+            }
+          ],
+          "outputs": [
+            {
+              "stateId": "root"
+            }
+          ]
+        },
+        {
+          "id": "polo",
+          "inputActions": [
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "text/plain",
+                "content": "Polo!"
+              }
+            }
+          ],
+          "outputs": [
+            {
+              "stateId": "root"
+            }
+          ]
+        },
+        {
+          "id": "hein",
+          "inputActions": [
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "text/plain",
+                "content": "Hein?"
+              }
+            }
+          ],
+          "outputs": [
+            {
+              "stateId": "root"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

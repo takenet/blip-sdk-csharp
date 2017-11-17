@@ -1,11 +1,7 @@
 ﻿using System.Threading.Tasks;
-using SimpleInjector;
-using Take.Blip.Builder;
-using Take.Blip.Builder.Actions;
-using Take.Blip.Builder.Hosting;
-using Take.Blip.Builder.Models;
+using Take.Blip.Client.Console;
 
-namespace Builder.Console
+namespace Navigation
 {
     class Program
     {
@@ -14,18 +10,6 @@ namespace Builder.Console
             MainAsync(args).GetAwaiter().GetResult();
         }
 
-        static async Task MainAsync(string[] args)
-        {
-
-            // 1.0
-            var container = new Container();
-            container.RegisterBuilder();
-
-
-
-            var flow = Flow.ParseFromJsonFile("Flow.json");
-            flow.Validate();
-
-        }
+        static Task MainAsync(string[] args) => ConsoleRunner.RunAsync(args);
     }
 }

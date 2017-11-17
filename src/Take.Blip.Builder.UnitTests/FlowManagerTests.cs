@@ -216,9 +216,8 @@ namespace Take.Blip.Builder.UnitTests
                     CancellationToken);
         }
 
-
         [Fact]
-        public async Task FlowWithConditionsAndMultipleInputsShouldChangeStateAndSendMessage()
+        public async Task FlowWithConditionsAndMultipleInputsShouldChangeStatesAndSendMessages()
         {
             // Arrange
             var input1 = new PlainText() { Text = "Ping!" };
