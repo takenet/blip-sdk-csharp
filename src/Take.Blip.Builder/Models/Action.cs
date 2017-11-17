@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json.Linq;
 
-namespace Take.Blip.Builder
+namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Defines an action to be executed when a state is activated.
@@ -26,8 +26,8 @@ namespace Take.Blip.Builder
         public string Name { get; set; }
 
         /// <summary>
-        /// The action argument for the specified type.
+        /// The action settings for the specified type.
         /// </summary>
-        public JObject Argument { get; set; }
+        public JObject Settings { get; set; }
     }
 }

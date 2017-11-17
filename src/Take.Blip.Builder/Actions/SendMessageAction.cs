@@ -17,10 +17,10 @@ namespace Take.Blip.Builder.Actions
 
         public string Name => "SendMessage";
 
-        public async Task ExecuteAsync(IContext context, JObject argument, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
-            var message = argument.ToObject<Message>();
-            message.To = context.User;
+            var message = settings.ToObject<Message>();
+            message.To = context.User.ToNode();
             await _sender.SendMessageAsync(message, cancellationToken);
         }
     }

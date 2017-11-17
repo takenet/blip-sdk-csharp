@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 
 namespace Take.Blip.Builder
 {
@@ -7,7 +8,7 @@ namespace Take.Blip.Builder
     {
         string FlowId { get; }
 
-        string User { get; }
+        Identity User { get; }
 
         Task SetVariableAsync(string name, string value, CancellationToken cancellationToken);
 

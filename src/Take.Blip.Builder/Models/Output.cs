@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Take.Blip.Builder
+namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Defines an output path from a state.

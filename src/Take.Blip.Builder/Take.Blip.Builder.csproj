@@ -8,8 +8,6 @@
     <PackageReference Include="Lime.Protocol.Serialization" Version="0.7.236" />
     <PackageReference Include="SimpleInjector" Version="4.0.12" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
-    <PackageReference Include="Takenet.Elephant" Version="0.5.31" />
-    <PackageReference Include="Takenet.Elephant.Redis" Version="0.5.31" />
   </ItemGroup>
 
   <ItemGroup>

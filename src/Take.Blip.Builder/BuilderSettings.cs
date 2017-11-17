@@ -1,4 +1,6 @@
-﻿namespace Take.Blip.Builder.Actions
+﻿using Take.Blip.Builder.Models;
+
+namespace Take.Blip.Builder
 {
     public class BuilderSettings
     {

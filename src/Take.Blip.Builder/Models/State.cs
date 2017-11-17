@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Take.Blip.Builder
+namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Defines a state in the conversation state machine.
@@ -19,9 +19,19 @@ namespace Take.Blip.Builder
         public bool Root { get; set; }
 
         /// <summary>
-        /// Determine the actions that should be executed when a user enters the current state. Optional.
+        /// Determine the actions that should be executed before awaiting for the user input. Optional.
         /// </summary>
-        public Action[] Actions { get; set; }
+        public Action[] InputActions { get; set; }
+
+        /// <summary>
+        /// Indicates the input handling rules for the current state. Optional.
+        /// </summary>
+        public Input Input { get; set; }
+
+        /// <summary>
+        /// Determine the actions that should be executed after receiving the user input. Optional.
+        /// </summary>
+        public Action[] OutputActions { get; set; }
 
         /// <summary>
         /// Determines the possible outputs and its conditions from the current state. Optional.

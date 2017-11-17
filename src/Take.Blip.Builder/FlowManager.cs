@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Models;
+using Take.Blip.Client;
+using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
 {
@@ -14,41 +20,32 @@ namespace Take.Blip.Builder
         private readonly IContextProvider _contextProvider;
         private readonly INamedSemaphore _namedSemaphore;
         private readonly IActionProvider _actionProvider;
+        private readonly ISender _sender;
 
         public FlowManager(
             IConfiguration configuration,
             IStorageManager storageManager, 
             IContextProvider contextProvider, 
             INamedSemaphore namedSemaphore, 
-            IActionProvider actionProvider)
+            IActionProvider actionProvider,
+            ISender sender)
         {
             _configuration = configuration;
             _storageManager = storageManager;
             _contextProvider = contextProvider;
             _namedSemaphore = namedSemaphore;
             _actionProvider = actionProvider;
+            _sender = sender;
         }
 
-        public async Task<bool> TryExecuteAsync(Flow flow, string user, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Document input, Identity user, Flow flow, CancellationToken cancellationToken)
         {
-            if (flow == null) throw new ArgumentNullException(nameof(flow));
+            if (input == null) throw new ArgumentNullException(nameof(input));
             if (user == null) throw new ArgumentNullException(nameof(user));
+            if (flow == null) throw new ArgumentNullException(nameof(flow));
             flow.Validate();
 
-            var handle = await GetSynchronizationHandleAsync(flow, user, cancellationToken);
-            try
-            {
-                var currentExecutionStatus = await _storageManager.GetExecutionStatusAsync(flow.Id, user, cancellationToken);
-                // Ignores if the execution is already in progress
-                if (currentExecutionStatus == ExecutionStatus.Executing) return false;
-                
-                await _storageManager.SetExecutionStatusAsync(flow.Id, user, ExecutionStatus.Executing, cancellationToken);
-            }
-            finally
-            {
-                await handle.DisposeAsync();
-            }
-
+            var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.ExecutionSemaphoreExpiration, cancellationToken);
             try
             {
                 // Try restore a stored state
@@ -56,44 +53,45 @@ namespace Take.Blip.Builder
                 var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                 // Load the user context
-                var context = await _contextProvider.GetContextAsync(flow.Id, user, cancellationToken);
+                var context = _contextProvider.GetContext(user, flow.Variables);
 
-                // While the user is in a state
-                while (state != null)
+                do
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    await ProcessActionsAsync(context, flow, state, cancellationToken);
-                    state = await ProcessOutputsAsync(context, flow, state, cancellationToken);
-                }
+                    // Validate the input for the current state
+                    if (state.Input != null 
+                        && !state.Input.Bypass 
+                        && state.Input.Validation != null 
+                        && !ValidateDocument(input, state.Input.Validation))
+                    {
+                        if (state.Input.Validation.Error != null)
+                        {
+                            // Send the validation error message
+                            await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
+                                cancellationToken);
+                        }
+                        break;
+                    }
 
-                // Change the execution status to Stopped for the current user
-                await SynchronizedSetExecutionStatusAsync(flow, user, ExecutionStatus.Stopped, cancellationToken);
-                return true;
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                await SynchronizedSetExecutionStatusAsync(flow, user, ExecutionStatus.Cancelled, CancellationToken.None);
-                throw;
-            }
-            catch
-            {
-                await SynchronizedSetExecutionStatusAsync(flow, user, ExecutionStatus.Failed, cancellationToken);
-                throw;
-            }
-        }
+                    // Prepare to leave the current state executing the output actions
+                    if (state.OutputActions != null)
+                    {
+                        await ProcessActionsAsync(context, state.OutputActions, cancellationToken);
+                    }
 
-        private async Task SynchronizedSetExecutionStatusAsync(Flow flow, string user, ExecutionStatus executionStatus, CancellationToken cancellationToken)
-        {
-            var handle = await GetSynchronizationHandleAsync(flow, user, cancellationToken);
-            try
-            {
-                var currentExecutionStatus = await _storageManager.GetExecutionStatusAsync(flow.Id, user, cancellationToken);
-                if (!currentExecutionStatus.CanChangeTo(executionStatus))
-                {
-                    throw new InvalidOperationException($"Cannot change from status '${currentExecutionStatus}' to '{executionStatus}'");
-                }
-                await _storageManager.SetExecutionStatusAsync(flow.Id, user, executionStatus, cancellationToken);
+                    // Determine the next state
+                    state = await ProcessOutputsAsync(input, context, flow, state, cancellationToken);
+
+                    await _storageManager.SetStateIdAsync(flow.Id, context.User, state?.Id, cancellationToken);
+
+                    // Process the next state input actions
+                    if (state?.InputActions != null)
+                    {
+                        await ProcessActionsAsync(context, state.InputActions, cancellationToken);
+
+                    }
+                } while (state != null && (state.Input == null || state.Input.Bypass));
             }
             finally
             {
@@ -101,33 +99,41 @@ namespace Take.Blip.Builder
             }
         }
 
-        private Task<IAsyncDisposable> GetSynchronizationHandleAsync(Flow flow, string user, CancellationToken cancellationToken)
+        private bool ValidateDocument(Document input, InputValidation inputValidation)
         {
-            return _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.ExecutionSemaphoreExpiration, cancellationToken);            
+            switch (inputValidation.Rule)
+            {
+                case InputValidationRule.Text:
+                    return input is PlainText;
+
+                case InputValidationRule.Number:
+                    return int.TryParse(input.ToString(), out _);
+
+                case InputValidationRule.Date:
+                    return DateTime.TryParse(input.ToString(), out _);
+
+                case InputValidationRule.Regex:
+                    return Regex.IsMatch(input.ToString(), inputValidation.Regex);
+
+                case InputValidationRule.Type:
+                    return input.GetMediaType() == inputValidation.Type;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(inputValidation));
+            }
         }
 
-        private async Task ProcessActionsAsync(IContext context, Flow flow, State state, CancellationToken cancellationToken)
+        private async Task ProcessActionsAsync(IContext context, Action[] actions, CancellationToken cancellationToken)
         {
-            var actionOrder = 0;
-
-            var actionId = await _storageManager.GetActionIdAsync(flow.Id, context.User, cancellationToken);
-            if (actionId != null)
-            {
-                actionOrder = state.Actions.FirstOrDefault(a => a.Id == actionId)?.Order ?? 0;
-            }
-
             // Execute all state actions
-            foreach (var stateAction in state.Actions.OrderBy(a => a.Order).Where(a => a.Order >= actionOrder))
+            foreach (var stateAction in actions.OrderBy(a => a.Order))
             {                
                 var action = _actionProvider.Get(stateAction.Name);
-                await action.ExecuteAsync(context, stateAction.Argument, cancellationToken);
-            }
-
-            // Reset the action id
-            await _storageManager.DeleteActionIdAsync(flow.Id, context.User, cancellationToken);
+                await action.ExecuteAsync(context, stateAction.Settings, cancellationToken);
+            }            
         }
 
-        private async Task<State> ProcessOutputsAsync(IContext context, Flow flow, State state, CancellationToken cancellationToken)
+        private async Task<State> ProcessOutputsAsync(Document input, IContext context, Flow flow, State state, CancellationToken cancellationToken)
         {
             var outputs = state.Outputs;
             state = null;
@@ -144,7 +150,7 @@ namespace Take.Blip.Builder
                     {
                         foreach (var outputCondition in output.Conditions)
                         {
-                            isValidOutput = await EvaluateConditionAsync(outputCondition, context, cancellationToken);
+                            isValidOutput = await EvaluateConditionAsync(outputCondition, input, context, cancellationToken);
                             if (!isValidOutput) break;
                         }
                     }
@@ -157,20 +163,44 @@ namespace Take.Blip.Builder
                 }
             }
 
-            await _storageManager.SetStateIdAsync(flow.Id, context.User, state?.Id, cancellationToken);
             return state;
         }
 
-        public async Task<bool> EvaluateConditionAsync(Condition condition, IContext context, CancellationToken cancellationToken)
+        public async Task<bool> EvaluateConditionAsync(Condition condition, Document input, IContext context, CancellationToken cancellationToken)
         {
+            string comparisonValue;
+            if (condition.Variable == null)
+            {
+                comparisonValue = input.ToString();
+            }
+            else
+            {
+                comparisonValue = await context.GetVariableAsync(condition.Variable, cancellationToken);
+            }
+
             switch (condition.Comparison)
             {
                 case ConditionComparison.Equals:
-                    var variableValue = await context.GetVariableAsync(condition.Variable, cancellationToken);
-                    return variableValue == condition.Value;
-            }
+                    return comparisonValue == condition.Value;
 
-            throw new NotImplementedException();
+                case ConditionComparison.NotEquals:
+                    return comparisonValue != condition.Value;
+
+                case ConditionComparison.Contains:
+                    return comparisonValue.Contains(condition.Value);
+
+                case ConditionComparison.StartsWith:
+                    return comparisonValue.StartsWith(condition.Value);
+
+                case ConditionComparison.EndsWith:
+                    return comparisonValue.EndsWith(condition.Value);
+
+                case ConditionComparison.Matches:
+                    return Regex.IsMatch(comparisonValue, condition.Value);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(condition));
+            }
         }
     }
 }

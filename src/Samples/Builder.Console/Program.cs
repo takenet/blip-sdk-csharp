@@ -3,6 +3,7 @@ using SimpleInjector;
 using Take.Blip.Builder;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Models;
 
 namespace Builder.Console
 {

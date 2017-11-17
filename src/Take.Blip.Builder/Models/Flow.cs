@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Take.Blip.Builder.Utils;
 
-namespace Take.Blip.Builder
+namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Defines a conversational state machine.
@@ -24,13 +25,24 @@ namespace Take.Blip.Builder
         [Required]
         public State[] States { get; set; }
 
+        /// <summary>
+        /// The flow variables. Optional.
+        /// </summary>
+        public Dictionary<string, string> Variables { get; set; }
+
         public void Validate()
         {
             Validator.ValidateObject(this, new ValidationContext(this));
 
-            if (States.Count(s => s.Root) != 1)
+            var rootState = States.SingleOrDefault(s => s.Root);
+            if (rootState == null)
             {
                 throw new ValidationException("The flow must have one root state");
+            }
+
+            if (rootState.Input == null || rootState.Input.Bypass)
+            {
+                throw new ValidationException("The root state must expect an input");
             }
         }
 
