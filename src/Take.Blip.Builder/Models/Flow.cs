@@ -59,6 +59,32 @@ namespace Take.Blip.Builder.Models
                 {
                     throw new ValidationException($"The state id '{state.Id}' is not unique in the flow");
                 }
+                
+                // Check if there's a direct path loop (without inputs) to this state in the flow.
+                if (state.Outputs != null)
+                {
+                    bool CanBeReached(State targetState, Output output)
+                    {
+                        var outputState = States.FirstOrDefault(s => s.Id == output.StateId);
+                        if (outputState?.Outputs == null || outputState.Outputs.Length == 0) return false;
+                        if (outputState.Input != null && !outputState.Input.Bypass) return false;
+                        if (outputState.Outputs.Any(o => o.StateId == targetState.Id)) return true;
+                        return outputState.Outputs.Any(o => CanBeReached(targetState, o));
+                    };
+
+                    foreach (var output in state.Outputs)
+                    {
+                        if (States.All(s => s.Id != output.StateId))
+                        {
+                            throw new ValidationException($"The output state id '{output.StateId}' is invalid");
+                        }
+
+                        if (CanBeReached(state, output))
+                        {
+                            throw new ValidationException($"The state '{state.Id}' has a loop without inputs to itself in the flow");
+                        }
+                    }
+                }
             }
 
             _isValid = true;

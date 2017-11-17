@@ -16,7 +16,12 @@
           "id": "root",
           "root": true,
           "input": {
-            "variable": "input" 
+            "validation": {
+              "rule": "type",
+              "type": "text/plain",
+              "error": "Sorry, I only understand text"
+            },
+            "variable": "input"
           },
           "outputs": [
             {
