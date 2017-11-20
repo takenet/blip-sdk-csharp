@@ -16,9 +16,7 @@ namespace Take.Blip.Builder
             _settings = settings;
         }
 
-        public Task ReceiveAsync(Message envelope, CancellationToken cancellationToken)
-        {
-            return _flowManager.ProcessInputAsync(envelope.Content, envelope.From.ToIdentity(), _settings.Flow, cancellationToken);
-        }
+        public virtual Task ReceiveAsync(Message envelope, CancellationToken cancellationToken) 
+            => _flowManager.ProcessInputAsync(envelope.Content, envelope.From.ToIdentity(), _settings.Flow, cancellationToken);
     }
 }
