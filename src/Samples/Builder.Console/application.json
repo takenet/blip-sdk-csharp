@@ -1,0 +1,205 @@
+﻿{
+  "identifier": "blipsdkdemo",
+  "accessKey": "Mm10THlXd085aXdjeXlPZlBsbTM=",
+  "messageReceivers": [
+    {
+      "type": "BuilderMessageReceiver"
+    }
+  ],
+  "serviceProviderType": "BuilderServiceProvider",
+  "settingsType": "BuilderSettings",
+  "settings": {
+    "flow": {
+      "id": "0",
+      "states": [
+        {
+          "id": "0.0",
+          "root": true,
+          "input": {},
+          "outputActions": [
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "text/plain",
+                "content": "Olá ${contact.name}, eu sou o bot de ajuda do BLiP. 🤖\n\nEstou aqui para tirar suas dúvidas sobre a nossa plataforma.",
+                "metadata": {
+                  "#message.replaceVariables": "true"
+                }
+              }
+            }
+          ],
+          "outputs": [
+            {
+              "stateId": "1.0"
+            }
+          ]
+        },
+        {
+          "id": "1.0",
+          "inputActions": [
+            {
+              "type": "Pause",
+              "settings": {
+                "sendComposing": true,
+                "randomize": true
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "application/vnd.lime.select+json",
+                "content": {
+                  "text": "Sobre qual dos assuntos abaixo ⬇  você quer conversar?",
+                  "scope": "immediate",
+                  "options": [
+                    {
+                      "text": "Criar chatbot",
+                      "type": "application/vnd.blip.builder-state",
+                      "value": "2.0"
+                    },
+                    {
+                      "text": "Dúvidas",
+                      "type": "application/vnd.blip.builder-state",
+                      "value": "3.0"
+                    },
+                    {
+                      "text": "Sugestões",
+                      "type": "application/vnd.blip.builder-state",
+                      "value": "4.0"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "input": {},
+          "outputs": [
+            {
+              "stateId": "2.0",
+              "conditions": [
+                { "value": "2.0" }
+              ]
+            },
+            {
+              "stateId": "3.0",
+              "conditions": [
+                { "value": "3.0" }
+              ]
+            },
+            {
+              "stateId": "4.0",
+              "conditions": [
+                { "value": "4.0" }
+              ]
+            },
+            {
+              "stateId": "1.0"
+            }
+          ]
+        },
+        {
+          "id": "2.0",
+          "inputActions": [
+            {
+              "type": "Pause",
+              "settings": {
+                "sendComposing": true
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "application/vnd.lime.select+json",
+                "content": {
+                  "text": "Qual o seu nível de conhecimento em programação? 🤔",
+                  "scope": "immediate",
+                  "options": [
+                    {
+                      "text": "Pouca coisa 🙄",
+                      "type": "application/vnd.blip.builder-state",
+                      "value": "2.1"
+                    },
+                    {
+                      "text": "Sei o suﬁciente 🤓",
+                      "type": "application/vnd.blip.builder-state",
+                      "value": "2.2"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "input": {},
+          "outputs": [
+            {
+              "stateId": "1.0"
+            }
+          ]
+        },
+        {
+          "id": "3.0",
+          "inputActions": [
+            {
+              "type": "Pause",
+              "settings": {
+                "sendComposing": true
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "text/plain",
+                "content": "Qual a sua dúvida?"
+              }
+            }
+          ],
+          "input": {},
+          "outputs": [
+            {
+              "stateId": "1.0"
+            }
+          ]
+        },
+        {
+          "id": "4.0",
+          "inputActions": [
+            {
+              "type": "Pause",
+              "settings": {
+                "sendComposing": true
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "text/plain",
+                "content": "Opa, sugestões são sempre bem vindas"
+                
+              }
+            },
+            {
+              "type": "Pause",
+              "settings": {
+                "sendComposing": true,
+                "randomize": true
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "type": "text/plain",
+                "content":  "Pode falar."
+              }
+            }
+          ],
+          "input": {},
+          "outputs": [
+            {
+              "stateId": "1.0"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
 EndProject
@@ -24,6 +24,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.TestKit", "Take.Blip.Client.TestKit\Take.Blip.Client.TestKit.csproj", "{EBC3B0CE-1FDB-4303-A8F4-8CB173CB027F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client.Web", "Take.Blip.Client.Web\Take.Blip.Client.Web.csproj", "{ABC433EC-8417-415B-97B2-45C727934FA0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Builder", "Take.Blip.Builder\Take.Blip.Builder.csproj", "{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Builder.Console", "Samples\Builder.Console\Builder.Console.csproj", "{DDA1D829-6762-4F36-BCA5-295C2566FF84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Builder.UnitTests", "Take.Blip.Builder.UnitTests\Take.Blip.Builder.UnitTests.csproj", "{24DAE2B5-5492-4373-8114-C175C7DC445B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +65,18 @@ Global
 		{ABC433EC-8417-415B-97B2-45C727934FA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABC433EC-8417-415B-97B2-45C727934FA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABC433EC-8417-415B-97B2-45C727934FA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF56BD07-0ABE-41C3-A884-256B1A20C1DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24DAE2B5-5492-4373-8114-C175C7DC445B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24DAE2B5-5492-4373-8114-C175C7DC445B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24DAE2B5-5492-4373-8114-C175C7DC445B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24DAE2B5-5492-4373-8114-C175C7DC445B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +84,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F00D45F1-1380-4D18-B6D7-E6587536A44E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 		{DCAAB449-D608-4945-8453-A4098F74978E} = {9A7ECD2D-523B-47A2-B905-88407B124192}
+		{DDA1D829-6762-4F36-BCA5-295C2566FF84} = {9A7ECD2D-523B-47A2-B905-88407B124192}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF2B5E4C-5153-491A-85E2-BF747D45BFC3}
