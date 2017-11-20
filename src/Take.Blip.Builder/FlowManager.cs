@@ -205,7 +205,7 @@ namespace Take.Blip.Builder
                     comparisonValue = await context.GetVariableAsync(condition.Variable, cancellationToken);
                     break;
 
-                case ValueSource.Intention:
+                case ValueSource.Intent:
                     var analysisResponse = await _artificialIntelligenceExtension.AnalyzeAsync(
                         new AnalysisRequest
                         {
@@ -213,7 +213,7 @@ namespace Take.Blip.Builder
                         },
                         cancellationToken);
 
-                    comparisonValue = analysisResponse.Intentions.OrderByDescending(i => i.Score).FirstOrDefault()?.Id;
+                    comparisonValue = analysisResponse.Intentions.OrderByDescending(i => i.Score).FirstOrDefault()?.Name;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

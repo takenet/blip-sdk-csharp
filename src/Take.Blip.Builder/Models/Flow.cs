@@ -24,7 +24,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The flow states. Required.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "The flow must have at least one state")]
         public State[] States { get; set; }
 
         /// <summary>

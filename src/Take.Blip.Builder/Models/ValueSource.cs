@@ -18,6 +18,6 @@
         /// <summary>
         /// The value comes from the identified intention of the user input.
         /// </summary>
-        Intention
+        Intent
     }
 }

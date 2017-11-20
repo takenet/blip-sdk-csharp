@@ -17,6 +17,7 @@ namespace Take.Blip.Builder
             _bucketExtension = bucketExtension;
             _flowVariables = flowVariables;
             User = user ?? throw new ArgumentNullException(nameof(user));
+            FlowId = flowId;
         }
 
         public string FlowId { get; set; }
