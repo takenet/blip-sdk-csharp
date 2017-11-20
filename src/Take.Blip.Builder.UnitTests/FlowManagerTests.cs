@@ -1,17 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
-using SimpleInjector;
-using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
-using Take.Blip.Client;
-using Take.Blip.Client.Extensions.ArtificialIntelligence;
-using Take.Blip.Client.Extensions.Bucket;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
 using Input = Take.Blip.Builder.Models.Input;
@@ -20,56 +14,8 @@ using Input = Take.Blip.Builder.Models.Input;
 
 namespace Take.Blip.Builder.UnitTests
 {
-    public class FlowManagerTests : IDisposable
+    public class FlowManagerTests : FlowManagerTestsBase, IDisposable
     {
-        public FlowManagerTests()
-        {
-            BucketExtension = Substitute.For<IBucketExtension>();
-            ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
-            Sender = Substitute.For<ISender>();
-            StorageManager = Substitute.For<IStorageManager>();
-            ContextProvider = Substitute.For<IContextProvider>();
-            Context = Substitute.For<IContext>();
-            ContextProvider
-                .GetContext(Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<IDictionary<string, string>>())
-                .Returns(Context);
-            User = new Identity("user", "domain");
-            Context.User.Returns(User);
-
-            CancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        }
-
-        public Identity User { get; set; }
-
-        public IBucketExtension BucketExtension { get; set; }
-
-        public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; set; }
-
-        public ISender Sender { get; set; }
-
-        public IStorageManager StorageManager { get; set; }
-
-        public IContextProvider ContextProvider { get; set; }
-
-        public IContext Context { get; set; }
-
-        public CancellationToken CancellationToken => CancellationTokenSource.Token;
-
-        public CancellationTokenSource CancellationTokenSource { get; set; }
-
-        public IFlowManager GetTarget()
-        {
-            var container = new Container();
-            container.Options.AllowOverridingRegistrations = true;
-            container.RegisterBuilder();
-            container.RegisterSingleton(BucketExtension);
-            container.RegisterSingleton(ArtificialIntelligenceExtension);
-            container.RegisterSingleton(ContextProvider);
-            container.RegisterSingleton(Sender);
-            container.RegisterSingleton(StorageManager);
-            return container.GetInstance<IFlowManager>();
-        }
-
         [Fact]
         public async Task FlowWithoutConditionsShouldChangeStateAndSendMessage()
         {
