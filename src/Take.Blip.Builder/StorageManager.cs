@@ -10,7 +10,6 @@ namespace Take.Blip.Builder
     public class StorageManager : IStorageManager
     {
         private const string STATE_ID_KEY = "stateId";
-        private const string ACTION_ID_KEY = "actionId";
 
         private readonly IBucketExtension _bucketExtension;
         private readonly IConfiguration _configuration;
@@ -30,8 +29,5 @@ namespace Take.Blip.Builder
 
         public Task DeleteStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken) 
             => _bucketExtension.DeleteAsync(BucketIdHelper.GetPrivateId(flowId, user, STATE_ID_KEY), cancellationToken);
-
-        public Task<string> GetActionIdAsync(string flowId, Identity user, CancellationToken cancellationToken) 
-            => _bucketExtension.GetAsync(BucketIdHelper.GetPrivateId(flowId, user, ACTION_ID_KEY), cancellationToken);
     }
 }
