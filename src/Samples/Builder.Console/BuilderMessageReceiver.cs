@@ -1,9 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
+using Take.Blip.Builder;
 using Take.Blip.Client;
 
-namespace Take.Blip.Builder
+namespace Builder.Console
 {
     public class BuilderMessageReceiver : IMessageReceiver
     {
@@ -16,9 +17,7 @@ namespace Take.Blip.Builder
             _settings = settings;
         }
 
-        public Task ReceiveAsync(Message envelope, CancellationToken cancellationToken)
-        {
-            return _flowManager.ProcessInputAsync(envelope.Content, envelope.From.ToIdentity(), _settings.Flow, cancellationToken);
-        }
+        public virtual Task ReceiveAsync(Message envelope, CancellationToken cancellationToken) 
+            => _flowManager.ProcessInputAsync(envelope.Content, envelope.From.ToIdentity(), _settings.Flow, cancellationToken);
     }
 }
