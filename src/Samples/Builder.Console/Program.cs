@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Take.Blip.Client.Console;
 
-namespace Navigation
+namespace Builder.Console
 {
     class Program
     {

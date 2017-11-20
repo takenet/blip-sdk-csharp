@@ -3,7 +3,7 @@ using SimpleInjector;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Client.Activation;
 
-namespace Take.Blip.Builder
+namespace Builder.Console
 {
     public class BuilderServiceProvider : Container, IServiceContainer
     {

@@ -1,9 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
+using Take.Blip.Builder;
 using Take.Blip.Client;
 
-namespace Take.Blip.Builder
+namespace Builder.Console
 {
     public class BuilderMessageReceiver : IMessageReceiver
     {

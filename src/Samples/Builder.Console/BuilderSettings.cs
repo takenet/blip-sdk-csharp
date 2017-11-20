@@ -1,6 +1,6 @@
 ﻿using Take.Blip.Builder.Models;
 
-namespace Take.Blip.Builder
+namespace Builder.Console
 {
     public class BuilderSettings
     {
