@@ -351,5 +351,91 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                     CancellationToken);
         }
 
+        [Fact]
+        public async Task FlowWithMachTextContextOutputConditionsShouldChangeStateAndSendMessage()
+        {
+            // Tests for Maches OutputConditions
+            // Arrange
+            var validInput = "Ping!";
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+
+            var input = new PlainText() { Text = validInput };
+
+            var variableName = "MyVariable";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Variable = variableName
+                        },
+                        Outputs = new Output[]
+                        {
+                            new Output
+                            {
+                                Conditions = new Condition[]
+                                {
+                                    new Condition
+                                    {
+                                        Source = ValueSource.Context,
+                                        Comparison = ConditionComparison.Matches,
+                                        Variable = variableName,
+                                        Value = "(Ping!)"
+                                    }
+                                },
+                                StateId = "state2"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "state2",
+                        InputActions = new Action[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            Context.GetVariableAsync(variableName, CancellationToken).Returns(validInput);
+
+            // Act
+            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            
+            // Assert
+            ContextProvider.Received(1).GetContext(User, flow.Id, flow.Variables);
+
+            await StorageManager.Received(1).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, CancellationToken);
+
+            await Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(User)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    CancellationToken);
+        }
+
     }
 }
