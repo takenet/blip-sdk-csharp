@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
 
 namespace Take.Blip.Client.Extensions.Bucket
@@ -44,5 +45,33 @@ namespace Take.Blip.Client.Extensions.Bucket
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         Task DeleteAsync(string id, CancellationToken cancellationToken = default(CancellationToken));       
+    }
+
+    public static class BucketExtensionExtensions
+    {
+        /// <summary>
+        /// Gets an existing text from the bucket by the id.
+        /// </summary>
+        /// <param name="bucketExtension"></param>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static async Task<string> GetTextAsync(this IBucketExtension bucketExtension, string id, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var document = await bucketExtension.GetAsync<PlainText>(id, cancellationToken);
+            return document?.Text;
+        }
+
+        /// <summary>
+        /// Stores a text in the bucket.
+        /// </summary>
+        /// <param name="bucketExtension"></param>
+        /// <param name="id"></param>
+        /// <param name="text"></param>
+        /// <param name="expiration"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static Task SetTextAsync(this IBucketExtension bucketExtension, string id, string text, TimeSpan expiration = default(TimeSpan), CancellationToken cancellationToken = default(CancellationToken)) 
+            => bucketExtension.SetAsync(id, new PlainText() {Text = text}, expiration, cancellationToken);
     }
 }
