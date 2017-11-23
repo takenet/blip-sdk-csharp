@@ -6,7 +6,7 @@ using Lime.Protocol;
 
 namespace Take.Blip.Builder
 {
-    public interface IStorageManager
+    public interface IStateManager
     {
         Task<string> GetStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken);
 

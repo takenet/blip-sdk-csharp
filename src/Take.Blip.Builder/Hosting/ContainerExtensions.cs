@@ -10,7 +10,7 @@ namespace Take.Blip.Builder.Hosting
         public static Container RegisterBuilder(this Container container)
         {
             container.RegisterSingleton<IFlowManager, FlowManager>();
-            container.RegisterSingleton<IStorageManager, StorageManager>();
+            container.RegisterSingleton<IStateManager, StateManager>();
             container.RegisterSingleton<IContextProvider, ContextProvider>();
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
             container.RegisterSingleton<IActionProvider, ActionProvider>();

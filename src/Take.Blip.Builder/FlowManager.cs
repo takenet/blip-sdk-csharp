@@ -19,7 +19,7 @@ namespace Take.Blip.Builder
     public class FlowManager : IFlowManager
     {
         private readonly IConfiguration _configuration;
-        private readonly IStorageManager _storageManager;
+        private readonly IStateManager _stateManager;
         private readonly IContextProvider _contextProvider;
         private readonly INamedSemaphore _namedSemaphore;
         private readonly IActionProvider _actionProvider;
@@ -29,7 +29,7 @@ namespace Take.Blip.Builder
 
         public FlowManager(
             IConfiguration configuration,
-            IStorageManager storageManager, 
+            IStateManager stateManager, 
             IContextProvider contextProvider, 
             INamedSemaphore namedSemaphore, 
             IActionProvider actionProvider,
@@ -38,7 +38,7 @@ namespace Take.Blip.Builder
             IArtificialIntelligenceExtension artificialIntelligenceExtension)
         {
             _configuration = configuration;
-            _storageManager = storageManager;
+            _stateManager = stateManager;
             _contextProvider = contextProvider;
             _namedSemaphore = namedSemaphore;
             _actionProvider = actionProvider;
@@ -59,7 +59,7 @@ namespace Take.Blip.Builder
             try
             {
                 // Try restore a stored state
-                var stateId = await _storageManager.GetStateIdAsync(flow.Id, user, cancellationToken);
+                var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, cancellationToken);
                 var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                 // Load the user context
@@ -102,11 +102,11 @@ namespace Take.Blip.Builder
                     // Store the next state
                     if (state != null)
                     {
-                        await _storageManager.SetStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
+                        await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
                     }
                     else
                     {
-                        await _storageManager.DeleteStateIdAsync(flow.Id, context.User, cancellationToken);
+                        await _stateManager.DeleteStateIdAsync(flow.Id, context.User, cancellationToken);
                     }
 
                     // Process the next state input actions

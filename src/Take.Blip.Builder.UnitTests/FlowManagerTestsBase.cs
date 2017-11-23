@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.UnitTests
             BucketExtension = Substitute.For<IBucketExtension>();
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             Sender = Substitute.For<ISender>();
-            StorageManager = Substitute.For<IStorageManager>();
+            StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
             Context = Substitute.For<IContext>();
             ContextProvider
@@ -40,7 +40,7 @@ namespace Take.Blip.Builder.UnitTests
 
         public ISender Sender { get; set; }
 
-        public IStorageManager StorageManager { get; set; }
+        public IStateManager StateManager { get; set; }
 
         public IContextProvider ContextProvider { get; set; }
 
@@ -59,7 +59,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ArtificialIntelligenceExtension);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
-            container.RegisterSingleton(StorageManager);
+            container.RegisterSingleton(StateManager);
             return container.GetInstance<IFlowManager>();
         }
 

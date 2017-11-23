@@ -66,8 +66,8 @@ namespace Take.Blip.Builder.UnitTests
 
             // Assert
             ContextProvider.Received(1).GetContext(User, flow.Id, flow.Variables);
-            StorageManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            StorageManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -109,7 +109,7 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             ContextProvider.Received(1).GetContext(User, flow.Id, flow.Variables);
             Context.Received(1).SetVariableAsync(variableName, input.Text, CancellationToken);
-            StorageManager.Received(0).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            StateManager.Received(0).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -205,9 +205,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            StorageManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            StorageManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "marco", CancellationToken);
-            StorageManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
+            StateManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "marco", CancellationToken);
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -307,9 +307,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input2, User, flow, CancellationToken);
 
             // Assert
-            StorageManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            StorageManager.Received(1).SetStateIdAsync(flow.Id, User, "marco", CancellationToken);
-            StorageManager.Received(2).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "marco", CancellationToken);
+            StateManager.Received(2).DeleteStateIdAsync(flow.Id, User, CancellationToken);
             Sender
                 .Received(1)
                 .SendMessageAsync(

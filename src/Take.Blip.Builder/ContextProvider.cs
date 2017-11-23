@@ -2,21 +2,22 @@
 using Lime.Protocol;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client.Extensions.Bucket;
+using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder
 {
     public class ContextProvider : IContextProvider
     {
-        private readonly IBucketExtension _bucketExtension;
+        private readonly IContextExtension _contextExtension;
 
-        public ContextProvider(IBucketExtension bucketExtension)
+        public ContextProvider(IContextExtension contextExtension)
         {
-            _bucketExtension = bucketExtension;
+            _contextExtension = contextExtension;
         }
 
         public IContext GetContext(Identity user, string flowId, IDictionary<string, string> flowVariables)
         {
-            return new Context(_bucketExtension, user, flowId, flowVariables);
+            return new Context(_contextExtension, flowId, user, flowVariables);
         }
     }
 }

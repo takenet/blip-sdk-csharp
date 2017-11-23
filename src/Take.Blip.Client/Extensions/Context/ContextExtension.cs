@@ -23,9 +23,8 @@ namespace Take.Blip.Client.Extensions.Context
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (variableName == null) throw new ArgumentNullException(nameof(variableName));
 
-            var requestCommand = CreateGetCommandRequest(
-                Smart.Format(CONTEXT, new { identity = Uri.EscapeDataString(identity.ToString()) }));
-
+            var uriPath = GetVariableRequestUri(identity, variableName);
+            var requestCommand = CreateGetCommandRequest(uriPath);
             return ProcessCommandAsync<T>(requestCommand, cancellationToken);
         }
 
@@ -36,14 +35,7 @@ namespace Take.Blip.Client.Extensions.Context
             if (variableName == null) throw new ArgumentNullException(nameof(variableName));
             if (document == null) throw new ArgumentNullException(nameof(document));
 
-            var uriPath = Smart.Format(
-                CONTEXT_VARIABLE,
-                new
-                {
-                    identity = Uri.EscapeDataString(identity.ToString()),
-                    variableName
-                });
-
+            var uriPath = GetVariableRequestUri(identity, variableName);
             uriPath = AppendExpiration<T>(uriPath, expiration);
 
             var requestCommand = CreateSetCommandRequest(
@@ -64,7 +56,7 @@ namespace Take.Blip.Client.Extensions.Context
                 CONTEXT_GLOBAL_VARIABLE,
                 new
                 {
-                    variableName
+                    variableName = Uri.EscapeDataString(variableName)
                 });
 
             uriPath = AppendExpiration<T>(uriPath, expiration);
@@ -72,24 +64,19 @@ namespace Take.Blip.Client.Extensions.Context
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
-        public Task<T> DeleteVariableAsync<T>(Identity identity, string variableName, CancellationToken cancellationToken) where T : Document
+        public Task DeleteVariableAsync(Identity identity, string variableName, CancellationToken cancellationToken)
         {
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (variableName == null) throw new ArgumentNullException(nameof(variableName));
-            
-            var requestCommand = CreateDeleteCommandRequest(
-                Smart.Format(
-                    CONTEXT_VARIABLE,
-                    new
-                    {
-                        identity = Uri.EscapeDataString(identity.ToString()),
-                        variableName
-                    }));
 
-            return ProcessCommandAsync<T>(requestCommand, cancellationToken);
+            var uriPath = GetVariableRequestUri(identity, variableName);
+
+            var requestCommand = CreateDeleteCommandRequest(uriPath);
+
+            return ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
-        public Task<T> DeleteGlobalVariableAsync<T>(string variableName, CancellationToken cancellationToken) where T : Document
+        public Task DeleteGlobalVariableAsync(string variableName, CancellationToken cancellationToken)
         {
             if (variableName == null) throw new ArgumentNullException(nameof(variableName));
 
@@ -98,10 +85,10 @@ namespace Take.Blip.Client.Extensions.Context
                     CONTEXT_GLOBAL_VARIABLE,
                     new
                     {
-                        variableName
+                        variableName = Uri.EscapeDataString(variableName)
                     }));
 
-            return ProcessCommandAsync<T>(requestCommand, cancellationToken);
+            return ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
         public Task<DocumentCollection> GetVariablesAsync(Identity identity, int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken))
@@ -118,6 +105,16 @@ namespace Take.Blip.Client.Extensions.Context
             var requestCommand = CreateGetCommandRequest(
                 $"{CONTEXTS}?{nameof(skip)}={skip}&{nameof(take)}={take}");
             return ProcessCommandAsync<DocumentCollection>(requestCommand, cancellationToken);
+        }
+
+        private static string GetVariableRequestUri(Identity identity, string variableName)
+        {
+            return Smart.Format(CONTEXT_VARIABLE,
+                new
+                {
+                    identity = Uri.EscapeDataString(identity.ToString()),
+                    variableName = Uri.EscapeDataString(variableName)
+                });
         }
 
         private static string AppendExpiration<T>(string uriPath, TimeSpan expiration) where T : Document
