@@ -23,11 +23,16 @@ namespace Take.Blip.Builder.Models
         public ConditionComparison Comparison { get; set; }
 
         /// <summary>
-        /// The value to be used by the comparison with the context value. Required.
+        /// The operator for comparison with the provided values. The default value is <see cref="ConditionOperator.Or"/>.
         /// </summary>
-        [Required(ErrorMessage = "The condition value is required")]
-        public string Value { get; set; }
+        public ConditionOperator Operator { get; set; }
 
+        /// <summary>
+        /// The values to be used by the comparison with the context value. Required.
+        /// </summary>
+        [Required(ErrorMessage = "The condition values are required")]
+        public string[] Values { get; set; }
+               
         public void Validate()
         {
             this.ValidateObject();

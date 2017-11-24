@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -215,32 +216,25 @@ namespace Take.Blip.Builder
 
                     comparisonValue = analysisResponse.Intentions.OrderByDescending(i => i.Score).FirstOrDefault()?.Name;
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            switch (condition.Comparison)
+            if (comparisonValue == null) return false;
+
+            var comparisonFunc = condition.Comparison.ToDelegate();
+
+            switch (condition.Operator)
             {
-                case ConditionComparison.Equals:
-                    return comparisonValue == condition.Value;
+                case ConditionOperator.Or:
+                    return condition.Values.Any(v => comparisonFunc(comparisonValue, v));
 
-                case ConditionComparison.NotEquals:
-                    return comparisonValue != condition.Value;
-
-                case ConditionComparison.Contains:
-                    return comparisonValue != null && comparisonValue.Contains(condition.Value);
-
-                case ConditionComparison.StartsWith:
-                    return comparisonValue != null && comparisonValue.StartsWith(condition.Value);
-
-                case ConditionComparison.EndsWith:
-                    return comparisonValue != null && comparisonValue.EndsWith(condition.Value);
-
-                case ConditionComparison.Matches:
-                    return comparisonValue != null && Regex.IsMatch(comparisonValue, condition.Value);
+                case ConditionOperator.And:
+                    return condition.Values.All(v => comparisonFunc(comparisonValue, v));
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(condition));
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }

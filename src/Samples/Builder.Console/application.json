@@ -1,6 +1,8 @@
 ﻿{
-  "identifier": "blipsdkdemo",
-  "accessKey": "Mm10THlXd085aXdjeXlPZlBsbTM=",
+  "identifier": "joao",
+  "accessKey": "NjE5ODg5",
+  "hostName": "localhost",
+  "port": 55321, 
   "messageReceivers": [
     {
       "type": "BuilderMessageReceiver"
@@ -77,19 +79,19 @@
             {
               "stateId": "2.0",
               "conditions": [
-                { "value": "2.0" }
+                { "values": [ "2.0" ] }
               ]
             },
             {
               "stateId": "3.0",
               "conditions": [
-                { "value": "3.0" }
+                { "values": [ "3.0" ] }
               ]
             },
             {
               "stateId": "4.0",
               "conditions": [
-                { "value": "4.0" }
+                { "values": [ "4.0" ] }
               ]
             },
             {
@@ -174,7 +176,7 @@
               "settings": {
                 "type": "text/plain",
                 "content": "Opa, sugestões são sempre bem vindas"
-                
+
               }
             },
             {
@@ -188,7 +190,7 @@
               "type": "SendMessage",
               "settings": {
                 "type": "text/plain",
-                "content":  "Pode falar."
+                "content": "Pode falar."
               }
             }
           ],

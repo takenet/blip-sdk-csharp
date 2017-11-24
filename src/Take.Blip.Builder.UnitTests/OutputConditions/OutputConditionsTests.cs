@@ -44,7 +44,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                 {
                                     new Condition
                                     {
-                                        Value = "Marco!"
+                                        Values = new[] { "Marco!" }
                                     }
                                 },
                                 StateId = "marco"
@@ -55,7 +55,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                 {
                                     new Condition
                                     {
-                                        Value = "Ping!"
+                                        Values = new[] { "Ping!" }
                                     }
                                 },
                                 StateId = "ping"
@@ -142,7 +142,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                 {
                                     new Condition
                                     {
-                                        Value = "Marco!"
+                                        Values = new[] { "Marco!" }
                                     }
                                 },
                                 StateId = "marco"
@@ -153,7 +153,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                 {
                                     new Condition
                                     {
-                                        Value = "Ping!"
+                                        Values = new[] { "Ping!" }
                                     }
                                 },
                                 StateId = "ping"
@@ -250,7 +250,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                         Source = ValueSource.Context,
                                         Comparison = ConditionComparison.Equals,
                                         Variable = variableName,
-                                        Value = validInput
+                                        Values = new[] { validInput }
                                     }
                                 },
                                 StateId = "state2"
@@ -265,7 +265,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                         Source = ValueSource.Context,
                                         Comparison = ConditionComparison.Contains,
                                         Variable = variableName,
-                                        Value = validInput
+                                        Values = new[] { validInput }
                                     }
                                 },
                                 StateId = "state2"
@@ -280,7 +280,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                         Source = ValueSource.Context,
                                         Comparison = ConditionComparison.StartsWith,
                                         Variable = variableName,
-                                        Value = validInput
+                                        Values = new[] { validInput }
                                     }
                                 },
                                 StateId = "state2"
@@ -295,7 +295,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                         Source = ValueSource.Context,
                                         Comparison = ConditionComparison.EndsWith,
                                         Variable = variableName,
-                                        Value = validInput
+                                        Values = new[] { validInput }
                                     }
                                 },
                                 StateId = "state2"
@@ -387,7 +387,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                         Source = ValueSource.Context,
                                         Comparison = ConditionComparison.Matches,
                                         Variable = variableName,
-                                        Value = "(Ping!)"
+                                        Values = new[] { "(Ping!)" }
                                     }
                                 },
                                 StateId = "state2"

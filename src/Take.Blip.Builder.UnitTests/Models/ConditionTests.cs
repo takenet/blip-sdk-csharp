@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             {
                 Source = ValueSource.Context,
                 Variable = "variable",
-                Value = "value"
+                Values = new[] { "value" }
             };
 
             // Act
@@ -41,10 +41,9 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("The condition value is required");
+                ex.Message.ShouldBe("The condition values are required");
             }
         }
-
 
         [Fact]
         public void ValidateContextSourceWithoutVariableNameShouldFail()
@@ -53,7 +52,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             var condition = new Condition
             {
                 Source = ValueSource.Context,
-                Value = "value"
+                Values = new[] { "value" }
             };
 
             // Act

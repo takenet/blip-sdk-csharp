@@ -145,7 +145,7 @@ namespace Take.Blip.Builder.UnitTests
                                     {
                                         Variable = "Word",
                                         Source = ValueSource.Context,
-                                        Value = "Marco!"
+                                        Values = new[] { "Marco!" }
                                     }
                                 },
                                 StateId = "marco"
@@ -158,7 +158,7 @@ namespace Take.Blip.Builder.UnitTests
                                     {
                                         Variable = "Word",
                                         Source = ValueSource.Context,
-                                        Value = "Ping!"
+                                        Values = new[] { "Ping!" }
                                     }
                                 },
                                 StateId = "ping"
@@ -248,7 +248,7 @@ namespace Take.Blip.Builder.UnitTests
                                 {
                                     new Condition
                                     {
-                                        Value = "Marco!"
+                                        Values = new[] { "Marco!" }
                                     }
                                 },
                                 StateId = "marco"
@@ -259,7 +259,7 @@ namespace Take.Blip.Builder.UnitTests
                                 {
                                     new Condition
                                     {
-                                        Value = "Ping!"
+                                        Values = new[] { "Ping!" }
                                     }
                                 },
                                 StateId = "ping"
