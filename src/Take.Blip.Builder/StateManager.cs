@@ -34,7 +34,13 @@ namespace Take.Blip.Builder
         public Task SetStateIdAsync(string flowId, Identity user, string stateId, CancellationToken cancellationToken)
             => _contextExtension.SetTextVariableAsync(user, $"{STATE_ID_KEY}@{flowId}", stateId, cancellationToken, _configuration.SessionExpiration);
 
-        public Task DeleteStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken)
-            => _contextExtension.DeleteVariableAsync(user, $"{STATE_ID_KEY}@{flowId}",  cancellationToken);
+        public async Task DeleteStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _contextExtension.DeleteVariableAsync(user, $"{STATE_ID_KEY}@{flowId}", cancellationToken);
+            }
+            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND) { }
+        }
     }
 }

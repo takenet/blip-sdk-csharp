@@ -1,8 +1,8 @@
 ﻿{
-  "identifier": "joao",
-  "accessKey": "NjE5ODg5",
-  "hostName": "localhost",
-  "port": 55321, 
+  "identifier": "blipsdkdemo",
+  "accessKey": "YVQ1NWxnODE0NURnZ3VqY2RSVjI=",
+  "hostName": "hmg.msging.net",
+  "port": 55321,
   "messageReceivers": [
     {
       "type": "BuilderMessageReceiver"
