@@ -55,6 +55,8 @@ namespace Take.Blip.Builder.Models
                 }
             }
 
+            Input?.Validate();
+
             if (OutputActions != null)
             {
                 foreach (var outputAction in OutputActions)
