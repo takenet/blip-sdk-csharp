@@ -24,7 +24,7 @@ namespace Take.Blip.Builder.UnitTests
             ContextProvider = Substitute.For<IContextProvider>();
             Context = Substitute.For<IContext>();
             ContextProvider
-                .GetContext(Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<IDictionary<string, string>>())
+                .GetContext(Arg.Any<Identity>(), Arg.Any<string>())
                 .Returns(Context);
             User = new Identity("user", "domain");
             Context.User.Returns(User);

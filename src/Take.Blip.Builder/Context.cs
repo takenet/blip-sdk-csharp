@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
@@ -10,13 +9,11 @@ namespace Take.Blip.Builder
 {
     public class Context : IContext
     {
-        private readonly IContextExtension _contextExtension;
-        private readonly IDictionary<string, string> _flowVariables;
+        private readonly IContextExtension _contextExtension;        
 
-        public Context(IContextExtension contextExtension, string flowId, Identity user, IDictionary<string, string> flowVariables)
+        public Context(IContextExtension contextExtension, string flowId, Identity user)
         {
             _contextExtension = contextExtension;
-            _flowVariables = flowVariables;
             User = user ?? throw new ArgumentNullException(nameof(user));
             FlowId = flowId;
         }
@@ -30,12 +27,6 @@ namespace Take.Blip.Builder
 
         public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
         {
-            if (_flowVariables != null && 
-                _flowVariables.TryGetValue(name, out var variableValue))
-            {
-                return variableValue;
-            }
-
             try
             {
                 return await _contextExtension.GetTextVariableAsync(User, name, cancellationToken);

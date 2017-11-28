@@ -15,9 +15,9 @@ namespace Take.Blip.Builder
             _contextExtension = contextExtension;
         }
 
-        public IContext GetContext(Identity user, string flowId, IDictionary<string, string> flowVariables)
+        public IContext GetContext(Identity user, string flowId)
         {
-            return new Context(_contextExtension, flowId, user, flowVariables);
+            return new Context(_contextExtension, flowId, user);
         }
     }
 }

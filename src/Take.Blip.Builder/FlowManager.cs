@@ -64,7 +64,7 @@ namespace Take.Blip.Builder
                 var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                 // Load the user context
-                var context = _contextProvider.GetContext(user, flow.Id, flow.Variables);
+                var context = _contextProvider.GetContext(user, flow.Id);
 
                 do
                 {
