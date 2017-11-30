@@ -3,13 +3,39 @@ using System.Text.RegularExpressions;
 
 namespace Take.Blip.Builder
 {
+    /// <summary>
+    /// Define the comparison methods for condition values.
+    /// </summary>
     public enum ConditionComparison
     {
+        /// <summary>
+        /// Check for value equality.
+        /// </summary>
         Equals,
+
+        /// <summary>
+        /// Check for a not equal value.
+        /// </summary>
         NotEquals,
+
+        /// <summary>
+        /// Check a substring value.
+        /// </summary>
         Contains,
+
+        /// <summary>
+        /// Check if a string starts with the provided value.
+        /// </summary>
         StartsWith,
+
+        /// <summary>
+        /// Check if a string ends with the provided value.
+        /// </summary>
         EndsWith,
+
+        /// <summary>
+        /// Check if a string matches the provided regular expression.
+        /// </summary>
         Matches
     }
 

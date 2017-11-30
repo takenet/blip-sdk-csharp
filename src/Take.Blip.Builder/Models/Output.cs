@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The id of the state to be activated in case of success evaluation of the conditions. Required.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "The output state id is required")]
         public string StateId { get; set; }
 
         public void Validate()

@@ -42,10 +42,6 @@ namespace Take.Blip.Builder.Models
         public void Validate()
         {
             this.ValidateObject();
-            if (Root && InputActions != null)
-            {
-                throw new ValidationException("The root state cannot have input actions");
-            }
 
             if (InputActions != null)
             {
