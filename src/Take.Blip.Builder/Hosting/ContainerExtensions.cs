@@ -19,8 +19,7 @@ namespace Take.Blip.Builder.Hosting
 
             container.RegisterCollection<IAction>(new[] 
             {
-                typeof(SendMessageAction),
-                typeof(PauseAction),
+                typeof(SendMessageAction)
             });
             return container;
         }

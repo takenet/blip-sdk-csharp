@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Lime.Protocol.Serialization.Newtonsoft;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Client;
 
@@ -12,10 +14,12 @@ namespace Take.Blip.Builder.Actions
     public class SendMessageAction : IAction
     {
         private readonly ISender _sender;
+        private readonly JsonSerializer _serializer;
 
         public SendMessageAction(ISender sender)
         {
             _sender = sender;
+            _serializer = JsonSerializer.Create(JsonNetSerializer.Settings);
         }
 
         public string Type => "SendMessage";
@@ -49,6 +53,16 @@ namespace Take.Blip.Builder.Actions
             }
             
             await _sender.SendMessageAsync(message, cancellationToken);
+
+            // Await the interval if it is a chatstate message
+            if (mediaType == ChatState.MediaType)
+            {
+                var chatState = rawContent.ToObject<ChatState>(_serializer);
+                if (chatState.Interval != null)
+                {
+                    await Task.Delay(chatState.Interval.Value, cancellationToken);
+                }
+            }
         }
     }
 }
