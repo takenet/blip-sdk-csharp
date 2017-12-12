@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace Take.Blip.Builder
+namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Define the comparison methods for condition values.
@@ -36,7 +36,12 @@ namespace Take.Blip.Builder
         /// <summary>
         /// Check if a string matches the provided regular expression.
         /// </summary>
-        Matches
+        Matches,
+
+        /// <summary>
+        /// Check if a string value is approximate to the other specified value.
+        /// </summary>
+        ApproximateTo
     }
 
     public static class ConditionComparisonExtensions
@@ -46,22 +51,26 @@ namespace Take.Blip.Builder
             switch (conditionComparison)
             {
                 case ConditionComparison.Equals:
-                    return (v1, v2) => v1 == v2;
+                    return (v1, v2) => v1.Equals(v2, StringComparison.OrdinalIgnoreCase);
 
                 case ConditionComparison.NotEquals:
-                    return (v1, v2) => v1 != v2;
+                    return (v1, v2) => !v1.Equals(v2, StringComparison.OrdinalIgnoreCase);
 
                 case ConditionComparison.Contains:
-                    return (v1, v2) => v1.Contains(v2);
+                    return (v1, v2) => v1.ToLowerInvariant().Contains(v2.ToLowerInvariant());
 
                 case ConditionComparison.StartsWith:
-                    return (v1, v2) => v1.StartsWith(v2);
+                    return (v1, v2) => v1.StartsWith(v2, StringComparison.OrdinalIgnoreCase);
 
                 case ConditionComparison.EndsWith:
-                    return (v1, v2) => v1.EndsWith(v2);
+                    return (v1, v2) => v1.EndsWith(v2, StringComparison.OrdinalIgnoreCase);
 
                 case ConditionComparison.Matches:
                     return Regex.IsMatch;
+
+                case ConditionComparison.ApproximateTo:
+                    // Allows the difference of 25% of the string.
+                    return (v1, v2) => v1.ToLowerInvariant().CalculateLevenshteinDistance(v2.ToLowerInvariant()) <= Math.Ceiling(v1.Length * 0.25);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(conditionComparison));
