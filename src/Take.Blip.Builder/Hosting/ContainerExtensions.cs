@@ -1,6 +1,7 @@
 ﻿using Lime.Protocol.Serialization;
 using SimpleInjector;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.ProcessHttp;
 using Take.Blip.Builder.Utils;
 
@@ -24,7 +25,8 @@ namespace Take.Blip.Builder.Hosting
             {
                 typeof(SendMessageAction),
                 typeof(TrackEventAction),
-                typeof(ProcessHttpAction)
+                typeof(ProcessHttpAction),
+                typeof(ManageListAction)
             });
             return container;
         }
