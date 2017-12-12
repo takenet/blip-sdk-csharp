@@ -24,14 +24,17 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
             var processHttpSettings = settings.ToObject<ProcessHttpSettings>();
 
+            if (processHttpSettings.Uri == null) throw new ArgumentException($"The '{nameof(ProcessHttpSettings.Uri)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
+            if (processHttpSettings.Method == null) throw new ArgumentException($"The '{nameof(ProcessHttpSettings.Method)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
+
             var httpRequestMessage = new HttpRequestMessage(
-                new HttpMethod(processHttpSettings.Method), processHttpSettings.Url);
+                new HttpMethod(processHttpSettings.Method), processHttpSettings.Uri);
 
             if (processHttpSettings.Headers != null)
             {
                 foreach (var header in processHttpSettings.Headers)
                 {
-                    httpRequestMessage.Headers.Add(header.Key, header.Value);
+                    httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
             }
 
@@ -44,7 +47,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
             // Set the responses variables
             if (string.IsNullOrWhiteSpace(processHttpSettings.Variable)) return;
-            await context.SetVariableAsync($"{processHttpSettings.Variable}.status", httpResponseMessage.StatusCode.ToString(), cancellationToken);
+            await context.SetVariableAsync($"{processHttpSettings.Variable}.status", ((int) httpResponseMessage.StatusCode).ToString(), cancellationToken);
 
             var body = await httpResponseMessage.Content.ReadAsStringAsync();
             if (!string.IsNullOrWhiteSpace(body))

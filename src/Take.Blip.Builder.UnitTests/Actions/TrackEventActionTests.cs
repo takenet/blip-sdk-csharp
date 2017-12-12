@@ -3,12 +3,10 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Shouldly;
 using Take.Blip.Builder.Actions;
-using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.EventTracker;
 using Xunit;
 
@@ -29,6 +27,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public CancellationTokenSource CancellationTokenSource { get; set; }
 
         public IEventTrackExtension EventTrackExtension { get; private set; }
+
         public IContext Context { get; private set; }
 
         public void Dispose()
@@ -50,12 +49,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
 
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
-            var settings = new JObject();
+            var settings = new JObject
+            {
+                ["category"] = category,
+                ["action"] = action,
+                ["identity"] = identity,
+                ["extras"] = JObject.FromObject(extras)
+            };
 
-            settings["category"] = category;
-            settings["action"] = action;
-            settings["identity"] = identity;
-            settings["extras"] = JObject.FromObject(extras);
 
             // Act
             await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
@@ -84,12 +85,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
 
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
-            var settings = new JObject();
+            var settings = new JObject
+            {
+                ["category"] = category,
+                ["action"] = action,
+                ["identity"] = identity,
+                ["extras"] = JObject.FromObject(extras)
+            };
 
-            settings["category"] = category;
-            settings["action"] = action;
-            settings["identity"] = identity;
-            settings["extras"] = JObject.FromObject(extras);
 
             // Act
             try

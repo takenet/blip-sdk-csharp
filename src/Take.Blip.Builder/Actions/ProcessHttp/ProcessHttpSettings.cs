@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
 {
@@ -6,7 +7,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
     {
         public string Method { get; set; }
 
-        public string Url { get; set; }
+        public Uri Uri { get; set; }
 
         public Dictionary<string, string> Headers { get; set; }
 
