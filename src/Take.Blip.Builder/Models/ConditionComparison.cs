@@ -70,7 +70,7 @@ namespace Take.Blip.Builder.Models
 
                 case ConditionComparison.ApproximateTo:
                     // Allows the difference of 25% of the string.
-                    return (v1, v2) => v1.CalculateLevenshteinDistance(v2) <= Math.Ceiling(v1.Length * 0.25);
+                    return (v1, v2) => v1.ToLowerInvariant().CalculateLevenshteinDistance(v2.ToLowerInvariant()) <= Math.Ceiling(v1.Length * 0.25);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(conditionComparison));
