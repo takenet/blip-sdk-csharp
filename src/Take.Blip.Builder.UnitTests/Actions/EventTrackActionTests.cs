@@ -14,9 +14,9 @@ using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
 {
-    public class EventTrackActionTests : IDisposable
+    public class TrackEventActionTests : IDisposable
     {
-        public EventTrackActionTests()
+        public TrackEventActionTests()
         {
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
             Context = Substitute.For<IContext>();
@@ -49,7 +49,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
 
 
-            var eventTrackAction = new EventTrackAction(EventTrackExtension);
+            var eventTrackAction = new TrackEventAction(EventTrackExtension);
             var settings = new JObject();
 
             settings["category"] = category;
@@ -83,7 +83,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
 
 
-            var eventTrackAction = new EventTrackAction(EventTrackExtension);
+            var eventTrackAction = new TrackEventAction(EventTrackExtension);
             var settings = new JObject();
 
             settings["category"] = category;
@@ -100,7 +100,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             catch (ArgumentException ex)
             {
                 // Assert
-                ex.Message.ShouldBe("The 'category' settings value is required for 'EventTrackAction' action");
+                ex.Message.ShouldBe("The 'category' settings value is required for 'TrackEventAction' action");
                 
                 await EventTrackExtension.DidNotReceive().AddAsync(
                     category,

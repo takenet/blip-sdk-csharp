@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder
@@ -27,11 +29,31 @@ namespace Take.Blip.Builder
 
         public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
         {
+            if (name == null) throw new ArgumentNullException(nameof(name));
+
+            var variableAndProperty = name.Split('@');
+            var variableName = variableAndProperty[0];
+            var propertyName = variableAndProperty.Length > 1 ? variableAndProperty[1] : null;
+
             try
             {
-                return await _contextExtension.GetTextVariableAsync(User, name, cancellationToken);
+                var variableValue = await _contextExtension.GetTextVariableAsync(User, variableName, cancellationToken);
+                if (string.IsNullOrWhiteSpace(propertyName)) return variableValue;
+
+                // If there's a propertyName, attempts to parse the value as JSON and retrieve the value from it.
+                var propertyNames = propertyName.Split('.');
+                JToken json = JObject.Parse(variableValue);
+                foreach (var s in propertyNames)
+                {
+                    json = json[s];
+                    if (json == null) return null;
+                }
+
+                return json.ToString(Formatting.None);
             }
-            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
+            catch (Exception ex) when (
+                (ex is LimeException limeException && limeException.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
+                || ex is JsonException)
             {
                 return null;
             }

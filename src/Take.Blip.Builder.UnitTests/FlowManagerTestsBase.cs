@@ -8,6 +8,7 @@ using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Bucket;
+using Take.Blip.Client.Extensions.EventTracker;
 
 #pragma warning disable 4014
 
@@ -19,6 +20,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             BucketExtension = Substitute.For<IBucketExtension>();
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+            EventTrackExtension = Substitute.For<IEventTrackExtension>();
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
@@ -37,6 +39,8 @@ namespace Take.Blip.Builder.UnitTests
         public IBucketExtension BucketExtension { get; set; }
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; set; }
+
+        public IEventTrackExtension EventTrackExtension { get; set; }
 
         public ISender Sender { get; set; }
 
@@ -57,6 +61,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterBuilder();
             container.RegisterSingleton(BucketExtension);
             container.RegisterSingleton(ArtificialIntelligenceExtension);
+            container.RegisterSingleton(EventTrackExtension);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);

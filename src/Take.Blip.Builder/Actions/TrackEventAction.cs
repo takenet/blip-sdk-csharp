@@ -8,16 +8,16 @@ using Take.Blip.Client.Extensions.EventTracker;
 
 namespace Take.Blip.Builder.Actions
 {
-    public class EventTrackAction : IAction
+    public class TrackEventAction : IAction
     {
         private readonly IEventTrackExtension _eventTrackExtension;
 
         private const string CATEGORY_KEY = "category";
         private const string ACTION_KEY = "action";
         
-        public string Type => "EventTrack";
+        public string Type => "TrackEvent";
 
-        public EventTrackAction(IEventTrackExtension eventTrackExtension)
+        public TrackEventAction(IEventTrackExtension eventTrackExtension)
         {
             _eventTrackExtension = eventTrackExtension;
         }
@@ -25,13 +25,13 @@ namespace Take.Blip.Builder.Actions
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(EventTrackAction)}' action");
+            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(TrackEventAction)}' action");
 
             var category = (string)settings[CATEGORY_KEY];
             var action = (string)settings[ACTION_KEY];
 
-            if (string.IsNullOrEmpty(category)) throw new ArgumentException($"The '{nameof(category)}' settings value is required for '{nameof(EventTrackAction)}' action");
-            if (string.IsNullOrEmpty(action)) throw new ArgumentException($"The '{nameof(action)}' settings value is required for '{nameof(EventTrackAction)}' action");
+            if (string.IsNullOrEmpty(category)) throw new ArgumentException($"The '{nameof(category)}' settings value is required for '{nameof(TrackEventAction)}' action");
+            if (string.IsNullOrEmpty(action)) throw new ArgumentException($"The '{nameof(action)}' settings value is required for '{nameof(TrackEventAction)}' action");
 
 
             Identity identity = null;
