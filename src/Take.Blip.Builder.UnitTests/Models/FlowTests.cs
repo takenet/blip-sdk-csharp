@@ -229,7 +229,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("There is a loop from the state '1' to itself that do not require user input");
+                ex.Message.ShouldBe("There is a loop in the flow that do not requires user input");
             }
         }
 
@@ -288,7 +288,88 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("There is a loop from the state '1' to itself that do not require user input");
+                ex.Message.ShouldBe("There is a loop in the flow that do not requires user input");
+            }
+        }
+
+        [Fact]
+        public void ValidateFlowWithMultipleStepsDirectLoopShouldFail()
+        {
+            // Arrange
+            var flow = new Flow
+            {
+                Id = "0",
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "0",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new []
+                        {
+                            new Output
+                            {
+                                StateId = "1"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "1",
+                        Outputs = new []
+                        {
+                            new Output
+                            {
+                                StateId = "2"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "2",
+                        Outputs = new []
+                        {
+                            new Output
+                            {
+                                StateId = "3"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "3",
+                        Outputs = new []
+                        {
+                            new Output
+                            {
+                                StateId = "4"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "4",
+                        Outputs = new []
+                        {
+                            new Output
+                            {
+                                StateId = "2"
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Act
+            try
+            {
+                flow.Validate();
+                throw new Exception("No validation exception thrown");
+            }
+            catch (ValidationException ex)
+            {
+                ex.Message.ShouldBe("There is a loop in the flow that do not requires user input");
             }
         }
     }

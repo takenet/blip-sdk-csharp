@@ -58,13 +58,15 @@ namespace Take.Blip.Builder.Models
                 // Check if there's a direct path loop (without inputs) to this state in the flow.
                 if (state.Outputs != null)
                 {
-                    bool CanBeReached(State targetState, Output output)
+                    bool CanBeReached(State targetState, Output output, ISet<string> checkedStates)
                     {
+                        if (checkedStates.Contains(output.StateId)) return true;
                         var outputState = States.FirstOrDefault(s => s.Id == output.StateId);
                         if (outputState?.Outputs == null || outputState.Outputs.Length == 0) return false;
                         if (outputState.Input != null && !outputState.Input.Bypass) return false;
                         if (outputState.Outputs.Any(o => o.StateId == targetState.Id)) return true;
-                        return outputState.Outputs.Any(o => CanBeReached(targetState, o));
+                        checkedStates.Add(output.StateId);
+                        return outputState.Outputs.Any(o => CanBeReached(targetState, o, checkedStates));
                     };
 
                     foreach (var output in state.Outputs)
@@ -76,10 +78,12 @@ namespace Take.Blip.Builder.Models
 
                         if (state.Input == null || state.Input.Bypass)
                         {
-                            if (CanBeReached(state, output))
+                            var checkedStates = new HashSet<string>();
+
+                            if (CanBeReached(state, output, checkedStates))
                             {
                                 throw new ValidationException(
-                                    $"There is a loop from the state '{state.Id}' to itself that do not require user input");
+                                    "There is a loop in the flow that do not requires user input");
                             }
                         }
                     }
