@@ -4,26 +4,29 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Lime.Protocol.Network;
+using Shouldly;
 using Take.Blip.Client.Extensions.Context;
+using Xunit;
 
 namespace Take.Blip.Builder.UnitTests
 {
-    public class ContextTests
+    public class ContextTests : CancellationTokenTestsBase
     {
         public ContextTests()
         {
-            ValuesDictionary = new Dictionary<string, string>();
+            ValuesDictionary = new Dictionary<string, Document>();
             FlowId = "0";
             User = "user@msging.net";
         }
 
-        public IDictionary<string, string> ValuesDictionary { get; }
+        public IDictionary<string, Document> ValuesDictionary { get; }
 
         public string FlowId { get; set; }
 
         public Identity User { get; set; }
-
 
         private Context GetTarget()
         {
@@ -33,24 +36,118 @@ namespace Take.Blip.Builder.UnitTests
                 User);
         }
 
+        [Fact]
+        public async Task GetExistingVariableShouldSucceed()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            var variableValue = "value1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync(variableName, CancellationToken);
+
+            // Assert
+            actual.ShouldBe(variableValue);
+        }
+
+        [Fact]
+        public async Task GetNonExistingVariableShouldReturnNull()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            var variableValue = "value1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("variableName2", CancellationToken);
+
+            // Assert
+            actual.ShouldBeNull();
+        }
+
+
+        [Fact]
+        public async Task GetVariableWithJsonPropertyShouldSucceed()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}"});
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("variableName1@plan", CancellationToken);
+
+            // Assert
+            actual.ShouldBe("Premium");
+        }
+
+        [Fact]
+        public async Task GetVariableWithInvalidJsonPropertyShouldSucceed()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}" });
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("variableName1@none", CancellationToken);
+
+            // Assert
+            actual.ShouldBeNull();
+        }
+
+
+        [Fact]
+        public async Task GetVariableWithJsonPropertyWithTwoLevelsShouldSucceed()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}" });
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("variableName1@details.address", CancellationToken);
+
+            // Assert
+            actual.ShouldBe("Rua X");
+        }
+
+        [Fact]
+        public async Task GetVariableWithJsonInvalidPropertyWithTwoLevelsShouldReturnNull()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}" });
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("variableName1@details.none", CancellationToken);
+
+            // Assert
+            actual.ShouldBeNull();
+        }
+
 
         private class DictionaryContextExtension : IContextExtension
         {            
-            public DictionaryContextExtension(IDictionary<string, string> valuesDictionary)
+            public DictionaryContextExtension(IDictionary<string, Document> valuesDictionary)
             {
                 ValuesDictionary = valuesDictionary;
             }
 
-            public IDictionary<string, string> ValuesDictionary { get; }
+            public IDictionary<string, Document> ValuesDictionary { get; }
 
-            public Task<T> GetVariableAsync<T>(Identity identity, string variableName, CancellationToken cancellationToken) where T : Document
+            public async Task<T> GetVariableAsync<T>(Identity identity, string variableName, CancellationToken cancellationToken) where T : Document
             {
                 if (!ValuesDictionary.TryGetValue(variableName, out var variableValue))
                 {
-                    
+                    throw new LimeException(ReasonCodes.COMMAND_RESOURCE_NOT_FOUND, "Not found");
                 }
 
-                return null;
+                return (T)variableValue;
             }
 
             public Task SetVariableAsync<T>(Identity identity, string variableName, T document, CancellationToken cancellationToken,

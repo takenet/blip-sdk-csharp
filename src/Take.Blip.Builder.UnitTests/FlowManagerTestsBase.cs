@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Threading;
 using Lime.Protocol;
 using NSubstitute;
 using SimpleInjector;
@@ -14,7 +12,7 @@ using Take.Blip.Client.Extensions.EventTracker;
 
 namespace Take.Blip.Builder.UnitTests
 {
-    public class FlowManagerTestsBase : IDisposable
+    public class FlowManagerTestsBase : CancellationTokenTestsBase
     {
         public FlowManagerTestsBase()
         {
@@ -31,7 +29,6 @@ namespace Take.Blip.Builder.UnitTests
             User = new Identity("user", "domain");
             Context.User.Returns(User);
 
-            CancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         }
 
         public Identity User { get; set; }
@@ -50,9 +47,7 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContext Context { get; set; }
 
-        public CancellationToken CancellationToken => CancellationTokenSource.Token;
 
-        public CancellationTokenSource CancellationTokenSource { get; set; }
 
         public IFlowManager GetTarget()
         {
@@ -66,11 +61,6 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);
             return container.GetInstance<IFlowManager>();
-        }
-
-        public void Dispose()
-        {
-            CancellationTokenSource.Dispose();
         }
     }
 }

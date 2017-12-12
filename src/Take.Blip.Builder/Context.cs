@@ -49,7 +49,7 @@ namespace Take.Blip.Builder
                     if (json == null) return null;
                 }
 
-                return json.ToString(Formatting.None);
+                return json.ToString(Formatting.None).Trim('"');
             }
             catch (Exception ex) when (
                 (ex is LimeException limeException && limeException.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
