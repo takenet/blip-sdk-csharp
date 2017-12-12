@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
@@ -27,6 +30,7 @@ namespace Take.Blip.Builder
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
+        private readonly IVariableReplacer _variableReplacer;
 
         public FlowManager(
             IConfiguration configuration,
@@ -36,7 +40,8 @@ namespace Take.Blip.Builder
             IActionProvider actionProvider,
             ISender sender,
             IDocumentSerializer documentSerializer,
-            IArtificialIntelligenceExtension artificialIntelligenceExtension)
+            IArtificialIntelligenceExtension artificialIntelligenceExtension,
+            IVariableReplacer variableReplacer)
         {
             _configuration = configuration;
             _stateManager = stateManager;
@@ -46,6 +51,7 @@ namespace Take.Blip.Builder
             _sender = sender;
             _documentSerializer = documentSerializer;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
+            _variableReplacer = variableReplacer;
         }
 
         public async Task ProcessInputAsync(Document input, Identity user, Flow flow, CancellationToken cancellationToken)
@@ -155,8 +161,17 @@ namespace Take.Blip.Builder
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {                
                 var action = _actionProvider.Get(stateAction.Type);
-                await action.ExecuteAsync(context, stateAction.Settings, cancellationToken);
-            }            
+
+                var settings = stateAction.Settings;
+                if (settings != null)
+                {
+                    var settingsJson = settings.ToString(Formatting.None);
+                    settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+                    settings = JObject.Parse(settingsJson);
+                }
+
+                await action.ExecuteAsync(context, settings, cancellationToken);
+            }
         }
 
         private async Task<State> ProcessOutputsAsync(Document input, IContext context, Flow flow, State state, CancellationToken cancellationToken)

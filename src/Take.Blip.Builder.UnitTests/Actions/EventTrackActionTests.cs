@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Shouldly;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.EventTracker;
@@ -36,17 +37,78 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task ValidEventTrackWithIdentityShouldSucced()
+        public async Task ValidEventTrackShouldSucceed()
         {
+            // Arrange
+            var category = "categoryX";
+            var action = "actionA";
+            var identity = "myidentity@msging.net";
+            var extras = new Dictionary<string, string>()
+            {
+                {"key1", "value1"}
+            };
+
+
             var eventTrackAction = new EventTrackAction(EventTrackExtension);
-
             var settings = new JObject();
-            settings["category"] = "categoryX";
-            settings["action"] = "actionA";
-            settings["identity"] = "myidentity@msging.net";
-            settings["extras"] = null;
 
-            await eventTrackAction.ExecuteAsync(Context, null, CancellationToken);
+            settings["category"] = category;
+            settings["action"] = action;
+            settings["identity"] = identity;
+            settings["extras"] = JObject.FromObject(extras);
+
+            // Act
+            await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
+
+            // Assert
+            await EventTrackExtension.Received(1).AddAsync(
+                category, 
+                action, 
+                Arg.Is<Dictionary<string, string>>(d => extras.Keys.All(k => d.ContainsKey(k) && d[k] == extras[k])), 
+                CancellationToken, 
+                identity);
+        }
+
+
+        [Fact]
+        public async Task EventTrackWithoutCategoryShouldFail()
+        {
+            // Arrange
+            string category = null;
+            var action = "actionA";
+            var identity = "myidentity@msging.net";
+            var extras = new Dictionary<string, string>()
+            {
+                {"key1", "value1"}
+            };
+
+
+            var eventTrackAction = new EventTrackAction(EventTrackExtension);
+            var settings = new JObject();
+
+            settings["category"] = category;
+            settings["action"] = action;
+            settings["identity"] = identity;
+            settings["extras"] = JObject.FromObject(extras);
+
+            // Act
+            try
+            {
+                await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
+                throw new Exception("The expected exception was not thrown");
+            }
+            catch (ArgumentException ex)
+            {
+                // Assert
+                ex.Message.ShouldBe("The 'category' settings value is required for 'EventTrackAction' action");
+                
+                await EventTrackExtension.DidNotReceive().AddAsync(
+                    category,
+                    action,
+                    Arg.Is<Dictionary<string, string>>(d => extras.Keys.All(k => d.ContainsKey(k) && d[k] == extras[k])),
+                    CancellationToken,
+                    identity);
+            }            
         }
 
     }

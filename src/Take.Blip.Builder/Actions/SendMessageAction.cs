@@ -27,7 +27,7 @@ namespace Take.Blip.Builder.Actions
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings), "The settings are required for 'SendMessage' action");
+            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendMessageAction)}' action");
 
             var message = new Message(EnvelopeId.NewId())
             {
