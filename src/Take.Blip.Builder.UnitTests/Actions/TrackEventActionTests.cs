@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Shouldly;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Client.Extensions.EventTracker;
@@ -41,22 +42,20 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var category = "categoryX";
             var action = "actionA";
-            var identity = "myidentity@msging.net";
+            var identity = Identity.Parse("myidentity@msging.net");
             var extras = new Dictionary<string, string>()
             {
                 {"key1", "value1"}
             };
 
-
+            Context.User.Returns(identity);
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
             var settings = new JObject
             {
                 ["category"] = category,
                 ["action"] = action,
-                ["identity"] = identity,
                 ["extras"] = JObject.FromObject(extras)
             };
-
 
             // Act
             await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
