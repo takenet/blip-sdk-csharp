@@ -36,6 +36,11 @@ namespace Take.Blip.Builder.Models
                     throw new ValidationException("The regular expression should be provided when using the 'regex' validation rule");
                 }
 
+                if (string.IsNullOrWhiteSpace(Validation.Error))
+                {
+                    throw new ValidationException("The validation error message is required");
+                }
+
                 if (Validation.Rule == InputValidationRule.Type
                     && Validation.Type == null)
                 {
