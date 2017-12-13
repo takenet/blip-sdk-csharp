@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Defines an output path from a state.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(StateId) + "}")]
     public class Output : IValidable
     {
         /// <summary>

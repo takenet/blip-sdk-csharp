@@ -229,7 +229,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("There is a loop in the flow that do not requires user input");
+                ex.Message.ShouldBe("There is a loop in the flow starting in the state 1 that does not requires user input");
             }
         }
 
@@ -288,7 +288,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("There is a loop in the flow that do not requires user input");
+                ex.Message.ShouldBe("There is a loop in the flow starting in the state 1 that does not requires user input");
             }
         }
 
@@ -369,8 +369,70 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("There is a loop in the flow that do not requires user input");
+                ex.Message.ShouldBe("There is a loop in the flow starting in the state 2 that does not requires user input");
             }
+        }
+
+        [Fact]
+        public void ValidateFlowWithMultipleStepsWithoutDirectLoopShouldSucceed()
+        {
+            // Arrange
+            var flow = new Flow
+            {
+                Id = "0",
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "onboarding",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new []
+                        {
+                            new Output { StateId = "1" },
+                            new Output { StateId = "fallback" }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "fallback",
+                        Outputs = new []
+                        {
+                            new Output { StateId = "onboarding" }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "1",
+                        Outputs = new []
+                        {
+                            new Output { StateId = "2" },
+                            new Output { StateId = "fallback" }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "2",
+                        Outputs = new []
+                        {
+                            new Output { StateId = "3" },
+                            new Output { StateId = "fallback" }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "3",
+                        Outputs = new []
+                        {
+                            new Output { StateId = "fallback" }
+                        }
+                    }
+                }
+            };
+
+            // Act
+            flow.Validate();
+ 
         }
     }
 }

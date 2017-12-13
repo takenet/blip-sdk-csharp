@@ -60,7 +60,7 @@ namespace Take.Blip.Builder.Models
                 {
                     bool CanBeReached(State targetState, Output output, ISet<string> checkedStates)
                     {
-                        if (checkedStates.Contains(output.StateId)) return true;
+                        if (checkedStates.Contains(output.StateId)) return false;
                         var outputState = States.FirstOrDefault(s => s.Id == output.StateId);
                         if (outputState?.Outputs == null || outputState.Outputs.Length == 0) return false;
                         if (outputState.Input != null && !outputState.Input.Bypass) return false;
@@ -83,7 +83,7 @@ namespace Take.Blip.Builder.Models
                             if (CanBeReached(state, output, checkedStates))
                             {
                                 throw new ValidationException(
-                                    "There is a loop in the flow that do not requires user input");
+                                     $"There is a loop in the flow starting in the state {state.Id} that does not requires user input");
                             }
                         }
                     }

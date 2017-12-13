@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Models
@@ -7,6 +7,7 @@ namespace Take.Blip.Builder.Models
     /// <summary>
     /// Defines an action to be executed when a state is activated.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(Type) + "}")]
     public class Action : IValidable
     {
         /// <summary>

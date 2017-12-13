@@ -1,10 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Defines a state in the conversation state machine.
     /// </summary>
+    
+    [DebuggerDisplay("{" + nameof(Id) + "}")]
     public class State : IValidable
     {
         /// <summary>
