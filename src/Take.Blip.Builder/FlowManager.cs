@@ -139,7 +139,7 @@ namespace Take.Blip.Builder
                     return input is PlainText;
 
                 case InputValidationRule.Number:
-                    return int.TryParse(input.ToString(), out _);
+                    return decimal.TryParse(input.ToString(), out _);
 
                 case InputValidationRule.Date:
                     return DateTime.TryParse(input.ToString(), out _);
