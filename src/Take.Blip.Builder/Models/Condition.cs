@@ -18,8 +18,8 @@ namespace Take.Blip.Builder.Models
         public string Variable { get; set; }
 
         /// <summary>
-        /// The variable name of the conversation context to be evaluated, if the <see cref="Source"/> value is <see cref="ValueSource.Context"/>.
-        /// </summary>        
+        /// The name of the entity to be evaluated, if the <see cref="Source"/> value is <see cref="ValueSource.Entity"/>.
+        /// </summary>
         public string Entity { get; set; }
 
         /// <summary>
