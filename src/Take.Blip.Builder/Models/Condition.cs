@@ -18,6 +18,11 @@ namespace Take.Blip.Builder.Models
         public string Variable { get; set; }
 
         /// <summary>
+        /// The variable name of the conversation context to be evaluated, if the <see cref="Source"/> value is <see cref="ValueSource.Context"/>.
+        /// </summary>        
+        public string Entity { get; set; }
+
+        /// <summary>
         /// The type of the comparison. Optional. The default value is <see cref="ConditionComparison.Equals"/>.
         /// </summary>
         public ConditionComparison Comparison { get; set; }

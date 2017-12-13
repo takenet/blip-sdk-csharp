@@ -5,6 +5,7 @@ using SimpleInjector;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
+using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.EventTracker;
 
@@ -19,6 +20,7 @@ namespace Take.Blip.Builder.UnitTests
             BucketExtension = Substitute.For<IBucketExtension>();
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
+            BroadcastExtension = Substitute.For<IBroadcastExtension>();
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
@@ -39,6 +41,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IEventTrackExtension EventTrackExtension { get; set; }
 
+        public IBroadcastExtension BroadcastExtension { get; set; }
+
         public ISender Sender { get; set; }
 
         public IStateManager StateManager { get; set; }
@@ -46,8 +50,6 @@ namespace Take.Blip.Builder.UnitTests
         public IContextProvider ContextProvider { get; set; }
 
         public IContext Context { get; set; }
-
-
 
         public IFlowManager GetTarget()
         {
@@ -57,6 +59,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(BucketExtension);
             container.RegisterSingleton(ArtificialIntelligenceExtension);
             container.RegisterSingleton(EventTrackExtension);
+            container.RegisterSingleton(BroadcastExtension);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);

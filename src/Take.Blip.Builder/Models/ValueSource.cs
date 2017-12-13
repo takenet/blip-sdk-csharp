@@ -16,8 +16,13 @@
         Context,
 
         /// <summary>
-        /// The value comes from the identified intention of the user input.
+        /// The value comes from the identified AI intention of the user input.
         /// </summary>
-        Intent
+        Intent,
+
+        /// <summary>
+        /// The value comes from the identified AI entity of the user input.
+        /// </summary>
+        Entity
     }
 }

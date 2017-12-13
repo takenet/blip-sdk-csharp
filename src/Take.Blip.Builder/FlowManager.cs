@@ -182,6 +182,8 @@ namespace Take.Blip.Builder
             // If there's any output in the current state
             if (outputs != null)
             {
+                var lazyInput = new LazyInput(input, _documentSerializer, _artificialIntelligenceExtension, cancellationToken);
+
                 // Evalute each output conditions
                 foreach (var output in outputs.OrderBy(o => o.Order))
                 {
@@ -191,7 +193,7 @@ namespace Take.Blip.Builder
                     {
                         foreach (var outputCondition in output.Conditions)
                         {
-                            isValidOutput = await EvaluateConditionAsync(outputCondition, input, context, cancellationToken);
+                            isValidOutput = await EvaluateConditionAsync(outputCondition, lazyInput, context, cancellationToken);
                             if (!isValidOutput) break;
                         }
                     }
@@ -207,14 +209,18 @@ namespace Take.Blip.Builder
             return state;
         }
 
-        public async Task<bool> EvaluateConditionAsync(Condition condition, Document input, IContext context, CancellationToken cancellationToken)
+        private async Task<bool> EvaluateConditionAsync(
+            Condition condition, 
+            LazyInput lazyInput, 
+            IContext context, 
+            CancellationToken cancellationToken)
         {
             string comparisonValue;
 
             switch (condition.Source)
             {
                 case ValueSource.Input:
-                    comparisonValue = _documentSerializer.Serialize(input);
+                    comparisonValue = lazyInput.InputSource;
                     break;
 
                 case ValueSource.Context:
@@ -222,14 +228,18 @@ namespace Take.Blip.Builder
                     break;
 
                 case ValueSource.Intent:
-                    var analysisResponse = await _artificialIntelligenceExtension.AnalyzeAsync(
-                        new AnalysisRequest
-                        {
-                            Text = _documentSerializer.Serialize(input)
-                        },
-                        cancellationToken);
+                    comparisonValue = (await lazyInput.AnalysisSource)
+                        .Intentions?
+                        .OrderByDescending(i => i.Score)
+                        .FirstOrDefault(i => i.Score >= 0.5)?
+                        .Name;
+                    break;
 
-                    comparisonValue = analysisResponse.Intentions.OrderByDescending(i => i.Score).FirstOrDefault()?.Name;
+                case ValueSource.Entity:
+                    comparisonValue = (await lazyInput.AnalysisSource)
+                        .Entities?
+                        .FirstOrDefault(e => e.Name != null && e.Name.Equals(condition.Entity, StringComparison.OrdinalIgnoreCase))?
+                        .Value;
                     break;
 
                 default:
@@ -251,6 +261,35 @@ namespace Take.Blip.Builder
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        /// <summary>
+        /// Allows the lazy evaluation of input bound values.
+        /// This optimizes the calls for serialization and the AI extension.
+        /// </summary>
+        private class LazyInput
+        {
+            private readonly Lazy<string> _inputSource;
+            private readonly Lazy<Task<AnalysisResponse>> _analysisSource;
+
+            public LazyInput(
+                Document input, 
+                IDocumentSerializer documentSerializer, 
+                IArtificialIntelligenceExtension artificialIntelligenceExtension,
+                CancellationToken cancellationToken)
+            {
+                _inputSource = new Lazy<string>(() => documentSerializer.Serialize(input));
+                _analysisSource = new Lazy<Task<AnalysisResponse>>(() => artificialIntelligenceExtension.AnalyzeAsync(
+                    new AnalysisRequest
+                    {
+                        Text = _inputSource.Value
+                    },
+                    cancellationToken));
+            }
+
+            public string InputSource => _inputSource.Value;
+
+            public Task<AnalysisResponse> AnalysisSource => _analysisSource.Value;
         }
     }
 }
