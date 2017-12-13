@@ -44,7 +44,12 @@ namespace Take.Blip.Builder.Models
 
             if (Source == ValueSource.Context && string.IsNullOrWhiteSpace(Variable))
             {
-                throw new ValidationException("The variable should be provided if the comparsion source is context");
+                throw new ValidationException("The variable name should be provided if the comparsion source is context");
+            }
+
+            if (Source == ValueSource.Entity && string.IsNullOrWhiteSpace(Entity))
+            {
+                throw new ValidationException("The entity name should be provided if the comparsion source is entity");
             }
         }
     }

@@ -63,7 +63,29 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("The variable should be provided if the comparsion source is context");
+                ex.Message.ShouldBe("The variable name should be provided if the comparsion source is context");
+            }
+        }
+
+        [Fact]
+        public void ValidateEntitySourceWithoutEntityNameShouldFail()
+        {
+            // Arrange
+            var condition = new Condition
+            {
+                Source = ValueSource.Entity,
+                Values = new[] { "value" }
+            };
+
+            // Act
+            try
+            {
+                condition.Validate();
+                throw new Exception("No validation exception thrown");
+            }
+            catch (ValidationException ex)
+            {
+                ex.Message.ShouldBe("The entity name should be provided if the comparsion source is entity");
             }
         }
     }
