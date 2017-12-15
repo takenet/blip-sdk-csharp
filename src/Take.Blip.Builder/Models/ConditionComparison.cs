@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Take.Blip.Builder.Models
@@ -51,10 +52,10 @@ namespace Take.Blip.Builder.Models
             switch (conditionComparison)
             {
                 case ConditionComparison.Equals:
-                    return (v1, v2) => v1.Equals(v2, StringComparison.OrdinalIgnoreCase);
+                    return (v1, v2) => string.Compare(v1, v2, CultureInfo.InvariantCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) == 0;
 
                 case ConditionComparison.NotEquals:
-                    return (v1, v2) => !v1.Equals(v2, StringComparison.OrdinalIgnoreCase);
+                    return (v1, v2) => string.Compare(v1, v2, CultureInfo.InvariantCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) != 0;
 
                 case ConditionComparison.Contains:
                     return (v1, v2) => v1.ToLowerInvariant().Contains(v2.ToLowerInvariant());

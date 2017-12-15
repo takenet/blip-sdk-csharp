@@ -220,9 +220,11 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var messageContent = "Pong!";
 
             var equalsInput = new PlainText() { Text = validInput };
+            var equalsWithAccentInput = new PlainText() { Text = "Píng!" };
             var containsInput = new PlainText() { Text = "ing" };
             var startsInput = new PlainText() { Text = "Pin" };
             var endsInput = new PlainText() { Text = "g!" };
+            var approximateInput = new PlainText() { Text = "Pamg!" };
 
             var variableName = "MyVariable";
             var flow = new Flow()
@@ -299,6 +301,21 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                     }
                                 },
                                 StateId = "state2"
+                            },
+                            new Output
+                            {
+                                Order = 5,
+                                Conditions = new Condition[]
+                                {
+                                    new Condition
+                                    {
+                                        Source = ValueSource.Context,
+                                        Comparison = ConditionComparison.EndsWith,
+                                        Variable = variableName,
+                                        Values = new[] { validInput }
+                                    }
+                                },
+                                StateId = "state2"
                             }
                         }
                     },
@@ -326,22 +343,27 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
 
             // Act
             await target.ProcessInputAsync(equalsInput, User, flow, CancellationToken);
+            await target.ProcessInputAsync(equalsWithAccentInput, User, flow, CancellationToken);
             await target.ProcessInputAsync(containsInput, User, flow, CancellationToken);
             await target.ProcessInputAsync(startsInput, User, flow, CancellationToken);
             await target.ProcessInputAsync(endsInput, User, flow, CancellationToken);
+            await target.ProcessInputAsync(approximateInput, User, flow, CancellationToken);
+            
 
             // Assert
-            ContextProvider.Received(4).GetContext(User, flow.Id);
+            ContextProvider.Received(6).GetContext(User, flow.Id);
 
-            await StateManager.Received(4).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            await StateManager.Received(6).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 
             await Context.Received(1).SetVariableAsync(variableName, equalsInput.Text, CancellationToken);
+            await Context.Received(1).SetVariableAsync(variableName, equalsWithAccentInput.Text, CancellationToken);
             await Context.Received(1).SetVariableAsync(variableName, containsInput.Text, CancellationToken);
             await Context.Received(1).SetVariableAsync(variableName, startsInput.Text, CancellationToken);
             await Context.Received(1).SetVariableAsync(variableName, endsInput.Text, CancellationToken);
+            await Context.Received(1).SetVariableAsync(variableName, approximateInput.Text, CancellationToken);
 
             await Sender
-                .Received(4)
+                .Received(6)
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
