@@ -25,21 +25,19 @@ namespace Take.Blip.Builder.Actions.ManageList
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             var managerListSettings = settings.ToObject<ManageListSettings>();
-            if (string.IsNullOrEmpty(managerListSettings.TargetListName)) throw new ArgumentException($"The '{nameof(ManageListSettings.TargetListName)}' settings value is required for '{nameof(ManageListAction)}' action");
+            if (string.IsNullOrEmpty(managerListSettings.ListName))
+            {
+                throw new ArgumentException($"The '{nameof(ManageListSettings.ListName)}' settings value is required for '{nameof(ManageListAction)}' action");
+            }
 
             switch (managerListSettings.Action)
             {
                 case ManageListSettingsAction.Add:
-                    await AddToListAsync(context, managerListSettings.TargetListName, cancellationToken);
+                    await AddToListAsync(context, managerListSettings.ListName, cancellationToken);
                     break;
 
                 case ManageListSettingsAction.Remove:
-                    await RemoveFromListAsync(context, managerListSettings.TargetListName, cancellationToken);
-                    break;
-                case ManageListSettingsAction.Move:
-                    if (string.IsNullOrEmpty(managerListSettings.SourceListName)) throw new ArgumentException($"The '{nameof(ManageListSettings.SourceListName)}' settings value is required for '{nameof(ManageListAction)}' action");
-                    await RemoveFromListAsync(context, managerListSettings.SourceListName, cancellationToken);
-                    await AddToListAsync(context, managerListSettings.TargetListName, cancellationToken);
+                    await RemoveFromListAsync(context, managerListSettings.ListName, cancellationToken);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

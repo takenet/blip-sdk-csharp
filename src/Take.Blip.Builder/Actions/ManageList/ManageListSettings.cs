@@ -4,8 +4,6 @@
     {
         public ManageListSettingsAction Action { get; set; }
 
-        public string SourceListName { get; set; }
-
-        public string TargetListName { get; set; }
+        public string ListName { get; set; }
     }
 }
