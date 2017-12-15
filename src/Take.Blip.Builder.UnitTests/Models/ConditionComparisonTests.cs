@@ -36,6 +36,18 @@ namespace Take.Blip.Builder.UnitTests.Models
         }
 
         [Fact]
+        public void EqualsComparisonWithEqualsValuesWithEmojiShouldSuccceed()
+        {
+            // Arrange
+            var value1 = "Value 😱🤢➡";
+            var value2 = "Value 😱🤢➡";
+            var target = ConditionComparison.Equals.ToDelegate();
+
+            // Act
+            target(value1, value2).ShouldBeTrue();
+        }
+    
+        [Fact]
         public void EqualsComparisonWithEqualsValuesWithAccentShouldSuccceed()
         {
             // Arrange
