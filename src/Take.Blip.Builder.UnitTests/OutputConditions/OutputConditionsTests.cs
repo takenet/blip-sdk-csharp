@@ -310,7 +310,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                     new Condition
                                     {
                                         Source = ValueSource.Context,
-                                        Comparison = ConditionComparison.EndsWith,
+                                        Comparison = ConditionComparison.ApproximateTo,
                                         Variable = variableName,
                                         Values = new[] { validInput }
                                     }
