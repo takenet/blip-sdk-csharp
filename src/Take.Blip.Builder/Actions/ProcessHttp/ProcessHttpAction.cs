@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -40,7 +41,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
             if (!string.IsNullOrWhiteSpace(processHttpSettings.Body))
             {
-                httpRequestMessage.Content = new StringContent(processHttpSettings.Body);
+                string contentType = null;
+                processHttpSettings.Headers?.TryGetValue("Content-Type", out contentType);
+                httpRequestMessage.Content = new StringContent(processHttpSettings.Body, Encoding.UTF8, contentType ?? "application/json");
             }
 
             var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);

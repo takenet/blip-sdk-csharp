@@ -11,6 +11,8 @@ namespace Take.Blip.Builder
 {
     public class Context : IContext
     {
+        public const string INTERVAL_VARIABLE_NAME_PREFIX = "$";
+
         private readonly IContextExtension _contextExtension;        
 
         public Context(IContextExtension contextExtension, string flowId, Identity user)
@@ -24,8 +26,11 @@ namespace Take.Blip.Builder
 
         public Identity User { get; }
 
-        public Task SetVariableAsync(string name, string value, CancellationToken cancellationToken) 
-            => _contextExtension.SetTextVariableAsync(User, name, value, cancellationToken);
+        public Task SetVariableAsync(string name, string value, CancellationToken cancellationToken)
+        {
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            return _contextExtension.SetTextVariableAsync(User, name, value, cancellationToken);
+        }
 
         public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
         {
