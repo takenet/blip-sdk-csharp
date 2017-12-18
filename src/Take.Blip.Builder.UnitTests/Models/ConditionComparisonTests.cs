@@ -167,6 +167,54 @@ namespace Take.Blip.Builder.UnitTests.Models
 
 
         [Fact]
+        public void GreaterThanWithComparisonWithBiggerValuesShouldSuccceed()
+        {
+            // Arrange
+            var value1 = "12345";
+            var value2 = "1234";
+            var target = ConditionComparison.GreaterThan.ToDelegate();
+
+            // Act
+            target(value1, value2).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void GreaterThanWithComparisonWithEqualsValuesShouldFail()
+        {
+            // Arrange
+            var value1 = "12345";
+            var value2 = "12345";
+            var target = ConditionComparison.GreaterThan.ToDelegate();
+
+            // Act
+            target(value1, value2).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void GreaterThanWithComparisonWithSmallerValuesShouldFail()
+        {
+            // Arrange
+            var value1 = "1234";
+            var value2 = "12345";
+            var target = ConditionComparison.GreaterThan.ToDelegate();
+
+            // Act
+            target(value1, value2).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void GreaterThanWithComparisonWithInvalidValuesShouldFail()
+        {
+            // Arrange
+            var value1 = "not a number";
+            var value2 = "also not a number";
+            var target = ConditionComparison.GreaterThan.ToDelegate();
+
+            // Act
+            target(value1, value2).ShouldBeFalse();
+        }
+
+        [Fact]
         public void ApproximateToComparisonWithApproximateToValuesShouldSuccceed()
         {
             // Arrange

@@ -35,6 +35,26 @@ namespace Take.Blip.Builder.Models
         EndsWith,
 
         /// <summary>
+        /// Check if the numeric value is greater than the provided value.
+        /// </summary>
+        GreaterThan,
+
+        /// <summary>
+        /// Check if the numeric value is less than the provided value.
+        /// </summary>
+        LessThan,
+
+        /// <summary>
+        /// Check if the numeric value is greater than or equals the provided value.
+        /// </summary>
+        GreaterThanOrEquals,
+
+        /// <summary>
+        /// Check if the numeric value is less than or equals the provided value.
+        /// </summary>
+        LessThanOrEquals,
+
+        /// <summary>
         /// Check if a string matches the provided regular expression.
         /// </summary>
         Matches,
@@ -72,6 +92,18 @@ namespace Take.Blip.Builder.Models
                 case ConditionComparison.ApproximateTo:
                     // Allows the difference of 25% of the string.
                     return (v1, v2) => v1.ToLowerInvariant().CalculateLevenshteinDistance(v2.ToLowerInvariant()) <= Math.Ceiling(v1.Length * 0.25);
+
+                case ConditionComparison.GreaterThan:
+                    return (v1, v2) => decimal.TryParse(v1, out var n1) && decimal.TryParse(v2, out var n2) && n1 > n2;
+                    
+                case ConditionComparison.LessThan:
+                    return (v1, v2) => decimal.TryParse(v1, out var n1) && decimal.TryParse(v2, out var n2) && n1 < n2;
+
+                case ConditionComparison.GreaterThanOrEquals:
+                    return (v1, v2) => decimal.TryParse(v1, out var n1) && decimal.TryParse(v2, out var n2) && n1 >= n2;
+
+                case ConditionComparison.LessThanOrEquals:
+                    return (v1, v2) => decimal.TryParse(v1, out var n1) && decimal.TryParse(v2, out var n2) && n1 <= n2;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(conditionComparison));
