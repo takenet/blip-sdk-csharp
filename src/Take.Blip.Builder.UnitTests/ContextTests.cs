@@ -221,6 +221,54 @@ namespace Take.Blip.Builder.UnitTests
             actual.ShouldBe(contact.Extras["property1"]);
         }
 
+
+        [Fact]
+        public async Task GetInvalidContactVariableShouldReturnNull()
+        {
+            // Arrange
+            var contact = new Contact
+            {
+                Name = "John da Silva"
+            };
+
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.invalid", CancellationToken);
+
+            // Assert
+            actual.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task GetCalendarVariableShouldSucceed()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;            
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("calendar.hour", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(now.Hour.ToString());
+        }
+
+        [Fact]
+        public async Task GetInvalidCalendarVariableShouldReturnNull()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("calendar.dimenson", CancellationToken);
+
+            // Assert
+            actual.ShouldBeNull();
+        }
+
         private class DictionaryContextExtension : IContextExtension
         {            
             public DictionaryContextExtension(IDictionary<string, Document> valuesDictionary)

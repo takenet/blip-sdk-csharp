@@ -68,6 +68,9 @@ namespace Take.Blip.Builder
                         if (contact == null) return null;
                         return GetContactProperty(contact, name);
 
+                    case VariableSource.Calendar:
+                        return CalendarVariablesProvider.GetVariable(name);
+
                     case VariableSource.Context:
                     default:
                         return await _contextExtension.GetTextVariableAsync(User, name, cancellationToken);
@@ -109,7 +112,6 @@ namespace Take.Blip.Builder
             return property;
         }
 
-
         private static string GetJsonProperty(string variableValue, string property)
         {
             try
@@ -133,8 +135,20 @@ namespace Take.Blip.Builder
 
         private enum VariableSource
         {
+            /// <summary>
+            /// Contexts variables.
+            /// </summary>
             Context,
-            Contact
+
+            /// <summary>
+            /// Contact variables;
+            /// </summary>
+            Contact,
+
+            /// <summary>
+            /// Calendar variables.
+            /// </summary>
+            Calendar
         }
 
         struct VariableName
