@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             _httpClient = httpClient;
         }
 
-        public string Type => "ProcessHttp";
+        public string Type => nameof(ProcessHttp);
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {

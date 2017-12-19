@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Actions.ManageList
             _broadcastExtension = broadcastExtension;
         }
 
-        public string Type => "ManageList";
+        public string Type => nameof(ManageList);
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {

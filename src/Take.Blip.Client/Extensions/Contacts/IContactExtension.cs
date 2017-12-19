@@ -19,11 +19,18 @@ namespace Take.Blip.Client.Extensions.Contacts
         Task<Contact> GetAsync(Identity identity, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Set contact info into roster
+        /// Set contact info into the bot roster.
         /// </summary>
         /// <param name="identity">Contact identity</param>
         /// <param name="contact">Contact info</param>
         Task SetAsync(Identity identity, Contact contact, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Merge the contact info into the bot roster.
+        /// </summary>
+        /// <param name="identity">Contact identity</param>
+        /// <param name="contact">Contact info</param>
+        Task MergeAsync(Identity identity, Contact contact, CancellationToken cancellationToken);
 
         /// <summary>
         /// Delete a contact info from roster

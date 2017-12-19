@@ -37,6 +37,18 @@ namespace Take.Blip.Client.Extensions.Contacts
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
+        public Task MergeAsync(Identity identity, Contact contact, CancellationToken cancellationToken)
+        {            
+            if (identity == null) throw new ArgumentNullException(nameof(identity));
+            if (contact == null) throw new ArgumentNullException(nameof(contact));
+
+            var requestCommand = CreateMergeCommandRequest(
+                contact,
+                CONTACTS);
+
+            return ProcessCommandAsync(requestCommand, cancellationToken);
+        }
+
         public Task DeleteAsync(Identity identity, CancellationToken cancellationToken)
         {
             if (identity == null) throw new ArgumentNullException(nameof(identity));
