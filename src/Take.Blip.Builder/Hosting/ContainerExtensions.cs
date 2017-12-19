@@ -24,6 +24,8 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterCollection<IAction>(new[] 
             {
                 typeof(SendMessageAction),
+                typeof(SendCommandAction),
+                typeof(ProcessCommandAction),
                 typeof(TrackEventAction),
                 typeof(ProcessHttpAction),
                 typeof(ManageListAction)
