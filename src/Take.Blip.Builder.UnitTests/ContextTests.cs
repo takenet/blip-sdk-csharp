@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
+using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using NSubstitute;
@@ -20,11 +22,14 @@ namespace Take.Blip.Builder.UnitTests
         public ContextTests()
         {
             ValuesDictionary = new Dictionary<string, Document>(StringComparer.InvariantCultureIgnoreCase);
+            ContactExtension = Substitute.For<IContactExtension>();
             FlowId = "0";
             User = "user@msging.net";
         }
 
         public IDictionary<string, Document> ValuesDictionary { get; }
+
+        public IContactExtension ContactExtension { get; }
 
         public string FlowId { get; set; }
 
@@ -36,7 +41,7 @@ namespace Take.Blip.Builder.UnitTests
                 FlowId,
                 User,
                 new DictionaryContextExtension(ValuesDictionary),
-                Substitute.For<IContactExtension>());
+                ContactExtension);
         }
 
         [Fact]
@@ -56,6 +61,48 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
+        public async Task GetExistingVariableWithContextSourceShouldSucceed()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            var variableValue = "value1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync($"context.{variableName}", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(variableValue);
+        }
+
+        [Fact]
+        public async Task GetExistingVariableWithLeadingDotShouldFail()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            var variableValue = "value1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            var target = GetTarget();
+
+            // Act
+            await target.GetVariableAsync($".{variableName}", CancellationToken).ShouldThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task GetExistingVariableWithTrailingDotShouldFail()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            var variableValue = "value1";
+            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            var target = GetTarget();
+
+            // Act
+            await target.GetVariableAsync($"{variableName}.", CancellationToken).ShouldThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
         public async Task GetNonExistingVariableShouldReturnNull()
         {
             // Arrange
@@ -70,7 +117,6 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             actual.ShouldBeNull();
         }
-
 
         [Fact]
         public async Task GetVariableWithJsonPropertyShouldSucceed()
@@ -133,6 +179,47 @@ namespace Take.Blip.Builder.UnitTests
             actual.ShouldBeNull();
         }
 
+        [Fact]
+        public async Task GetContactVariableShouldSucceed()
+        {
+            // Arrange
+            var contact = new Contact
+            {
+                Name = "John da Silva"
+            };
+
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.name", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(contact.Name);
+        }
+
+        [Fact]
+        public async Task GetContactExtrasVariableShouldSucceed()
+        {
+            // Arrange
+            var contact = new Contact
+            {
+                Name = "John da Silva",
+                Extras = new Dictionary<string, string>()
+                {
+                    { "property1", "value 1" }
+                }
+            };
+
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.extras.property1", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(contact.Extras["property1"]);
+        }
 
         private class DictionaryContextExtension : IContextExtension
         {            

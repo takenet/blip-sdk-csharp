@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Resources;
@@ -138,6 +139,8 @@ namespace Take.Blip.Builder
 
         struct VariableName
         {
+            private static readonly Regex VariableNameRegex = new Regex("^(?<sourceOrName>[\\w\\d]+)(\\.(?<name>[\\w\\d\\.]+))?(@(?<property>[\\w\\d\\.]+))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
             private VariableName(VariableSource source, string name, string property)
             {
                 Source = source;
@@ -161,28 +164,31 @@ namespace Take.Blip.Builder
             {
                 if (s == null) throw new ArgumentNullException(nameof(s));
 
-                var variableAndProperty = s.ToLowerInvariant().Split('@');
-                var property = variableAndProperty.Length > 1 ? variableAndProperty[1] : null;
+                var match = VariableNameRegex.Match(s);
+
+                if (!match.Success) throw new ArgumentException($"Invalid variable name '{s}'", nameof(s));
 
                 VariableSource source;
                 string name;
 
-                var dotIndex = variableAndProperty[0].IndexOf('.');
-                if (dotIndex > 0)
+                var sourceOrName = match.Groups["sourceOrName"].Value;
+                var nameGroup = match.Groups["name"];
+                if (nameGroup.Success)
                 {
-                    var sourceName = variableAndProperty[0].Substring(0, dotIndex);
-                    if (!Enum.TryParse(sourceName, out source))
+                    if (!Enum.TryParse(sourceOrName, true, out source))
                     {
-                        throw new ArgumentException($"Invalid source '{sourceName}'");
+                        throw new ArgumentException($"Invalid source '{sourceOrName}'");
                     }
-
-                    name = variableAndProperty[0].Substring(dotIndex + 1, variableAndProperty[0].Length - 1);
+                    name = nameGroup.Value;
                 }
                 else
                 {
                     source = VariableSource.Context;
-                    name = variableAndProperty[0];
+                    name = sourceOrName;
                 }
+
+                var propertyGroup = match.Groups["property"];
+                var property = propertyGroup.Success ? propertyGroup.Value : null;
 
                 return new VariableName(source, name, property);
             }
