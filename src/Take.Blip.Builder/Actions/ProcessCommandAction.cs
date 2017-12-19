@@ -21,7 +21,7 @@ namespace Take.Blip.Builder.Actions
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendCommandAction)}' action");
+            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(ProcessCommandAction)}' action");
 
             string variable = null;
 

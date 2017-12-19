@@ -90,7 +90,7 @@ namespace Take.Blip.Builder.UnitTests
             var variableValue = "Variable value 1";
             Context.GetVariableAsync(variableName, CancellationToken).Returns(variableValue);
 
-            var messageContent = "Hello ${context.variableName1}!";
+            var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
 
             var flow = new Flow()
@@ -155,7 +155,7 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
             var messageType = "text/plain";
-            var messageContent = "Hello ${context.variableName1}!";
+            var messageContent = "Hello {{context.variableName1}}!";
             var expectedMessageContent = "Hello !";
 
             var flow = new Flow()

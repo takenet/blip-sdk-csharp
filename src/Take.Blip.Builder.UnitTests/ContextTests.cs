@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Network;
+using NSubstitute;
 using Shouldly;
+using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Context;
 using Xunit;
 
@@ -17,7 +19,7 @@ namespace Take.Blip.Builder.UnitTests
     {
         public ContextTests()
         {
-            ValuesDictionary = new Dictionary<string, Document>();
+            ValuesDictionary = new Dictionary<string, Document>(StringComparer.InvariantCultureIgnoreCase);
             FlowId = "0";
             User = "user@msging.net";
         }
@@ -31,9 +33,10 @@ namespace Take.Blip.Builder.UnitTests
         private Context GetTarget()
         {
             return new Context(
-                new DictionaryContextExtension(ValuesDictionary),
                 FlowId,
-                User);
+                User,
+                new DictionaryContextExtension(ValuesDictionary),
+                Substitute.For<IContactExtension>());
         }
 
         [Fact]

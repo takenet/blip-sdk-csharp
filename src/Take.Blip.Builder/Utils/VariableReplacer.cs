@@ -7,7 +7,7 @@ namespace Take.Blip.Builder.Utils
 {
     public class VariableReplacer : IVariableReplacer
     {
-        private static readonly Regex TextVariablesRegex = new Regex(@"\${context\.([a-zA-Z0-9\.@]+)}", RegexOptions.Compiled);
+        private static readonly Regex TextVariablesRegex = new Regex(@"{{([a-zA-Z0-9\.@]+)}}", RegexOptions.Compiled);
 
         public async Task<string> ReplaceAsync(string value, IContext context, CancellationToken cancellationToken)
         {
@@ -17,7 +17,6 @@ namespace Take.Blip.Builder.Utils
                 var variableName = match.Groups[1].Value;
                 if (variableValues.ContainsKey(variableName)) continue;
                 var variableValue = await context.GetVariableAsync(variableName, cancellationToken);
-
                 variableValues.Add(variableName, variableValue);
             }
 

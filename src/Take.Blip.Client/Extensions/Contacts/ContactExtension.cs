@@ -10,12 +10,9 @@ namespace Take.Blip.Client.Extensions.Contacts
 {
     public class ContactExtension : ExtensionBase, IContactExtension
     {
-        private readonly ISender _messagingHubSender;
-
-        public ContactExtension(ISender messagingHubSender)
-            : base(messagingHubSender)
+        public ContactExtension(ISender sender)
+            : base(sender)
         {
-            _messagingHubSender = messagingHubSender;
         }
 
         public Task<Contact> GetAsync(Identity identity, CancellationToken cancellationToken)
