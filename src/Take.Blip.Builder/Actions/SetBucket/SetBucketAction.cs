@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -24,8 +22,25 @@ namespace Take.Blip.Builder.Actions.SetBucket
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
+            var setBucketActionSettings = settings.ToObject<SetBucketActionSettings>();
+            if (setBucketActionSettings.Id == null)
+            {
+                throw new ArgumentException($"The '{nameof(SetBucketActionSettings.Id)}' settings value is required for '{nameof(SetBucket)}' action");
+            }
+            if (setBucketActionSettings.Type == null)
+            {
+                throw new ArgumentException($"The '{nameof(SetBucketActionSettings.Type)}' settings value is required for '{nameof(SetBucket)}' action");
+            }
 
-            throw new NotImplementedException();
+            var expiration = setBucketActionSettings.Expiration.HasValue
+                ? TimeSpan.FromMilliseconds(setBucketActionSettings.Expiration.Value)
+                : default(TimeSpan);
+
+            return _bucketExtension.SetAsync(
+                setBucketActionSettings.Id,
+                setBucketActionSettings.ToDocument(),
+                expiration,
+                cancellationToken);
         }
     }
 }
