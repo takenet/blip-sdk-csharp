@@ -282,6 +282,104 @@ namespace Take.Blip.Builder.UnitTests
             actual.ShouldBeNull();
         }
 
+        [Fact]
+        public async Task GetRandomGuidVariableShouldSucceed()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("random.guid", CancellationToken);
+
+            // Assert
+            actual.ShouldNotBeNull();
+            Guid.TryParse(actual, out _).ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task GetRandomIntegerVariableShouldSucceed()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("random.integer", CancellationToken);
+
+            // Assert
+            actual.ShouldNotBeNull();
+            int.TryParse(actual, out _).ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task GetRandomStringVariableShouldSucceed()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("random.string", CancellationToken);
+
+            // Assert
+            actual.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task GetBucketTextVariableShouldSucceed()
+        {
+            // Arrange
+            var document = new PlainText()
+            {
+                Text = "my value"
+            };
+            Sender
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals("/buckets/id1")), CancellationToken)
+                .Returns(new Command()
+                {
+                    Status = CommandStatus.Success,
+                    Resource = document
+                });
+
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("bucket.id1", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(document.Text);
+        }
+
+        [Fact]
+        public async Task GetBucketJsonVariablePropertyShouldSucceed()
+        {
+            // Arrange
+            var document = new JsonDocument()
+            {
+                {"key1", "value1"},
+                {"key2", "value2"}
+            };
+            Sender
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals("/buckets/id1")), CancellationToken)
+                .Returns(new Command()
+                {
+                    Status = CommandStatus.Success,
+                    Resource = document
+                });
+
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("bucket.id1@key2", CancellationToken);
+
+            // Assert
+            actual.ShouldBe("value2");
+        }
+
+
         private class DictionaryContextExtension : IContextExtension
         {            
             public DictionaryContextExtension(IDictionary<string, Document> valuesDictionary)
