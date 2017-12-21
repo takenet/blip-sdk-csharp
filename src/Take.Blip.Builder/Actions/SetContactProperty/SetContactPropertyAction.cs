@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Resources;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Extensions.Contacts;
 
@@ -19,9 +18,13 @@ namespace Take.Blip.Builder.Actions.SetContactProperty
 
         public string Type => nameof(SetContactProperty);
 
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+            var contact = settings.ToObject<Contact>(LimeSerializerContainer.Serializer);
+            return _contactExtension.MergeAsync(contact.Identity, contact, cancellationToken);
         }
     }
 }

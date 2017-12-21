@@ -7,11 +7,13 @@ using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions
 {
-    public class SendCommandAction : SenderActionBase, IAction
+    public class SendCommandAction : IAction
     {
+        private readonly ISender _sender;
+
         public SendCommandAction(ISender sender)
-            : base(sender)
         {
+            _sender = sender;
         }
 
         public string Type => "SendCommand";
@@ -21,10 +23,10 @@ namespace Take.Blip.Builder.Actions
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendCommandAction)}' action");
 
-            var command = settings.ToObject<Command>(Serializer);
+            var command = settings.ToObject<Command>(LimeSerializerContainer.Serializer);
             command.Id = EnvelopeId.NewId();
 
-            return Sender.SendCommandAsync(command, cancellationToken);
+            return _sender.SendCommandAsync(command, cancellationToken);
         }
     }
 }

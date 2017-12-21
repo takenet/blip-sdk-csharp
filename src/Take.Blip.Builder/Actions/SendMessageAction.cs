@@ -9,12 +9,13 @@ using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions
 {
-    public class SendMessageAction : SenderActionBase, IAction
+    public class SendMessageAction : IAction
     {
+        private readonly ISender _sender;
+
         public SendMessageAction(ISender sender)
-            : base(sender)
         {
-            
+            _sender = sender;
         }
 
         public string Type => "SendMessage";
@@ -47,12 +48,12 @@ namespace Take.Blip.Builder.Actions
                 message.Metadata = ((JObject) metadata).ToObject<Dictionary<string, string>>();
             }
             
-            await Sender.SendMessageAsync(message, cancellationToken);
+            await _sender.SendMessageAsync(message, cancellationToken);
 
             // Await the interval if it is a chatstate message
             if (mediaType == ChatState.MediaType)
             {
-                var chatState = rawContent.ToObject<ChatState>(Serializer);
+                var chatState = rawContent.ToObject<ChatState>(LimeSerializerContainer.Serializer);
                 if (chatState.Interval != null)
                 {
                     await Task.Delay(chatState.Interval.Value, cancellationToken);

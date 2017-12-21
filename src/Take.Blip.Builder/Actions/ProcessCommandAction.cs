@@ -9,11 +9,13 @@ using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions
 {
-    public class ProcessCommandAction : SenderActionBase, IAction
+    public class ProcessCommandAction : IAction
     {
+        private readonly ISender _sender;
+
         public ProcessCommandAction(ISender sender)
-            : base(sender)
         {
+            _sender = sender;
         }
 
         public string Type => "ProcessCommand";
@@ -30,10 +32,10 @@ namespace Take.Blip.Builder.Actions
                 variable = variableToken.ToString().Trim('"');
             }
 
-            var command = settings.ToObject<Command>(Serializer);
+            var command = settings.ToObject<Command>(LimeSerializerContainer.Serializer);
             command.Id = EnvelopeId.NewId();
 
-            var resultCommand = await Sender.ProcessCommandAsync(command, cancellationToken);
+            var resultCommand = await _sender.ProcessCommandAsync(command, cancellationToken);
 
             if (string.IsNullOrWhiteSpace(variable)) return;
 
