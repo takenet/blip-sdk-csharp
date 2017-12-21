@@ -3,6 +3,7 @@ using SimpleInjector;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.ProcessHttp;
+using Take.Blip.Builder.Actions.SetContactProperty;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 
@@ -29,7 +30,8 @@ namespace Take.Blip.Builder.Hosting
                 typeof(ProcessCommandAction),
                 typeof(TrackEventAction),
                 typeof(ProcessHttpAction),
-                typeof(ManageListAction)
+                typeof(ManageListAction),
+                typeof(SetContactPropertyAction)
             });
 
             container.RegisterCollection<IVariableProvider>(new[]
