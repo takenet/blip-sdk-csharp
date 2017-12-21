@@ -7,7 +7,7 @@ using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Client;
 
-namespace Take.Blip.Builder.Actions
+namespace Take.Blip.Builder.Actions.SendMessage
 {
     public class SendMessageAction : IAction
     {
@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Actions
             _sender = sender;
         }
 
-        public string Type => "SendMessage";
+        public string Type => nameof(SendMessage);
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {

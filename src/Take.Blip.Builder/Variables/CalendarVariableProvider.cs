@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Variables
             switch (name)
             {
                 case "datetime":
-                    return now.ToString("s", CultureInfo.InvariantCulture);
+                    return now.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
 
                 case "date":
                     return now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -54,7 +54,6 @@ namespace Take.Blip.Builder.Variables
 
                 case "dayofweek":
                     return now.DayOfWeek.ToString();
-
             }
 
             return null;

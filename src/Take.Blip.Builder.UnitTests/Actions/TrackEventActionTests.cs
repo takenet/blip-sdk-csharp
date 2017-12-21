@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Shouldly;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.TrackEvent;
 using Take.Blip.Client.Extensions.EventTracker;
 using Xunit;
 

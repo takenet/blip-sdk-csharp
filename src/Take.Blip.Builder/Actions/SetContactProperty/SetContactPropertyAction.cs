@@ -24,7 +24,8 @@ namespace Take.Blip.Builder.Actions.SetContactProperty
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             var contact = settings.ToObject<Contact>(LimeSerializerContainer.Serializer);
-            return _contactExtension.MergeAsync(contact.Identity, contact, cancellationToken);
+            contact.Identity = contact.Identity;
+            return _contactExtension.MergeAsync(context.User, contact, cancellationToken);
         }
     }
 }

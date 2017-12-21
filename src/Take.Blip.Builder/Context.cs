@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Lime.Messaging.Resources;
 using Lime.Protocol;
-using Lime.Protocol.Network;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Variables;
-using Take.Blip.Client.Extensions.Bucket;
-using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder
@@ -84,8 +78,6 @@ namespace Take.Blip.Builder
                 return null;
             }
         }
-
-
 
         struct VariableName
         {

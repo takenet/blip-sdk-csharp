@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Client;
 
-namespace Take.Blip.Builder.Actions
+namespace Take.Blip.Builder.Actions.ProcessCommand
 {
     public class ProcessCommandAction : IAction
     {
@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Actions
             _sender = sender;
         }
 
-        public string Type => "ProcessCommand";
+        public string Type => nameof(ProcessCommand);
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
