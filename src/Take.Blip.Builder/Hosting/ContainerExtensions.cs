@@ -6,6 +6,7 @@ using Take.Blip.Builder.Actions.ProcessCommand;
 using Take.Blip.Builder.Actions.ProcessHttp;
 using Take.Blip.Builder.Actions.SendCommand;
 using Take.Blip.Builder.Actions.SendMessage;
+using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetContactProperty;
 using Take.Blip.Builder.Actions.SetVariable;
 using Take.Blip.Builder.Actions.TrackEvent;
@@ -38,6 +39,7 @@ namespace Take.Blip.Builder.Hosting
                 typeof(ManageListAction),
                 typeof(SetContactPropertyAction),
                 typeof(SetVariableAction),
+                typeof(SetBucketAction),
             });
 
             container.RegisterCollection<IVariableProvider>(new[]
