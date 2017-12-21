@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
@@ -11,6 +8,10 @@ using Lime.Protocol;
 using Lime.Protocol.Network;
 using NSubstitute;
 using Shouldly;
+using SimpleInjector;
+using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Variables;
+using Take.Blip.Client;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Context;
 using Xunit;
@@ -22,7 +23,9 @@ namespace Take.Blip.Builder.UnitTests
         public ContextTests()
         {
             ValuesDictionary = new Dictionary<string, Document>(StringComparer.InvariantCultureIgnoreCase);
+            ContextExtension = new DictionaryContextExtension(ValuesDictionary);
             ContactExtension = Substitute.For<IContactExtension>();
+            Sender = Substitute.For<ISender>();
             FlowId = "0";
             User = "user@msging.net";
         }
@@ -31,17 +34,27 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContactExtension ContactExtension { get; }
 
+        public IContextExtension ContextExtension { get; set; }
+
+        public ISender Sender { get; set; }
+
         public string FlowId { get; set; }
 
         public Identity User { get; set; }
 
         private Context GetTarget()
         {
+            var container = new Container();
+            container.RegisterBuilder();
+            container.RegisterSingleton(ContactExtension);
+            container.RegisterSingleton(ContextExtension);
+            container.RegisterSingleton(Sender);
+
             return new Context(
                 FlowId,
                 User,
-                new DictionaryContextExtension(ValuesDictionary),
-                ContactExtension);
+                ContextExtension,
+                container.GetAllInstances<IVariableProvider>());
         }
 
         [Fact]

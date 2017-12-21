@@ -1,5 +1,6 @@
-﻿using Lime.Protocol;
-using Take.Blip.Client.Extensions.Contacts;
+﻿using System.Collections.Generic;
+using Lime.Protocol;
+using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder
@@ -7,15 +8,14 @@ namespace Take.Blip.Builder
     public class ContextProvider : IContextProvider
     {
         private readonly IContextExtension _contextExtension;
-        private readonly IContactExtension _contactExtension;
+        private readonly IEnumerable<IVariableProvider> _variableProviders;
 
-        public ContextProvider(IContextExtension contextExtension, IContactExtension contactExtension)
+        public ContextProvider(IContextExtension contextExtension, IEnumerable<IVariableProvider> variableProviders)
         {
             _contextExtension = contextExtension;
-            _contactExtension = contactExtension;
+            _variableProviders = variableProviders;
         }
 
-        public IContext GetContext(Identity user, string flowId) 
-            => new Context(flowId, user, _contextExtension, _contactExtension);
+        public IContext GetContext(Identity user, string flowId) => new Context(flowId, user, _contextExtension, _variableProviders);
     }
 }

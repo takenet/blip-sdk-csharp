@@ -4,6 +4,7 @@ using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.ProcessHttp;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Builder.Variables;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -30,6 +31,16 @@ namespace Take.Blip.Builder.Hosting
                 typeof(ProcessHttpAction),
                 typeof(ManageListAction)
             });
+
+            container.RegisterCollection<IVariableProvider>(new[]
+            {
+                typeof(BucketVariableProvider),
+                typeof(CalendarVariableProvider),
+                typeof(ContactVariableProvider),
+                typeof(ContextVariableProvider),
+                typeof(RandomVariableProvider)
+            });
+
             return container;
         }
     }
