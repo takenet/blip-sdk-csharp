@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using System.Diagnostics;
+using Serilog;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -13,6 +14,7 @@ namespace Take.Blip.Client.Receivers
     public class HandleExceptionMessageReceiver : IMessageReceiver
     {
         private readonly IMessageReceiver _receiver;
+        private readonly ILogger _logger;
         private readonly SendResponseMessageReceiver _sendResponseMessageReceiver;
 
         /// <summary>
@@ -21,10 +23,12 @@ namespace Take.Blip.Client.Receivers
         /// <param name="receiver">The receiver to intercept the errors.</param>
         /// <param name="sender">The sender.</param>
         /// <param name="exceptionDocument">The exception document.</param>
+        /// <param name="logger"></param>
         /// <exception cref="System.ArgumentNullException"></exception>
-        public HandleExceptionMessageReceiver(IMessageReceiver receiver, ISender sender, Document exceptionDocument)
+        public HandleExceptionMessageReceiver(IMessageReceiver receiver, ISender sender, Document exceptionDocument, ILogger logger)
         {
             _receiver = receiver ?? throw new ArgumentNullException(nameof(receiver));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _sendResponseMessageReceiver = new SendResponseMessageReceiver(sender, exceptionDocument);
         }
 
@@ -36,7 +40,7 @@ namespace Take.Blip.Client.Receivers
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.ToString());
+                _logger.Error(ex, "The receive operation for message '{Id}' failed", envelope.Id);
                 await _sendResponseMessageReceiver.ReceiveAsync(envelope, cancellationToken);
             }
         }

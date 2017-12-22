@@ -9,6 +9,8 @@ using Lime.Protocol;
 using Lime.Protocol.Listeners;
 using Lime.Protocol.Network;
 using Lime.Protocol.Util;
+using Serilog;
+using Serilog.Context;
 using Take.Blip.Client.Receivers;
 
 namespace Take.Blip.Client
@@ -17,6 +19,7 @@ namespace Take.Blip.Client
     {
         private readonly ISender _sender;
         private readonly bool _autoNotify;
+        private readonly ILogger _logger;
 
         private readonly IChannelListener _channelListener;
         private readonly IList<ReceiverFactoryPredicate<Message>> _messageReceivers;
@@ -30,10 +33,11 @@ namespace Take.Blip.Client
         private CancellationTokenSource _cts;
         private readonly object _syncRoot = new object();
         
-        public BlipChannelListener(ISender sender, bool autoNotify)
+        public BlipChannelListener(ISender sender, bool autoNotify, ILogger logger = null)
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
             _autoNotify = autoNotify;
+            _logger = logger ?? LoggerProvider.Logger;
 
             _messageReceivers = new List<ReceiverFactoryPredicate<Message>>(new[]
             {
@@ -190,6 +194,8 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
+                LogException(message, ex);
+
                 Reason reason;
                 if (ex is LimeException limeException)
                 {
@@ -208,8 +214,6 @@ namespace Take.Blip.Client
                 {
                     await _sender.SendNotificationAsync(message.ToFailedNotification(reason), CancellationToken.None);
                 }
-
-                Trace.TraceError(ex.ToString());
             }
 
             return true;
@@ -223,7 +227,7 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.ToString());
+                LogException(notification, ex);
             }
 
             return true;
@@ -239,6 +243,8 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
+                LogException(command, ex);
+
                 await _sender.SendCommandAsync(new Command
                 {
                     Id = command.Id,
@@ -266,7 +272,18 @@ namespace Take.Blip.Client
             await Task.WhenAll(
                 receiverGroup.Select(r => r.ReceiverFactory().ReceiveAsync(envelope, cancellationToken)));
         }
-        
+
+        private void LogException<T>(T envelope, Exception ex) where T : Envelope
+        {
+            using (LogContext.PushProperty(nameof(Envelope), typeof(T).Name))
+            using (LogContext.PushProperty(nameof(Envelope.Id), envelope.Id))
+            using (LogContext.PushProperty(nameof(Envelope.From), envelope.From))
+            using (LogContext.PushProperty(nameof(Envelope.To), envelope.To))
+            {
+                _logger.Error(ex, "Error processing the received envelope");
+            }
+        }
+
         private class ReceiverFactoryPredicate<T> where T : Envelope, new()
         {
             public ReceiverFactoryPredicate(Func<IEnvelopeReceiver<T>> receiverFactory, Func<T, Task<bool>> predicate, int priority)
@@ -280,7 +297,7 @@ namespace Take.Blip.Client
 
             public Func<T, Task<bool>> Predicate { get; }
 
-            public int Priority { get; set; }
+            public int Priority { get; }
         }
     }
 }

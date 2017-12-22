@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Lime.Transport.Tcp;
+using Serilog;
 
 namespace Take.Blip.Client
 {

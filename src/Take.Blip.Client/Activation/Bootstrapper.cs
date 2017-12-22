@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Server;
 using Newtonsoft.Json;
+using Serilog;
 using Take.Blip.Client.Extensions;
 using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.Tunnel;
@@ -28,11 +29,13 @@ namespace Take.Blip.Client.Activation
         /// <param name="application">The application instance. If not defined, the class will look for an application.json file in the current directory.</param>
         /// <param name="builder">The builder instance to be used.</param>
         /// <param name="typeResolver">The resolver for type names.</param>
+        /// <param name="logger">The logger instance to be used.</param>
         public static async Task<IStoppable> StartAsync(
             CancellationToken cancellationToken,
             Application application = null,
             BlipClientBuilder builder = null,
-            ITypeResolver typeResolver = null)
+            ITypeResolver typeResolver = null,
+            ILogger logger = null)
         {
             if (application == null)
             {
@@ -43,7 +46,7 @@ namespace Take.Blip.Client.Activation
                 application = Application.ParseFromJsonFile(DefaultApplicationFileName);
             }
 
-            if (builder == null) builder = new BlipClientBuilder();
+            if (builder == null) builder = new BlipClientBuilder(new TcpTransportFactory(), logger);
             if (application.Identifier != null)
             {
                 if (application.Password != null)
@@ -77,16 +80,20 @@ namespace Take.Blip.Client.Activation
             if (application.DisableNotify) builder = builder.WithAutoNotify(false);
             if (application.ChannelCount.HasValue) builder = builder.WithChannelCount(application.ChannelCount.Value);
             if (application.ReceiptEvents != null && application.ReceiptEvents.Length > 0)
+            {
                 builder = builder.WithReceiptEvents(application.ReceiptEvents);
+            }
             else if (application.ReceiptEvents != null)
+            {
                 builder = builder.WithReceiptEvents(new[] { Event.Failed });
+            }
 
             if (typeResolver == null) typeResolver = new TypeResolver();
             var localServiceProvider = BuildServiceProvider(application, typeResolver);
 
             localServiceProvider.RegisterService(typeof(BlipClientBuilder), builder);
 
-            var client = await BuildClientAsync(application, builder.Build, localServiceProvider, typeResolver, cancellationToken);
+            var client = await BuildClientAsync(application, builder.Build, localServiceProvider, typeResolver, cancellationToken, logger: logger);
 
             var stoppables = new IStoppable[2];
             stoppables[0] = client;
@@ -153,7 +160,8 @@ namespace Take.Blip.Client.Activation
             IServiceContainer serviceContainer,
             ITypeResolver typeResolver,
             CancellationToken cancellationToken,
-            Action<IServiceContainer> serviceOverrides = null)
+            Action<IServiceContainer> serviceOverrides = null,
+            ILogger logger = null)
         {
             RegisterSettingsContainer(application, serviceContainer, typeResolver);
             RegisterSettingsTypes(application, serviceContainer, typeResolver);
@@ -165,6 +173,8 @@ namespace Take.Blip.Client.Activation
             serviceContainer.RegisterService(typeof(Application), application);
             serviceContainer.RegisterService(typeof(ISessionManager), () => new SessionManager(serviceContainer.GetService<IBucketExtension>()));
 
+            if (logger != null) serviceContainer.RegisterService(typeof(ILogger), logger);
+            
             var client = builder();
             serviceContainer.RegisterService(typeof(ISender), client);
             serviceOverrides?.Invoke(serviceContainer);
@@ -177,7 +187,7 @@ namespace Take.Blip.Client.Activation
                 RegisterTunnelReceivers(application);
             }
 
-            var channelListener = new BlipChannelListener(client, !application.DisableNotify);
+            var channelListener = new BlipChannelListener(client, !application.DisableNotify, logger);
 
             await AddMessageReceivers(application, serviceContainer, client, channelListener, typeResolver, stateManager, sessionManager);
             await AddNotificationReceivers(application, serviceContainer, client, channelListener, typeResolver, stateManager, sessionManager);
