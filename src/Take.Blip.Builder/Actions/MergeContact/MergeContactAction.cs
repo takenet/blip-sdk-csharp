@@ -5,18 +5,18 @@ using Lime.Messaging.Resources;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Extensions.Contacts;
 
-namespace Take.Blip.Builder.Actions.SetContactProperty
+namespace Take.Blip.Builder.Actions.MergeContact
 {
-    public class SetContactPropertyAction : IAction
+    public class MergeContactAction : IAction
     {
         private readonly IContactExtension _contactExtension;
 
-        public SetContactPropertyAction(IContactExtension contactExtension)
+        public MergeContactAction(IContactExtension contactExtension)
         {
             _contactExtension = contactExtension;
         }
 
-        public string Type => nameof(SetContactProperty);
+        public string Type => nameof(MergeContact);
 
         public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
