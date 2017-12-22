@@ -194,7 +194,10 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
-                LogException(message, ex);
+                using (LogContext.PushProperty(nameof(Message.Type), message.Type))
+                {
+                    LogException(message, ex);
+                }
 
                 Reason reason;
                 if (ex is LimeException limeException)
@@ -280,7 +283,7 @@ namespace Take.Blip.Client
             using (LogContext.PushProperty(nameof(Envelope.From), envelope.From))
             using (LogContext.PushProperty(nameof(Envelope.To), envelope.To))
             {
-                _logger.Error(ex, "Error processing the received envelope");
+                _logger.Error(ex, $"Error processing the received envelope: {ex.Message}");
             }
         }
 
