@@ -30,6 +30,8 @@ namespace Take.Blip.Client.Extensions.Contacts
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (contact == null) throw new ArgumentNullException(nameof(contact));
 
+            if (contact.Identity == null) contact.Identity = identity;
+
             var requestCommand = CreateSetCommandRequest(
                 contact,
                 CONTACTS);
@@ -41,6 +43,8 @@ namespace Take.Blip.Client.Extensions.Contacts
         {            
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (contact == null) throw new ArgumentNullException(nameof(contact));
+
+            if (contact.Identity == null) contact.Identity = identity;
 
             var requestCommand = CreateMergeCommandRequest(
                 contact,
