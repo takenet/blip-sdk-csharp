@@ -42,7 +42,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     {"Content-Type", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
-                Variable = "httpResult"
+                BodyVariable = "httpResultBody",
+                StatusVariable = "httpResultStatus",
+
             };
 
             var target = GetTarget();
@@ -63,9 +65,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Arg.Is<HttpRequestMessage>(
                     h => h.RequestUri.Equals(settings.Uri)), CancellationToken);
 
-            await Context.Received(1).SetVariableAsync($"{settings.Variable}.status", ((int) HttpStatusCode.Accepted).ToString(),
+            await Context.Received(1).SetVariableAsync(settings.StatusVariable, ((int) HttpStatusCode.Accepted).ToString(),
                 CancellationToken);
-            await Context.Received(1).SetVariableAsync($"{settings.Variable}.body", "Some result", CancellationToken);
+            await Context.Received(1).SetVariableAsync(settings.BodyVariable, "Some result", CancellationToken);
         }
 
         [Fact]

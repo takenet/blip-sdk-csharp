@@ -13,6 +13,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         public string Body { get; set; }
 
-        public string Variable { get; set; }
+        public string BodyVariable { get; set; }
+
+        public string StatusVariable { get; set; }
     }
 }

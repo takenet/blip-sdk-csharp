@@ -49,13 +49,19 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
             // Set the responses variables
-            if (string.IsNullOrWhiteSpace(processHttpSettings.Variable)) return;
-            await context.SetVariableAsync($"{processHttpSettings.Variable}.status", ((int) httpResponseMessage.StatusCode).ToString(), cancellationToken);
-
-            var body = await httpResponseMessage.Content.ReadAsStringAsync();
-            if (!string.IsNullOrWhiteSpace(body))
+            if (!string.IsNullOrWhiteSpace(processHttpSettings.StatusVariable))
             {
-                await context.SetVariableAsync($"{processHttpSettings.Variable}.body", body, cancellationToken);
+                await context.SetVariableAsync(processHttpSettings.StatusVariable,
+                    ((int) httpResponseMessage.StatusCode).ToString(), cancellationToken);
+            }
+
+            if (!string.IsNullOrWhiteSpace(processHttpSettings.BodyVariable))
+            {                
+                var body = await httpResponseMessage.Content.ReadAsStringAsync();
+                if (!string.IsNullOrWhiteSpace(body))
+                {
+                    await context.SetVariableAsync(processHttpSettings.BodyVariable, body, cancellationToken);
+                }
             }
         }
 
