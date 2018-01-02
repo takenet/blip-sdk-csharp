@@ -32,7 +32,7 @@ namespace Take.Blip.Builder
             }
         }
         public Task SetStateIdAsync(string flowId, Identity user, string stateId, CancellationToken cancellationToken)
-            => _contextExtension.SetTextVariableAsync(user, $"{STATE_ID_KEY}@{flowId}", stateId, cancellationToken, _configuration.SessionExpiration);
+            => _contextExtension.SetTextVariableAsync(user, $"{STATE_ID_KEY}@{flowId}", stateId, cancellationToken);
 
         public async Task DeleteStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken)
         {

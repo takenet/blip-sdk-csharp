@@ -6,8 +6,6 @@ namespace Take.Blip.Builder.Hosting
     {
         TimeSpan ExecutionSemaphoreExpiration { get; }
 
-        TimeSpan SessionExpiration { get; }
-
         string RedisStorageConfiguration { get; }
 
         int RedisDatabase { get; }

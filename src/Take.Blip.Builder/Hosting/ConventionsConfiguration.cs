@@ -6,8 +6,6 @@ namespace Take.Blip.Builder.Hosting
     {
         public TimeSpan ExecutionSemaphoreExpiration => TimeSpan.FromMinutes(5);
 
-        public TimeSpan SessionExpiration => TimeSpan.FromMinutes(30);
-
         public string RedisStorageConfiguration => "localhost";
 
         public int RedisDatabase => 0;
