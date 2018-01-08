@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
-using Take.Blip.Builder.Hosting;
 using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder
@@ -12,12 +11,10 @@ namespace Take.Blip.Builder
         private const string STATE_ID_KEY = "stateId";
 
         private readonly IContextExtension _contextExtension;
-        private readonly IConfiguration _configuration;
 
-        public StateManager(IContextExtension contextExtension, IConfiguration configuration)
+        public StateManager(IContextExtension contextExtension)
         {
             _contextExtension = contextExtension;
-            _configuration = configuration;
         }
 
         public async Task<string> GetStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken)
