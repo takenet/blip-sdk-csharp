@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Take.Blip.Builder.Actions.ProcessHttp
+namespace Take.Blip.Builder.Utils
 {
     public interface IHttpClient : IDisposable
     {

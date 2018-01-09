@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Take.Blip.Builder.Actions.ProcessHttp;
+using Take.Blip.Builder.Utils;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
@@ -21,6 +22,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         public IHttpClient HttpClient { get; set; }
+
         public IContext Context { get; private set; }
 
         private ProcessHttpAction GetTarget()

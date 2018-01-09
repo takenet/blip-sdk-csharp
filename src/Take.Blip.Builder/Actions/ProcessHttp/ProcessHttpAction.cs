@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
 {
@@ -24,13 +25,18 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             var processHttpSettings = settings.ToObject<ProcessHttpSettings>();
+            if (processHttpSettings.Uri == null)
+            {
+                throw new ArgumentException(
+                    $"The '{nameof(ProcessHttpSettings.Uri)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
+            }
+            if (processHttpSettings.Method == null)
+            {
+                throw new ArgumentException(
+                    $"The '{nameof(ProcessHttpSettings.Method)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
+            }
 
-            if (processHttpSettings.Uri == null) throw new ArgumentException($"The '{nameof(ProcessHttpSettings.Uri)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
-            if (processHttpSettings.Method == null) throw new ArgumentException($"The '{nameof(ProcessHttpSettings.Method)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
-
-            var httpRequestMessage = new HttpRequestMessage(
-                new HttpMethod(processHttpSettings.Method), processHttpSettings.Uri);
-
+            var httpRequestMessage = new HttpRequestMessage(new HttpMethod(processHttpSettings.Method), processHttpSettings.Uri);
             if (processHttpSettings.Headers != null)
             {
                 foreach (var header in processHttpSettings.Headers)
@@ -46,7 +52,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 httpRequestMessage.Content = new StringContent(processHttpSettings.Body, Encoding.UTF8, contentType ?? "application/json");
             }
 
-            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);
+            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
 
             // Set the responses variables
             if (!string.IsNullOrWhiteSpace(processHttpSettings.ResponseStatusVariable))

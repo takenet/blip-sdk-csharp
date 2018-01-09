@@ -1,6 +1,6 @@
 using System.Net.Http;
 
-namespace Take.Blip.Builder.Actions.ProcessHttp
+namespace Take.Blip.Builder.Utils
 {
     public class HttpClientWrapper : HttpClient, IHttpClient
     {

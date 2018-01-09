@@ -8,6 +8,7 @@ using Take.Blip.Builder.Actions.ProcessHttp;
 using Take.Blip.Builder.Actions.Redirect;
 using Take.Blip.Builder.Actions.SendCommand;
 using Take.Blip.Builder.Actions.SendMessage;
+using Take.Blip.Builder.Actions.SendMessageFromHttp;
 using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetVariable;
 using Take.Blip.Builder.Actions.TrackEvent;
@@ -29,11 +30,11 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IConfiguration, ConventionsConfiguration>();
             container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
             container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
-
             container.RegisterCollection<IAction>(
                 new[] 
                 {
                     typeof(SendMessageAction),
+                    typeof(SendMessageFromHttpAction),
                     typeof(SendCommandAction),
                     typeof(ProcessCommandAction),
                     typeof(TrackEventAction),
@@ -44,7 +45,6 @@ namespace Take.Blip.Builder.Hosting
                     typeof(SetBucketAction),
                     typeof(RedirectAction),
                 });
-
             container.RegisterCollection<IVariableProvider>(
                 new[]
                 {
