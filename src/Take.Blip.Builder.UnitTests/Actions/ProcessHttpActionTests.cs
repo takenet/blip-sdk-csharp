@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Serilog;
 using Take.Blip.Builder.Actions.ProcessHttp;
 using Take.Blip.Builder.Utils;
 using Xunit;
@@ -27,7 +28,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         private ProcessHttpAction GetTarget()
         {
-            return new ProcessHttpAction(HttpClient);
+            return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>());
         }
 
         [Fact]
