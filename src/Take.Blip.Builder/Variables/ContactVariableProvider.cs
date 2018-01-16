@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
+using Lime.Protocol.Network;
 using Take.Blip.Client.Extensions.Contacts;
 
 namespace Take.Blip.Builder.Variables
@@ -25,9 +26,16 @@ namespace Take.Blip.Builder.Variables
 
         public async Task<string> GetVariableAsync(string name, Identity user, CancellationToken cancellationToken)
         {
-            var contact = await _contactExtension.GetAsync(user, cancellationToken);
-            if (contact == null) return null;
-            return GetContactProperty(contact, name);
+            try
+            {
+                var contact = await _contactExtension.GetAsync(user, cancellationToken);
+                if (contact == null) return null;
+                return GetContactProperty(contact, name);
+            }
+            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
+            {
+                return null;
+            }
         }
 
         private string GetContactProperty(Contact contact, string variableName)
