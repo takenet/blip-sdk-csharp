@@ -83,7 +83,7 @@ namespace Take.Blip.Builder
                     if (state.Input != null 
                         && !state.Input.Bypass 
                         && state.Input.Validation != null 
-                        && !ValidateDocument(input, state.Input.Validation))
+                        && !ValidateDocument(lazyInput, state.Input.Validation))
                     {
                         if (state.Input.Validation.Error != null)
                         {
@@ -134,24 +134,24 @@ namespace Take.Blip.Builder
             }
         }
 
-        private bool ValidateDocument(Document input, InputValidation inputValidation)
+        private bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
         {
             switch (inputValidation.Rule)
             {
                 case InputValidationRule.Text:
-                    return input is PlainText;
+                    return lazyInput.Input is PlainText;
 
                 case InputValidationRule.Number:
-                    return decimal.TryParse(input.ToString(), out _);
+                    return decimal.TryParse(lazyInput.SerializedInput, out _);
 
                 case InputValidationRule.Date:
-                    return DateTime.TryParse(input.ToString(), out _);
+                    return DateTime.TryParse(lazyInput.SerializedInput, out _);
 
                 case InputValidationRule.Regex:
-                    return Regex.IsMatch(input.ToString(), inputValidation.Regex);
+                    return Regex.IsMatch(lazyInput.SerializedInput, inputValidation.Regex);
 
                 case InputValidationRule.Type:
-                    return input.GetMediaType() == inputValidation.Type;
+                    return lazyInput.Input.GetMediaType() == inputValidation.Type;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(inputValidation));
@@ -223,7 +223,7 @@ namespace Take.Blip.Builder
             switch (condition.Source)
             {
                 case ValueSource.Input:
-                    comparisonValue = lazyInput.InputSource;
+                    comparisonValue = lazyInput.SerializedInput;
                     break;
 
                 case ValueSource.Context:
@@ -231,7 +231,7 @@ namespace Take.Blip.Builder
                     break;
 
                 case ValueSource.Intent:
-                    comparisonValue = (await lazyInput.AnalysisSource)
+                    comparisonValue = (await lazyInput.AnalyzedInput)
                         .Intentions?
                         .OrderByDescending(i => i.Score)
                         .FirstOrDefault(i => i.Score >= 0.5)?
@@ -239,7 +239,7 @@ namespace Take.Blip.Builder
                     break;
 
                 case ValueSource.Entity:
-                    comparisonValue = (await lazyInput.AnalysisSource)
+                    comparisonValue = (await lazyInput.AnalyzedInput)
                         .Entities?
                         .FirstOrDefault(e => e.Name != null && e.Name.Equals(condition.Entity, StringComparison.OrdinalIgnoreCase))?
                         .Value;
@@ -281,6 +281,7 @@ namespace Take.Blip.Builder
                 IArtificialIntelligenceExtension artificialIntelligenceExtension,
                 CancellationToken cancellationToken)
             {
+                Input = input;
                 _inputSource = new Lazy<string>(() => documentSerializer.Serialize(input));
                 _analysisSource = new Lazy<Task<AnalysisResponse>>(() => artificialIntelligenceExtension.AnalyzeAsync(
                     new AnalysisRequest
@@ -290,9 +291,11 @@ namespace Take.Blip.Builder
                     cancellationToken));
             }
 
-            public string InputSource => _inputSource.Value;
+            public Document Input { get; }
 
-            public Task<AnalysisResponse> AnalysisSource => _analysisSource.Value;
+            public string SerializedInput => _inputSource.Value;
+
+            public Task<AnalysisResponse> AnalyzedInput => _analysisSource.Value;
         }
     }
 }
