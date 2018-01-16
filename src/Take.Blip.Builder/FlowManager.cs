@@ -97,7 +97,7 @@ namespace Take.Blip.Builder
                     // Set the input in the context
                     if (!string.IsNullOrEmpty(state.Input?.Variable))
                     {
-                        await context.SetVariableAsync(state.Input.Variable, _documentSerializer.Serialize(input), cancellationToken);
+                        await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedInput, cancellationToken);
                     }
 
                     // Prepare to leave the current state executing the output actions
