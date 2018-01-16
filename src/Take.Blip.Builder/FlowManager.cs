@@ -185,8 +185,6 @@ namespace Take.Blip.Builder
             // If there's any output in the current state
             if (outputs != null)
             {
-                //var lazyInput = new LazyInput(input, _documentSerializer, _artificialIntelligenceExtension, cancellationToken);
-
                 // Evalute each output conditions
                 foreach (var output in outputs.OrderBy(o => o.Order))
                 {
