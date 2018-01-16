@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Lime.Protocol;
 using NSubstitute;
+using Serilog;
 using SimpleInjector;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
@@ -27,6 +28,7 @@ namespace Take.Blip.Builder.UnitTests
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
             Context = Substitute.For<IContext>();
+            Logger = Substitute.For<ILogger>();
             ContextProvider
                 .GetContext(Arg.Any<Identity>(), Arg.Any<string>())
                 .Returns(Context);
@@ -54,6 +56,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContext Context { get; set; }
 
+        public ILogger Logger { get; set; }
+
         public IFlowManager GetTarget()
         {
             var container = new Container();
@@ -67,6 +71,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);
+            container.RegisterSingleton(Logger);
             return container.GetInstance<IFlowManager>();
         }
     }
