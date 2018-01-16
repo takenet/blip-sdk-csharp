@@ -61,6 +61,9 @@ namespace Take.Blip.Builder
             if (flow == null) throw new ArgumentNullException(nameof(flow));
             flow.Validate();
 
+            // Create the input evaluator
+            var lazyInput = new LazyInput(input, _documentSerializer, _artificialIntelligenceExtension, cancellationToken);
+
             // Synchronize to avoid concurrency issues on multiple running instances
             var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.ExecutionSemaphoreExpiration, cancellationToken);
             try
@@ -104,7 +107,7 @@ namespace Take.Blip.Builder
                     }
 
                     // Determine the next state
-                    state = await ProcessOutputsAsync(input, context, flow, state, cancellationToken);
+                    state = await ProcessOutputsAsync(lazyInput, context, flow, state, cancellationToken);
 
                     // Store the next state
                     if (state != null)
@@ -174,7 +177,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task<State> ProcessOutputsAsync(Document input, IContext context, Flow flow, State state, CancellationToken cancellationToken)
+        private async Task<State> ProcessOutputsAsync(LazyInput lazyInput, IContext context, Flow flow, State state, CancellationToken cancellationToken)
         {
             var outputs = state.Outputs;
             state = null;
@@ -182,7 +185,7 @@ namespace Take.Blip.Builder
             // If there's any output in the current state
             if (outputs != null)
             {
-                var lazyInput = new LazyInput(input, _documentSerializer, _artificialIntelligenceExtension, cancellationToken);
+                //var lazyInput = new LazyInput(input, _documentSerializer, _artificialIntelligenceExtension, cancellationToken);
 
                 // Evalute each output conditions
                 foreach (var output in outputs.OrderBy(o => o.Order))
