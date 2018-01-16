@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
@@ -11,10 +12,12 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
     public sealed class ProcessHttpAction: IAction, IDisposable
     {
         private readonly IHttpClient _httpClient;
+        private readonly ILogger _logger;
 
-        public ProcessHttpAction(IHttpClient httpClient)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
         }
 
         public string Type => nameof(ProcessHttp);
@@ -36,38 +39,53 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     $"The '{nameof(ProcessHttpSettings.Method)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
             }
 
-            var httpRequestMessage = new HttpRequestMessage(new HttpMethod(processHttpSettings.Method), processHttpSettings.Uri);
-            if (processHttpSettings.Headers != null)
+            var responseStatus = 0;
+            string responseBody = null;
+            try
             {
-                foreach (var header in processHttpSettings.Headers)
+                var httpRequestMessage =
+                    new HttpRequestMessage(new HttpMethod(processHttpSettings.Method), processHttpSettings.Uri);
+                if (processHttpSettings.Headers != null)
                 {
-                    httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    foreach (var header in processHttpSettings.Headers)
+                    {
+                        httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(processHttpSettings.Body))
+                {
+                    string contentType = null;
+                    processHttpSettings.Headers?.TryGetValue("Content-Type", out contentType);
+                    httpRequestMessage.Content = new StringContent(processHttpSettings.Body, Encoding.UTF8,
+                        contentType ?? "application/json");
+                }
+
+                var httpResponseMessage =
+                    await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
+
+                responseStatus = (int)httpResponseMessage.StatusCode;
+                if (!string.IsNullOrWhiteSpace(processHttpSettings.ResponseBodyVariable))
+                {
+                    responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
                 }
             }
-
-            if (!string.IsNullOrWhiteSpace(processHttpSettings.Body))
+            catch (Exception ex)
             {
-                string contentType = null;
-                processHttpSettings.Headers?.TryGetValue("Content-Type", out contentType);
-                httpRequestMessage.Content = new StringContent(processHttpSettings.Body, Encoding.UTF8, contentType ?? "application/json");
+                _logger.Error(ex, $"An exception occurred while processing HTTP action: {ex.Message}");
             }
-
-            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
 
             // Set the responses variables
             if (!string.IsNullOrWhiteSpace(processHttpSettings.ResponseStatusVariable))
             {
                 await context.SetVariableAsync(processHttpSettings.ResponseStatusVariable,
-                    ((int) httpResponseMessage.StatusCode).ToString(), cancellationToken);
+                    responseStatus.ToString(), cancellationToken);
             }
 
-            if (!string.IsNullOrWhiteSpace(processHttpSettings.ResponseBodyVariable))
-            {                
-                var body = await httpResponseMessage.Content.ReadAsStringAsync();
-                if (!string.IsNullOrWhiteSpace(body))
-                {
-                    await context.SetVariableAsync(processHttpSettings.ResponseBodyVariable, body, cancellationToken);
-                }
+            if (!string.IsNullOrWhiteSpace(processHttpSettings.ResponseBodyVariable) &&
+                !string.IsNullOrWhiteSpace(responseBody))
+            {
+                await context.SetVariableAsync(processHttpSettings.ResponseBodyVariable, responseBody, cancellationToken);
             }
         }
 
