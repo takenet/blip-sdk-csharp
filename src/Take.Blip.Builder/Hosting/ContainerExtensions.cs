@@ -54,6 +54,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(ContextVariableProvider),
                     typeof(RandomVariableProvider),
                     typeof(FlowVariableProvider),
+                    typeof(InputVariableProvider),
                 });
 
             return container;
