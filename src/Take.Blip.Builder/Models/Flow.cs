@@ -27,6 +27,11 @@ namespace Take.Blip.Builder.Models
         [Required(ErrorMessage = "The flow must have at least one state")]
         public State[] States { get; set; }
 
+        /// <summary>
+        /// The flow variables.
+        /// </summary>
+        public Dictionary<string, string> Variables { get; set; }
+
         public void Validate()
         {
             // Optimization to avoid multiple validations.

@@ -25,6 +25,16 @@
         /// <summary>
         /// Get values from bucket.
         /// </summary>
-        Bucket
+        Bucket,
+
+        /// <summary>
+        /// Get values from the flow.
+        /// </summary>
+        Flow,
+
+        /// <summary>
+        /// Get values from the input.
+        /// </summary>
+        Input,
     }
 }

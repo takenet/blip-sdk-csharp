@@ -52,7 +52,8 @@ namespace Take.Blip.Builder.Hosting
                     typeof(CalendarVariableProvider),
                     typeof(ContactVariableProvider),
                     typeof(ContextVariableProvider),
-                    typeof(RandomVariableProvider)
+                    typeof(RandomVariableProvider),
+                    typeof(FlowVariableProvider),
                 });
 
             return container;
