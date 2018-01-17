@@ -6,6 +6,7 @@ using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Take.Blip.Builder.Models;
+using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
 using Input = Take.Blip.Builder.Models.Input;
@@ -464,6 +465,240 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content.ToString() == poloMessageContent),
                     CancellationToken);
         }
+
+        [Fact]
+        public async Task FlowWithoutIntentConditionsShouldChangeStateAndSendMessage()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "text/plain";
+            var messageContent = "This is my intent";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "my-intent",
+                                Conditions = new[]
+                                {
+                                    new Condition()
+                                    {
+                                        Source = ValueSource.Intent,
+                                        Values = new[]
+                                        {
+                                            "My intent"
+                                        }
+                                    }
+                                }
+                            },
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "my-intent",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", "This is not supposed to be received..."}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            ArtificialIntelligenceExtension
+                .AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == input.Text), CancellationToken)
+                .Returns(new AnalysisResponse()
+                {
+                    Intentions = new []
+                    {
+                        new IntentionResponse
+                        {
+                            Name = "My intent",
+                            Score = 1
+                        },
+                        new IntentionResponse
+                        {
+                            Name = "Other intent",
+                            Score = 0.1
+                        }
+                    }
+                });
+
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+
+            // Assert
+            ContextProvider.Received(1).GetContext(User, flow.Id);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "my-intent", CancellationToken);
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(User)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    CancellationToken);
+        }
+
+
+        [Fact]
+        public async Task FlowWithoutEntityConditionsShouldChangeStateAndSendMessage()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "text/plain";
+            var messageContent = "This is my entity";
+            var entityName = "My entity name";
+            var entityValue = "My entity value";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "my-entity",
+                                Conditions = new[]
+                                {
+                                    new Condition()
+                                    {
+                                        Source = ValueSource.Entity,
+                                        Entity = entityName,
+                                        Values = new[]
+                                        {
+                                            entityValue
+                                        }
+                                    }
+                                }
+                            },
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "my-entity",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", "This is not supposed to be received..."}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            ArtificialIntelligenceExtension
+                .AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == input.Text), CancellationToken)
+                .Returns(new AnalysisResponse()
+                {
+                    Entities = new[]
+                    {
+                        new EntityResponse()
+                        {
+                            Name = entityName,
+                            Value = entityValue
+                        },
+                        new EntityResponse()
+                        {
+                            Name = "Other entity name",
+                            Value = "Other entity value"
+                        }
+                    }
+                });
+
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+
+            // Assert
+            ContextProvider.Received(1).GetContext(User, flow.Id);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "my-entity", CancellationToken);
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(User)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    CancellationToken);
+        }
+
 
         public void Dispose()
         {
