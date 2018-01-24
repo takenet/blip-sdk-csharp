@@ -480,8 +480,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithDateValidationShouldChangeStateProperly()
         {
             // Arrange
-            var input = new PlainText() { Text = "20/11/2017 17:13:00" };
-            var invalidInput = new MediaLink();
+            var input = new PlainText() { Text = "2017-11-20T17:13:00Z" };
             var messageType = "text/plain";
             var messageContent = "Pong!";
             var validationMessageContent = "Invalid message content";

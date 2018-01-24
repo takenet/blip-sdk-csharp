@@ -28,9 +28,9 @@ namespace Take.Blip.Builder.Models
         public State[] States { get; set; }
 
         /// <summary>
-        /// The flow variables.
+        /// The flow configuration.
         /// </summary>
-        public Dictionary<string, string> Variables { get; set; }
+        public Dictionary<string, string> Configuration { get; set; }
 
         public void Validate()
         {

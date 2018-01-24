@@ -53,7 +53,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(ContactVariableProvider),
                     typeof(ContextVariableProvider),
                     typeof(RandomVariableProvider),
-                    typeof(FlowVariableProvider),
+                    typeof(FlowConfigurationVariableProvider),
                     typeof(InputVariableProvider),
                 });
 

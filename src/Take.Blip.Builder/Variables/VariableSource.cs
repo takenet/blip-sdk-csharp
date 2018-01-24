@@ -28,9 +28,9 @@
         Bucket,
 
         /// <summary>
-        /// Get values from the flow.
+        /// Get values from the flow configuration.
         /// </summary>
-        Flow,
+        Config,
 
         /// <summary>
         /// Get values from the input.
