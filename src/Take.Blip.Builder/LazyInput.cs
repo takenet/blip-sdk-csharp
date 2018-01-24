@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,15 +18,18 @@ namespace Take.Blip.Builder
     /// </summary>
     internal class LazyInput
     {
+        private readonly IDictionary<string, string> _flowConfiguration;
         private readonly Lazy<string> _inputSource;
         private readonly Lazy<Task<AnalysisResponse>> _analysisSource;
 
         public LazyInput(
             Document input,
+            IDictionary<string, string> flowConfiguration,
             IDocumentSerializer documentSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             CancellationToken cancellationToken)
         {
+            _flowConfiguration = flowConfiguration;
             Input = input;
             _inputSource = new Lazy<string>(() => documentSerializer.Serialize(input));
             _analysisSource = new Lazy<Task<AnalysisResponse>>(async () =>
@@ -51,21 +56,28 @@ namespace Take.Blip.Builder
 
         public Task<AnalysisResponse> AnalyzedInput => _analysisSource.Value;
 
-        public async Task<string> GetIntentAsync(double minimumScore = 0.5)
+        public async Task<IntentionResponse> GetIntentAsync()
         {
+            double minimumIntentScore;
+
+            if (_flowConfiguration == null ||
+                !_flowConfiguration.TryGetValue($"builder:{nameof(minimumIntentScore)}", out var minimumScoreValue) ||
+                !double.TryParse(minimumScoreValue, NumberStyles.Float, CultureInfo.InvariantCulture, out minimumIntentScore))
+            {               
+                minimumIntentScore = 0.5;
+            }
+
             return (await AnalyzedInput)?
                 .Intentions?
                 .OrderByDescending(i => i.Score)
-                .FirstOrDefault(i => i.Score >= minimumScore)?
-                .Name;
+                .FirstOrDefault(i => i.Score >= minimumIntentScore);
         }
 
-        public async Task<string> GetEntityValue(string entityName)
+        public async Task<EntityResponse> GetEntityValue(string entityName)
         {
             return (await AnalyzedInput)?
                 .Entities?
-                .FirstOrDefault(e => e.Name != null && e.Name.Equals(entityName, StringComparison.OrdinalIgnoreCase))?
-                .Value;
+                .FirstOrDefault(e => e.Name != null && e.Name.Equals(entityName, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

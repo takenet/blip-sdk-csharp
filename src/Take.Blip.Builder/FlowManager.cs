@@ -65,7 +65,7 @@ namespace Take.Blip.Builder
             try
             {
                 // Create the input evaluator
-                var lazyInput = new LazyInput(input, _documentSerializer, _artificialIntelligenceExtension, cancellationToken);
+                var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer, _artificialIntelligenceExtension, cancellationToken);
 
                 using (RequestContext.Create(lazyInput, flow))
                 {
@@ -233,11 +233,11 @@ namespace Take.Blip.Builder
                     break;
 
                 case ValueSource.Intent:
-                    comparisonValue = await lazyInput.GetIntentAsync();
+                    comparisonValue = (await lazyInput.GetIntentAsync())?.Name;
                     break;
 
                 case ValueSource.Entity:
-                    comparisonValue = await lazyInput.GetEntityValue(condition.Entity);
+                    comparisonValue = (await lazyInput.GetEntityValue(condition.Entity))?.Value;
                     break;
 
                 default:
