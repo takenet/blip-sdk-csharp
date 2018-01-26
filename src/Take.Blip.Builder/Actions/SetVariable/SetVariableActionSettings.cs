@@ -5,5 +5,7 @@
         public string Variable { get; set; }
 
         public string Value { get; set; }
+
+        public int? Expiration { get; set; }
     }
 }

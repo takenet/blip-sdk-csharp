@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 
@@ -10,7 +11,7 @@ namespace Take.Blip.Builder
 
         Identity User { get; }
 
-        Task SetVariableAsync(string name, string value, CancellationToken cancellationToken);
+        Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan));
 
         Task<string> GetVariableAsync(string name, CancellationToken cancellationToken);
     }
