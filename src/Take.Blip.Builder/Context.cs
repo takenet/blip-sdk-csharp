@@ -81,7 +81,7 @@ namespace Take.Blip.Builder
 
         struct VariableName
         {
-            private static readonly Regex VariableNameRegex = new Regex("^(?<sourceOrName>[\\w\\d]+)(\\.(?<name>[\\w\\d\\.]+))?(@(?<property>[\\w\\d\\.]+))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            private static readonly Regex VariableNameRegex = new Regex("^(?<sourceOrName>[\\w\\d]+)(\\.(?<name>[\\w\\d\\.]+))?(@(?<property>([\\w\\d\\.](\\[(?<index>\\d+|\\$n)\\])?)+))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             private VariableName(VariableSource source, string name, string property)
             {
