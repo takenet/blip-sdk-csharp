@@ -244,8 +244,6 @@ namespace Take.Blip.Builder
                     throw new ArgumentOutOfRangeException();
             }
 
-            if (comparisonValue == null) return false;
-
             var comparisonFunc = condition.Comparison.ToDelegate();
 
             switch (condition.Operator)
