@@ -246,9 +246,15 @@ namespace Take.Blip.Builder
 
             var comparisonFunc = condition.Comparison.ToDelegate();
 
+            if (condition.Comparison == ConditionComparison.IsNullOrEmpty
+                || condition.Comparison == ConditionComparison.IsNotNullOrEmpty)
+            {
+                return comparisonFunc(comparisonValue, null);
+            }
+
             switch (condition.Operator)
             {
-                case ConditionOperator.Or:
+                case ConditionOperator.Or:                    
                     return condition.Values.Any(v => comparisonFunc(comparisonValue, v));
 
                 case ConditionOperator.And:
