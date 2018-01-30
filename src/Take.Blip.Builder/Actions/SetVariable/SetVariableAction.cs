@@ -15,14 +15,14 @@ namespace Take.Blip.Builder.Actions.SetVariable
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             var setVariableActionSettings = settings.ToObject<SetVariableActionSettings>();
+            if (setVariableActionSettings.Variable == null) throw new ArgumentException($"The '{nameof(SetVariableActionSettings.Variable)}' settings value is required for '{nameof(SetVariable)}' action");
 
             var expiration = default(TimeSpan);
             if (setVariableActionSettings.Expiration.HasValue)
             {
                 expiration = TimeSpan.FromSeconds(setVariableActionSettings.Expiration.Value);
             }
-
-            if (setVariableActionSettings.Variable == null) throw new ArgumentException($"The '{nameof(SetVariableActionSettings.Variable)}' settings value is required for '{nameof(SetVariable)}' action");            
+            
             return context.SetVariableAsync(setVariableActionSettings.Variable, setVariableActionSettings.Value, cancellationToken, expiration);
         }
     }
