@@ -58,6 +58,12 @@ namespace Take.Blip.Builder
             return GetJsonProperty(variableValue, variable.Property);
         }
 
+        public Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
+        {
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            return _contextExtension.DeleteVariableAsync(User, name.ToLowerInvariant(), cancellationToken);
+        }
+
         private static string GetJsonProperty(string variableValue, string property)
         {
             try

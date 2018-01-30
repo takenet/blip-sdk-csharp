@@ -15,21 +15,18 @@ using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
 {
-    public class SendMessageFromHttpActionTests : CancellationTokenTestsBase
+    public class SendMessageFromHttpActionTests : ActionTestsBase
     {
         public SendMessageFromHttpActionTests()
         {
             Sender = Substitute.For<ISender>();
             HttpClient = Substitute.For<IHttpClient>();
-            Context = Substitute.For<IContext>();
             DocumentSerializer = new DocumentSerializer();
         }
 
         public ISender Sender { get; set; }
 
         public IHttpClient HttpClient { get; set; }
-
-        public IContext Context { get; }
 
         private IDocumentSerializer DocumentSerializer { get; }
 

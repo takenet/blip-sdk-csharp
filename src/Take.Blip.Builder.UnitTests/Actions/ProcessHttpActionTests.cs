@@ -14,17 +14,14 @@ using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
 {
-    public class ProcessHttpActionTests : CancellationTokenTestsBase
+    public class ProcessHttpActionTests : ActionTestsBase
     {
         public ProcessHttpActionTests()
         {
             HttpClient = Substitute.For<IHttpClient>();
-            Context = Substitute.For<IContext>();
         }
 
         public IHttpClient HttpClient { get; set; }
-
-        public IContext Context { get; private set; }
 
         private ProcessHttpAction GetTarget()
         {

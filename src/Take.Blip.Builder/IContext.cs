@@ -14,5 +14,7 @@ namespace Take.Blip.Builder
         Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan));
 
         Task<string> GetVariableAsync(string name, CancellationToken cancellationToken);
+
+        Task DeleteVariableAsync(string name, CancellationToken cancellationToken);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Lime.Protocol.Serialization;
 using SimpleInjector;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.ExecuteScript;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.MergeContact;
 using Take.Blip.Builder.Actions.ProcessCommand;
@@ -33,6 +34,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterCollection<IAction>(
                 new[] 
                 {
+                    typeof(ExecuteScriptAction),
                     typeof(SendMessageAction),
                     typeof(SendMessageFromHttpAction),
                     typeof(SendCommandAction),
