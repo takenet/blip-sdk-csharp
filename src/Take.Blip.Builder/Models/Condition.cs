@@ -35,10 +35,13 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The values to be used by the comparison with the context value. Required.
         /// </summary>
+        [Required(ErrorMessage = "The condition values are required")]
         public string[] Values { get; set; }
                
         public void Validate()
         {
+            this.ValidateObject();
+
             if (Source == ValueSource.Context && string.IsNullOrWhiteSpace(Variable))
             {
                 throw new ValidationException("The variable name should be provided if the comparsion source is context");
@@ -47,13 +50,6 @@ namespace Take.Blip.Builder.Models
             if (Source == ValueSource.Entity && string.IsNullOrWhiteSpace(Entity))
             {
                 throw new ValidationException("The entity name should be provided if the comparsion source is entity");
-            }
-
-            if (Comparison != ConditionComparison.IsNullOrEmpty
-                && Comparison != ConditionComparison.IsNotNullOrEmpty
-                && (Values == null || Values.Length == 0))
-            {
-                throw new ValidationException("The condition values are required for the specified comparison");
             }
         }
     }
