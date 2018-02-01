@@ -41,7 +41,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task ExecuteWithTwoStatementScriptShouldSucceed()
+        public async Task ExecuteWithArgumentsShouldSucceed()
         {
             // Arrange
             var number1 = "100";
@@ -54,11 +54,81 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 InputVariables = new[]
                 {
-                    nameof(number1), nameof(number2)
+                    nameof(number1),
+                    nameof(number2)
 
                 },
                 Source = @"
                     function run(number1, number2) {
+                        return parseInt(number1) + parseInt(number2);
+                    }",
+                OutputVariable = nameof(result)
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(nameof(result), "350", CancellationToken, default(TimeSpan));
+        }
+
+        [Fact]
+        public async Task ExecuteWithMissingArgumentsShouldSucceed()
+        {
+            // Arrange
+            var number1 = "100";
+            var number2 = "250";
+            Context.GetVariableAsync(nameof(number1), CancellationToken).Returns(number1);
+            Context.GetVariableAsync(nameof(number2), CancellationToken).Returns(number2);
+            var result = "";
+
+            var settings = new ExecuteScriptSettings()
+            {
+                InputVariables = new[]
+                {
+                    nameof(number1),
+                    nameof(number2)
+
+                },
+                Source = @"
+                    function run(number1, number2, number3) {
+                        return parseInt(number1) + parseInt(number2) + (number3 || 150);
+                    }",
+                OutputVariable = nameof(result)
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(nameof(result), "500", CancellationToken, default(TimeSpan));
+        }
+
+        [Fact]
+        public async Task ExecuteWithCustomFunctionNameAndArgumentsShouldSucceed()
+        {
+            // Arrange
+            var number1 = "100";
+            var number2 = "250";
+            Context.GetVariableAsync(nameof(number1), CancellationToken).Returns(number1);
+            Context.GetVariableAsync(nameof(number2), CancellationToken).Returns(number2);
+            var result = "";
+
+            var settings = new ExecuteScriptSettings()
+            {
+                Function = "executeFunc",
+                InputVariables = new[]
+                {
+                    nameof(number1),
+                    nameof(number2)
+
+                },
+                Source = @"
+                    function executeFunc(number1, number2) {
                         return parseInt(number1) + parseInt(number2);
                     }",
                 OutputVariable = nameof(result)
