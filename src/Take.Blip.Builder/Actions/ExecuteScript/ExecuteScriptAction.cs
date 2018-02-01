@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Jint;
 using Jint.Native;
-using Jint.Native.Json;
 using Jint.Parser;
 using Jint.Runtime;
 using Newtonsoft.Json;
@@ -15,6 +12,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 {
     public class ExecuteScriptAction : IAction
     {
+        private const string DEFAULT_FUNCTION = "run";
+
         public string Type => nameof(ExecuteScript);
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
@@ -27,38 +26,40 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             {
                 throw new ArgumentException($"The '{nameof(ExecuteScriptSettings.Source)}' settings value is required for '{nameof(ExecuteScriptSettings)}' action");
             }
-
-            // Warning: Synchronous calls in an async context should be avoided.
-            var engine = new Engine(options => options
-                    .LimitRecursion(1)
-                    .MaxStatements(5)
-                    .TimeoutInterval(TimeSpan.FromSeconds(2)))
-                .SetValue("getVariable",
-                    new Func<string, string>(name => context.GetVariableAsync(name, cancellationToken).Result))
-                .SetValue("setVariable",
-                    new Action<string, string>((name, value) =>
-                        context.SetVariableAsync(name, value, cancellationToken).Wait(cancellationToken)))
-                .SetValue("setVariable",
-                    new Action<string, string, double>((name, value, expiration) =>
-                        context.SetVariableAsync(name, value, cancellationToken, TimeSpan.FromSeconds(expiration)).Wait(cancellationToken)))
-                .SetValue("deleteVariable",
-                    new Action<string>(name => context.DeleteVariableAsync(name, cancellationToken).Wait(cancellationToken)));
-
-            var result = engine.Execute(executeScriptSettings.Source, new ParserOptions() {Tolerant = true}).GetCompletionValue();
-            if (result != null && 
-                !string.IsNullOrEmpty(executeScriptSettings.Variable))
+            if (string.IsNullOrEmpty(executeScriptSettings.OutputVariable))
             {
-                string value;
-                if (result.Type == Types.Object)
-                {
-                    value = GetJson(result.AsObject()).ToString(Formatting.None);                    
-                }
-                else
-                {
-                    value = result.ToString();
-                }
+                throw new ArgumentException($"The '{nameof(ExecuteScriptSettings.OutputVariable)}' settings value is required for '{nameof(ExecuteScriptSettings)}' action");
+            }
 
-                await context.SetVariableAsync(executeScriptSettings.Variable, value, cancellationToken);
+            // Retrive the input variables
+            object[] arguments = null;
+            if (executeScriptSettings.InputVariables != null && executeScriptSettings.InputVariables.Length > 0)
+            {
+                arguments = new object[executeScriptSettings.InputVariables.Length];
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    arguments[i] =
+                        await context.GetVariableAsync(executeScriptSettings.InputVariables[i], cancellationToken);
+                }
+            }
+
+            var result = new Engine(options => options
+                .LimitRecursion(5)
+                .MaxStatements(50)
+                .TimeoutInterval(TimeSpan.FromSeconds(2)))
+                .Invoke(executeScriptSettings.Function ?? DEFAULT_FUNCTION, arguments);
+
+            if (result != null && !result.IsNull())
+            {
+                var value = result.Type == Types.Object
+                    ? GetJson(result.AsObject()).ToString(Formatting.None)
+                    : result.ToString();
+
+                await context.SetVariableAsync(executeScriptSettings.OutputVariable, value, cancellationToken);
+            }
+            else
+            {
+                await context.DeleteVariableAsync(executeScriptSettings.OutputVariable, cancellationToken);
             }
         }
 

@@ -88,7 +88,7 @@ namespace Take.Blip.Builder.UnitTests
             var input = new PlainText() { Text = "Ping!" };
             var messageType = "text/plain";
             var variableName = "variableName1";
-            var variableValue = "Variable value 1";
+            var variableValue = "OutputVariable value 1";
             Context.GetVariableAsync(variableName, CancellationToken).Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";

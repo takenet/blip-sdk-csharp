@@ -81,7 +81,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Source = $@"
                     return parseInt(getVariable('number1')) + parseInt(getVariable('number2'));
                     ",
-                Variable = nameof(result)
+                OutputVariable = nameof(result)
             };
             var target = GetTarget();
 
@@ -114,7 +114,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         }
                     };
                     ",
-                Variable = nameof(result)
+                OutputVariable = nameof(result)
             };
             var target = GetTarget();
 
@@ -141,7 +141,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     }
                     return value;
                     ",
-                Variable = nameof(result)
+                OutputVariable = nameof(result)
             };
             var target = GetTarget();
 
@@ -170,7 +170,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         return 0;
                     }, 2000);
                     ",
-                Variable = nameof(result)
+                OutputVariable = nameof(result)
             };
             var target = GetTarget();
 
