@@ -43,11 +43,15 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 }
             }
 
-            var result = new Engine(options => options
+            var engine = new Engine(options => options
                 .LimitRecursion(5)
                 .MaxStatements(50)
                 .TimeoutInterval(TimeSpan.FromSeconds(2)))
-                .Invoke(executeScriptSettings.Function ?? DEFAULT_FUNCTION, arguments);
+                .Execute(executeScriptSettings.Source);
+
+            var result = arguments != null 
+                ? engine.Invoke(executeScriptSettings.Function ?? DEFAULT_FUNCTION, arguments) 
+                : engine.Invoke(executeScriptSettings.Function ?? DEFAULT_FUNCTION);
 
             if (result != null && !result.IsNull())
             {
