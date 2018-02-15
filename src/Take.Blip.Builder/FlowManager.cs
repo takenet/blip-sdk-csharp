@@ -138,7 +138,7 @@ namespace Take.Blip.Builder
                             // Check if the state transition limit has reached (to avoid loops in the flow)
                             if (transitions++ >= _configuration.MaxTransitionsByInput)
                             {
-                                throw new InvalidOperationException("Max state transitions reached");
+                                throw new BuilderException("Max state transitions reached");
                             }
 
                             // Continue processing if the next has do not expect the user input
@@ -183,15 +183,23 @@ namespace Take.Blip.Builder
             {                
                 var action = _actionProvider.Get(stateAction.Type);
 
-                var settings = stateAction.Settings;
-                if (settings != null)
+                try
                 {
-                    var settingsJson = settings.ToString(Formatting.None);
-                    settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
-                    settings = JObject.Parse(settingsJson);
-                }
+                    var settings = stateAction.Settings;
+                    if (settings != null)
+                    {
+                        var settingsJson = settings.ToString(Formatting.None);
+                        settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+                        settings = JObject.Parse(settingsJson);
+                    }
 
-                await action.ExecuteAsync(context, settings, cancellationToken);
+                    await action.ExecuteAsync(context, settings, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    throw new ActionProcessingException(
+                        $"The processing of the action '{stateAction.Type}' has failed", ex);
+                }
             }
         }
 
