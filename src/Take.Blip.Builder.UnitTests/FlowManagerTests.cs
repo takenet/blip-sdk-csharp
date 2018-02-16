@@ -151,6 +151,75 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
+        public async Task FlowWithActionWithJsonVariableShouldBeEscapedAndReplaced()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "text/plain";
+            var variableName = "variableName1";
+            var variableValue = "{\"propertyName1\":\"propertyValue1\",\"propertyName2\":2}";
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+
+            var messageContent = "Hello {{variableName1}}!";
+            var expectedMessageContent = $"Hello {variableValue}!";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+
+            // Assert
+            ContextProvider.Received(1).GetContext(User, flow.Id);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(User)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == expectedMessageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         public async Task FlowWithActionWithVariableThatNotExistsShouldBeReplacedByEmpty()
         {
             // Arrange

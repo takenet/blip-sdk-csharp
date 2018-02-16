@@ -198,7 +198,7 @@ namespace Take.Blip.Builder
                 catch (Exception ex)
                 {
                     throw new ActionProcessingException(
-                        $"The processing of the action '{stateAction.Type}' has failed", ex);
+                        $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
                 }
             }
         }
