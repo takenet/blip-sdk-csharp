@@ -36,6 +36,8 @@ namespace Take.Blip.Builder.Utils
         /// <returns></returns>
         private static string EscapeString(string src)
         {
+            if (string.IsNullOrWhiteSpace(src)) return src;
+
             var sb = new StringBuilder();
 
             int start = 0;
