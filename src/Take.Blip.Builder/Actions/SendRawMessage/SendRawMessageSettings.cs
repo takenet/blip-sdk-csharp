@@ -4,9 +4,9 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Take.Blip.Builder.Models;
 
-namespace Take.Blip.Builder.Actions.SendMessageFromRaw
+namespace Take.Blip.Builder.Actions.SendRawMessage
 {
-    public class SendMessageFromRawSettings : IValidable
+    public class SendRawMessageSettings : IValidable
     {
         public string Type { get; set; }
 
@@ -22,19 +22,19 @@ namespace Take.Blip.Builder.Actions.SendMessageFromRaw
             if (RawContent == null)
             {
                 throw new ArgumentException(
-                    $"The '{nameof(RawContent)}' settings value is required for '{nameof(SendMessageFromRawSettings)}' action");
+                    $"The '{nameof(RawContent)}' settings value is required for '{nameof(SendRawMessageSettings)}' action");
             }
 
             if (Type == null)
             {
                 throw new ArgumentException(
-                    $"The '{nameof(Type)}' settings value is required for '{nameof(SendMessageFromRawSettings)}' action");
+                    $"The '{nameof(Type)}' settings value is required for '{nameof(SendRawMessageSettings)}' action");
             }
 
             if (!MediaType.TryParse(Type, out MediaType))
             {
                 throw new ArgumentException(
-                    $"The '{nameof(Type)}' settings value must be a valid MIME type for '{nameof(SendMessageFromRawSettings)}' action");
+                    $"The '{nameof(Type)}' settings value must be a valid MIME type for '{nameof(SendRawMessageSettings)}' action");
             }
         }
     }
