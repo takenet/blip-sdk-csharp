@@ -3,41 +3,30 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
-using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Extensions.Broadcast;
 
 namespace Take.Blip.Builder.Actions.ManageList
 {
-    public class ManageListAction : IAction
+    public class ManageListAction : ActionBase<ManageListSettings>
     {
         private readonly IBroadcastExtension _broadcastExtension;
 
         public ManageListAction(IBroadcastExtension broadcastExtension)
+            :base(nameof(ManageList))
         {
             _broadcastExtension = broadcastExtension;
         }
 
-        public string Type => nameof(ManageList);
-
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(IContext context, ManageListSettings settings, CancellationToken cancellationToken)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            var managerListSettings = settings.ToObject<ManageListSettings>();
-            if (string.IsNullOrEmpty(managerListSettings.ListName))
-            {
-                throw new ArgumentException($"The '{nameof(ManageListSettings.ListName)}' settings value is required for '{nameof(ManageListAction)}' action");
-            }
-
-            switch (managerListSettings.Action)
+            switch (settings.Action)
             {
                 case ManageListSettingsAction.Add:
-                    await AddToListAsync(context, managerListSettings.ListName, cancellationToken);
+                    await AddToListAsync(context, settings.ListName, cancellationToken);
                     break;
 
                 case ManageListSettingsAction.Remove:
-                    await RemoveFromListAsync(context, managerListSettings.ListName, cancellationToken);
+                    await RemoveFromListAsync(context, settings.ListName, cancellationToken);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

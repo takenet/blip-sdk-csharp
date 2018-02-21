@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -12,7 +10,7 @@ namespace Take.Blip.Builder.Actions
     {
         protected ActionBase(string type)
         {
-            if (string.IsNullOrWhiteSpace(type)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(type));
+            if (string.IsNullOrWhiteSpace(type)) throw new ArgumentException("Action type cannot be null or whitespace.", nameof(type));
             Type = type;
         }
 
@@ -20,9 +18,12 @@ namespace Take.Blip.Builder.Actions
 
         public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
+
             var validableSettings = settings.ToObject<TSettings>();
             validableSettings.Validate();
+
             return ExecuteAsync(context, validableSettings, cancellationToken);
         }
 

@@ -3,55 +3,44 @@ using System.Threading;
 using System.Threading.Tasks;
 using Jint;
 using Jint.Native;
-using Jint.Parser;
 using Jint.Runtime;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
-    public class ExecuteScriptAction : IAction
+    public class ExecuteScriptAction : ActionBase<ExecuteScriptSettings>
     {
         private const string DEFAULT_FUNCTION = "run";
 
-        public string Type => nameof(ExecuteScript);
-
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public ExecuteScriptAction() 
+            : base(nameof(ExecuteScript))
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
+        }
 
-            var executeScriptSettings = settings.ToObject<ExecuteScriptSettings>();
-            if (string.IsNullOrEmpty(executeScriptSettings.Source))
-            {
-                throw new ArgumentException($"The '{nameof(ExecuteScriptSettings.Source)}' settings value is required for '{nameof(ExecuteScriptSettings)}' action");
-            }
-            if (string.IsNullOrEmpty(executeScriptSettings.OutputVariable))
-            {
-                throw new ArgumentException($"The '{nameof(ExecuteScriptSettings.OutputVariable)}' settings value is required for '{nameof(ExecuteScriptSettings)}' action");
-            }
-
+        public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
+        {
             // Retrive the input variables
             object[] arguments = null;
-            if (executeScriptSettings.InputVariables != null && executeScriptSettings.InputVariables.Length > 0)
+            if (settings.InputVariables != null && settings.InputVariables.Length > 0)
             {
-                arguments = new object[executeScriptSettings.InputVariables.Length];
+                arguments = new object[settings.InputVariables.Length];
                 for (int i = 0; i < arguments.Length; i++)
                 {
                     arguments[i] =
-                        await context.GetVariableAsync(executeScriptSettings.InputVariables[i], cancellationToken);
+                        await context.GetVariableAsync(settings.InputVariables[i], cancellationToken);
                 }
             }
 
             var engine = new Engine(options => options
-                .LimitRecursion(5)
-                .MaxStatements(50)
-                .TimeoutInterval(TimeSpan.FromSeconds(2)))
-                .Execute(executeScriptSettings.Source);
+                    .LimitRecursion(5)
+                    .MaxStatements(50)
+                    .TimeoutInterval(TimeSpan.FromSeconds(2)))
+                .Execute(settings.Source);
 
-            var result = arguments != null 
-                ? engine.Invoke(executeScriptSettings.Function ?? DEFAULT_FUNCTION, arguments) 
-                : engine.Invoke(executeScriptSettings.Function ?? DEFAULT_FUNCTION);
+            var result = arguments != null
+                ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
+                : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
 
             if (result != null && !result.IsNull())
             {
@@ -59,11 +48,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                     ? GetJson(result.AsObject()).ToString(Formatting.None)
                     : result.ToString();
 
-                await context.SetVariableAsync(executeScriptSettings.OutputVariable, value, cancellationToken);
+                await context.SetVariableAsync(settings.OutputVariable, value, cancellationToken);
             }
             else
             {
-                await context.DeleteVariableAsync(executeScriptSettings.OutputVariable, cancellationToken);
+                await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
             }
         }
 

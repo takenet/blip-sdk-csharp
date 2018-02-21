@@ -9,55 +9,39 @@ using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
 {
-    public sealed class ProcessHttpAction: IAction, IDisposable
+    public sealed class ProcessHttpAction : ActionBase<ProcessHttpSettings>, IDisposable
     {
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
 
         public ProcessHttpAction(IHttpClient httpClient, ILogger logger)
+            : base(nameof(ProcessHttp))
         {
             _httpClient = httpClient;
             _logger = logger;
-        }
+        }        
 
-        public string Type => nameof(ProcessHttp);
-
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            var processHttpSettings = settings.ToObject<ProcessHttpSettings>();
-            if (processHttpSettings.Uri == null)
-            {
-                throw new ArgumentException(
-                    $"The '{nameof(ProcessHttpSettings.Uri)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
-            }
-            if (processHttpSettings.Method == null)
-            {
-                throw new ArgumentException(
-                    $"The '{nameof(ProcessHttpSettings.Method)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
-            }
-
             var responseStatus = 0;
             string responseBody = null;
             try
             {
                 var httpRequestMessage =
-                    new HttpRequestMessage(new HttpMethod(processHttpSettings.Method), processHttpSettings.Uri);
-                if (processHttpSettings.Headers != null)
+                    new HttpRequestMessage(new HttpMethod(settings.Method), settings.Uri);
+                if (settings.Headers != null)
                 {
-                    foreach (var header in processHttpSettings.Headers)
+                    foreach (var header in settings.Headers)
                     {
                         httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
                     }
                 }
 
-                if (!string.IsNullOrWhiteSpace(processHttpSettings.Body))
+                if (!string.IsNullOrWhiteSpace(settings.Body))
                 {
                     string contentType = null;
-                    processHttpSettings.Headers?.TryGetValue("Content-Type", out contentType);
-                    httpRequestMessage.Content = new StringContent(processHttpSettings.Body, Encoding.UTF8,
+                    settings.Headers?.TryGetValue("Content-Type", out contentType);
+                    httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
                         contentType ?? "application/json");
                 }
 
@@ -65,7 +49,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
 
                 responseStatus = (int)httpResponseMessage.StatusCode;
-                if (!string.IsNullOrWhiteSpace(processHttpSettings.ResponseBodyVariable))
+                if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
                 {
                     responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
                 }
@@ -76,16 +60,16 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             }
 
             // Set the responses variables
-            if (!string.IsNullOrWhiteSpace(processHttpSettings.ResponseStatusVariable))
+            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
             {
-                await context.SetVariableAsync(processHttpSettings.ResponseStatusVariable,
+                await context.SetVariableAsync(settings.ResponseStatusVariable,
                     responseStatus.ToString(), cancellationToken);
             }
 
-            if (!string.IsNullOrWhiteSpace(processHttpSettings.ResponseBodyVariable) &&
+            if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable) &&
                 !string.IsNullOrWhiteSpace(responseBody))
             {
-                await context.SetVariableAsync(processHttpSettings.ResponseBodyVariable, responseBody, cancellationToken);
+                await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
             }
         }
 

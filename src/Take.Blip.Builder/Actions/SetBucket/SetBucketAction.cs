@@ -1,44 +1,29 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Extensions.Bucket;
 
 namespace Take.Blip.Builder.Actions.SetBucket
 {
-    public class SetBucketAction : IAction
+    public class SetBucketAction : ActionBase<SetBucketActionSettings>
     {
         private readonly IBucketExtension _bucketExtension;
 
         public SetBucketAction(IBucketExtension bucketExtension)
+            : base(nameof(SetBucket))
         {
             _bucketExtension = bucketExtension;
         }
 
-        public string Type => nameof(SetBucket);
-
-        public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override Task ExecuteAsync(IContext context, SetBucketActionSettings settings, CancellationToken cancellationToken)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            var setBucketActionSettings = settings.ToObject<SetBucketActionSettings>();
-            if (setBucketActionSettings.Id == null)
-            {
-                throw new ArgumentException($"The '{nameof(SetBucketActionSettings.Id)}' settings value is required for '{nameof(SetBucket)}' action");
-            }
-            if (setBucketActionSettings.Type == null)
-            {
-                throw new ArgumentException($"The '{nameof(SetBucketActionSettings.Type)}' settings value is required for '{nameof(SetBucket)}' action");
-            }
-
-            var expiration = setBucketActionSettings.Expiration.HasValue
-                ? TimeSpan.FromMilliseconds(setBucketActionSettings.Expiration.Value)
+            var expiration = settings.Expiration.HasValue
+                ? TimeSpan.FromMilliseconds(settings.Expiration.Value)
                 : default(TimeSpan);
 
             return _bucketExtension.SetAsync(
-                setBucketActionSettings.Id,
-                setBucketActionSettings.ToDocument(),
+                settings.Id,
+                settings.ToDocument(),
                 expiration,
                 cancellationToken);
         }

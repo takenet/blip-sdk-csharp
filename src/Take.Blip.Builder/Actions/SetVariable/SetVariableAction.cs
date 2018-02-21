@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Actions.SetVariable
 {
-    public class SetVariableAction : IAction
+    public class SetVariableAction : ActionBase<SetVariableActionSettings>
     {
-        public string Type => nameof(SetVariable);
-
-        public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public SetVariableAction()
+            : base(nameof(SetVariable))
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            var setVariableActionSettings = settings.ToObject<SetVariableActionSettings>();
-            if (setVariableActionSettings.Variable == null) throw new ArgumentException($"The '{nameof(SetVariableActionSettings.Variable)}' settings value is required for '{nameof(SetVariable)}' action");
-
-            var expiration = default(TimeSpan);
-            if (setVariableActionSettings.Expiration.HasValue)
-            {
-                expiration = TimeSpan.FromSeconds(setVariableActionSettings.Expiration.Value);
-            }
             
-            return context.SetVariableAsync(setVariableActionSettings.Variable, setVariableActionSettings.Value, cancellationToken, expiration);
+        }
+
+        public override Task ExecuteAsync(IContext context, SetVariableActionSettings settings, CancellationToken cancellationToken)
+        {
+            var expiration = default(TimeSpan);
+            if (settings.Expiration.HasValue)
+            {
+                expiration = TimeSpan.FromSeconds(settings.Expiration.Value);
+            }
+
+            return context.SetVariableAsync(settings.Variable, settings.Value, cancellationToken, expiration);
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
+using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Actions.SetBucket
 {
-    public class SetBucketActionSettings
+    public class SetBucketActionSettings : IValidable
     {
         public string Id { get; set; }
 
@@ -25,6 +27,18 @@ namespace Take.Blip.Builder.Actions.SetBucket
             }
 
             return new PlainDocument(Document, mediaType);
+        }
+
+        public void Validate()
+        {
+            if (Id == null)
+            {
+                throw new ArgumentException($"The '{nameof(Id)}' settings value is required for '{nameof(SetBucket)}' action");
+            }
+            if (Type == null)
+            {
+                throw new ArgumentException($"The '{nameof(Type)}' settings value is required for '{nameof(SetBucket)}' action");
+            }
         }
     }
 }
