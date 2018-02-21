@@ -1,6 +1,6 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Take.Blip.Client;
 
@@ -20,9 +20,15 @@ namespace Take.Blip.Builder.Actions.SendMessageFromRaw
 
         public override Task ExecuteAsync(IContext context, SendMessageFromRawSettings settings, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var message = new Message(EnvelopeId.NewId())
+            {
+                Id = EnvelopeId.NewId(),
+                To = context.User.ToNode(),
+                Content = _documentSerializer.Deserialize(settings.RawContent, settings.MediaType),
+                Metadata = settings.Metadata
+            };
+
+            return _sender.SendMessageAsync(message, cancellationToken);
         }
     }
-
-   
 }

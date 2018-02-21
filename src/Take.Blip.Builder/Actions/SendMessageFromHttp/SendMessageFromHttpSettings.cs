@@ -9,6 +9,8 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
     {
         public string Type { get; set; }
 
+        public MediaType MediaType;
+
         public Uri Uri { get; set; }
 
         public Dictionary<string, string> Headers { get; set; }
@@ -27,10 +29,10 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     $"The '{nameof(Type)}' settings value is required for '{nameof(SendMessageFromHttpAction)}' action");
             }
 
-            if (!MediaType.TryParse(Type, out _))
+            if (!MediaType.TryParse(Type, out MediaType))
             {
                 throw new ArgumentException(
-                    $"The '{nameof(Type)}' settings value must be a valid MIME type");
+                    $"The '{nameof(Type)}' settings value must be a valid MIME type for '{nameof(SendMessageFromHttpAction)}' action");
             }
         }
     }

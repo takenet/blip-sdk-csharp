@@ -44,14 +44,12 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
             var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
             httpResponseMessage.EnsureSuccessStatusCode();
 
-            var mediaType = MediaType.Parse(settings.Type);
-
             var body = await httpResponseMessage.Content.ReadAsStringAsync();
             var message = new Message(EnvelopeId.NewId())
             {
                 Id = EnvelopeId.NewId(),
                 To = context.User.ToNode(),
-                Content = _documentSerializer.Deserialize(body, mediaType)
+                Content = _documentSerializer.Deserialize(body, settings.MediaType)
             };
 
             await _sender.SendMessageAsync(message, cancellationToken);
