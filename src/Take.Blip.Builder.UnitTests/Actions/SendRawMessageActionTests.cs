@@ -30,7 +30,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-
         public async Task SendWithPlainHttpContentShouldSucceed()
         {
             // Arrange
@@ -54,7 +53,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-
         public async Task SendWithJsonHttpContentShouldSucceed()
         {
             // Arrange
