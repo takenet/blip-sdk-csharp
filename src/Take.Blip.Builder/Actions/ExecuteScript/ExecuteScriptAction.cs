@@ -45,7 +45,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             if (result != null && !result.IsNull())
             {
                 var value = result.Type == Types.Object
-                    ? GetJson(result.AsObject()).ToString(Formatting.None)
+                    ? JsonConvert.SerializeObject(result.ToObject())
                     : result.ToString();
 
                 await context.SetVariableAsync(settings.OutputVariable, value, cancellationToken);
@@ -54,37 +54,6 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             {
                 await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
             }
-        }
-
-        private static JToken GetJson(JsValue jsValue)
-        {
-            if (jsValue == null || jsValue.IsNull()) return null;
-            if (jsValue.IsString()) return jsValue.AsString();            
-            if (jsValue.IsBoolean()) return jsValue.AsBoolean();
-            if (jsValue.IsNumber()) return jsValue.AsNumber();
-            if (jsValue.IsDate()) return jsValue.AsDate().ToDateTime();
-            if (jsValue.IsArray())
-            {
-                var jArray = new JArray();
-                foreach (var keyValuePair in jsValue.AsArray().GetOwnProperties())
-                {
-                    jArray.Add(GetJson(keyValuePair.Value.Value));
-                }
-
-                return jArray;
-            }
-            if (jsValue.IsObject())
-            {
-                var jObject = new JObject();
-                foreach (var keyValuePair in jsValue.AsObject().GetOwnProperties())
-                {
-                    jObject[keyValuePair.Key] = GetJson(keyValuePair.Value.Value);
-                }
-
-                return jObject;
-            }
-
-            return null;
         }
     }
 }

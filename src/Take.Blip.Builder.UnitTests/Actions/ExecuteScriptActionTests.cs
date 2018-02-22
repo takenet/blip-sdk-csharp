@@ -147,7 +147,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task ExecuteWithJsonReturnValueShouldSucceed()
         {
             // Arrange
-            var result = "{\"id\":1.0,\"valid\":true,\"options\":[1.0,2.0,3.0,3.0],\"names\":[\"a\",\"b\",\"c\",3.0],\"others\":[{\"a\":\"value1\"},{\"b\":\"value2\"},2.0],\"content\":{\"uri\":\"https://server.com/image.jpeg\",\"type\":\"image/jpeg\"}}";
+            var result = "{\"id\":1.0,\"valid\":true,\"options\":[1.0,2.0,3.0],\"names\":[\"a\",\"b\",\"c\"],\"others\":[{\"a\":\"value1\"},{\"b\":\"value2\"}],\"content\":{\"uri\":\"https://server.com/image.jpeg\",\"type\":\"image/jpeg\"}}";
             var settings = new ExecuteScriptSettings()
             {
                 Source = @"
@@ -163,6 +163,30 @@ namespace Take.Blip.Builder.UnitTests.Actions
                                 type: 'image/jpeg'
                             }
                         };
+                    }
+                    ",
+                OutputVariable = nameof(result)
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
+        }
+
+        [Fact]
+        public async Task ExecuteWithArrayReturnValueShouldSucceed()
+        {
+            // Arrange
+            var result = "[1.0,2.0,3.0]";
+            var settings = new ExecuteScriptSettings()
+            {
+                Source = @"
+                    function run() {
+                        return [1, 2, 3];
                     }
                     ",
                 OutputVariable = nameof(result)
