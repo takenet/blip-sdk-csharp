@@ -17,11 +17,11 @@ namespace Take.Blip.Builder.Variables
 
         public VariableSource Source => VariableSource.Context;
 
-        public async Task<string> GetVariableAsync(string name, Identity user, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
             try
             {
-                return await _contextExtension.GetTextVariableAsync(user, name, cancellationToken);
+                return await _contextExtension.GetTextVariableAsync(context.User, name, cancellationToken);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {

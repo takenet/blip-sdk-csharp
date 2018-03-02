@@ -6,12 +6,15 @@ using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Network;
+using Lime.Protocol.Serialization;
 using NSubstitute;
 using Shouldly;
 using SimpleInjector;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
+using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Context;
 using Xunit;
@@ -23,14 +26,29 @@ namespace Take.Blip.Builder.UnitTests
         public ContextTests()
         {
             ValuesDictionary = new Dictionary<string, Document>(StringComparer.InvariantCultureIgnoreCase);
+            ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             ContextExtension = new DictionaryContextExtension(ValuesDictionary);
             ContactExtension = Substitute.For<IContactExtension>();
             Sender = Substitute.For<ISender>();
-            FlowId = "0";
+            Flow = new Flow()
+            {
+                Id = "0",
+                Configuration = new Dictionary<string, string>()
+            };
             User = "user@msging.net";
+            Input = new LazyInput(new PlainText()
+                {
+                    Text = "Hello world!"
+                },
+                Flow.Configuration,
+                new DocumentSerializer(),
+                ArtificialIntelligenceExtension,
+                CancellationToken);
         }
 
         public IDictionary<string, Document> ValuesDictionary { get; }
+
+        public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; }
 
         public IContactExtension ContactExtension { get; }
 
@@ -38,10 +56,12 @@ namespace Take.Blip.Builder.UnitTests
 
         public ISender Sender { get; set; }
 
-        public string FlowId { get; set; }
-
         public Identity User { get; set; }
 
+        public LazyInput Input { get; set; }
+
+        public Flow Flow { get; set; }
+        
         private Context GetTarget()
         {
             var container = new Container();
@@ -51,8 +71,9 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(Sender);
 
             return new Context(
-                FlowId,
                 User,
+                Input,
+                Flow,                
                 ContextExtension,
                 container.GetAllInstances<IVariableProvider>());
         }

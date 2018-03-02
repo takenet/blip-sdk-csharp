@@ -4,6 +4,7 @@ using NSubstitute;
 using Serilog;
 using SimpleInjector;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Models;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Broadcast;
@@ -30,7 +31,7 @@ namespace Take.Blip.Builder.UnitTests
             Context = Substitute.For<IContext>();
             Logger = Substitute.For<ILogger>();
             ContextProvider
-                .GetContext(Arg.Any<Identity>(), Arg.Any<string>())
+                .GetContext(Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
             User = new Identity("user", "domain");
             Context.User.Returns(User);

@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
+using NSubstitute;
 using Shouldly;
 using Take.Blip.Builder.Variables;
 using Xunit;
@@ -13,6 +14,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public CalendarVariableProviderTests()
         {
             Identity = new Identity("name", "domain.com");
+            Context = Substitute.For<IContext>();
+            Context.User.Returns(Identity);
         }
 
         public CalendarVariableProvider GetTarget()
@@ -22,6 +25,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public Identity Identity { get; }
 
+        public IContext Context { get; }
+
         [Fact]
         public async Task GetDateShouldReturnTodayDate()
         {
@@ -29,7 +34,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("date", Identity, CancellationToken);
+            var actual = await target.GetVariableAsync("date", Context, CancellationToken);
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.ToString("yyyy-MM-dd"));
@@ -42,7 +47,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("today.date", Identity, CancellationToken);
+            var actual = await target.GetVariableAsync("today.date", Context, CancellationToken);
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.ToString("yyyy-MM-dd"));
@@ -55,7 +60,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("tomorrow.date", Identity, CancellationToken);
+            var actual = await target.GetVariableAsync("tomorrow.date", Context, CancellationToken);
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(1).ToString("yyyy-MM-dd"));
@@ -68,7 +73,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("yesterday.date", Identity, CancellationToken);
+            var actual = await target.GetVariableAsync("yesterday.date", Context, CancellationToken);
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(-1).ToString("yyyy-MM-dd"));
@@ -81,7 +86,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("plus5days.date", Identity, CancellationToken);
+            var actual = await target.GetVariableAsync("plus5days.date", Context, CancellationToken);
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(5).ToString("yyyy-MM-dd"));
@@ -94,7 +99,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("minus5days.date", Identity, CancellationToken);
+            var actual = await target.GetVariableAsync("minus5days.date", Context, CancellationToken);
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(-5).ToString("yyyy-MM-dd"));
@@ -107,7 +112,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("tomorrow.plus5days.date", Identity, CancellationToken);
+            var actual = await target.GetVariableAsync("tomorrow.plus5days.date", Context, CancellationToken);
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(6).ToString("yyyy-MM-dd"));

@@ -71,79 +71,77 @@ namespace Take.Blip.Builder
                     var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer,
                         _artificialIntelligenceExtension, linkedCts.Token);
 
-                    using (RequestContext.Create(lazyInput, flow))
+                    // Try restore a stored state
+                    var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, linkedCts.Token);
+                    var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
+                    // Load the user context
+                    var context = _contextProvider.GetContext(user, lazyInput, flow);
+
+                    // Calculate the number of state transitions
+                    var transitions = 0;
+
+                    do
                     {
-                        // Try restore a stored state
-                        var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, linkedCts.Token);
-                        var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+                        linkedCts.Token.ThrowIfCancellationRequested();
 
-                        // Load the user context
-                        var context = _contextProvider.GetContext(user, flow.Id);
-
-                        // Calculate the number of state transitions
-                        var transitions = 0;
-
-                        do
+                        // Validate the input for the current state
+                        if (state.Input != null &&
+                            !state.Input.Bypass &&
+                            state.Input.Validation != null &&
+                            !ValidateDocument(lazyInput, state.Input.Validation))
                         {
-                            linkedCts.Token.ThrowIfCancellationRequested();
-
-                            // Validate the input for the current state
-                            if (state.Input != null &&
-                                !state.Input.Bypass &&
-                                state.Input.Validation != null &&
-                                !ValidateDocument(lazyInput, state.Input.Validation))
+                            if (state.Input.Validation.Error != null)
                             {
-                                if (state.Input.Validation.Error != null)
-                                {
-                                    // Send the validation error message
-                                    await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
-                                        linkedCts.Token);
-                                }
-
-                                break;
-                            }
-
-                            // Set the input in the context
-                            if (!string.IsNullOrEmpty(state.Input?.Variable))
-                            {
-                                await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedInput,
+                                // Send the validation error message
+                                await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
                                     linkedCts.Token);
                             }
 
-                            // Prepare to leave the current state executing the output actions
-                            if (state.OutputActions != null)
-                            {
-                                await ProcessActionsAsync(context, state.OutputActions, linkedCts.Token);
-                            }
+                            break;
+                        }
 
-                            // Determine the next state
-                            state = await ProcessOutputsAsync(lazyInput, context, flow, state, linkedCts.Token);
+                        // Set the input in the context
+                        if (!string.IsNullOrEmpty(state.Input?.Variable))
+                        {
+                            await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedInput,
+                                linkedCts.Token);
+                        }
 
-                            // Store the next state
-                            if (state != null)
-                            {
-                                await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, linkedCts.Token);
-                            }
-                            else
-                            {
-                                await _stateManager.DeleteStateIdAsync(flow.Id, context.User, linkedCts.Token);
-                            }
+                        // Prepare to leave the current state executing the output actions
+                        if (state.OutputActions != null)
+                        {
+                            await ProcessActionsAsync(context, state.OutputActions, linkedCts.Token);
+                        }
 
-                            // Process the next state input actions
-                            if (state?.InputActions != null)
-                            {
-                                await ProcessActionsAsync(context, state.InputActions, linkedCts.Token);
-                            }
+                        // Determine the next state
+                        state = await ProcessOutputsAsync(lazyInput, context, flow, state, linkedCts.Token);
+
+                        // Store the next state
+                        if (state != null)
+                        {
+                            await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, linkedCts.Token);
+                        }
+                        else
+                        {
+                            await _stateManager.DeleteStateIdAsync(flow.Id, context.User, linkedCts.Token);
+                        }
+
+                        // Process the next state input actions
+                        if (state?.InputActions != null)
+                        {
+                            await ProcessActionsAsync(context, state.InputActions, linkedCts.Token);
+                        }
                             
-                            // Check if the state transition limit has reached (to avoid loops in the flow)
-                            if (transitions++ >= _configuration.MaxTransitionsByInput)
-                            {
-                                throw new BuilderException("Max state transitions reached");
-                            }
+                        // Check if the state transition limit has reached (to avoid loops in the flow)
+                        if (transitions++ >= _configuration.MaxTransitionsByInput)
+                        {
+                            throw new BuilderException("Max state transitions reached");
+                        }
 
-                            // Continue processing if the next has do not expect the user input
-                        } while (state != null && (state.Input == null || state.Input.Bypass));
-                    }
+                        // Continue processing if the next has do not expect the user input
+                    } while (state != null && (state.Input == null || state.Input.Bypass));
+                    
                 }
                 finally
                 {

@@ -16,7 +16,7 @@ namespace Take.Blip.Builder
     /// Allows the lazy evaluation of input bound values.
     /// This optimizes the calls for serialization and the AI extension.
     /// </summary>
-    internal class LazyInput
+    public class LazyInput
     {
         private readonly IDictionary<string, string> _flowConfiguration;
         private readonly Lazy<string> _inputSource;

@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Variables
 
         public VariableSource Source => VariableSource.Bucket;
 
-        public async Task<string> GetVariableAsync(string name, Identity user, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
             try
             {

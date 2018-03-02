@@ -24,11 +24,11 @@ namespace Take.Blip.Builder.Variables
 
         public VariableSource Source => VariableSource.Contact;
 
-        public async Task<string> GetVariableAsync(string name, Identity user, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
             try
             {
-                var contact = await _contactExtension.GetAsync(user, cancellationToken);
+                var contact = await _contactExtension.GetAsync(context.User, cancellationToken);
                 if (contact == null) return null;
                 return GetContactProperty(contact, name);
             }

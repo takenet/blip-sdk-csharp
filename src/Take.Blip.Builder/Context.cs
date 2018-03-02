@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.Context;
 
@@ -17,21 +18,26 @@ namespace Take.Blip.Builder
         private readonly IContextExtension _contextExtension;
         private readonly IDictionary<VariableSource, IVariableProvider> _variableProviderDictionary;
 
-        public Context(
-            string flowId, 
-            Identity user, 
+        public Context(            
+            Identity user,
+            LazyInput input,
+            Flow flow,
             IContextExtension contextExtension,
             IEnumerable<IVariableProvider> variableProviders)
         {
             User = user ?? throw new ArgumentNullException(nameof(user));
-            FlowId = flowId;
+            Input = input ?? throw new ArgumentNullException(nameof(input));
+            Flow = flow ?? throw new ArgumentNullException(nameof(flow));
+
             _contextExtension = contextExtension;
             _variableProviderDictionary = variableProviders.ToDictionary(v => v.Source, v => v);
         }
 
-        public string FlowId { get; set; }
-
         public Identity User { get; }
+
+        public LazyInput Input { get; }
+
+        public Flow Flow { get; }
 
         public Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
         {
@@ -48,7 +54,7 @@ namespace Take.Blip.Builder
                 throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
             }
 
-            var variableValue = await provider.GetVariableAsync(variable.Name, User, cancellationToken);
+            var variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
 
             if (string.IsNullOrWhiteSpace(variableValue) || string.IsNullOrWhiteSpace(variable.Property))
             {

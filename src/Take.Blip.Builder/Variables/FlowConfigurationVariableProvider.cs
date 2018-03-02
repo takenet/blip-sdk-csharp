@@ -8,9 +8,9 @@ namespace Take.Blip.Builder.Variables
     {
         public VariableSource Source => VariableSource.Config;
 
-        public async Task<string> GetVariableAsync(string name, Identity user, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
-            var configuration = RequestContext.Flow?.Configuration;
+            var configuration = context.Flow.Configuration;
             if (configuration == null) return null;
             configuration.TryGetValue(name, out var value);
             return value;

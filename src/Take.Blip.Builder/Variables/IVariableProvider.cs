@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using Lime.Protocol;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -10,6 +7,6 @@ namespace Take.Blip.Builder.Variables
     {
         VariableSource Source { get; }
 
-        Task<string> GetVariableAsync(string name, Identity user, CancellationToken cancellationToken);
+        Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken);
     }
 }

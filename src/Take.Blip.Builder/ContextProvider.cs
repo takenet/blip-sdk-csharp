@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Lime.Protocol;
+using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.Context;
 
@@ -16,6 +17,6 @@ namespace Take.Blip.Builder
             _variableProviders = variableProviders;
         }
 
-        public IContext GetContext(Identity user, string flowId) => new Context(flowId, user, _contextExtension, _variableProviders);
+        public IContext GetContext(Identity user, LazyInput input, Flow flow) => new Context(user, input, flow, _contextExtension, _variableProviders);
     }
 }
