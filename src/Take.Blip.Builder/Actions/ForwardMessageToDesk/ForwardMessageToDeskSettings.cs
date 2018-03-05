@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
 
-namespace Take.Blip.Builder.Actions.ForwardMessage
+namespace Take.Blip.Builder.Actions.ForwardMessageToDesk
 {
-    public class ForwardToAgentSettings : IValidable
+    public class ForwardMessageToDeskSettings : IValidable
     {
         public string Domain { get; set; }
 
-        public ForwardToAgentSettingsContext Context { get; set; }
+        public ForwardMessageToDeskSettingsContext Context { get; set; }
 
         public void Validate()
         {
@@ -15,7 +15,7 @@ namespace Take.Blip.Builder.Actions.ForwardMessage
         }
     }
 
-    public class ForwardToAgentSettingsContext
+    public class ForwardMessageToDeskSettingsContext
     {
         public string Type { get; set; }
 

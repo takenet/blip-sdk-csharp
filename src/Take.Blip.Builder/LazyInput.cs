@@ -19,27 +19,27 @@ namespace Take.Blip.Builder
     public class LazyInput
     {
         private readonly IDictionary<string, string> _flowConfiguration;
-        private readonly Lazy<string> _inputSource;
-        private readonly Lazy<Task<AnalysisResponse>> _analysisSource;
+        private readonly Lazy<string> _lazySerializedContent;
+        private readonly Lazy<Task<AnalysisResponse>> _lazyAnalyzedContent;
 
         public LazyInput(
-            Document input,
+            Document content,
             IDictionary<string, string> flowConfiguration,
             IDocumentSerializer documentSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             CancellationToken cancellationToken)
         {
             _flowConfiguration = flowConfiguration;
-            Input = input;
-            _inputSource = new Lazy<string>(() => documentSerializer.Serialize(input));
-            _analysisSource = new Lazy<Task<AnalysisResponse>>(async () =>
+            Content = content;
+            _lazySerializedContent = new Lazy<string>(() => documentSerializer.Serialize(content));
+            _lazyAnalyzedContent = new Lazy<Task<AnalysisResponse>>(async () =>
             {
                 try
                 {
                     return await artificialIntelligenceExtension.AnalyzeAsync(
                         new AnalysisRequest
                         {
-                            Text = _inputSource.Value
+                            Text = _lazySerializedContent.Value
                         },
                         cancellationToken);
                 }
@@ -50,11 +50,11 @@ namespace Take.Blip.Builder
             });
         }
 
-        public Document Input { get; }
+        public Document Content { get; }
 
-        public string SerializedInput => _inputSource.Value;
+        public string SerializedContent => _lazySerializedContent.Value;
 
-        public Task<AnalysisResponse> AnalyzedInput => _analysisSource.Value;
+        public Task<AnalysisResponse> AnalyzedContent => _lazyAnalyzedContent.Value;
 
         public async Task<IntentionResponse> GetIntentAsync()
         {
@@ -67,7 +67,7 @@ namespace Take.Blip.Builder
                 minimumIntentScore = 0.5;
             }
 
-            return (await AnalyzedInput)?
+            return (await AnalyzedContent)?
                 .Intentions?
                 .OrderByDescending(i => i.Score)
                 .FirstOrDefault(i => i.Score >= minimumIntentScore);
@@ -75,7 +75,7 @@ namespace Take.Blip.Builder
 
         public async Task<EntityResponse> GetEntityValue(string entityName)
         {
-            return (await AnalyzedInput)?
+            return (await AnalyzedContent)?
                 .Entities?
                 .FirstOrDefault(e => e.Name != null && e.Name.Equals(entityName, StringComparison.OrdinalIgnoreCase));
         }

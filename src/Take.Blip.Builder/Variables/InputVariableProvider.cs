@@ -27,13 +27,13 @@ namespace Take.Blip.Builder.Variables
             switch (nameToLower)
             {
                 case "content":
-                    return input.SerializedInput;
+                    return input.SerializedContent;
 
                 case "type":
-                    return input.Input?.GetMediaType()?.ToString();
+                    return input.Content?.GetMediaType()?.ToString();
 
                 case "length":
-                    return input.SerializedInput?.Length.ToString();
+                    return input.SerializedContent?.Length.ToString();
             }
 
             if (nameToLower.StartsWith("intent."))

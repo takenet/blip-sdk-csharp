@@ -442,7 +442,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
             
             // Assert
-            ContextProvider.Received(1).GetContext(User, Arg.Is<LazyInput>(i => i.Input == input), flow);
+            ContextProvider.Received(1).GetContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
 
             await StateManager.Received(1).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 

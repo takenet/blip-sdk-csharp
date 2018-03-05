@@ -104,7 +104,7 @@ namespace Take.Blip.Builder
                         // Set the input in the context
                         if (!string.IsNullOrEmpty(state.Input?.Variable))
                         {
-                            await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedInput,
+                            await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
                                 linkedCts.Token);
                         }
 
@@ -155,19 +155,19 @@ namespace Take.Blip.Builder
             switch (inputValidation.Rule)
             {
                 case InputValidationRule.Text:
-                    return lazyInput.Input is PlainText;
+                    return lazyInput.Content is PlainText;
 
                 case InputValidationRule.Number:
-                    return decimal.TryParse(lazyInput.SerializedInput, out _);
+                    return decimal.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Date:
-                    return DateTime.TryParse(lazyInput.SerializedInput, out _);
+                    return DateTime.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Regex:
-                    return Regex.IsMatch(lazyInput.SerializedInput, inputValidation.Regex);
+                    return Regex.IsMatch(lazyInput.SerializedContent, inputValidation.Regex);
 
                 case InputValidationRule.Type:
-                    return lazyInput.Input.GetMediaType() == inputValidation.Type;
+                    return lazyInput.Content.GetMediaType() == inputValidation.Type;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(inputValidation));
@@ -245,7 +245,7 @@ namespace Take.Blip.Builder
             switch (condition.Source)
             {
                 case ValueSource.Input:
-                    comparisonValue = lazyInput.SerializedInput;
+                    comparisonValue = lazyInput.SerializedContent;
                     break;
 
                 case ValueSource.Context:
