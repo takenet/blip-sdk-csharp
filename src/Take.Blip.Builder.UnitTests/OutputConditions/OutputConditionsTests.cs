@@ -351,7 +351,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
 
 
             // Assert
-            ContextProvider.Received(6).GetContext(User, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(6).CreateContext(User, Arg.Any<LazyInput>(), flow);
 
             await StateManager.Received(6).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 
@@ -442,7 +442,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
             
             // Assert
-            ContextProvider.Received(1).GetContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
 
             await StateManager.Received(1).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 

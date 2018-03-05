@@ -76,7 +76,7 @@ namespace Take.Blip.Builder
                     var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                     // Load the user context
-                    var context = _contextProvider.GetContext(user, lazyInput, flow);
+                    var context = _contextProvider.CreateContext(user, lazyInput, flow);
 
                     // Calculate the number of state transitions
                     var transitions = 0;
@@ -114,7 +114,8 @@ namespace Take.Blip.Builder
                             await ProcessActionsAsync(context, state.OutputActions, linkedCts.Token);
                         }
 
-                        // Determine the next state
+                        // Store the previous state and determine the next 
+                        await _stateManager.SetPreviousStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
                         state = await ProcessOutputsAsync(lazyInput, context, flow, state, linkedCts.Token);
 
                         // Store the next state
@@ -268,7 +269,7 @@ namespace Take.Blip.Builder
 
             switch (condition.Operator)
             {
-                case ConditionOperator.Or:                    
+                case ConditionOperator.Or:
                     return condition.Values.Any(v => comparisonFunc(comparisonValue, v));
 
                 case ConditionOperator.And:

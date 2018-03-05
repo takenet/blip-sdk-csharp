@@ -17,6 +17,6 @@ namespace Take.Blip.Builder
             _variableProviders = variableProviders;
         }
 
-        public IContext GetContext(Identity user, LazyInput input, Flow flow) => new Context(user, input, flow, _contextExtension, _variableProviders);
+        public IContext CreateContext(Identity user, LazyInput input, Flow flow) => new Context(user, input, flow, _contextExtension, _variableProviders);
     }
 }

@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Actions.SetBucket
         public override Task ExecuteAsync(IContext context, SetBucketActionSettings settings, CancellationToken cancellationToken)
         {
             var expiration = settings.Expiration.HasValue
-                ? TimeSpan.FromMilliseconds(settings.Expiration.Value)
+                ? TimeSpan.FromSeconds(settings.Expiration.Value)
                 : default(TimeSpan);
 
             return _bucketExtension.SetAsync(

@@ -19,7 +19,16 @@ namespace Take.Blip.Builder
         Task<string> GetStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Sets the state for the user in the flow.
+        /// Gets the previous state for the user in the flow.
+        /// </summary>
+        /// <param name="flowId"></param>
+        /// <param name="user"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<string> GetPreviousStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Sets the current state for the user in the flow.
         /// </summary>
         /// <param name="flowId"></param>
         /// <param name="user"></param>
@@ -27,6 +36,17 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task SetStateIdAsync(string flowId, Identity user, string stateId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Sets the previous state id for the user in the flow.
+        /// This action is only informative and do not affect the user navigation.
+        /// </summary>
+        /// <param name="flowId"></param>
+        /// <param name="user"></param>
+        /// <param name="previousStateId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task SetPreviousStateIdAsync(string flowId, Identity user, string previousStateId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes the current state for the user in the flow.

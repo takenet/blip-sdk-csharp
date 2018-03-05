@@ -21,7 +21,7 @@ namespace Take.Blip.Builder.Actions.ForwardMessageToDesk
         {
             var message = new Message
             {
-                Id = EnvelopeId.NewId(),
+                Id = EnvelopeReceiverContext<Message>.Envelope?.Id ?? EnvelopeId.NewId(),
                 To = new Node(Uri.EscapeDataString(context.User), settings.Domain ?? DEFAULT_DESK_DOMAIN, null),
                 Content = context.Input.Content
             };

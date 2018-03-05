@@ -31,7 +31,7 @@ namespace Take.Blip.Builder.UnitTests
             Context = Substitute.For<IContext>();
             Logger = Substitute.For<ILogger>();
             ContextProvider
-                .GetContext(Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
+                .CreateContext(Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
             User = new Identity("user", "domain");
             Context.User.Returns(User);
