@@ -32,7 +32,7 @@ namespace Take.Blip.Client
 
         private CancellationTokenSource _cts;
         private readonly object _syncRoot = new object();
-        
+
         public BlipChannelListener(ISender sender, bool autoNotify, ILogger logger = null)
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
@@ -185,7 +185,10 @@ namespace Take.Blip.Client
                     await _sender.SendNotificationAsync(message.ToReceivedNotification(), cancellationToken);
                 }
 
-                await CallReceiversAsync(message, cancellationToken);
+                using (EnvelopeReceiverContext<Message>.Create(message))
+                {
+                    await CallReceiversAsync(message, cancellationToken);
+                }
 
                 if (_autoNotify)
                 {
@@ -226,7 +229,10 @@ namespace Take.Blip.Client
         {
             try
             {
-                await CallReceiversAsync(notification, cancellationToken);
+                using (EnvelopeReceiverContext<Notification>.Create(notification))
+                {
+                    await CallReceiversAsync(notification, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
@@ -242,7 +248,10 @@ namespace Take.Blip.Client
 
             try
             {
-                await CallReceiversAsync(command, cancellationToken);
+                using (EnvelopeReceiverContext<Command>.Create(command))
+                {
+                    await CallReceiversAsync(command, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
@@ -301,6 +310,40 @@ namespace Take.Blip.Client
             public Func<T, Task<bool>> Predicate { get; }
 
             public int Priority { get; }
+        }
+    }
+
+    /// <summary>
+    /// Stores information about the envelope receiver that is currently being called.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public static class EnvelopeReceiverContext<T> where T : Envelope
+    {
+        private static readonly AsyncLocal<T> _envelope = new AsyncLocal<T>();
+
+        /// <summary>
+        /// Gets the envelope that is currently being processed by the receiver.
+        /// </summary>
+        public static T Envelope => _envelope.Value;
+
+        /// <summary>
+        /// Creates a new context for the specified envelope type.
+        /// </summary>
+        /// <param name="envelope"></param>
+        /// <returns></returns>
+        public static IDisposable Create(T envelope)
+        {
+            // TODO: Create a stack to support multiple levels of contexts
+            _envelope.Value = envelope;
+            return new ClearEnvelopeReceiverContext();
+        }
+
+        private sealed class ClearEnvelopeReceiverContext : IDisposable
+        {
+            public void Dispose()
+            {
+                _envelope.Value = null;
+            }
         }
     }
 }
