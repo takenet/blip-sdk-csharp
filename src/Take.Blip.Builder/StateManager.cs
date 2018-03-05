@@ -30,7 +30,6 @@ namespace Take.Blip.Builder
             }
         }
 
-
         public async Task<string> GetPreviousStateIdAsync(string flowId, Identity user, CancellationToken cancellationToken)
         {
             try

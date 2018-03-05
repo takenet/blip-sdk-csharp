@@ -5,7 +5,7 @@ using Take.Blip.Client.Extensions.Bucket;
 
 namespace Take.Blip.Builder.Actions.SetBucket
 {
-    public class SetBucketAction : ActionBase<SetBucketActionSettings>
+    public class SetBucketAction : ActionBase<SetBucketSettings>
     {
         private readonly IBucketExtension _bucketExtension;
 
@@ -15,7 +15,7 @@ namespace Take.Blip.Builder.Actions.SetBucket
             _bucketExtension = bucketExtension;
         }
 
-        public override Task ExecuteAsync(IContext context, SetBucketActionSettings settings, CancellationToken cancellationToken)
+        public override Task ExecuteAsync(IContext context, SetBucketSettings settings, CancellationToken cancellationToken)
         {
             var expiration = settings.Expiration.HasValue
                 ? TimeSpan.FromSeconds(settings.Expiration.Value)

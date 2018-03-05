@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Take.Blip.Builder.Actions.SetVariable
 {
-    public class SetVariableAction : ActionBase<SetVariableActionSettings>
+    public class SetVariableAction : ActionBase<SetVariableSettings>
     {
         public SetVariableAction()
             : base(nameof(SetVariable))
@@ -12,7 +12,7 @@ namespace Take.Blip.Builder.Actions.SetVariable
             
         }
 
-        public override Task ExecuteAsync(IContext context, SetVariableActionSettings settings, CancellationToken cancellationToken)
+        public override Task ExecuteAsync(IContext context, SetVariableSettings settings, CancellationToken cancellationToken)
         {
             var expiration = settings.Expiration.HasValue
                 ? TimeSpan.FromSeconds(settings.Expiration.Value)

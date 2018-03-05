@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -101,7 +102,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
                 throw new Exception();
             }
-            catch (ArgumentException exception)
+            catch (ValidationException exception)
             {
                 //Assert
                 await HttpClient.DidNotReceive().SendAsync(

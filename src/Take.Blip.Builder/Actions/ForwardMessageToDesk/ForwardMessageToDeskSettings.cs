@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Actions.ForwardMessageToDesk
@@ -13,6 +14,10 @@ namespace Take.Blip.Builder.Actions.ForwardMessageToDesk
 
         public void Validate()
         {
+            if (Context == null)
+            {
+                throw new ValidationException("The context");
+            }
             
         }
     }
