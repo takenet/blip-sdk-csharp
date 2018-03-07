@@ -2,6 +2,7 @@
 using SimpleInjector;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ExecuteScript;
+using Take.Blip.Builder.Actions.ForwardMessageToDesk;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.MergeContact;
 using Take.Blip.Builder.Actions.ProcessCommand;
@@ -48,6 +49,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(SetVariableAction),
                     typeof(SetBucketAction),
                     typeof(RedirectAction),
+                    typeof(ForwardMessageToDeskAction),
                 });
             container.RegisterCollection<IVariableProvider>(
                 new[]
