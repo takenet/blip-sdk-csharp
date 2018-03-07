@@ -55,7 +55,7 @@ namespace Take.Blip.Builder.Variables
             if (state.ExtensionData != null &&
                 state.ExtensionData.TryGetValue(variableName, out var value))
             {
-                return value.ToString(Formatting.None);
+                return value.ToString(Formatting.None).Trim('"');
             }
 
             return null;
