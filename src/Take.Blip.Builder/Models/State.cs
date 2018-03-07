@@ -1,5 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Models
 {
@@ -41,6 +44,12 @@ namespace Take.Blip.Builder.Models
         /// Array of <see cref="Output"/>. Optional.
         /// </summary>
         public Output[] Outputs { get; set; }
+
+        /// <summary>
+        /// Stores additional JSON attributes that are not mapped in the type.
+        /// </summary>
+        [JsonExtensionData]
+        public IDictionary<string, JToken> ExtensionData { get; set; }
 
         public void Validate()
         {

@@ -36,5 +36,10 @@
         /// Get values from the input.
         /// </summary>
         Input,
+
+        /// <summary>
+        /// Get values from the current state.
+        /// </summary>
+        State,
     }
 }
