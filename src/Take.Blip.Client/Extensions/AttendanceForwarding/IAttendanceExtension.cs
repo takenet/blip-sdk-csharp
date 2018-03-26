@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 
@@ -7,6 +8,7 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
     /// <summary>
     /// Provide human attendance forwarding, using Blip App as 'operator'
     /// </summary>
+    [Obsolete("IAttendanceExtension is deprecated, please use IDeskExtension instead")]
     public interface IAttendanceExtension
     {
         /// <summary>
