@@ -1,10 +1,8 @@
 ﻿using Lime.Protocol;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using Take.Blip.Client.Extensions.HelpDesk;
 
 namespace Take.Blip.Client.Extensions.HelpDesk
 {
@@ -29,7 +27,7 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         {
             if (_helpDeskExtension.FromAttendant(message))
             {
-                var customerIdentityString = HttpUtility.UrlDecode(message.From.Name);
+                var customerIdentityString = Uri.UnescapeDataString(message.From.Name);
                 var customerIdentiy = Identity.Parse(customerIdentityString);
                 await ReceiveAsync(message, customerIdentiy, cancellationToken);
             }
