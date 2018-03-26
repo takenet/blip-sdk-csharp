@@ -10,6 +10,8 @@ namespace Take.Blip.Client.Extensions.EventTracker
     public class EventTrackExtension : ExtensionBase, IEventTrackExtension
     {
         const string EVENTRACK_URI = "/event-track";
+        const string EVENTRACK_MESSAGE_URI = "/event-track/message";
+        readonly Node EventTrackPostmaster = Node.Parse("postmaster@analytics.msging.net");
 
         public EventTrackExtension(ISender sender)
             : base(sender)
@@ -53,6 +55,18 @@ namespace Take.Blip.Client.Extensions.EventTracker
         {
             var commandRequest = CreateGetCommandRequest($"{EVENTRACK_URI}/{category}?{nameof(startDate)}={Uri.EscapeDataString(startDate.ToString("s"))}&{nameof(endDate)}={Uri.EscapeDataString(endDate.ToString("s"))}&$take={take}");
             return ProcessCommandAsync<DocumentCollection>(commandRequest, cancellationToken);
+        }
+
+        public Task UpdateMessageTrackAsync(string messageId, IDictionary<string, string> extras = null, CancellationToken cancellationToken = default(CancellationToken), Identity identity = null)
+        {
+            var eventTrack = new EventTrack
+            {
+                Extras = extras,
+                Identity = identity
+            };
+
+            var commandRequest = CreateSetCommandRequest(eventTrack, $"{EVENTRACK_MESSAGE_URI}/{messageId}", EventTrackPostmaster);
+            return ProcessCommandAsync(commandRequest, cancellationToken);
         }
     }
 }
