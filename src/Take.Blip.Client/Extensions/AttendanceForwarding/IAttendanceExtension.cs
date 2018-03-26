@@ -8,7 +8,7 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
     /// <summary>
     /// Provide human attendance forwarding, using Blip App as 'operator'
     /// </summary>
-    [Obsolete("IAttendanceExtension is deprecated, please use IDeskExtension instead")]
+    [Obsolete("IAttendanceExtension is deprecated, please use IHelpDeskExtension instead")]
     public interface IAttendanceExtension
     {
         /// <summary>

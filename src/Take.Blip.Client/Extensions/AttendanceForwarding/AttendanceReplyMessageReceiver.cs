@@ -10,7 +10,7 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
     /// Automaticly forwards replies from an Blip App attendant
     /// to user that have sent a message
     /// </summary>
-    [Obsolete("AttendanceReplyMessageReceiver is deprecated, please use DeskExtension instead")]
+    [Obsolete("AttendanceReplyMessageReceiver is deprecated, please use HelpDeskExtension instead")]
     public class AttendanceReplyMessageReceiver : IMessageReceiver
     {
         private const string AttendantSettingsKey = "attendantIdentity";

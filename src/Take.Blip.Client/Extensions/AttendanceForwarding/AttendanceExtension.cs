@@ -6,7 +6,7 @@ using Takenet.Iris.Messaging.Contents;
 
 namespace Take.Blip.Client.Extensions.AttendanceForwarding
 {
-    [Obsolete("AttendanceExtension is deprecated, please use DeskExtension instead")]
+    [Obsolete("AttendanceExtension is deprecated, please use HelpDeskExtension instead")]
     public class AttendanceExtension : IAttendanceExtension
     {
         private readonly ISender _sender;
