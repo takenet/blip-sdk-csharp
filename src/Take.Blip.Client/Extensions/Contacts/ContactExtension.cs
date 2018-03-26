@@ -10,12 +10,9 @@ namespace Take.Blip.Client.Extensions.Contacts
 {
     public class ContactExtension : ExtensionBase, IContactExtension
     {
-        private readonly ISender _messagingHubSender;
-
-        public ContactExtension(ISender messagingHubSender)
-            : base(messagingHubSender)
+        public ContactExtension(ISender sender)
+            : base(sender)
         {
-            _messagingHubSender = messagingHubSender;
         }
 
         public Task<Contact> GetAsync(Identity identity, CancellationToken cancellationToken)
@@ -33,7 +30,23 @@ namespace Take.Blip.Client.Extensions.Contacts
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (contact == null) throw new ArgumentNullException(nameof(contact));
 
+            if (contact.Identity == null) contact.Identity = identity;
+
             var requestCommand = CreateSetCommandRequest(
+                contact,
+                CONTACTS);
+
+            return ProcessCommandAsync(requestCommand, cancellationToken);
+        }
+
+        public Task MergeAsync(Identity identity, Contact contact, CancellationToken cancellationToken)
+        {            
+            if (identity == null) throw new ArgumentNullException(nameof(identity));
+            if (contact == null) throw new ArgumentNullException(nameof(contact));
+
+            if (contact.Identity == null) contact.Identity = identity;
+
+            var requestCommand = CreateMergeCommandRequest(
                 contact,
                 CONTACTS);
 

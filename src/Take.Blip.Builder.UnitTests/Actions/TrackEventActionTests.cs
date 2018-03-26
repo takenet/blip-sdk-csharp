@@ -3,38 +3,24 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Shouldly;
-using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.TrackEvent;
 using Take.Blip.Client.Extensions.EventTracker;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
 {
-    public class TrackEventActionTests : IDisposable
+    public class TrackEventActionTests : ActionTestsBase
     {
         public TrackEventActionTests()
         {
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
-            Context = Substitute.For<IContext>();
-
-            CancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         }
-
-        public CancellationToken CancellationToken => CancellationTokenSource.Token;
-
-        public CancellationTokenSource CancellationTokenSource { get; set; }
 
         public IEventTrackExtension EventTrackExtension { get; private set; }
 
-        public IContext Context { get; private set; }
-
-        public void Dispose()
-        {
-            CancellationTokenSource.Dispose();
-        }
 
         [Fact]
         public async Task ValidEventTrackShouldSucceed()

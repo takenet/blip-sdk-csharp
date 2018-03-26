@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Take.Blip.Builder.Actions
@@ -13,6 +14,14 @@ namespace Take.Blip.Builder.Actions
                 .ToDictionary(a => a.Type, a => a);
         }
 
-        public IAction Get(string name) => _actionDictionary[name];
+        public IAction Get(string name)
+        {
+            if (!_actionDictionary.TryGetValue(name, out var action))
+            {
+                throw new ArgumentException($"Unknown action '{action}'");
+            }
+
+            return action;
+        }
     }
 }

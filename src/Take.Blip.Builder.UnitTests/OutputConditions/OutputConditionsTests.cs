@@ -102,9 +102,9 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            await StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            await StateManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "marco", CancellationToken);
-            await StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            await StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
+            await StateManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "marco", Arg.Any<CancellationToken>());
+            await StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
             await Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -113,7 +113,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == pongMessageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -200,14 +200,14 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            await StateManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            await StateManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "marco", CancellationToken);
-            await StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            await StateManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
+            await StateManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "marco", Arg.Any<CancellationToken>());
+            await StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
             await Sender
                 .DidNotReceive()
                 .SendMessageAsync(
                     Arg.Any<Message>(),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -220,9 +220,11 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var messageContent = "Pong!";
 
             var equalsInput = new PlainText() { Text = validInput };
+            var equalsWithAccentInput = new PlainText() { Text = "Píng!" };
             var containsInput = new PlainText() { Text = "ing" };
             var startsInput = new PlainText() { Text = "Pin" };
             var endsInput = new PlainText() { Text = "g!" };
+            var approximateInput = new PlainText() { Text = "Pamg!" };
 
             var variableName = "MyVariable";
             var flow = new Flow()
@@ -299,6 +301,21 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                                     }
                                 },
                                 StateId = "state2"
+                            },
+                            new Output
+                            {
+                                Order = 5,
+                                Conditions = new Condition[]
+                                {
+                                    new Condition
+                                    {
+                                        Source = ValueSource.Context,
+                                        Comparison = ConditionComparison.ApproximateTo,
+                                        Variable = variableName,
+                                        Values = new[] { validInput }
+                                    }
+                                },
+                                StateId = "state2"
                             }
                         }
                     },
@@ -322,33 +339,38 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             };
             var target = GetTarget();
 
-            Context.GetVariableAsync(variableName, CancellationToken).Returns(validInput);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(validInput);
 
             // Act
             await target.ProcessInputAsync(equalsInput, User, flow, CancellationToken);
+            await target.ProcessInputAsync(equalsWithAccentInput, User, flow, CancellationToken);
             await target.ProcessInputAsync(containsInput, User, flow, CancellationToken);
             await target.ProcessInputAsync(startsInput, User, flow, CancellationToken);
             await target.ProcessInputAsync(endsInput, User, flow, CancellationToken);
+            await target.ProcessInputAsync(approximateInput, User, flow, CancellationToken);
+
 
             // Assert
-            ContextProvider.Received(4).GetContext(User, flow.Id);
+            ContextProvider.Received(6).CreateContext(User, Arg.Any<LazyInput>(), flow);
 
-            await StateManager.Received(4).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            await StateManager.Received(6).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 
-            await Context.Received(1).SetVariableAsync(variableName, equalsInput.Text, CancellationToken);
-            await Context.Received(1).SetVariableAsync(variableName, containsInput.Text, CancellationToken);
-            await Context.Received(1).SetVariableAsync(variableName, startsInput.Text, CancellationToken);
-            await Context.Received(1).SetVariableAsync(variableName, endsInput.Text, CancellationToken);
+            await Context.Received(1).SetVariableAsync(variableName, equalsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, equalsWithAccentInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, containsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, startsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, endsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, approximateInput.Text, Arg.Any<CancellationToken>());
 
             await Sender
-                .Received(4)
+                .Received(6)
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -414,17 +436,17 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             };
             var target = GetTarget();
 
-            Context.GetVariableAsync(variableName, CancellationToken).Returns(validInput);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(validInput);
 
             // Act
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
             
             // Assert
-            ContextProvider.Received(1).GetContext(User, flow.Id);
+            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
 
             await StateManager.Received(1).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 
-            await Context.Received(1).SetVariableAsync(variableName, input.Text, CancellationToken);
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
 
             await Sender
                 .Received(1)
@@ -434,7 +456,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
     }

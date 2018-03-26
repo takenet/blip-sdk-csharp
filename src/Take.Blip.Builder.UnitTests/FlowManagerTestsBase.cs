@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using Lime.Protocol;
 using NSubstitute;
+using Serilog;
 using SimpleInjector;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Models;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
+using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.EventTracker;
 
 #pragma warning disable 4014
@@ -21,16 +24,17 @@ namespace Take.Blip.Builder.UnitTests
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
             BroadcastExtension = Substitute.For<IBroadcastExtension>();
+            ContactExtension = Substitute.For<IContactExtension>();
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
             Context = Substitute.For<IContext>();
+            Logger = Substitute.For<ILogger>();
             ContextProvider
-                .GetContext(Arg.Any<Identity>(), Arg.Any<string>())
+                .CreateContext(Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
             User = new Identity("user", "domain");
             Context.User.Returns(User);
-
         }
 
         public Identity User { get; set; }
@@ -43,6 +47,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IBroadcastExtension BroadcastExtension { get; set; }
 
+        public IContactExtension ContactExtension { get; set; }
+
         public ISender Sender { get; set; }
 
         public IStateManager StateManager { get; set; }
@@ -50,6 +56,8 @@ namespace Take.Blip.Builder.UnitTests
         public IContextProvider ContextProvider { get; set; }
 
         public IContext Context { get; set; }
+
+        public ILogger Logger { get; set; }
 
         public IFlowManager GetTarget()
         {
@@ -60,9 +68,11 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ArtificialIntelligenceExtension);
             container.RegisterSingleton(EventTrackExtension);
             container.RegisterSingleton(BroadcastExtension);
+            container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);
+            container.RegisterSingleton(Logger);
             return container.GetInstance<IFlowManager>();
         }
     }

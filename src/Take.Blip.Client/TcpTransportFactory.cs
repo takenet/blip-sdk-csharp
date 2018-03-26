@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Lime.Transport.Tcp;
+using Serilog;
+using Serilog.Events;
 
 namespace Take.Blip.Client
 {
@@ -21,13 +23,14 @@ namespace Take.Blip.Client
 
         private class TraceWriter : ITraceWriter
         {
+
             public Task TraceAsync(string data, DataOperation operation)
             {
-                Trace.WriteLine(data, operation.ToString());
+                Log.Logger?.Verbose("{Operation}: " + data, operation);
                 return Task.CompletedTask;
             }
 
-            public bool IsEnabled => Trace.Listeners.Count > 0;
+            public bool IsEnabled => Log.Logger != null && Log.Logger.IsEnabled(LogEventLevel.Verbose);
         }
     }
 }

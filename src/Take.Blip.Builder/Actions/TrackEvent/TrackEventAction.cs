@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Extensions.EventTracker;
 
-namespace Take.Blip.Builder.Actions
+namespace Take.Blip.Builder.Actions.TrackEvent
 {
     public class TrackEventAction : IAction
     {
@@ -14,7 +14,7 @@ namespace Take.Blip.Builder.Actions
         private const string CATEGORY_KEY = "category";
         private const string ACTION_KEY = "action";
         
-        public string Type => "TrackEvent";
+        public string Type => nameof(TrackEvent);
 
         public TrackEventAction(IEventTrackExtension eventTrackExtension)
         {

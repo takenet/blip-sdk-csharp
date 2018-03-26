@@ -1,58 +1,75 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Serilog;
+using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
 {
-    public sealed class ProcessHttpAction: IAction, IDisposable
+    public sealed class ProcessHttpAction : ActionBase<ProcessHttpSettings>, IDisposable
     {
         private readonly IHttpClient _httpClient;
+        private readonly ILogger _logger;
 
-        public ProcessHttpAction(IHttpClient httpClient)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger)
+            : base(nameof(ProcessHttp))
         {
             _httpClient = httpClient;
-        }
+            _logger = logger;
+        }        
 
-        public string Type => "ProcessHttp";
-
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            var processHttpSettings = settings.ToObject<ProcessHttpSettings>();
-
-            if (processHttpSettings.Uri == null) throw new ArgumentException($"The '{nameof(ProcessHttpSettings.Uri)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
-            if (processHttpSettings.Method == null) throw new ArgumentException($"The '{nameof(ProcessHttpSettings.Method)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
-
-            var httpRequestMessage = new HttpRequestMessage(
-                new HttpMethod(processHttpSettings.Method), processHttpSettings.Uri);
-
-            if (processHttpSettings.Headers != null)
+            var responseStatus = 0;
+            string responseBody = null;
+            try
             {
-                foreach (var header in processHttpSettings.Headers)
+                var httpRequestMessage =
+                    new HttpRequestMessage(new HttpMethod(settings.Method), settings.Uri);
+                if (settings.Headers != null)
                 {
-                    httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    foreach (var header in settings.Headers)
+                    {
+                        httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(settings.Body))
+                {
+                    string contentType = null;
+                    settings.Headers?.TryGetValue("Content-Type", out contentType);
+                    httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
+                        contentType ?? "application/json");
+                }
+
+                var httpResponseMessage =
+                    await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
+
+                responseStatus = (int)httpResponseMessage.StatusCode;
+                if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
+                {
+                    responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
                 }
             }
-
-            if (!string.IsNullOrWhiteSpace(processHttpSettings.Body))
+            catch (Exception ex)
             {
-                httpRequestMessage.Content = new StringContent(processHttpSettings.Body);
+                _logger.Error(ex, $"An exception occurred while processing HTTP action: {ex.Message}");
             }
 
-            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);
-
             // Set the responses variables
-            if (string.IsNullOrWhiteSpace(processHttpSettings.Variable)) return;
-            await context.SetVariableAsync($"{processHttpSettings.Variable}.status", ((int) httpResponseMessage.StatusCode).ToString(), cancellationToken);
-
-            var body = await httpResponseMessage.Content.ReadAsStringAsync();
-            if (!string.IsNullOrWhiteSpace(body))
+            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
             {
-                await context.SetVariableAsync($"{processHttpSettings.Variable}.body", body, cancellationToken);
+                await context.SetVariableAsync(settings.ResponseStatusVariable,
+                    responseStatus.ToString(), cancellationToken);
+            }
+
+            if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable) &&
+                !string.IsNullOrWhiteSpace(responseBody))
+            {
+                await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
             }
         }
 

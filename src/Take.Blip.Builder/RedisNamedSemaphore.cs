@@ -13,10 +13,10 @@ namespace Take.Blip.Builder
         private readonly IConfiguration _configuration;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
 
-        public RedisNamedSemaphore(IConfiguration configuration)
+        public RedisNamedSemaphore(IConfiguration configuration, IConnectionMultiplexer connectionMultiplexer)
         {
             _configuration = configuration;
-            _connectionMultiplexer = ConnectionMultiplexer.Connect(configuration.RedisStorageConfiguration);
+            _connectionMultiplexer = connectionMultiplexer;
         }
 
         public async Task<IAsyncDisposable> WaitAsync(string handle, TimeSpan timeout, CancellationToken cancellationToken)

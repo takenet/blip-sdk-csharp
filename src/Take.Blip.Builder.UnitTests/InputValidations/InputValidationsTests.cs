@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
@@ -76,8 +77,8 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "state2", CancellationToken);
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "state2", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
 
             Sender
                 .Received(1)
@@ -87,7 +88,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -150,8 +151,8 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(0).SetStateIdAsync(flow.Id, User, "state2", CancellationToken);
-            StateManager.Received(0).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(0).SetStateIdAsync(flow.Id, User, "state2", Arg.Any<CancellationToken>());
+            StateManager.Received(0).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
 
             Sender
                 .Received(1)
@@ -161,7 +162,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -223,8 +224,8 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "state2", CancellationToken);
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "state2", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
 
             Sender
                 .Received(1)
@@ -234,7 +235,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -293,11 +294,11 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, flow, Arg.Any<CancellationToken>());
 
             // Assert
-            StateManager.Received(0).SetStateIdAsync(flow.Id, User, "state2", CancellationToken);
-            StateManager.Received(0).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(0).SetStateIdAsync(flow.Id, User, "state2", Arg.Any<CancellationToken>());
+            StateManager.Received(0).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
 
             Sender
                 .Received(1)
@@ -307,7 +308,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -371,8 +372,8 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -381,7 +382,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -390,7 +391,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -454,8 +455,8 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -464,7 +465,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -473,15 +474,14 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
         public async Task FlowWithDateValidationShouldChangeStateProperly()
         {
             // Arrange
-            var input = new PlainText() { Text = "20/11/2017 17:13:00" };
-            var invalidInput = new MediaLink();
+            var input = new PlainText() { Text = "2017-11-20T17:13:00Z" };
             var messageType = "text/plain";
             var messageContent = "Pong!";
             var validationMessageContent = "Invalid message content";
@@ -535,8 +535,8 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
             
             Sender
                 .Received(1)
@@ -546,7 +546,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -608,8 +608,8 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(0).SetStateIdAsync(flow.Id, User, "ping", CancellationToken);
-            StateManager.Received(0).DeleteStateIdAsync(flow.Id, User, CancellationToken);
+            StateManager.Received(0).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(0).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
 
             Sender
                 .Received(1)
@@ -619,7 +619,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
-                    CancellationToken);
+                    Arg.Any<CancellationToken>());
         }
     }
 }

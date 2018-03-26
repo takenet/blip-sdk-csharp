@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lime.Protocol.Serialization" Version="0.7.248" />
+    <PackageReference Include="Jint" Version="2.11.58" />
     <PackageReference Include="SimpleInjector" Version="3.3.2" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />

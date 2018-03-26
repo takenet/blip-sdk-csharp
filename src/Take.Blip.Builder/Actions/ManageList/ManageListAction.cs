@@ -3,43 +3,30 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
-using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Extensions.Broadcast;
 
 namespace Take.Blip.Builder.Actions.ManageList
 {
-    public class ManageListAction : IAction
+    public class ManageListAction : ActionBase<ManageListSettings>
     {
         private readonly IBroadcastExtension _broadcastExtension;
 
         public ManageListAction(IBroadcastExtension broadcastExtension)
+            :base(nameof(ManageList))
         {
             _broadcastExtension = broadcastExtension;
         }
 
-        public string Type => "ManageList";
-
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(IContext context, ManageListSettings settings, CancellationToken cancellationToken)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            var managerListSettings = settings.ToObject<ManageListSettings>();
-            if (string.IsNullOrEmpty(managerListSettings.TargetListName)) throw new ArgumentException($"The '{nameof(ManageListSettings.TargetListName)}' settings value is required for '{nameof(ManageListAction)}' action");
-
-            switch (managerListSettings.Action)
+            switch (settings.Action)
             {
                 case ManageListSettingsAction.Add:
-                    await AddToListAsync(context, managerListSettings.TargetListName, cancellationToken);
+                    await AddToListAsync(context, settings.ListName, cancellationToken);
                     break;
 
                 case ManageListSettingsAction.Remove:
-                    await RemoveFromListAsync(context, managerListSettings.TargetListName, cancellationToken);
-                    break;
-                case ManageListSettingsAction.Move:
-                    if (string.IsNullOrEmpty(managerListSettings.SourceListName)) throw new ArgumentException($"The '{nameof(ManageListSettings.SourceListName)}' settings value is required for '{nameof(ManageListAction)}' action");
-                    await RemoveFromListAsync(context, managerListSettings.SourceListName, cancellationToken);
-                    await AddToListAsync(context, managerListSettings.TargetListName, cancellationToken);
+                    await RemoveFromListAsync(context, settings.ListName, cancellationToken);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -73,11 +60,10 @@ namespace Take.Blip.Builder.Actions.ManageList
             {
                 await _broadcastExtension.DeleteRecipientAsync(listName, context.User, cancellationToken);
             }
-            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.APPLICATION_ERROR)
+            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.APPLICATION_ERROR || ex.Reason.Code == ReasonCodes.COMMAND_INVALID_ARGUMENT)
             {
-                // Ignores if the list doesn't exists
+                // Ignores if the list doesn't exists or the recipient is not member of the list
             }
-            
         }
     }
 }

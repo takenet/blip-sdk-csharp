@@ -44,6 +44,15 @@ namespace Take.Blip.Client.Extensions
                 Resource = resource
             };
 
+        protected Command CreateMergeCommandRequest<T>(T resource, string uriPath, Node to = null) where T : Document =>
+            new Command()
+            {
+                To = to,
+                Method = CommandMethod.Merge,
+                Uri = new LimeUri(uriPath),
+                Resource = resource
+            };
+
         protected Command CreateGetCommandRequest(string uriPath, Node to = null) =>
             new Command()
             {

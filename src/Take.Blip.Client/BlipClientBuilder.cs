@@ -8,6 +8,7 @@ using Lime.Protocol.Client;
 using Lime.Protocol.Network;
 using Lime.Protocol.Network.Modules;
 using Lime.Protocol.Security;
+using Serilog;
 
 namespace Take.Blip.Client
 {
@@ -17,6 +18,7 @@ namespace Take.Blip.Client
     public sealed class BlipClientBuilder
     {
         private readonly ITransportFactory _transportFactory;
+        private readonly ILogger _logger;
 
         public BlipClientBuilder()
             : this(new TcpTransportFactory())
@@ -24,9 +26,10 @@ namespace Take.Blip.Client
 
         }
 
-        public BlipClientBuilder(ITransportFactory transportFactory)
+        public BlipClientBuilder(ITransportFactory transportFactory, ILogger logger = null)
         {
             _transportFactory = transportFactory ?? throw new ArgumentNullException(nameof(transportFactory));
+            _logger = logger;
 
             // Initialize the defaults
             Domain = Constants.DEFAULT_DOMAIN;
@@ -240,7 +243,7 @@ namespace Take.Blip.Client
             }
 
             var onDemandClientChannel = CreateOnDemandClientChannel(establishedClientChannelBuilder);
-            return new BlipClient(onDemandClientChannel);
+            return new BlipClient(onDemandClientChannel, _logger);
         }
 
         private Authentication GetAuthenticationScheme()

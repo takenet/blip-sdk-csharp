@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -7,25 +8,25 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Serilog;
 using Take.Blip.Builder.Actions.ProcessHttp;
+using Take.Blip.Builder.Utils;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
 {
-    public class ProcessHttpActionTests : CancellationTokenTestsBase
+    public class ProcessHttpActionTests : ActionTestsBase
     {
         public ProcessHttpActionTests()
         {
             HttpClient = Substitute.For<IHttpClient>();
-            Context = Substitute.For<IContext>();
         }
 
         public IHttpClient HttpClient { get; set; }
-        public IContext Context { get; private set; }
 
         private ProcessHttpAction GetTarget()
         {
-            return new ProcessHttpAction(HttpClient);
+            return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>());
         }
 
         [Fact]
@@ -42,7 +43,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     {"Content-Type", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
-                Variable = "httpResult"
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
             };
 
             var target = GetTarget();
@@ -63,9 +66,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Arg.Is<HttpRequestMessage>(
                     h => h.RequestUri.Equals(settings.Uri)), CancellationToken);
 
-            await Context.Received(1).SetVariableAsync($"{settings.Variable}.status", ((int) HttpStatusCode.Accepted).ToString(),
+            await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int) HttpStatusCode.Accepted).ToString(),
                 CancellationToken);
-            await Context.Received(1).SetVariableAsync($"{settings.Variable}.body", "Some result", CancellationToken);
+            await Context.Received(1).SetVariableAsync(settings.ResponseBodyVariable, "Some result", CancellationToken);
         }
 
         [Fact]
@@ -99,7 +102,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
                 throw new Exception();
             }
-            catch (ArgumentException exception)
+            catch (ValidationException exception)
             {
                 //Assert
                 await HttpClient.DidNotReceive().SendAsync(

@@ -5,7 +5,8 @@
     <OutputType>Exe</OutputType>    
   </PropertyGroup>
   
-  <ItemGroup>
+  <ItemGroup>    
+    <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="Take.Blip.Client" Version="0.1.42" />
     <PackageReference Include="Take.Blip.Client.Console" Version="0.1.42" />
   </ItemGroup>

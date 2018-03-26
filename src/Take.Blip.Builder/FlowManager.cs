@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -15,7 +14,6 @@ using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
-using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -61,94 +59,116 @@ namespace Take.Blip.Builder
             if (flow == null) throw new ArgumentNullException(nameof(flow));
             flow.Validate();
 
-            // Synchronize to avoid concurrency issues on multiple running instances
-            var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.ExecutionSemaphoreExpiration, cancellationToken);
-            try
+            // Create a cancellation token
+            using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
             {
-                // Try restore a stored state
-                var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, cancellationToken);
-                var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
-
-                // Load the user context
-                var context = _contextProvider.GetContext(user, flow.Id);
-
-                do
+                // Synchronize to avoid concurrency issues on multiple running instances
+                var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.InputProcessingTimeout, linkedCts.Token);
+                try
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    // Create the input evaluator
+                    var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer,
+                        _artificialIntelligenceExtension, linkedCts.Token);
 
-                    // Validate the input for the current state
-                    if (state.Input != null 
-                        && !state.Input.Bypass 
-                        && state.Input.Validation != null 
-                        && !ValidateDocument(input, state.Input.Validation))
+                    // Try restore a stored state
+                    var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, linkedCts.Token);
+                    var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
+                    // Load the user context
+                    var context = _contextProvider.CreateContext(user, lazyInput, flow);
+
+                    // Calculate the number of state transitions
+                    var transitions = 0;
+
+                    do
                     {
-                        if (state.Input.Validation.Error != null)
+                        linkedCts.Token.ThrowIfCancellationRequested();
+
+                        // Validate the input for the current state
+                        if (state.Input != null &&
+                            !state.Input.Bypass &&
+                            state.Input.Validation != null &&
+                            !ValidateDocument(lazyInput, state.Input.Validation))
                         {
-                            // Send the validation error message
-                            await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
-                                cancellationToken);
+                            if (state.Input.Validation.Error != null)
+                            {
+                                // Send the validation error message
+                                await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
+                                    linkedCts.Token);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
 
-                    // Set the input in the context
-                    if (!string.IsNullOrEmpty(state.Input?.Variable))
-                    {
-                        await context.SetVariableAsync(state.Input.Variable, _documentSerializer.Serialize(input), cancellationToken);
-                    }
+                        // Set the input in the context
+                        if (!string.IsNullOrEmpty(state.Input?.Variable))
+                        {
+                            await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
+                                linkedCts.Token);
+                        }
 
-                    // Prepare to leave the current state executing the output actions
-                    if (state.OutputActions != null)
-                    {
-                        await ProcessActionsAsync(context, state.OutputActions, cancellationToken);
-                    }
+                        // Prepare to leave the current state executing the output actions
+                        if (state.OutputActions != null)
+                        {
+                            await ProcessActionsAsync(context, state.OutputActions, linkedCts.Token);
+                        }
 
-                    // Determine the next state
-                    state = await ProcessOutputsAsync(input, context, flow, state, cancellationToken);
+                        // Store the previous state and determine the next 
+                        await _stateManager.SetPreviousStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
+                        state = await ProcessOutputsAsync(lazyInput, context, flow, state, linkedCts.Token);
 
-                    // Store the next state
-                    if (state != null)
-                    {
-                        await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
-                    }
-                    else
-                    {
-                        await _stateManager.DeleteStateIdAsync(flow.Id, context.User, cancellationToken);
-                    }
+                        // Store the next state
+                        if (state != null)
+                        {
+                            await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, linkedCts.Token);
+                        }
+                        else
+                        {
+                            await _stateManager.DeleteStateIdAsync(flow.Id, context.User, linkedCts.Token);
+                        }
 
-                    // Process the next state input actions
-                    if (state?.InputActions != null)
-                    {
-                        await ProcessActionsAsync(context, state.InputActions, cancellationToken);
-                    }
+                        // Process the next state input actions
+                        if (state?.InputActions != null)
+                        {
+                            await ProcessActionsAsync(context, state.InputActions, linkedCts.Token);
+                        }
+                            
+                        // Check if the state transition limit has reached (to avoid loops in the flow)
+                        if (transitions++ >= _configuration.MaxTransitionsByInput)
+                        {
+                            throw new BuilderException("Max state transitions reached");
+                        }
 
-                    // Continue processing if the next has do not expect the user input
-                } while (state != null && (state.Input == null || state.Input.Bypass));
-            }
-            finally
-            {
-                await handle.DisposeAsync();
+                        // Continue processing if the next has do not expect the user input
+                    } while (state != null && (state.Input == null || state.Input.Bypass));
+                    
+                }
+                finally
+                {
+                    await handle.DisposeAsync();
+                }
             }
         }
 
-        private bool ValidateDocument(Document input, InputValidation inputValidation)
+        private bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
         {
             switch (inputValidation.Rule)
             {
                 case InputValidationRule.Text:
-                    return input is PlainText;
+                    return lazyInput.Content is PlainText;
 
                 case InputValidationRule.Number:
-                    return decimal.TryParse(input.ToString(), out _);
+                    return decimal.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Date:
-                    return DateTime.TryParse(input.ToString(), out _);
+                    return DateTime.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Regex:
-                    return Regex.IsMatch(input.ToString(), inputValidation.Regex);
+                    return Regex.IsMatch(lazyInput.SerializedContent, inputValidation.Regex);
 
                 case InputValidationRule.Type:
-                    return input.GetMediaType() == inputValidation.Type;
+                    return lazyInput.Content.GetMediaType() == inputValidation.Type;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(inputValidation));
@@ -162,19 +182,27 @@ namespace Take.Blip.Builder
             {                
                 var action = _actionProvider.Get(stateAction.Type);
 
-                var settings = stateAction.Settings;
-                if (settings != null)
+                try
                 {
-                    var settingsJson = settings.ToString(Formatting.None);
-                    settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
-                    settings = JObject.Parse(settingsJson);
-                }
+                    var settings = stateAction.Settings;
+                    if (settings != null)
+                    {
+                        var settingsJson = settings.ToString(Formatting.None);
+                        settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+                        settings = JObject.Parse(settingsJson);
+                    }
 
-                await action.ExecuteAsync(context, settings, cancellationToken);
+                    await action.ExecuteAsync(context, settings, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    throw new ActionProcessingException(
+                        $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
+                }
             }
         }
 
-        private async Task<State> ProcessOutputsAsync(Document input, IContext context, Flow flow, State state, CancellationToken cancellationToken)
+        private async Task<State> ProcessOutputsAsync(LazyInput lazyInput, IContext context, Flow flow, State state, CancellationToken cancellationToken)
         {
             var outputs = state.Outputs;
             state = null;
@@ -182,8 +210,6 @@ namespace Take.Blip.Builder
             // If there's any output in the current state
             if (outputs != null)
             {
-                var lazyInput = new LazyInput(input, _documentSerializer, _artificialIntelligenceExtension, cancellationToken);
-
                 // Evalute each output conditions
                 foreach (var output in outputs.OrderBy(o => o.Order))
                 {
@@ -220,7 +246,7 @@ namespace Take.Blip.Builder
             switch (condition.Source)
             {
                 case ValueSource.Input:
-                    comparisonValue = lazyInput.InputSource;
+                    comparisonValue = lazyInput.SerializedContent;
                     break;
 
                 case ValueSource.Context:
@@ -228,25 +254,16 @@ namespace Take.Blip.Builder
                     break;
 
                 case ValueSource.Intent:
-                    comparisonValue = (await lazyInput.AnalysisSource)
-                        .Intentions?
-                        .OrderByDescending(i => i.Score)
-                        .FirstOrDefault(i => i.Score >= 0.5)?
-                        .Name;
+                    comparisonValue = (await lazyInput.GetIntentAsync())?.Name;
                     break;
 
                 case ValueSource.Entity:
-                    comparisonValue = (await lazyInput.AnalysisSource)
-                        .Entities?
-                        .FirstOrDefault(e => e.Name != null && e.Name.Equals(condition.Entity, StringComparison.OrdinalIgnoreCase))?
-                        .Value;
+                    comparisonValue = (await lazyInput.GetEntityValue(condition.Entity))?.Value;
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            if (comparisonValue == null) return false;
 
             var comparisonFunc = condition.Comparison.ToDelegate();
 
@@ -261,35 +278,6 @@ namespace Take.Blip.Builder
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-
-        /// <summary>
-        /// Allows the lazy evaluation of input bound values.
-        /// This optimizes the calls for serialization and the AI extension.
-        /// </summary>
-        private class LazyInput
-        {
-            private readonly Lazy<string> _inputSource;
-            private readonly Lazy<Task<AnalysisResponse>> _analysisSource;
-
-            public LazyInput(
-                Document input, 
-                IDocumentSerializer documentSerializer, 
-                IArtificialIntelligenceExtension artificialIntelligenceExtension,
-                CancellationToken cancellationToken)
-            {
-                _inputSource = new Lazy<string>(() => documentSerializer.Serialize(input));
-                _analysisSource = new Lazy<Task<AnalysisResponse>>(() => artificialIntelligenceExtension.AnalyzeAsync(
-                    new AnalysisRequest
-                    {
-                        Text = _inputSource.Value
-                    },
-                    cancellationToken));
-            }
-
-            public string InputSource => _inputSource.Value;
-
-            public Task<AnalysisResponse> AnalysisSource => _analysisSource.Value;
         }
     }
 }
