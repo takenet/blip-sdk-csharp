@@ -43,6 +43,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(SendCommandAction),
                     typeof(ProcessCommandAction),
                     typeof(TrackEventAction),
+                    typeof(UpdateTrackEventAction),
                     typeof(ProcessHttpAction),
                     typeof(ManageListAction),
                     typeof(MergeContactAction),
