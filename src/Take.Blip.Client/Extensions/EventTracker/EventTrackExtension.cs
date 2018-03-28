@@ -56,21 +56,5 @@ namespace Take.Blip.Client.Extensions.EventTracker
             var commandRequest = CreateGetCommandRequest($"{EVENTRACK_URI}/{category}?{nameof(startDate)}={Uri.EscapeDataString(startDate.ToString("s"))}&{nameof(endDate)}={Uri.EscapeDataString(endDate.ToString("s"))}&$take={take}");
             return ProcessCommandAsync<DocumentCollection>(commandRequest, cancellationToken);
         }
-
-        public Task UpdateMessageTrackAsync(string messageId, IDictionary<string, string> extras = null, CancellationToken cancellationToken = default(CancellationToken), Identity identity = null)
-        {
-            if (extras == null) throw new ArgumentNullException(nameof(extras));
-
-            extras.Add(nameof(messageId), messageId);
-            
-            var eventTrack = new EventTrack
-            {
-                Extras = extras,
-                Identity = identity
-            };
-
-            var commandRequest = CreateSetCommandRequest(eventTrack, $"{EVENTRACK_MESSAGE_URI}/{messageId}", EventTrackPostmaster);
-            return ProcessCommandAsync(commandRequest, cancellationToken);
-        }
     }
 }
