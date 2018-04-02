@@ -37,13 +37,17 @@ namespace Take.Blip.Builder.Actions.TrackEvent
 
             var messageId = EnvelopeReceiverContext<Message>.Envelope?.Id;
 
-            Dictionary<string, string> extras = null;
+            Dictionary<string, string> extras;
             if (settings.TryGetValue(nameof(extras), out var extrasToken))
             {
                 extras = extrasToken.ToObject<Dictionary<string, string>>();
             }
+            else
+            {
+                extras = new Dictionary<string, string>();
+            }
 
-            extras.Add(MESSAGE_ID_KEY, messageId);
+            extras[MESSAGE_ID_KEY] = messageId;
 
             await _eventTrackExtension.AddAsync(category, action, extras, cancellationToken, context.User);
         }
