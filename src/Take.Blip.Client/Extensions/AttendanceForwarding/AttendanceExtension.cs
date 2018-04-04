@@ -1,10 +1,12 @@
 ﻿using Lime.Protocol;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Takenet.Iris.Messaging.Contents;
 
 namespace Take.Blip.Client.Extensions.AttendanceForwarding
 {
+    [Obsolete("AttendanceExtension is deprecated, please use HelpDeskExtension instead")]
     public class AttendanceExtension : IAttendanceExtension
     {
         private readonly ISender _sender;
