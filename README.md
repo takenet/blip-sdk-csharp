@@ -12,7 +12,7 @@ The **BLiP C# SDK** is a set of Nuget packages that allow the creation of [BLiP]
 The easiest way to get started is using one of our `dotnet` templates. To install the templates, run the execute command in the shell:
 
 ```
-dotnet new -i Take.Blip.Client.Templates::*
+dotnet new -i "Take.Blip.Client.Templates::*"
 ```
 
 After installing the templates, just create a directory for your chatbot and create a new project using a template:
