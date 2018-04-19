@@ -19,7 +19,7 @@ The SDK provides [`dotnet` templates](https://github.com/dotnet/templating) to a
 To use the BLiP templates you must, first of all, **install them on your computer**. To do this, run the following command:
 
 ```
-dotnet new -i Take.Blip.Client.Templates::*
+dotnet new -i "Take.Blip.Client.Templates::*"
 ```
 
 The installation of BLiP templates needs to be done *only once*, but can be repeated if you want to upgrade to newer versions. From there, you can create projects using the templates.
