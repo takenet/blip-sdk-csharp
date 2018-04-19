@@ -39,12 +39,12 @@ dotnet new blip-console
 
 In this way, a `MyBot.csproj` project and all the files necessary for the operation of your application are created. The suggested editors for working with the BLiP SDK are:
 
-- **Visual Studio 2017** (Update 3) - IDE for Windows. Download the Community version (free) [here] (https://www.visualstudio.com/vs/community/).
+- **Visual Studio 2017** (Update 3) - IDE for Windows. Download the Community version (free) [here](https://www.visualstudio.com/vs/community/).
 - **Visual Studio Code** - Open source code editor, available for Windows, Linux and Mac. Download [here](https://code.visualstudio.com/). It is recommended to install the C # extension.
 - **Visual Studio for Mac** - IDE for Mac. Download free [here](https://www.visualstudio.com/vs/visual-studio-mac/).
 
 You will need an identifier and an access key to be able to connect to the BLiP. To get them:
-- Access the [BLiP Panel](https://portal.blip.ai).
+- Access the [BLiP Panel](https://preview.blip.ai).
 - On the `Chatbots` tab click` Create chatbot`.
 - Step choose the `SDK` option and fill in the requested information
 - Ready, your chatbot has been created and the identifier and access key will be displayed.
