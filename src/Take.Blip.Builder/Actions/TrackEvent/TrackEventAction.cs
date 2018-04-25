@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Newtonsoft.Json.Linq;
+using Take.Blip.Client;
 using Take.Blip.Client.Extensions.EventTracker;
 
 namespace Take.Blip.Builder.Actions.TrackEvent
@@ -13,7 +15,8 @@ namespace Take.Blip.Builder.Actions.TrackEvent
 
         private const string CATEGORY_KEY = "category";
         private const string ACTION_KEY = "action";
-        
+        private const string MESSAGE_ID_KEY = "#messageId";
+
         public string Type => nameof(TrackEvent);
 
         public TrackEventAction(IEventTrackExtension eventTrackExtension)
@@ -32,11 +35,19 @@ namespace Take.Blip.Builder.Actions.TrackEvent
             if (string.IsNullOrEmpty(category)) throw new ArgumentException($"The '{nameof(category)}' settings value is required for '{nameof(TrackEventAction)}' action");
             if (string.IsNullOrEmpty(action)) throw new ArgumentException($"The '{nameof(action)}' settings value is required for '{nameof(TrackEventAction)}' action");
 
-            Dictionary<string, string> extras = null;
+            var messageId = EnvelopeReceiverContext<Message>.Envelope?.Id;
+
+            Dictionary<string, string> extras;
             if (settings.TryGetValue(nameof(extras), out var extrasToken))
             {
                 extras = extrasToken.ToObject<Dictionary<string, string>>();
             }
+            else
+            {
+                extras = new Dictionary<string, string>();
+            }
+
+            extras[MESSAGE_ID_KEY] = messageId;
 
             await _eventTrackExtension.AddAsync(category, action, extras, cancellationToken, context.User);
         }

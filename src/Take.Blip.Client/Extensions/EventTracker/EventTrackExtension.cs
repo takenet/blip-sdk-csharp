@@ -10,6 +10,8 @@ namespace Take.Blip.Client.Extensions.EventTracker
     public class EventTrackExtension : ExtensionBase, IEventTrackExtension
     {
         const string EVENTRACK_URI = "/event-track";
+        const string EVENTRACK_MESSAGE_URI = "/event-track/message";
+        readonly Node EventTrackPostmaster = Node.Parse("postmaster@analytics.msging.net");
 
         public EventTrackExtension(ISender sender)
             : base(sender)
