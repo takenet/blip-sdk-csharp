@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
@@ -34,6 +35,9 @@ namespace Take.Blip.Builder
             _lazySerializedContent = new Lazy<string>(() => documentSerializer.Serialize(content));
             _lazyAnalyzedContent = new Lazy<Task<AnalysisResponse>>(async () =>
             {
+                // Only analyze the input if the type is plain text.
+                if (Content.GetMediaType() != PlainText.MediaType) return null;
+
                 try
                 {
                     return await artificialIntelligenceExtension.AnalyzeAsync(
