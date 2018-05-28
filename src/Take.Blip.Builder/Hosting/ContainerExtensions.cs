@@ -1,4 +1,5 @@
 ﻿using Lime.Protocol.Serialization;
+using Lime.Protocol.Serialization.Newtonsoft;
 using SimpleInjector;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ExecuteScript;
@@ -30,6 +31,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
             container.RegisterSingleton<IActionProvider, ActionProvider>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
+            container.RegisterSingleton<IEnvelopeSerializer, JsonNetSerializer>();
             container.RegisterSingleton<IConfiguration, ConventionsConfiguration>();
             container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
             container.RegisterSingleton<IHttpClient, HttpClientWrapper>();

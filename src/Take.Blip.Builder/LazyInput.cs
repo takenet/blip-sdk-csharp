@@ -8,6 +8,7 @@ using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
+using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 
@@ -22,11 +23,13 @@ namespace Take.Blip.Builder
         private readonly IDictionary<string, string> _flowConfiguration;
         private readonly Lazy<string> _lazySerializedContent;
         private readonly Lazy<Task<AnalysisResponse>> _lazyAnalyzedContent;
+        private readonly Lazy<string> _lazySerializedMessage;
 
         public LazyInput(
             Document content,
             IDictionary<string, string> flowConfiguration,
             IDocumentSerializer documentSerializer,
+            IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             CancellationToken cancellationToken)
         {
@@ -52,11 +55,23 @@ namespace Take.Blip.Builder
                     return null;
                 }
             });
+            _lazySerializedMessage = new Lazy<string>(() =>
+            {
+                var message = EnvelopeReceiverContext<Message>.Envelope;
+                if (message != null)
+                {
+                    return envelopeSerializer.Serialize(message);
+                }
+
+                return null;                
+            });
         }
 
         public Document Content { get; }
 
         public string SerializedContent => _lazySerializedContent.Value;
+
+        public string SerializedMessage => _lazySerializedMessage.Value;
 
         public Task<AnalysisResponse> AnalyzedContent => _lazyAnalyzedContent.Value;
 

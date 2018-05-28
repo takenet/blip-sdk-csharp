@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
+using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -28,6 +29,9 @@ namespace Take.Blip.Builder.Variables
             {
                 case "content":
                     return input.SerializedContent;
+
+                case "message":
+                    return input.SerializedMessage;
 
                 case "type":
                     return input.Content?.GetMediaType()?.ToString();
