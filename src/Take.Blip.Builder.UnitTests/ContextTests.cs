@@ -7,6 +7,7 @@ using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
+using Lime.Protocol.Serialization.Newtonsoft;
 using NSubstitute;
 using Shouldly;
 using SimpleInjector;
@@ -42,6 +43,7 @@ namespace Take.Blip.Builder.UnitTests
                 },
                 Flow.Configuration,
                 new DocumentSerializer(),
+                new JsonNetSerializer(), 
                 ArtificialIntelligenceExtension,
                 CancellationToken);
         }

@@ -27,6 +27,7 @@ namespace Take.Blip.Builder
         private readonly IActionProvider _actionProvider;
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
+        private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
         private readonly IVariableReplacer _variableReplacer;
 
@@ -38,6 +39,7 @@ namespace Take.Blip.Builder
             IActionProvider actionProvider,
             ISender sender,
             IDocumentSerializer documentSerializer,
+            IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             IVariableReplacer variableReplacer)
         {
@@ -48,6 +50,7 @@ namespace Take.Blip.Builder
             _actionProvider = actionProvider;
             _sender = sender;
             _documentSerializer = documentSerializer;
+            _envelopeSerializer = envelopeSerializer;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
             _variableReplacer = variableReplacer;
         }
@@ -69,7 +72,7 @@ namespace Take.Blip.Builder
                 {
                     // Create the input evaluator
                     var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer,
-                        _artificialIntelligenceExtension, linkedCts.Token);
+                        _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                     // Try restore a stored state
                     var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, linkedCts.Token);
