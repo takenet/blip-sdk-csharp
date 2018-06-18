@@ -46,6 +46,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                             contentType ?? "application/json");
                     }
 
+                    await AddUserToHeaderAsync(httpRequestMessage, context, cancellationToken);
+
                     using (var httpResponseMessage =
                         await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false))
                     {
@@ -73,6 +75,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 !string.IsNullOrWhiteSpace(responseBody))
             {
                 await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
+            }
+        }
+
+        private async Task AddUserToHeaderAsync(HttpRequestMessage httpRequestMessage, IContext context, CancellationToken cancellationToken)
+        {
+            var userHeaderValue = await context.GetVariableAsync("config.processHttp.addUserToRequestHeader", cancellationToken);
+            if (bool.TryParse(userHeaderValue, out bool sendUserHeader) && sendUserHeader)
+            {
+                httpRequestMessage.Headers.Add("X-BLIP-USER", context.User);
             }
         }
 
