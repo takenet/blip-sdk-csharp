@@ -10,16 +10,6 @@ namespace Take.Blip.Builder.Models
     public enum ConditionComparison
     {
         /// <summary>
-        /// Check if value exists.
-        /// </summary>
-        Exists,
-        
-        /// <summary>
-        /// Check if value does not exist.
-        /// </summary>
-        NotExists,
-
-        /// <summary>
         /// Check for value equality.
         /// </summary>
         Equals,
@@ -73,6 +63,16 @@ namespace Take.Blip.Builder.Models
         /// Check if a string value is approximate to the other specified value.
         /// </summary>
         ApproximateTo,
+
+        /// <summary>
+        /// Check if value exists.
+        /// </summary>
+        Exists,
+
+        /// <summary>
+        /// Check if value does not exist.
+        /// </summary>
+        NotExists,
     }
 
     /// <summary>
