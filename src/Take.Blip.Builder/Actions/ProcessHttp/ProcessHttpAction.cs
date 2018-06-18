@@ -19,7 +19,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             _httpClient = httpClient;
             _logger = logger;
-        }        
+        }
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
         {
@@ -27,31 +27,34 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             string responseBody = null;
             try
             {
-                var httpRequestMessage =
-                    new HttpRequestMessage(new HttpMethod(settings.Method), settings.Uri);
-                if (settings.Headers != null)
+                using (var httpRequestMessage =
+                    new HttpRequestMessage(new HttpMethod(settings.Method), settings.Uri))
                 {
-                    foreach (var header in settings.Headers)
+                    if (settings.Headers != null)
                     {
-                        httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        foreach (var header in settings.Headers)
+                        {
+                            httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        }
                     }
-                }
 
-                if (!string.IsNullOrWhiteSpace(settings.Body))
-                {
-                    string contentType = null;
-                    settings.Headers?.TryGetValue("Content-Type", out contentType);
-                    httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
-                        contentType ?? "application/json");
-                }
+                    if (!string.IsNullOrWhiteSpace(settings.Body))
+                    {
+                        string contentType = null;
+                        settings.Headers?.TryGetValue("Content-Type", out contentType);
+                        httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
+                            contentType ?? "application/json");
+                    }
 
-                var httpResponseMessage =
-                    await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
-
-                responseStatus = (int)httpResponseMessage.StatusCode;
-                if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
-                {
-                    responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+                    using (var httpResponseMessage =
+                        await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false))
+                    {
+                        responseStatus = (int)httpResponseMessage.StatusCode;
+                        if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
+                        {
+                            responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+                        }
+                    }
                 }
             }
             catch (Exception ex)
