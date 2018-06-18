@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -268,15 +269,37 @@ namespace Take.Blip.Builder
                     throw new ArgumentOutOfRangeException();
             }
 
-            var comparisonFunc = condition.Comparison.ToDelegate();
-
-            switch (condition.Operator)
+            switch (condition.Comparison.GetComparisonType())
             {
-                case ConditionOperator.Or:
-                    return condition.Values.Any(v => comparisonFunc(comparisonValue, v));
+                case ComparisonType.Unary:
+                    var unaryComparisonFunc = condition.Comparison.ToUnaryDelegate();
 
-                case ConditionOperator.And:
-                    return condition.Values.All(v => comparisonFunc(comparisonValue, v));
+                    switch (condition.Operator)
+                    {
+                        case ConditionOperator.Or:
+                            return condition.Values.Any(unaryComparisonFunc);
+
+                        case ConditionOperator.And:
+                            return condition.Values.All(unaryComparisonFunc);
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                case ComparisonType.Binary:
+                    var binaryComparisonFunc = condition.Comparison.ToBinaryDelegate();
+
+                    switch (condition.Operator)
+                    {
+                        case ConditionOperator.Or:
+                            return condition.Values.Any(v => binaryComparisonFunc(comparisonValue, v));
+
+                        case ConditionOperator.And:
+                            return condition.Values.All(v => binaryComparisonFunc(comparisonValue, v));
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
 
                 default:
                     throw new ArgumentOutOfRangeException();
