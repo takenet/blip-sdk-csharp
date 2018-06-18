@@ -83,7 +83,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             var userHeaderValue = await context.GetVariableAsync("config.processHttp.addUserToRequestHeader", cancellationToken);
             if (bool.TryParse(userHeaderValue, out bool sendUserHeader) && sendUserHeader)
             {
-                httpRequestMessage.Headers.Add("X-BLIP-USER", context.User);
+                httpRequestMessage.Headers.Add("X-Blip-User", context.User);
             }
         }
 
