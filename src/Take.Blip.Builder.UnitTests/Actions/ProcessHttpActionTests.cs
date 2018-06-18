@@ -5,10 +5,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Serilog;
+using Shouldly;
 using Take.Blip.Builder.Actions.ProcessHttp;
 using Take.Blip.Builder.Utils;
 using Xunit;
@@ -108,7 +111,58 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 await HttpClient.DidNotReceive().SendAsync(
                     Arg.Is<HttpRequestMessage>(
                         h => h.RequestUri.Equals(settings.Uri)), CancellationToken);
-            }            
+            }
+        }
+
+        [Fact]
+        public async Task ProcessActionWithUserHeaderShouldSucceed()
+        {
+            //Arrange
+            const string userIdentity = "user@domain.local";
+            const string userToRequestHeaderVariableName = "config.processHttp.addUserToRequestHeader";        
+            Context.GetVariableAsync(userToRequestHeaderVariableName, Arg.Any<CancellationToken>()).Returns("true");
+            Context.User.Returns(Identity.Parse(userIdentity));
+
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri("https://blip.ai"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+                Content = new StringContent("Some result")
+            };
+
+            HttpRequestMessage requestMessage = null;
+            HttpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), CancellationToken)
+                .ReturnsForAnyArgs(httpResponseMessage);
+
+            //Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            //Assert
+            requestMessage.Headers.Contains("X-BLIP-USER").ShouldBeTrue();
+            requestMessage.Headers.GetValues("X-BLIP-USER").First().ShouldBe(userIdentity);
+
+            await Context.Received(1).GetVariableAsync(userToRequestHeaderVariableName, CancellationToken);
+
+            await HttpClient.Received(1).SendAsync(
+                Arg.Is<HttpRequestMessage>(
+                    h => h.RequestUri.Equals(settings.Uri)), CancellationToken);
         }
     }
 }
