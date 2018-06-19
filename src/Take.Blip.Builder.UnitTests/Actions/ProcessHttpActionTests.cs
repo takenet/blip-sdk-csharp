@@ -23,6 +23,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public ProcessHttpActionTests()
         {
             HttpClient = Substitute.For<IHttpClient>();
+            Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
         }
 
         public IHttpClient HttpClient { get; set; }
@@ -119,8 +120,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             //Arrange
             const string userIdentity = "user@domain.local";
-            const string userToRequestHeaderVariableName = "config.processHttp.addUserToRequestHeader";        
-            Context.GetVariableAsync(userToRequestHeaderVariableName, Arg.Any<CancellationToken>()).Returns("true");
+            const string userToRequestHeaderVariableName = "processHttp.addUserToRequestHeader";        
+            Context.Flow.Configuration.Add(userToRequestHeaderVariableName, "true");
             Context.User.Returns(Identity.Parse(userIdentity));
 
             var settings = new ProcessHttpSettings
@@ -155,10 +156,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             //Assert
-            requestMessage.Headers.Contains("X-BLIP-USER").ShouldBeTrue();
-            requestMessage.Headers.GetValues("X-BLIP-USER").First().ShouldBe(userIdentity);
-
-            await Context.Received(1).GetVariableAsync(userToRequestHeaderVariableName, CancellationToken);
+            requestMessage.Headers.Contains("X-Blip-User").ShouldBeTrue();
+            requestMessage.Headers.GetValues("X-Blip-User").First().ShouldBe(userIdentity);
 
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(
