@@ -56,18 +56,18 @@ namespace Take.Blip.Builder.Models
                 throw new ValidationException("The condition values should not be provided if comparison is Exists or NotExists");
             }
 
-            if ( (Comparison == ConditionComparison.Equals 
-               || Comparison == ConditionComparison.NotEquals
-               || Comparison == ConditionComparison.Contains
-               || Comparison == ConditionComparison.StartsWith
-               || Comparison == ConditionComparison.EndsWith
-               || Comparison == ConditionComparison.GreaterThan
-               || Comparison == ConditionComparison.LessThan
-               || Comparison == ConditionComparison.GreaterThanOrEquals
-               || Comparison == ConditionComparison.LessThanOrEquals
-               || Comparison == ConditionComparison.Matches
-               || Comparison == ConditionComparison.ApproximateTo) 
-               && (Values == null ||Values.Length == 0))
+            if ( (Comparison == ConditionComparison.Equals ||
+                  Comparison == ConditionComparison.NotEquals ||
+                  Comparison == ConditionComparison.Contains ||
+                  Comparison == ConditionComparison.StartsWith ||
+                  Comparison == ConditionComparison.EndsWith ||
+                  Comparison == ConditionComparison.GreaterThan ||
+                  Comparison == ConditionComparison.LessThan ||
+                  Comparison == ConditionComparison.GreaterThanOrEquals ||
+                  Comparison == ConditionComparison.LessThanOrEquals ||
+                  Comparison == ConditionComparison.Matches ||
+                  Comparison == ConditionComparison.ApproximateTo) &&
+                 (Values == null || Values.Length == 0))
             {
                 throw new ValidationException("The condition values should be provided if comparison is not Exists or NotExists");
             }
