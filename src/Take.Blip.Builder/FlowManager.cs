@@ -273,17 +273,7 @@ namespace Take.Blip.Builder
                 case ComparisonType.Unary:
                     var unaryComparisonFunc = condition.Comparison.ToUnaryDelegate();
 
-                    switch (condition.Operator)
-                    {
-                        case ConditionOperator.Or:
-                            return condition.Values.Any(unaryComparisonFunc);
-
-                        case ConditionOperator.And:
-                            return condition.Values.All(unaryComparisonFunc);
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    return unaryComparisonFunc(comparisonValue);
 
                 case ComparisonType.Binary:
                     var binaryComparisonFunc = condition.Comparison.ToBinaryDelegate();
