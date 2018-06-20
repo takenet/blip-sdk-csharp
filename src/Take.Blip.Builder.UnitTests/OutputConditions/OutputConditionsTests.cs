@@ -726,7 +726,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var variableName = "MyVariable";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var existsInput = new PlainText() { };
+            var existsInput = new PlainText();
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.Exists, variableName, sentMessageType, sentMessageContent);
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(existsInput.Text);
