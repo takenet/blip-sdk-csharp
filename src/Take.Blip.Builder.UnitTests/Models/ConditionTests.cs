@@ -41,7 +41,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("The condition values are required");
+                ex.Message.ShouldBe("The condition values should be provided if comparison is not Exists or NotExists");
             }
         }
 

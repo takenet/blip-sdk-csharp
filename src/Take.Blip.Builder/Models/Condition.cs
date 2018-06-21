@@ -8,7 +8,7 @@ namespace Take.Blip.Builder.Models
     public class Condition : IValidable
     {
         /// <summary>
-        /// The source for comparison with the <see cref="Value"/>. Optional. The default value is <see cref="ValueSource.Input"/>.
+        /// The source for comparison with the <see cref="ValueSource"/>. Optional. The default value is <see cref="ValueSource.Input"/>.
         /// </summary>
         public ValueSource Source { get; set; }
 
@@ -33,9 +33,8 @@ namespace Take.Blip.Builder.Models
         public ConditionOperator Operator { get; set; }
 
         /// <summary>
-        /// The values to be used by the comparison with the context value. Required.
+        /// The values to be used by the comparison with the context value.
         /// </summary>
-        [Required(ErrorMessage = "The condition values are required")]
         public string[] Values { get; set; }
                
         public void Validate()
@@ -50,6 +49,27 @@ namespace Take.Blip.Builder.Models
             if (Source == ValueSource.Entity && string.IsNullOrWhiteSpace(Entity))
             {
                 throw new ValidationException("The entity name should be provided if the comparsion source is entity");
+            }
+
+            if ((Comparison == ConditionComparison.Exists || Comparison == ConditionComparison.NotExists) && (Values != null && Values.Length >= 0))
+            {
+                throw new ValidationException("The condition values should not be provided if comparison is Exists or NotExists");
+            }
+
+            if ( (Comparison == ConditionComparison.Equals ||
+                  Comparison == ConditionComparison.NotEquals ||
+                  Comparison == ConditionComparison.Contains ||
+                  Comparison == ConditionComparison.StartsWith ||
+                  Comparison == ConditionComparison.EndsWith ||
+                  Comparison == ConditionComparison.GreaterThan ||
+                  Comparison == ConditionComparison.LessThan ||
+                  Comparison == ConditionComparison.GreaterThanOrEquals ||
+                  Comparison == ConditionComparison.LessThanOrEquals ||
+                  Comparison == ConditionComparison.Matches ||
+                  Comparison == ConditionComparison.ApproximateTo) &&
+                 (Values == null || Values.Length == 0))
+            {
+                throw new ValidationException("The condition values should be provided if comparison is not Exists or NotExists");
             }
         }
     }
