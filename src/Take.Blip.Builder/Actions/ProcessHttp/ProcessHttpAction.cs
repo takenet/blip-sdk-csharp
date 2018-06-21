@@ -19,7 +19,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             _httpClient = httpClient;
             _logger = logger;
-        }        
+        }
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
         {
@@ -27,31 +27,36 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             string responseBody = null;
             try
             {
-                var httpRequestMessage =
-                    new HttpRequestMessage(new HttpMethod(settings.Method), settings.Uri);
-                if (settings.Headers != null)
+                using (var httpRequestMessage =
+                    new HttpRequestMessage(new HttpMethod(settings.Method), settings.Uri))
                 {
-                    foreach (var header in settings.Headers)
+                    if (settings.Headers != null)
                     {
-                        httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        foreach (var header in settings.Headers)
+                        {
+                            httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        }
                     }
-                }
 
-                if (!string.IsNullOrWhiteSpace(settings.Body))
-                {
-                    string contentType = null;
-                    settings.Headers?.TryGetValue("Content-Type", out contentType);
-                    httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
-                        contentType ?? "application/json");
-                }
+                    if (!string.IsNullOrWhiteSpace(settings.Body))
+                    {
+                        string contentType = null;
+                        settings.Headers?.TryGetValue("Content-Type", out contentType);
+                        httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
+                            contentType ?? "application/json");
+                    }
 
-                var httpResponseMessage =
-                    await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
+                    AddUserToHeaders(httpRequestMessage, context);
 
-                responseStatus = (int)httpResponseMessage.StatusCode;
-                if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
-                {
-                    responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+                    using (var httpResponseMessage =
+                        await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false))
+                    {
+                        responseStatus = (int)httpResponseMessage.StatusCode;
+                        if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
+                        {
+                            responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -70,6 +75,23 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 !string.IsNullOrWhiteSpace(responseBody))
             {
                 await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
+            }
+        }
+
+        /// <summary>
+        /// Add 'X-Blip-User' header to request, with current user identity as its value, if there is 
+        /// a configuration variable 'processHttp.addUserToRequestHeader' set to true
+        /// </summary>
+        /// <param name="httpRequestMessage"></param>
+        /// <param name="context"></param>
+        private void AddUserToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
+        {
+            if (context.Flow.Configuration != null &&
+                context.Flow.Configuration.TryGetValue("processHttp.addUserToRequestHeader", out string userHeaderValue) && 
+                bool.TryParse(userHeaderValue, out bool sendUserHeader) && 
+                sendUserHeader)
+            {
+                httpRequestMessage.Headers.Add("X-Blip-User", context.User);
             }
         }
 
