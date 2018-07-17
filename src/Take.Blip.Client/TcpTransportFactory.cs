@@ -18,6 +18,7 @@ namespace Take.Blip.Client
         {
             var documentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
             documentTypeResolver.RegisterAssemblyDocuments(typeof(TcpTransportFactory).Assembly);
+            documentTypeResolver.RegisterAssemblyDocuments(typeof(Takenet.Iris.Messaging.Contents.Attendance).Assembly);
             DefaultSerializer = new EnvelopeSerializer(documentTypeResolver);
         }
 
