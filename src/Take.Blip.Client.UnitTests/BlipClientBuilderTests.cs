@@ -21,17 +21,16 @@ namespace Take.Blip.Client.UnitTests
                 n => TaskUtil.TrueCompletedTask,
                 c => TaskUtil.TrueCompletedTask);
             Server = new DummyServer();
-            Lime.Messaging.Registrator.RegisterDocuments();
         }
 
         public IChannelListener ChannelListener { get; }
 
         public DummyServer Server { get; }
 
-        public BlipClientBuilder GetTarget() 
+        public BlipClientBuilder GetTarget()
             => new BlipClientBuilder()
                 .UsingHostName(Server.ListenerUri.Host)
-                .UsingPort(Server.ListenerUri.Port);        
+                .UsingPort(Server.ListenerUri.Port);
 
         [Fact]
         public async Task BuildUsingAccessKeyAndDefaultSettingsShouldSucceed()
@@ -63,7 +62,7 @@ namespace Take.Blip.Client.UnitTests
             var presence = presenceCommand.Resource.ShouldBeOfType<Presence>();
             presence.Status.ShouldBe(PresenceStatus.Available);
             presence.RoutingRule.ShouldBe(target.RoutingRule);
-            presence.RoundRobin.ShouldBe(true);            
+            presence.RoundRobin.ShouldBe(true);
             var receiptCommand = Server.Commands.Dequeue();
             receiptCommand.Method.ShouldBe(CommandMethod.Set);
             receiptCommand.Uri.ToString().ShouldBe("/receipt");
@@ -147,7 +146,7 @@ namespace Take.Blip.Client.UnitTests
             while (Server.Channels.Count > 0)
             {
                 var serverChannel = Server.Channels.Dequeue();
-                serverChannel.RemoteNode.Name.ShouldBe(identifier);                
+                serverChannel.RemoteNode.Name.ShouldBe(identifier);
             }
         }
 
@@ -161,6 +160,5 @@ namespace Take.Blip.Client.UnitTests
 
             base.Dispose(disposing);
         }
-
     }
 }
