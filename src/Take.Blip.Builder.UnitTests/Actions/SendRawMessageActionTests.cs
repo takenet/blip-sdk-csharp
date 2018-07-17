@@ -17,10 +17,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public SendRawMessageActionTests()
         {
             Sender = Substitute.For<ISender>();
-            DocumentSerializer = new DocumentSerializer();
+            DocumentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
+            DocumentTypeResolver.RegisterAssemblyDocuments(typeof(BlipClient).Assembly);
+            DocumentSerializer = new DocumentSerializer(DocumentTypeResolver);
         }
 
         public ISender Sender { get; set; }
+
+        private IDocumentTypeResolver DocumentTypeResolver { get; }
 
         private IDocumentSerializer DocumentSerializer { get; }
 
@@ -35,10 +39,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var destination = new Identity(Guid.NewGuid().ToString(), "msging.net");
             Context.User.Returns(destination);
-            
+
             var content = "This is a text content";
             var settings = new SendRawMessageSettings()
-            {                
+            {
                 Type = PlainText.MIME_TYPE,
                 RawContent = content
             };
@@ -56,7 +60,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task SendWithJsonHttpContentShouldSucceed()
         {
             // Arrange
-            Registrator.RegisterDocuments();
             var destination = new Identity(Guid.NewGuid().ToString(), "msging.net");
             Context.User.Returns(destination);
             var select = new Select()
@@ -82,9 +85,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             var content = DocumentSerializer.Serialize(select);
 
-
             var settings = new SendRawMessageSettings
-            {                
+            {
                 Type = Select.MIME_TYPE,
                 RawContent = content
             };
@@ -107,6 +109,5 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     && ((Select)m.Content).Options[2].Text == select.Options[2].Text),
                 CancellationToken);
         }
-
     }
 }
