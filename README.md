@@ -27,7 +27,7 @@ There are available the following templates:
 - `blip-console` - Run as a console application
 - `blip-web` - Run as a ASP.NET Core application (experimental)
 
-For more details about the BLiP SDK, please refer to our SDK documentation [here](https://portal.blip.ai/#/docs/home).
+For more details about the BLiP SDK, please refer to our SDK documentation [here](https://docs.blip.ai/#sdk).
 
 ## License
 
