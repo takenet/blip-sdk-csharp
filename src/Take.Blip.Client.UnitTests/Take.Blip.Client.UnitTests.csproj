@@ -4,8 +4,7 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Lime.Protocol" Version="0.8.18-beta" />
+  <ItemGroup>    
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
     <PackageReference Include="NSubstitute" Version="2.0.3" />
     <PackageReference Include="Shouldly" Version="2.8.3" />
