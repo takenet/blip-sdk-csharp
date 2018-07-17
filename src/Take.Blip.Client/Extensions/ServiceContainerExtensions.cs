@@ -24,11 +24,7 @@ namespace Take.Blip.Client.Extensions
     {
         internal static IServiceContainer RegisterExtensions(this IServiceContainer serviceContainer)
         {
-            var documentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
-            documentTypeResolver.RegisterAssemblyDocuments(typeof(Takenet.Iris.Messaging.Contents.Attendance).Assembly);
-            documentTypeResolver.RegisterAssemblyDocuments(typeof(ServiceContainerExtensions).Assembly);
-            serviceContainer.RegisterService(typeof(IDocumentTypeResolver), documentTypeResolver);
-
+            serviceContainer.RegisterService(typeof(IDocumentTypeResolver), new DocumentTypeResolver().WithBlipDocuments());
             Func<ISender> senderFactory = () => serviceContainer.GetService<ISender>();
             serviceContainer.RegisterService(typeof(IBroadcastExtension), () => new BroadcastExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IDelegationExtension), () => new DelegationExtension(senderFactory()));
