@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Take.Blip.Builder.Actions.SendRawMessage;
 using Take.Blip.Client;
+using Take.Blip.Client.Extensions;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
@@ -17,8 +18,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public SendRawMessageActionTests()
         {
             Sender = Substitute.For<ISender>();
-            DocumentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
-            DocumentTypeResolver.RegisterAssemblyDocuments(typeof(BlipClient).Assembly);
+            DocumentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
             DocumentSerializer = new DocumentSerializer(DocumentTypeResolver);
         }
 

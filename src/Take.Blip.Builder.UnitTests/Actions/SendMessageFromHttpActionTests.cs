@@ -11,6 +11,7 @@ using NSubstitute;
 using Take.Blip.Builder.Actions.SendMessageFromHttp;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
+using Take.Blip.Client.Extensions;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
@@ -21,8 +22,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             Sender = Substitute.For<ISender>();
             HttpClient = Substitute.For<IHttpClient>();
-            DocumentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
-            DocumentTypeResolver.RegisterAssemblyDocuments(typeof(BlipClient).Assembly);
+            DocumentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
             DocumentSerializer = new DocumentSerializer(DocumentTypeResolver);
         }
 

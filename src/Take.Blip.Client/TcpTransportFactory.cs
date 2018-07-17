@@ -7,6 +7,7 @@ using Lime.Protocol.Serialization.Newtonsoft;
 using Lime.Transport.Tcp;
 using Serilog;
 using Serilog.Events;
+using Take.Blip.Client.Extensions;
 
 namespace Take.Blip.Client
 {
@@ -16,10 +17,7 @@ namespace Take.Blip.Client
 
         static TcpTransportFactory()
         {
-            var documentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
-            documentTypeResolver.RegisterAssemblyDocuments(typeof(TcpTransportFactory).Assembly);
-            documentTypeResolver.RegisterAssemblyDocuments(typeof(Takenet.Iris.Messaging.Contents.Attendance).Assembly);
-            DefaultSerializer = new EnvelopeSerializer(documentTypeResolver);
+            DefaultSerializer = new EnvelopeSerializer(new DocumentTypeResolver().WithBlipDocuments());
         }
 
         private readonly IEnvelopeSerializer _envelopeSerializer;
