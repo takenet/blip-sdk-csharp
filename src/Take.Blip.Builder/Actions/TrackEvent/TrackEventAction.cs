@@ -15,7 +15,8 @@ namespace Take.Blip.Builder.Actions.TrackEvent
 
         private const string CATEGORY_KEY = "category";
         private const string ACTION_KEY = "action";
-        private const string MESSAGE_ID_KEY = "#messageId";
+        private const string LABEL_KEY = "label";
+        private const string VALUE_KEY = "value";
 
         public string Type => nameof(TrackEvent);
 
@@ -47,9 +48,19 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                 extras = new Dictionary<string, string>();
             }
 
-            extras[MESSAGE_ID_KEY] = messageId;
+            var valueString = (string)settings[VALUE_KEY];
+            decimal? value = null;
+            if (!string.IsNullOrEmpty(valueString))
+            {
+                decimal parsedValue;
+                if(!decimal.TryParse(valueString, out parsedValue))
+                {
+                    throw new ArgumentException($"The '{nameof(value)}' settings could not be parsed to decimal in the '{nameof(TrackEventAction)}' action");
+                }
+                value = parsedValue;
+            }
 
-            await _eventTrackExtension.AddAsync(category, action, extras, cancellationToken, context.User);
+            await _eventTrackExtension.AddAsync(category, action, label:(string)settings[LABEL_KEY], value: value, messageId: messageId, extras: extras, cancellationToken: cancellationToken, contactIdentity: context.User);
         }
     }
 }
