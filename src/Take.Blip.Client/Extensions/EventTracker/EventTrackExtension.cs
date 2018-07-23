@@ -1,9 +1,11 @@
-﻿using Lime.Protocol;
+﻿using Lime.Messaging.Resources;
+using Lime.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Takenet.Iris.Messaging.Resources;
+using Takenet.Iris.Messaging.Resources.Analytics;
 
 namespace Take.Blip.Client.Extensions.EventTracker
 {
@@ -18,7 +20,17 @@ namespace Take.Blip.Client.Extensions.EventTracker
         {
         }
 
-        public async Task AddAsync(string category, string action, IDictionary<string, string> extras = null, CancellationToken cancellationToken = new CancellationToken(), Identity identity = null)
+        public Task AddAsync(string category, string action, IDictionary<string, string> extras = null, CancellationToken cancellationToken = new CancellationToken(), Identity identity = null)
+        {
+            return AddAsync(category, action, contactIdentity: identity, extras: extras, cancellationToken: cancellationToken);
+        }
+
+        public Task AddAsync(string category, string action, string label = null, Message message = null, Contact contact = null, string contactExternalId = null, decimal? value = null, IDictionary<string, string> extras = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return AddAsync(category, action, label, message?.Id, contact?.Identity, contact?.Source ?? message?.From?.Instance, contact?.Group, contactExternalId, value, extras, cancellationToken);
+        }
+
+        public Task AddAsync(string category, string action, string label = null, string messageId = null, string contactIdentity = null, string contactSource = null, string contactGroup = null, string contactExternalId = null, decimal? value = null, IDictionary<string, string> extras = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrEmpty(category)) throw new ArgumentNullException(nameof(category));
             if (string.IsNullOrEmpty(action)) throw new ArgumentNullException(nameof(action));
@@ -31,12 +43,21 @@ namespace Take.Blip.Client.Extensions.EventTracker
                 {
                     Category = category,
                     Action = action,
+                    Label = label,
+                    Value = value,
                     Extras = extras,
-                    Identity = identity
+                    MessageId = messageId,
+                    Contact = new EventContact
+                    {
+                        ExternalId = contactExternalId,
+                        Group = contactGroup,
+                        Identity = contactIdentity,
+                        Source = contactSource
+                    }
                 }
             };
 
-            await ProcessCommandAsync(requestCommand, cancellationToken);
+            return ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
         public Task<DocumentCollection> GetAllAsync(DateTimeOffset startDate, DateTimeOffset endDate, string category, string action, int skip = 0, int take = 20, CancellationToken cancellationToken = default(CancellationToken))
