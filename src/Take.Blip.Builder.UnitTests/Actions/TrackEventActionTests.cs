@@ -199,7 +199,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task EventTrackWithDefaultExtrasShouldSucceed()
+        public async Task EventTrackWithUserIdExtrasConfigurationShouldSucceed()
         {
             // Arrange
             const string userIdentity = "user@domain.local";
