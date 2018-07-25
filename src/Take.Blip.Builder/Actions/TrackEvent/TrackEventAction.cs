@@ -48,6 +48,8 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                 extras = new Dictionary<string, string>();
             }
 
+            AddUserIdExtras(extras, context);
+
             var valueString = (string)settings[VALUE_KEY];
             decimal? value = null;
             if (!string.IsNullOrEmpty(valueString))
@@ -61,6 +63,22 @@ namespace Take.Blip.Builder.Actions.TrackEvent
             }
 
             await _eventTrackExtension.AddAsync(category, action, label:(string)settings[LABEL_KEY], value: value, messageId: messageId, extras: extras, cancellationToken: cancellationToken, contactIdentity: context.User);
+        }
+
+        /// <summary>
+        /// Add 'userId' to trackevent extras
+        /// </summary>
+        /// <param name="extras"></param>
+        /// <param name="context"></param>
+        private void AddUserIdExtras(Dictionary<string, string> extras, IContext context)
+        {
+            if (context.Flow?.Configuration != null && !extras.ContainsKey("userId") &&
+                context.Flow.Configuration.TryGetValue("trackEvent.addUserIdExtras", out string userIdExtrasValue) &&
+                bool.TryParse(userIdExtrasValue, out bool addUserIdExtras) &&
+                addUserIdExtras)
+            {
+                extras.Add("userId", context.User);
+            }
         }
     }
 }

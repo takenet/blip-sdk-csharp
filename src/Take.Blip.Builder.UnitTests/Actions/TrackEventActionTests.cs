@@ -10,6 +10,7 @@ using Take.Blip.Builder.Actions.TrackEvent;
 using Take.Blip.Client.Extensions.EventTracker;
 using Xunit;
 using Take.Blip.Client;
+using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.UnitTests.Actions
 {
@@ -197,5 +198,52 @@ namespace Take.Blip.Builder.UnitTests.Actions
             }
         }
 
+        [Fact]
+        public async Task EventTrackWithDefaultExtrasShouldSucceed()
+        {
+            // Arrange
+            const string userIdentity = "user@domain.local";
+            const string userIdExtrasVariableName = "trackEvent.addUserIdExtras";
+
+            var category = "categoryX";
+            var action = "actionA";
+            var identity = Identity.Parse(userIdentity);
+            var extras = new Dictionary<string, string>()
+            {
+                {"key1", "value1"}
+            };
+
+            Context.Flow.Returns(new Flow
+            {
+                Configuration = new Dictionary<string, string>
+                {
+                    { userIdExtrasVariableName, "true" }
+                }
+            });
+            Context.User.Returns(Identity.Parse(userIdentity));
+
+            var eventTrackAction = new TrackEventAction(EventTrackExtension);
+
+            var settings = new JObject
+            {
+                ["category"] = category,
+                ["action"] = action,
+                ["extras"] = JObject.FromObject(extras)
+            };
+
+            // Act
+            await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
+
+            // Assert
+            await EventTrackExtension.Received(1).AddAsync(
+                category,
+                action,
+                label: null,
+                value: null,
+                messageId: null,
+                extras: Arg.Is<Dictionary<string, string>>(d => d.ContainsKey("userId") && d["userId"].Equals(userIdentity)),
+                cancellationToken: CancellationToken,
+                contactIdentity: identity);
+        }
     }
 }
