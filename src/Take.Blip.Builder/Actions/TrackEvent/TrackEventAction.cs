@@ -53,11 +53,10 @@ namespace Take.Blip.Builder.Actions.TrackEvent
             if (!string.IsNullOrEmpty(valueString))
             {
                 decimal parsedValue;
-                if(!decimal.TryParse(valueString, out parsedValue))
+                if(decimal.TryParse(valueString, out parsedValue))
                 {
-                    throw new ArgumentException($"The '{nameof(value)}' settings could not be parsed to decimal in the '{nameof(TrackEventAction)}' action");
+                    value = parsedValue;
                 }
-                value = parsedValue;
             }
 
             await _eventTrackExtension.AddAsync(category, action, label:(string)settings[LABEL_KEY], value: value, messageId: messageId, extras: extras, cancellationToken: cancellationToken, contactIdentity: context.User);
