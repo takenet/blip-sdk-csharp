@@ -120,7 +120,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             //Arrange
             const string userIdentity = "user@domain.local";
-            const string userToRequestHeaderVariableName = "processHttp.addUserToRequestHeader";        
+            const string userToRequestHeaderVariableName = "processHttpAddUserToRequestHeader";        
             Context.Flow.Configuration.Add(userToRequestHeaderVariableName, "true");
             Context.User.Returns(Identity.Parse(userIdentity));
 
