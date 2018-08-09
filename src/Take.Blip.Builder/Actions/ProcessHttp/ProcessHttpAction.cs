@@ -80,14 +80,14 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         /// <summary>
         /// Add 'X-Blip-User' header to request, with current user identity as its value, if there is 
-        /// a configuration variable 'processHttp.addUserToRequestHeader' set to true
+        /// a configuration variable 'processHttpAddUserToRequestHeader' set to true
         /// </summary>
         /// <param name="httpRequestMessage"></param>
         /// <param name="context"></param>
         private void AddUserToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
             if (context.Flow.Configuration != null &&
-                context.Flow.Configuration.TryGetValue("processHttp.addUserToRequestHeader", out string userHeaderValue) && 
+                context.Flow.Configuration.TryGetValue("processHttpAddUserToRequestHeader", out string userHeaderValue) && 
                 bool.TryParse(userHeaderValue, out bool sendUserHeader) && 
                 sendUserHeader)
             {
