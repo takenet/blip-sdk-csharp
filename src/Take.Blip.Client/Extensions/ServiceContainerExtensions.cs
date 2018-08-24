@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Lime.Messaging;
+using Lime.Protocol.Serialization;
+using System;
+using System.Reflection;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.AttendanceForwarding;
@@ -21,10 +24,7 @@ namespace Take.Blip.Client.Extensions
     {
         internal static IServiceContainer RegisterExtensions(this IServiceContainer serviceContainer)
         {
-            Lime.Messaging.Registrator.RegisterDocuments();
-            Takenet.Iris.Messaging.Registrator.RegisterDocuments();
-            Registrator.RegisterDocuments();
-
+            serviceContainer.RegisterService(typeof(IDocumentTypeResolver), new DocumentTypeResolver().WithBlipDocuments());
             Func<ISender> senderFactory = () => serviceContainer.GetService<ISender>();
             serviceContainer.RegisterService(typeof(IBroadcastExtension), () => new BroadcastExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IDelegationExtension), () => new DelegationExtension(senderFactory()));

@@ -11,6 +11,7 @@ using NSubstitute;
 using Take.Blip.Builder.Actions.SendMessageFromHttp;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
+using Take.Blip.Client.Extensions;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
@@ -21,12 +22,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             Sender = Substitute.For<ISender>();
             HttpClient = Substitute.For<IHttpClient>();
-            DocumentSerializer = new DocumentSerializer();
+            DocumentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
+            DocumentSerializer = new DocumentSerializer(DocumentTypeResolver);
         }
 
         public ISender Sender { get; set; }
 
         public IHttpClient HttpClient { get; set; }
+
+        private IDocumentTypeResolver DocumentTypeResolver { get; }
 
         private IDocumentSerializer DocumentSerializer { get; }
 
@@ -36,7 +40,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-
         public async Task SendWithPlainHttpContentShouldSucceed()
         {
             // Arrange
@@ -59,7 +62,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Type = PlainText.MIME_TYPE
             };
             var target = GetTarget();
-            
+
             // Act
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
@@ -69,11 +72,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-
         public async Task SendWithJsonHttpContentShouldSucceed()
         {
             // Arrange
-            Registrator.RegisterDocuments();
             var destination = new Identity(Guid.NewGuid().ToString(), "msging.net");
             Context.User.Returns(destination);
             var uri = new Uri("https://myserver.com/content/id");
@@ -96,7 +97,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         Text = "This is the third option"
                     }
                 }
-            };            
+            };
 
             var httpResponseMessage = new HttpResponseMessage()
             {
@@ -120,17 +121,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             await Sender.Received(1).SendMessageAsync(
                 Arg.Is<Message>(m =>
-                    m.To.ToIdentity().Equals(destination) 
-                    && m.Type == Select.MediaType 
+                    m.To.ToIdentity().Equals(destination)
+                    && m.Type == Select.MediaType
                     && m.Content is Select
                     && ((Select)m.Content).Text == content.Text
                     && ((Select)m.Content).Scope == SelectScope.Immediate
                     && ((Select)m.Content).Options.Length == content.Options.Length
                     && ((Select)m.Content).Options[0].Text == content.Options[0].Text
                     && ((Select)m.Content).Options[1].Text == content.Options[1].Text
-                    && ((Select)m.Content).Options[2].Text == content.Options[2].Text), 
+                    && ((Select)m.Content).Options[2].Text == content.Options[2].Text),
                 CancellationToken);
         }
-
     }
 }

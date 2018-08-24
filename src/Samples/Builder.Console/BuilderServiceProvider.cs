@@ -7,7 +7,11 @@ namespace Builder.Console
 {
     public class BuilderServiceProvider : Container, IServiceContainer
     {
-        public BuilderServiceProvider() => this.RegisterBuilder();
+        public BuilderServiceProvider()
+        {
+            Options.AllowOverridingRegistrations = true;
+            this.RegisterBuilder();
+        }
 
         public void RegisterService(Type serviceType, object instance) => RegisterSingleton(serviceType, instance);
 

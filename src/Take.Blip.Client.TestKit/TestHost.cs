@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Lime.Messaging;
 using Lime.Protocol;
+using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Take.Blip.Client.Activation;
 
@@ -53,7 +55,7 @@ namespace Take.Blip.Client.TestKit
 
             Bootstrapper.RegisterSettingsContainer(application, localServiceProvider, typeResolver);
 
-            var serializer = new JsonNetSerializer();
+            var serializer = new EnvelopeSerializer(new DocumentTypeResolver().WithMessagingDocuments());
             _onDemandClientChannel = new InternalOnDemandClientChannel(serializer, application);
             _client = await Bootstrapper.BuildClientAsync(
                 application,

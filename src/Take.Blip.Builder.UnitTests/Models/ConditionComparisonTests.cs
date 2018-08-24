@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Shouldly;
+﻿using Shouldly;
 using Take.Blip.Builder.Models;
 using Xunit;
 
@@ -12,48 +7,48 @@ namespace Take.Blip.Builder.UnitTests.Models
     public class ConditionComparisonTests
     {
         [Fact]
-        public void EqualsComparisonWithEqualsValuesShouldSuccceed()
+        public void EqualsComparisonWithEqualsValuesShouldSucceed()
         {
             // Arrange
             var value1 = "Value 1";
             var value2 = "Value 1";
-            var target = ConditionComparison.Equals.ToDelegate();
+            var target = ConditionComparison.Equals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
         }
 
         [Fact]
-        public void EqualsComparisonWithEqualsValuesWithDifferentCasingShouldSuccceed()
+        public void EqualsComparisonWithEqualsValuesWithDifferentCasingShouldSucceed()
         {
             // Arrange
             var value1 = "ValUe 1";
             var value2 = "value 1";
-            var target = ConditionComparison.Equals.ToDelegate();
+            var target = ConditionComparison.Equals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
         }
 
         [Fact]
-        public void EqualsComparisonWithEqualsValuesWithEmojiShouldSuccceed()
+        public void EqualsComparisonWithEqualsValuesWithEmojiShouldSucceed()
         {
             // Arrange
             var value1 = "Value 😱🤢➡";
             var value2 = "Value 😱🤢➡";
-            var target = ConditionComparison.Equals.ToDelegate();
+            var target = ConditionComparison.Equals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
         }
     
         [Fact]
-        public void EqualsComparisonWithEqualsValuesWithAccentShouldSuccceed()
+        public void EqualsComparisonWithEqualsValuesWithAccentShouldSucceed()
         {
             // Arrange
             var value1 = "Valuê 1";
             var value2 = "Válue 1";
-            var target = ConditionComparison.Equals.ToDelegate();
+            var target = ConditionComparison.Equals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
@@ -64,7 +59,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "Value 1";
             var value2 = "Value X";
-            var target = ConditionComparison.Equals.ToDelegate();
+            var target = ConditionComparison.Equals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
@@ -76,7 +71,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "Value 1";
             var value2 = "Value 1";
-            var target = ConditionComparison.NotEquals.ToDelegate();
+            var target = ConditionComparison.NotEquals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
@@ -88,7 +83,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "ValUe 1";
             var value2 = "value 1";
-            var target = ConditionComparison.NotEquals.ToDelegate();
+            var target = ConditionComparison.NotEquals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
@@ -100,7 +95,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "Valuê 1";
             var value2 = "Válue 1";
-            var target = ConditionComparison.NotEquals.ToDelegate();
+            var target = ConditionComparison.NotEquals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
@@ -111,43 +106,43 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "Value 1";
             var value2 = "Value X";
-            var target = ConditionComparison.NotEquals.ToDelegate();
+            var target = ConditionComparison.NotEquals.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
         }
 
         [Fact]
-        public void StartsWithComparisonWithEqualsValuesShouldSuccceed()
+        public void StartsWithComparisonWithEqualsValuesShouldSucceed()
         {
             // Arrange
             var value1 = "Value 1";
             var value2 = "Value 1";
-            var target = ConditionComparison.StartsWith.ToDelegate();
+            var target = ConditionComparison.StartsWith.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
         }
 
         [Fact]
-        public void StartsWithComparisonWithEqualsValuesWithDifferentCasingShouldSuccceed()
+        public void StartsWithComparisonWithEqualsValuesWithDifferentCasingShouldSucceed()
         {
             // Arrange
             var value1 = "ValUe 1";
             var value2 = "value 1";
-            var target = ConditionComparison.StartsWith.ToDelegate();
+            var target = ConditionComparison.StartsWith.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
         }
 
         [Fact]
-        public void StartsWithComparisonWithPartialValuesShouldSuccceed()
+        public void StartsWithComparisonWithPartialValuesShouldSucceed()
         {
             // Arrange
             var value1 = "Value 1";
             var value2 = "Valu";
-            var target = ConditionComparison.StartsWith.ToDelegate();
+            var target = ConditionComparison.StartsWith.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
@@ -159,7 +154,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "Value 1";
             var value2 = "Balue";
-            var target = ConditionComparison.StartsWith.ToDelegate();
+            var target = ConditionComparison.StartsWith.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
@@ -167,12 +162,12 @@ namespace Take.Blip.Builder.UnitTests.Models
 
 
         [Fact]
-        public void GreaterThanWithComparisonWithBiggerValuesShouldSuccceed()
+        public void GreaterThanWithComparisonWithBiggerValuesShouldSucceed()
         {
             // Arrange
             var value1 = "12345";
             var value2 = "1234";
-            var target = ConditionComparison.GreaterThan.ToDelegate();
+            var target = ConditionComparison.GreaterThan.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
@@ -184,7 +179,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "12345";
             var value2 = "12345";
-            var target = ConditionComparison.GreaterThan.ToDelegate();
+            var target = ConditionComparison.GreaterThan.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
@@ -196,7 +191,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "1234";
             var value2 = "12345";
-            var target = ConditionComparison.GreaterThan.ToDelegate();
+            var target = ConditionComparison.GreaterThan.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
@@ -208,43 +203,43 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "not a number";
             var value2 = "also not a number";
-            var target = ConditionComparison.GreaterThan.ToDelegate();
+            var target = ConditionComparison.GreaterThan.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
         }
 
         [Fact]
-        public void ApproximateToComparisonWithApproximateToValuesShouldSuccceed()
+        public void ApproximateToComparisonWithApproximateToValuesShouldSucceed()
         {
             // Arrange
             var value1 = "Value 1";
             var value2 = "Value 1";
-            var target = ConditionComparison.ApproximateTo.ToDelegate();
+            var target = ConditionComparison.ApproximateTo.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
         }
 
         [Fact]
-        public void ApproximateToComparisonWithApproximateToValuesWithDifferentCasingShouldSuccceed()
+        public void ApproximateToComparisonWithApproximateToValuesWithDifferentCasingShouldSucceed()
         {
             // Arrange
             var value1 = "ValUe 1";
             var value2 = "value 1";
-            var target = ConditionComparison.ApproximateTo.ToDelegate();
+            var target = ConditionComparison.ApproximateTo.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
         }
 
         [Fact]
-        public void ApproximateToComparisonWithApproximateToValuesWithAccentShouldSuccceed()
+        public void ApproximateToComparisonWithApproximateToValuesWithAccentShouldSucceed()
         {
             // Arrange
             var value1 = "Valuê 1";
             var value2 = "Válue 1";
-            var target = ConditionComparison.ApproximateTo.ToDelegate();
+            var target = ConditionComparison.ApproximateTo.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
@@ -256,7 +251,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "Value 1";
             var value2 = "Vilue X";
-            var target = ConditionComparison.ApproximateTo.ToDelegate();
+            var target = ConditionComparison.ApproximateTo.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeTrue();
@@ -268,10 +263,76 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Arrange
             var value1 = "Value 1";
             var value2 = "Hello world";
-            var target = ConditionComparison.ApproximateTo.ToDelegate();
+            var target = ConditionComparison.ApproximateTo.ToBinaryDelegate();
 
             // Act
             target(value1, value2).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void ExistsComparisonWithExistingValueShouldSucceed()
+        {
+            // Arrange
+            var value = "Value";
+            var target = ConditionComparison.Exists.ToUnaryDelegate();
+
+            // Act
+            target(value).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void ExistsComparisonWithEmptyStringShouldFail()
+        {
+            // Arrange
+            var value = "";
+            var target = ConditionComparison.Exists.ToUnaryDelegate();
+
+            // Act
+            target(value).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void ExistsComparisonNonExistingValueShouldFail()
+        {
+            // Arrange
+            string value = null;
+            var target = ConditionComparison.Exists.ToUnaryDelegate();
+
+            // Act
+            target(value).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void NotExistsComparisonWithExistingValueShouldFail()
+        {
+            // Arrange
+            var value = "Value";
+            var target = ConditionComparison.NotExists.ToUnaryDelegate();
+
+            // Act
+            target(value).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void NotExistsComparisonWithEmptyStringShouldSucceed()
+        {
+            // Arrange
+            var value = "";
+            var target = ConditionComparison.NotExists.ToUnaryDelegate();
+
+            // Act
+            target(value).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void NotExistsComparisonNonExistingValueShouldSucceed()
+        {
+            // Arrange
+            string value = null;
+            var target = ConditionComparison.NotExists.ToUnaryDelegate();
+
+            // Act
+            target(value).ShouldBeTrue();
         }
     }
 }

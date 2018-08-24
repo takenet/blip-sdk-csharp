@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
+using Take.Blip.Client;
+using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -29,11 +31,19 @@ namespace Take.Blip.Builder.Variables
                 case "content":
                     return input.SerializedContent;
 
+                case "message":
+                    return input.SerializedMessage;
+
                 case "type":
                     return input.Content?.GetMediaType()?.ToString();
 
                 case "length":
                     return input.SerializedContent?.Length.ToString();
+            }
+
+            if (nameToLower.Equals("analysis"))
+            {
+                return await GetAnalyzedContentAsync(input);
             }
 
             if (nameToLower.StartsWith("intent."))
@@ -52,6 +62,11 @@ namespace Take.Blip.Builder.Variables
             return null;
         }
 
+        private async Task<string> GetAnalyzedContentAsync(LazyInput input)
+        {
+            var analyzedContent = await input.AnalyzedContent;
+            return _documentSerializer.Serialize(analyzedContent) ?? null;
+        }
 
         private async Task<string> GetIntentVariableAsync(LazyInput input, string intentProperty)
         {

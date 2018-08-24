@@ -27,6 +27,7 @@ namespace Take.Blip.Builder
         private readonly IActionProvider _actionProvider;
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
+        private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
         private readonly IVariableReplacer _variableReplacer;
 
@@ -38,6 +39,7 @@ namespace Take.Blip.Builder
             IActionProvider actionProvider,
             ISender sender,
             IDocumentSerializer documentSerializer,
+            IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             IVariableReplacer variableReplacer)
         {
@@ -48,6 +50,7 @@ namespace Take.Blip.Builder
             _actionProvider = actionProvider;
             _sender = sender;
             _documentSerializer = documentSerializer;
+            _envelopeSerializer = envelopeSerializer;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
             _variableReplacer = variableReplacer;
         }
@@ -69,7 +72,7 @@ namespace Take.Blip.Builder
                 {
                     // Create the input evaluator
                     var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer,
-                        _artificialIntelligenceExtension, linkedCts.Token);
+                        _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                     // Try restore a stored state
                     var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, linkedCts.Token);
@@ -265,15 +268,27 @@ namespace Take.Blip.Builder
                     throw new ArgumentOutOfRangeException();
             }
 
-            var comparisonFunc = condition.Comparison.ToDelegate();
-
-            switch (condition.Operator)
+            switch (condition.Comparison.GetComparisonType())
             {
-                case ConditionOperator.Or:
-                    return condition.Values.Any(v => comparisonFunc(comparisonValue, v));
+                case ComparisonType.Unary:
+                    var unaryComparisonFunc = condition.Comparison.ToUnaryDelegate();
 
-                case ConditionOperator.And:
-                    return condition.Values.All(v => comparisonFunc(comparisonValue, v));
+                    return unaryComparisonFunc(comparisonValue);
+
+                case ComparisonType.Binary:
+                    var binaryComparisonFunc = condition.Comparison.ToBinaryDelegate();
+
+                    switch (condition.Operator)
+                    {
+                        case ConditionOperator.Or:
+                            return condition.Values.Any(v => binaryComparisonFunc(comparisonValue, v));
+
+                        case ConditionOperator.And:
+                            return condition.Values.All(v => binaryComparisonFunc(comparisonValue, v));
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
 
                 default:
                     throw new ArgumentOutOfRangeException();

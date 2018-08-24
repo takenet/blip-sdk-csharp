@@ -63,11 +63,91 @@ namespace Take.Blip.Builder.Models
         /// Check if a string value is approximate to the other specified value.
         /// </summary>
         ApproximateTo,
+
+        /// <summary>
+        /// Check if value exists.
+        /// </summary>
+        Exists,
+
+        /// <summary>
+        /// Check if value does not exist.
+        /// </summary>
+        NotExists,
+    }
+
+    /// <summary>
+    /// Define the delegation method for comparison types.
+    /// </summary>
+    public enum ComparisonType
+    {
+        /// <summary>
+        /// Check for unary comparison.
+        /// </summary>
+        Unary,
+
+        /// <summary>
+        /// Check for binary comparison.
+        /// </summary>
+        Binary,
     }
 
     public static class ConditionComparisonExtensions
     {
-        public static Func<string, string, bool> ToDelegate(this ConditionComparison conditionComparison)
+        public static ComparisonType GetComparisonType(this ConditionComparison conditionComparison)
+        {
+            switch (conditionComparison)
+            {
+                case ConditionComparison.Exists:
+                case ConditionComparison.NotExists:
+                    return ComparisonType.Unary;
+
+                case ConditionComparison.Equals:
+                case ConditionComparison.NotEquals:
+                case ConditionComparison.Contains:
+                case ConditionComparison.StartsWith:
+                case ConditionComparison.EndsWith:
+                case ConditionComparison.GreaterThan:
+                case ConditionComparison.LessThan:
+                case ConditionComparison.GreaterThanOrEquals:
+                case ConditionComparison.LessThanOrEquals:
+                case ConditionComparison.Matches:
+                case ConditionComparison.ApproximateTo:
+                    return ComparisonType.Binary;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(conditionComparison));
+            }
+        }
+
+        public static Func<string, bool> ToUnaryDelegate (this ConditionComparison conditionComparison)
+        {
+            switch (conditionComparison)
+            {
+                case ConditionComparison.Exists:
+                    return (v) => string.IsNullOrEmpty(v) == false;
+
+                case ConditionComparison.NotExists:
+                    return (v) => string.IsNullOrEmpty(v);
+                
+                case ConditionComparison.Equals:
+                case ConditionComparison.NotEquals:
+                case ConditionComparison.Contains:
+                case ConditionComparison.StartsWith:
+                case ConditionComparison.EndsWith:
+                case ConditionComparison.Matches:
+                case ConditionComparison.ApproximateTo:
+                case ConditionComparison.GreaterThan:
+                case ConditionComparison.LessThan:
+                case ConditionComparison.GreaterThanOrEquals:
+                case ConditionComparison.LessThanOrEquals:
+                    throw new ArgumentException("Not unary comparison condition: ", nameof(conditionComparison));
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(conditionComparison));
+            }
+        }
+
+        public static Func<string, string, bool> ToBinaryDelegate(this ConditionComparison conditionComparison)
         {
             switch (conditionComparison)
             {
@@ -104,6 +184,10 @@ namespace Take.Blip.Builder.Models
 
                 case ConditionComparison.LessThanOrEquals:
                     return (v1, v2) => decimal.TryParse(v1, out var n1) && decimal.TryParse(v2, out var n2) && n1 <= n2;
+
+                case ConditionComparison.Exists:
+                case ConditionComparison.NotExists:
+                    throw new ArgumentException("Not binary comparison condition: ", nameof(conditionComparison));
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(conditionComparison));
