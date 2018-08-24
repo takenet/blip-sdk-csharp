@@ -33,9 +33,9 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             }
 
             var engine = new Engine(options => options
-                    .LimitRecursion(5)
-                    .MaxStatements(50)
-                    .TimeoutInterval(TimeSpan.FromSeconds(2)))
+                    .LimitRecursion(50)
+                    .MaxStatements(1000)
+                    .TimeoutInterval(TimeSpan.FromSeconds(5)))
                 .Execute(settings.Source);
 
             var result = arguments != null

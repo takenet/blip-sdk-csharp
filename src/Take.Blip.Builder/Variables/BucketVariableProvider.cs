@@ -3,8 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
-using Lime.Protocol.Serialization.Newtonsoft;
-using Newtonsoft.Json;
+using Lime.Protocol.Serialization;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Variables
@@ -12,10 +11,12 @@ namespace Take.Blip.Builder.Variables
     public class BucketVariableProvider : IVariableProvider
     {
         private readonly ISender _sender;
+        private readonly IDocumentSerializer _documentSerializer;
 
-        public BucketVariableProvider(ISender sender)
+        public BucketVariableProvider(ISender sender, IDocumentSerializer documentSerializer)
         {
             _sender = sender;
+            _documentSerializer = documentSerializer;
         }
 
         public VariableSource Source => VariableSource.Bucket;
@@ -35,7 +36,7 @@ namespace Take.Blip.Builder.Variables
 
                 if (bucketCommandResult.Status != CommandStatus.Success) return null;
                 if (!bucketCommandResult.Resource.GetMediaType().IsJson) return bucketCommandResult.Resource.ToString();
-                return JsonConvert.SerializeObject(bucketCommandResult.Resource, JsonNetSerializer.Settings);
+                return _documentSerializer.Serialize(bucketCommandResult.Resource);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {

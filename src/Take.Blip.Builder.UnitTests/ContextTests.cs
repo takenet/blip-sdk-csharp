@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging;
 using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
+using Lime.Protocol.Serialization.Newtonsoft;
 using NSubstitute;
 using Shouldly;
 using SimpleInjector;
@@ -25,6 +27,8 @@ namespace Take.Blip.Builder.UnitTests
     {
         public ContextTests()
         {
+            var documentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
+
             ValuesDictionary = new Dictionary<string, Document>(StringComparer.InvariantCultureIgnoreCase);
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             ContextExtension = new DictionaryContextExtension(ValuesDictionary);
@@ -41,7 +45,8 @@ namespace Take.Blip.Builder.UnitTests
                     Text = "Hello world!"
                 },
                 Flow.Configuration,
-                new DocumentSerializer(),
+                new DocumentSerializer(documentTypeResolver),
+                new EnvelopeSerializer(documentTypeResolver),
                 ArtificialIntelligenceExtension,
                 CancellationToken);
         }
