@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Builder", "Take.B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Builder.Console", "Samples\Builder.Console\Builder.Console.csproj", "{DDA1D829-6762-4F36-BCA5-295C2566FF84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Builder.UnitTests", "Take.Blip.Builder.UnitTests\Take.Blip.Builder.UnitTests.csproj", "{24DAE2B5-5492-4373-8114-C175C7DC445B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Builder.UnitTests", "Take.Blip.Builder.UnitTests\Take.Blip.Builder.UnitTests.csproj", "{24DAE2B5-5492-4373-8114-C175C7DC445B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
