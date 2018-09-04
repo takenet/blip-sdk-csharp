@@ -1,7 +1,7 @@
 ﻿{
   /* TODO: Put your chatbot identifier and accessKey bellow. */
-  "identifier": "pedroqa",
-  "accessKey": "SW1qVEtvVlR0ZnJrdk5FY0daMEw=",
+  "identifier": "",
+  "accessKey": "",
   "messageReceivers": [
     {
       "type": "MainMessageReceiver",
