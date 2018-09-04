@@ -18,7 +18,7 @@ namespace Take.Blip.Builder
         private readonly IContextExtension _contextExtension;
         private readonly IDictionary<VariableSource, IVariableProvider> _variableProviderDictionary;
 
-        public Context(            
+        public Context(
             Identity user,
             LazyInput input,
             Flow flow,
@@ -28,6 +28,7 @@ namespace Take.Blip.Builder
             User = user ?? throw new ArgumentNullException(nameof(user));
             Input = input ?? throw new ArgumentNullException(nameof(input));
             Flow = flow ?? throw new ArgumentNullException(nameof(flow));
+            InputContext = new Dictionary<string, object>();
 
             _contextExtension = contextExtension;
             _variableProviderDictionary = variableProviders.ToDictionary(v => v.Source, v => v);
@@ -38,6 +39,8 @@ namespace Take.Blip.Builder
         public LazyInput Input { get; }
 
         public Flow Flow { get; }
+
+        public IDictionary<string, object> InputContext { get; }
 
         public Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
         {
