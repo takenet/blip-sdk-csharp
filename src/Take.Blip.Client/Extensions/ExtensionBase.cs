@@ -35,8 +35,8 @@ namespace Take.Blip.Client.Extensions
             return responseCommand.Resource as T;
         }
 
-        protected Command CreateSetCommandRequest<T>(T resource, string uriPath, Node to = null) where T : Document =>
-            new Command()
+        protected Command CreateSetCommandRequest<T>(T resource, string uriPath, Node to = null, string id = null) where T : Document =>
+            new Command(id ?? EnvelopeId.NewId())
             {
                 To = to,
                 Method = CommandMethod.Set,
@@ -44,8 +44,8 @@ namespace Take.Blip.Client.Extensions
                 Resource = resource
             };
 
-        protected Command CreateMergeCommandRequest<T>(T resource, string uriPath, Node to = null) where T : Document =>
-            new Command()
+        protected Command CreateMergeCommandRequest<T>(T resource, string uriPath, Node to = null, string id = null) where T : Document =>
+            new Command(id ?? EnvelopeId.NewId())
             {
                 To = to,
                 Method = CommandMethod.Merge,
@@ -53,16 +53,16 @@ namespace Take.Blip.Client.Extensions
                 Resource = resource
             };
 
-        protected Command CreateGetCommandRequest(string uriPath, Node to = null) =>
-            new Command()
+        protected Command CreateGetCommandRequest(string uriPath, Node to = null, string id = null) =>
+            new Command(id ?? EnvelopeId.NewId())
             {
                 To = to,
                 Method = CommandMethod.Get,
                 Uri = new LimeUri(uriPath)
             };
 
-        protected Command CreateDeleteCommandRequest(string uriPath, Node to = null) =>
-            new Command()
+        protected Command CreateDeleteCommandRequest(string uriPath, Node to = null, string id = null) =>
+            new Command(id ?? EnvelopeId.NewId())
             {
                 To = to,
                 Method = CommandMethod.Delete,

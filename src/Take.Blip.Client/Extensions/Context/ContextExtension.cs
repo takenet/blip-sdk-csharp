@@ -24,7 +24,7 @@ namespace Take.Blip.Client.Extensions.Context
             if (variableName == null) throw new ArgumentNullException(nameof(variableName));
 
             var uriPath = GetVariableRequestUri(identity, variableName);
-            var requestCommand = CreateGetCommandRequest(uriPath);
+            var requestCommand = CreateGetCommandRequest(uriPath, id: $"disposable:{EnvelopeId.NewId()}");
             return ProcessCommandAsync<T>(requestCommand, cancellationToken);
         }
 
