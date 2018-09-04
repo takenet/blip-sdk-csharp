@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
@@ -25,6 +26,12 @@ namespace Take.Blip.Builder
         /// The flow that is being processed.
         /// </summary>
         Flow Flow { get; }
+
+        /// <summary>
+        /// Gets the local context data associated with the current input.
+        /// These values are transient.
+        /// </summary>
+        IDictionary<string, object> InputContext { get; }
 
         /// <summary>
         /// Sets a context variable value for the user.
