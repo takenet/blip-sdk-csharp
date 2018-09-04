@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,8 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
     /// </summary>
     public class SendMessageFromHttpAction : ActionBase<SendMessageFromHttpSettings>
     {
+        public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
+
         private readonly ISender _sender;
         private readonly IHttpClient _httpClient;
         private readonly IDocumentSerializer _documentSerializer;
@@ -41,18 +44,22 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                 httpRequestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(settings.Type));
             }
 
-            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false);
-            httpResponseMessage.EnsureSuccessStatusCode();
-
-            var body = await httpResponseMessage.Content.ReadAsStringAsync();
-            var message = new Message(EnvelopeId.NewId())
+            using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
+            using (var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, linkedCts.Token).ConfigureAwait(false))
             {
-                Id = EnvelopeId.NewId(),
-                To = context.User.ToNode(),
-                Content = _documentSerializer.Deserialize(body, settings.MediaType)
-            };
+                httpResponseMessage.EnsureSuccessStatusCode();
 
-            await _sender.SendMessageAsync(message, cancellationToken);
+                var body = await httpResponseMessage.Content.ReadAsStringAsync();
+                var message = new Message(EnvelopeId.NewId())
+                {
+                    Id = EnvelopeId.NewId(),
+                    To = context.User.ToNode(),
+                    Content = _documentSerializer.Deserialize(body, settings.MediaType)
+                };
+
+                await _sender.SendMessageAsync(message, cancellationToken);
+            }
         }
     }
 }
