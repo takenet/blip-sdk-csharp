@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using Take.Blip.Builder.Utils;
 
@@ -11,6 +10,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 {
     public sealed class ProcessHttpAction : ActionBase<ProcessHttpSettings>, IDisposable
     {
+        public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
+        
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
 
@@ -48,8 +49,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
                     AddUserToHeaders(httpRequestMessage, context);
 
-                    using (var httpResponseMessage =
-                        await _httpClient.SendAsync(httpRequestMessage, cancellationToken).ConfigureAwait(false))
+                    using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
+                    using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
+                    using (var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, linkedCts.Token).ConfigureAwait(false))
                     {
                         responseStatus = (int)httpResponseMessage.StatusCode;
                         if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))

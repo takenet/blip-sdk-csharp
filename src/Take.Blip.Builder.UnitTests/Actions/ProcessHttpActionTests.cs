@@ -36,7 +36,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         [Fact]
         public async Task ProcessPostActionShouldSucceed()
         {
-            //Arrange
+            // Arrange
             var settings = new ProcessHttpSettings
             {
                 Uri = new Uri("https://blip.ai"),
@@ -60,25 +60,24 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Content = new StringContent("Some result")
             };
 
-            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), CancellationToken).Returns(httpResponseMessage);
+            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>()).Returns(httpResponseMessage);
 
-            //Act
+            // Act
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
-            //Assert
+            // Assert
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), CancellationToken);
+                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
 
-            await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int) HttpStatusCode.Accepted).ToString(),
-                CancellationToken);
-            await Context.Received(1).SetVariableAsync(settings.ResponseBodyVariable, "Some result", CancellationToken);
+            await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int) HttpStatusCode.Accepted).ToString(),                 Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(settings.ResponseBodyVariable, "Some result", Arg.Any<CancellationToken>());
         }
 
         [Fact]
         public async Task ProcessPostActionWithoutValidSettingsShouldFailed()
         {
-            //Arrange
+            // Arrange
             var settings = new ProcessHttpSettings
             {
                 Method = HttpMethod.Post.ToString(),
@@ -98,9 +97,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Content = new StringContent("Error")
             };
 
-            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), CancellationToken).Returns(httpResponseMessage);
+            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>()).Returns(httpResponseMessage);
 
-            //Act
+            // Act
             try
             {
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
@@ -108,17 +107,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             }
             catch (ValidationException exception)
             {
-                //Assert
+                // Assert
                 await HttpClient.DidNotReceive().SendAsync(
                     Arg.Is<HttpRequestMessage>(
-                        h => h.RequestUri.Equals(settings.Uri)), CancellationToken);
+                        h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
             }
         }
 
         [Fact]
         public async Task ProcessActionWithUserHeaderShouldSucceed()
         {
-            //Arrange
+            // Arrange
             const string userIdentity = "user@domain.local";
             const string userToRequestHeaderVariableName = "processHttpAddUserToRequestHeader";        
             Context.Flow.Configuration.Add(userToRequestHeaderVariableName, "true");
@@ -149,19 +148,19 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), CancellationToken)
+                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
                 .ReturnsForAnyArgs(httpResponseMessage);
 
-            //Act
+            // Act
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
-            //Assert
+            // Assert
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeTrue();
             requestMessage.Headers.GetValues("X-Blip-User").First().ShouldBe(userIdentity);
 
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), CancellationToken);
+                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
         }
     }
 }
