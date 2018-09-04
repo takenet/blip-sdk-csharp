@@ -20,24 +20,67 @@ namespace Take.Blip.Client.Extensions.EventTracker
         {
         }
 
-        public Task AddAsync(string category, string action, IDictionary<string, string> extras = null, CancellationToken cancellationToken = new CancellationToken(), Identity identity = null)
+        public Task AddAsync(
+            string category,
+            string action,
+            IDictionary<string, string> extras = null,
+            CancellationToken cancellationToken = new CancellationToken(),
+            Identity identity = null)
         {
-            return AddAsync(category, action, contactIdentity: identity, extras: extras, cancellationToken: cancellationToken);
+            return AddAsync(
+                category,
+                action,
+                contactIdentity: identity,
+                extras: extras,
+                cancellationToken: cancellationToken);
         }
 
-        public Task AddAsync(string category, string action, string label = null, Message message = null, Contact contact = null, string contactExternalId = null, decimal? value = null, IDictionary<string, string> extras = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task AddAsync(
+            string category,
+            string action,
+            string label = null,
+            Message message = null,
+            Contact contact = null,
+            string contactExternalId = null,
+            decimal? value = null,
+            IDictionary<string, string> extras = null,
+            bool fireAndForget = false,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            return AddAsync(category, action, label, message?.Id, contact?.Identity, contact?.Source ?? message?.From?.Instance, contact?.Group, contactExternalId, value, extras, cancellationToken);
+            return AddAsync(
+                category,
+                action,
+                label,
+                message?.Id,
+                contact?.Identity,
+                contact?.Source ?? message?.From?.Instance,
+                contact?.Group,
+                contactExternalId,
+                value,
+                extras,
+                fireAndForget,
+                cancellationToken);
         }
 
-        public Task AddAsync(string category, string action, string label = null, string messageId = null, string contactIdentity = null, string contactSource = null, string contactGroup = null, string contactExternalId = null, decimal? value = null, IDictionary<string, string> extras = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task AddAsync(
+            string category,
+            string action,
+            string label = null,
+            string messageId = null,
+            string contactIdentity = null,
+            string contactSource = null,
+            string contactGroup = null,
+            string contactExternalId = null,
+            decimal? value = null,
+            IDictionary<string, string> extras = null,
+            bool fireAndForget = false,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrEmpty(category)) throw new ArgumentNullException(nameof(category));
             if (string.IsNullOrEmpty(action)) throw new ArgumentNullException(nameof(action));
 
-            var requestCommand = new Command
+            var requestCommand = new Command(null)
             {
-                Method = CommandMethod.Set,
                 Uri = new LimeUri(EVENTRACK_URI),
                 Resource = new EventTrack
                 {
@@ -56,6 +99,15 @@ namespace Take.Blip.Client.Extensions.EventTracker
                     }
                 }
             };
+
+            if (fireAndForget)
+            {
+                requestCommand.Method = CommandMethod.Observe;
+                return Sender.SendCommandAsync(requestCommand, cancellationToken);
+            }
+
+            requestCommand.Id = EnvelopeId.NewId();
+            requestCommand.Method = CommandMethod.Set;
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }

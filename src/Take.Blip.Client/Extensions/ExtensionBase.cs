@@ -69,6 +69,15 @@ namespace Take.Blip.Client.Extensions
                 Uri = new LimeUri(uriPath)
             };
 
+        protected Command CreateObserveCommandRequest<T>( string uriPath, T resource = default(T), Node to = null, string id = null) where T : Document =>
+            new Command(id)
+            {
+                To = to,
+                Method = CommandMethod.Observe,
+                Uri = new LimeUri(uriPath),
+                Resource = resource
+            };
+
         protected virtual void EnsureSuccess(Command responseCommand)
         {
             if (responseCommand.Status != CommandStatus.Success)

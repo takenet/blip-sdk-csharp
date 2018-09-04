@@ -54,9 +54,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 label: null,
                 value: null,
                 messageId: null,
-                extras: Arg.Is<Dictionary<string, string>>(d => extras.Keys.All(k => d.ContainsKey(k) && d[k] == extras[k])), 
-                cancellationToken: CancellationToken, 
-                contactIdentity: identity);
+                extras: Arg.Is<Dictionary<string, string>>(d => extras.Keys.All(k => d.ContainsKey(k) && d[k] == extras[k])),
+                contactIdentity: identity,
+                fireAndForget: true,
+                cancellationToken: CancellationToken);
         }
 
         [Fact]
@@ -99,7 +100,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 messageId: messageId,
                 extras: Arg.Is<Dictionary<string, string>>(d => extras.Keys.All(k => d.ContainsKey(k) && d[k] == extras[k])),
                 cancellationToken: CancellationToken,
-                contactIdentity: identity);
+                contactIdentity: identity,
+                fireAndForget: true);
         }
 
         [Fact]
@@ -142,7 +144,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 messageId: messageId,
                 extras: Arg.Is<Dictionary<string, string>>(d => extras.Keys.All(k => d.ContainsKey(k) && d[k] == extras[k])),
                 cancellationToken: CancellationToken,
-                contactIdentity: identity);
+                contactIdentity: identity,
+                fireAndForget: true);
         }
 
 
@@ -178,7 +181,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             catch (ArgumentException ex)
             {
                 // Assert
-                ex.Message.ShouldBe("The 'category' settings value is required for 'TrackEventAction' action");
+                ex.Message.ShouldBe("The 'Category' settings value is required for 'TrackEventAction' action");
                 
                 await EventTrackExtension.DidNotReceive().AddAsync(
                     category,
