@@ -40,7 +40,8 @@ namespace Take.Blip.Client.Extensions.Context
 
             var requestCommand = CreateSetCommandRequest(
                 document,
-                uriPath
+                uriPath, 
+                id: $"disposable:{EnvelopeId.NewId()}"
                 );
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
@@ -56,7 +57,7 @@ namespace Take.Blip.Client.Extensions.Context
             if (variableName == null) throw new ArgumentNullException(nameof(variableName));
 
             var uriPath = GetVariableRequestUri(identity, variableName);
-            var requestCommand = CreateDeleteCommandRequest(uriPath);
+            var requestCommand = CreateDeleteCommandRequest(uriPath, id: $"disposable:{EnvelopeId.NewId()}");
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }
