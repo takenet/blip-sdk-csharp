@@ -11,5 +11,9 @@ namespace Take.Blip.Builder.Hosting
         int RedisDatabase { get; }
 
         int MaxTransitionsByInput { get; }
+        
+        TimeSpan WarningElapsedTimeThreshold { get; }
+
+        TimeSpan ErrorElapsedTimeThreshold { get; }
     }
 }

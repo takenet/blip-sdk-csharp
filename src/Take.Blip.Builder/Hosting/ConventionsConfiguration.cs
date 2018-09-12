@@ -11,5 +11,9 @@ namespace Take.Blip.Builder.Hosting
         public int RedisDatabase => 0;
 
         public int MaxTransitionsByInput => 10;
+
+        public TimeSpan WarningElapsedTimeThreshold => TimeSpan.FromMilliseconds(500);
+
+        public TimeSpan ErrorElapsedTimeThreshold => TimeSpan.FromMilliseconds(1000);
     }
 }

@@ -29,7 +29,7 @@ namespace Take.Blip.Builder.UnitTests
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
             Context = Substitute.For<IContext>();
-            Logger = Substitute.For<ILogger>();
+            Logger = new LoggerConfiguration().CreateLogger();
             ContextProvider
                 .CreateContext(Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);

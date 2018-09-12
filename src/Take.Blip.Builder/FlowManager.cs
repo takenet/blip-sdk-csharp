@@ -1,13 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Lime.Messaging.Contents;
+﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog;
+using Serilog.Events;
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -30,18 +33,20 @@ namespace Take.Blip.Builder
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
         private readonly IVariableReplacer _variableReplacer;
+        private readonly ILogger _logger;
 
         public FlowManager(
             IConfiguration configuration,
-            IStateManager stateManager, 
-            IContextProvider contextProvider, 
-            INamedSemaphore namedSemaphore, 
+            IStateManager stateManager,
+            IContextProvider contextProvider,
+            INamedSemaphore namedSemaphore,
             IActionProvider actionProvider,
             ISender sender,
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
-            IVariableReplacer variableReplacer)
+            IVariableReplacer variableReplacer,
+            ILogger logger)
         {
             _configuration = configuration;
             _stateManager = stateManager;
@@ -53,104 +58,134 @@ namespace Take.Blip.Builder
             _envelopeSerializer = envelopeSerializer;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
             _variableReplacer = variableReplacer;
+            _logger = logger;
         }
 
         public async Task ProcessInputAsync(Document input, Identity user, Flow flow, CancellationToken cancellationToken)
         {
-            if (input == null) throw new ArgumentNullException(nameof(input));
-            if (user == null) throw new ArgumentNullException(nameof(user));
-            if (flow == null) throw new ArgumentNullException(nameof(flow));
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (flow == null)
+            {
+                throw new ArgumentNullException(nameof(flow));
+            }
+
             flow.Validate();
 
-            // Create a cancellation token
-            using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
-            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+            var sw = Stopwatch.StartNew();
+            try
             {
-                // Synchronize to avoid concurrency issues on multiple running instances
-                var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.InputProcessingTimeout, linkedCts.Token);
-                try
+
+                // Create a cancellation token
+                using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
+                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
-                    // Create the input evaluator
-                    var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer,
-                        _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
-
-                    // Try restore a stored state
-                    var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, linkedCts.Token);
-                    var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
-
-                    // Load the user context
-                    var context = _contextProvider.CreateContext(user, lazyInput, flow);
-
-                    // Calculate the number of state transitions
-                    var transitions = 0;
-
-                    do
+                    // Synchronize to avoid concurrency issues on multiple running instances
+                    var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.InputProcessingTimeout, linkedCts.Token);
+                    try
                     {
-                        linkedCts.Token.ThrowIfCancellationRequested();
+                        // Create the input evaluator
+                        var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer,
+                            _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
-                        // Validate the input for the current state
-                        if (state.Input != null &&
-                            !state.Input.Bypass &&
-                            state.Input.Validation != null &&
-                            !ValidateDocument(lazyInput, state.Input.Validation))
+                        // Try restore a stored state
+                        var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, linkedCts.Token);
+                        var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
+                        // Load the user context
+                        var context = _contextProvider.CreateContext(user, lazyInput, flow);
+
+                        // Calculate the number of state transitions
+                        var transitions = 0;
+
+                        do
                         {
-                            if (state.Input.Validation.Error != null)
+                            linkedCts.Token.ThrowIfCancellationRequested();
+
+                            // Validate the input for the current state
+                            if (state.Input != null &&
+                                !state.Input.Bypass &&
+                                state.Input.Validation != null &&
+                                !ValidateDocument(lazyInput, state.Input.Validation))
                             {
-                                // Send the validation error message
-                                await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
+                                if (state.Input.Validation.Error != null)
+                                {
+                                    // Send the validation error message
+                                    await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
+                                        linkedCts.Token);
+                                }
+
+                                break;
+                            }
+
+                            // Set the input in the context
+                            if (!string.IsNullOrEmpty(state.Input?.Variable))
+                            {
+                                await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
                                     linkedCts.Token);
                             }
 
-                            break;
-                        }
+                            // Prepare to leave the current state executing the output actions
+                            if (state.OutputActions != null)
+                            {
+                                await ProcessActionsAsync(context, state.OutputActions, linkedCts.Token);
+                            }
 
-                        // Set the input in the context
-                        if (!string.IsNullOrEmpty(state.Input?.Variable))
-                        {
-                            await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
-                                linkedCts.Token);
-                        }
+                            // Store the previous state and determine the next 
+                            await _stateManager.SetPreviousStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
+                            state = await ProcessOutputsAsync(lazyInput, context, flow, state, linkedCts.Token);
 
-                        // Prepare to leave the current state executing the output actions
-                        if (state.OutputActions != null)
-                        {
-                            await ProcessActionsAsync(context, state.OutputActions, linkedCts.Token);
-                        }
+                            // Store the next state
+                            if (state != null)
+                            {
+                                await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, linkedCts.Token);
+                            }
+                            else
+                            {
+                                await _stateManager.DeleteStateIdAsync(flow.Id, context.User, linkedCts.Token);
+                            }
 
-                        // Store the previous state and determine the next 
-                        await _stateManager.SetPreviousStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
-                        state = await ProcessOutputsAsync(lazyInput, context, flow, state, linkedCts.Token);
+                            // Process the next state input actions
+                            if (state?.InputActions != null)
+                            {
+                                await ProcessActionsAsync(context, state.InputActions, linkedCts.Token);
+                            }
 
-                        // Store the next state
-                        if (state != null)
-                        {
-                            await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, linkedCts.Token);
-                        }
-                        else
-                        {
-                            await _stateManager.DeleteStateIdAsync(flow.Id, context.User, linkedCts.Token);
-                        }
+                            // Check if the state transition limit has reached (to avoid loops in the flow)
+                            if (transitions++ >= _configuration.MaxTransitionsByInput)
+                            {
+                                throw new BuilderException("Max state transitions reached");
+                            }
 
-                        // Process the next state input actions
-                        if (state?.InputActions != null)
-                        {
-                            await ProcessActionsAsync(context, state.InputActions, linkedCts.Token);
-                        }
-                            
-                        // Check if the state transition limit has reached (to avoid loops in the flow)
-                        if (transitions++ >= _configuration.MaxTransitionsByInput)
-                        {
-                            throw new BuilderException("Max state transitions reached");
-                        }
+                            // Continue processing if the next has do not expect the user input
+                        } while (state != null && (state.Input == null || state.Input.Bypass));
 
-                        // Continue processing if the next has do not expect the user input
-                    } while (state != null && (state.Input == null || state.Input.Bypass));
-                    
+                    }
+                    finally
+                    {
+                        await handle.DisposeAsync();
+                    }
                 }
-                finally
-                {
-                    await handle.DisposeAsync();
-                }
+            }
+            finally
+            {
+                sw.Stop();
+
+                _logger.Write(
+                    GetLogLevel(sw.Elapsed),
+                    "Processing message '{MessageId}' elapsed time was {Elapsed} ms for user '{User}'",
+                    EnvelopeReceiverContext<Message>.Envelope?.Id,
+                    sw.ElapsedMilliseconds,
+                    user
+                    );
             }
         }
 
@@ -182,9 +217,10 @@ namespace Take.Blip.Builder
         {
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
-            {                
+            {
                 var action = _actionProvider.Get(stateAction.Type);
 
+                var sw = Stopwatch.StartNew();
                 try
                 {
                     var settings = stateAction.Settings;
@@ -202,6 +238,18 @@ namespace Take.Blip.Builder
                     throw new ActionProcessingException(
                         $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
                 }
+                finally
+                {
+                    sw.Stop();
+
+                    _logger.Write(
+                        GetLogLevel(sw.Elapsed),
+                        "Processing action '{ActionName}' elapsed time was {Elapsed} ms for user '{User}' and input '{Input}'",
+                        action.Type,
+                        sw.ElapsedMilliseconds,
+                        context.User,
+                        context.Input?.SerializedContent);
+                }
             }
         }
 
@@ -213,25 +261,44 @@ namespace Take.Blip.Builder
             // If there's any output in the current state
             if (outputs != null)
             {
-                // Evalute each output conditions
-                foreach (var output in outputs.OrderBy(o => o.Order))
+                var sw = Stopwatch.StartNew();
+                try
                 {
-                    var isValidOutput = true;
-
-                    if (output.Conditions != null)
+                    // Evalute each output conditions
+                    foreach (var output in outputs.OrderBy(o => o.Order))
                     {
-                        foreach (var outputCondition in output.Conditions)
+                        var isValidOutput = true;
+
+                        if (output.Conditions != null)
                         {
-                            isValidOutput = await EvaluateConditionAsync(outputCondition, lazyInput, context, cancellationToken);
-                            if (!isValidOutput) break;
+                            foreach (var outputCondition in output.Conditions)
+                            {
+                                isValidOutput = await EvaluateConditionAsync(outputCondition, lazyInput, context, cancellationToken);
+                                if (!isValidOutput)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (isValidOutput)
+                        {
+                            state = flow.States.SingleOrDefault(s => s.Id == output.StateId);
+                            break;
                         }
                     }
+                }
+                finally
+                {
+                    sw.Stop();
 
-                    if (isValidOutput)
-                    {
-                        state = flow.States.SingleOrDefault(s => s.Id == output.StateId);
-                        break;
-                    }
+                    _logger.Write(
+                        GetLogLevel(sw.Elapsed),
+                        "Processing outputs for state '{StateId}' elapsed time was {Elapsed} ms for user '{User}' and input '{Input}'",
+                        state?.Id,
+                        sw.ElapsedMilliseconds,
+                        context.User,
+                        context.Input?.SerializedContent);
                 }
             }
 
@@ -239,9 +306,9 @@ namespace Take.Blip.Builder
         }
 
         private async Task<bool> EvaluateConditionAsync(
-            Condition condition, 
-            LazyInput lazyInput, 
-            IContext context, 
+            Condition condition,
+            LazyInput lazyInput,
+            IContext context,
             CancellationToken cancellationToken)
         {
             string comparisonValue;
@@ -293,6 +360,26 @@ namespace Take.Blip.Builder
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private LogEventLevel GetLogLevel(TimeSpan elapsed)
+        {
+            LogEventLevel logEventLevel;
+
+            if (elapsed >= _configuration.ErrorElapsedTimeThreshold)
+            {
+                logEventLevel = LogEventLevel.Error;
+            }
+            else if (elapsed >= _configuration.WarningElapsedTimeThreshold)
+            {
+                logEventLevel = LogEventLevel.Warning;
+            }
+            else
+            {
+                logEventLevel = LogEventLevel.Debug;
+            }
+
+            return logEventLevel;
         }
     }
 }
