@@ -6,11 +6,11 @@ using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder.Variables
 {
-    public class ContextVariableProvider : IVariableProvider
+    public class ExtensionContextVariableProvider : IVariableProvider
     {
         private readonly IContextExtension _contextExtension;
 
-        public ContextVariableProvider(IContextExtension contextExtension)
+        public ExtensionContextVariableProvider(IContextExtension contextExtension)
         {
             _contextExtension = contextExtension;
         }

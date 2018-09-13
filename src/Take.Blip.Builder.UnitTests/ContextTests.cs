@@ -67,7 +67,7 @@ namespace Take.Blip.Builder.UnitTests
 
         public Flow Flow { get; set; }
         
-        private Context GetTarget()
+        private ExtensionContext GetTarget()
         {
             var container = new Container();
             container.RegisterBuilder();
@@ -75,7 +75,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ContextExtension);
             container.RegisterSingleton(Sender);
 
-            return new Context(
+            return new ExtensionContext(
                 User,
                 Input,
                 Flow,                

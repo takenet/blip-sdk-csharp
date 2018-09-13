@@ -20,6 +20,8 @@ using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetVariable;
 using Take.Blip.Builder.Actions.TrackEvent;
 using Take.Blip.Builder.Diagnostics;
+using Take.Blip.Builder.Storage;
+using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
@@ -33,7 +35,7 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<IFlowManager, FlowManager>();
             container.RegisterSingleton<IStateManager, StateManager>();
-            container.RegisterSingleton<IContextProvider, ContextProvider>();
+            container.RegisterSingleton<IContextProvider, ExtensionContextProvider>();
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
             container.RegisterSingleton<IActionProvider, ActionProvider>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
@@ -69,7 +71,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(BucketVariableProvider),
                     typeof(CalendarVariableProvider),
                     typeof(ContactVariableProvider),
-                    typeof(ContextVariableProvider),
+                    typeof(ExtensionContextVariableProvider),
                     typeof(RandomVariableProvider),
                     typeof(FlowConfigurationVariableProvider),
                     typeof(InputVariableProvider),

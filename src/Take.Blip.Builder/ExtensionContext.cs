@@ -13,42 +13,33 @@ using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder
 {
-    public class Context : IContext
+    /// <summary>
+    /// Defines a context that uses the BLiP SDK context extension.
+    /// </summary>
+    public class ExtensionContext : ContextBase
     {
         private readonly IContextExtension _contextExtension;
         private readonly IDictionary<VariableSource, IVariableProvider> _variableProviderDictionary;
 
-        public Context(
+        public ExtensionContext(
             Identity user,
             LazyInput input,
             Flow flow,
             IContextExtension contextExtension,
             IEnumerable<IVariableProvider> variableProviders)
+            : base (user, input, flow)
         {
-            User = user ?? throw new ArgumentNullException(nameof(user));
-            Input = input ?? throw new ArgumentNullException(nameof(input));
-            Flow = flow ?? throw new ArgumentNullException(nameof(flow));
-            InputContext = new Dictionary<string, object>();
-
             _contextExtension = contextExtension;
             _variableProviderDictionary = variableProviders.ToDictionary(v => v.Source, v => v);
         }
 
-        public Identity User { get; }
-
-        public LazyInput Input { get; }
-
-        public Flow Flow { get; }
-
-        public IDictionary<string, object> InputContext { get; }
-
-        public Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
+        public override Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             return _contextExtension.SetTextVariableAsync(User, name.ToLowerInvariant(), value, cancellationToken);
         }
 
-        public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
+        public override async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
         {
             var variable = VariableName.Parse(name);
 
@@ -67,7 +58,7 @@ namespace Take.Blip.Builder
             return GetJsonProperty(variableValue, variable.Property);
         }
 
-        public Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
+        public override Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             return _contextExtension.DeleteVariableAsync(User, name.ToLowerInvariant(), cancellationToken);
