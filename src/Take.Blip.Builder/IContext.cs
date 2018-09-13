@@ -18,6 +18,11 @@ namespace Take.Blip.Builder
         Identity User { get; }
 
         /// <summary>
+        /// The identity of the application that is having the conversation with the user.
+        /// </summary>
+        Identity Application { get; }
+
+        /// <summary>
         /// The current input document of the user.
         /// </summary>
         LazyInput Input { get; }

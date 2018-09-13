@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Lime.Protocol.Network;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Storage;
+using Take.Blip.Builder.Variables;
 
 namespace Take.Blip.Builder
 {
@@ -13,24 +16,59 @@ namespace Take.Blip.Builder
     /// </summary>
     public class StorageContext : ContextBase
     {
-        public StorageContext(Identity user, LazyInput input, Flow flow)
-            : base(user, input, flow)
+        private readonly IOwnerCallerNameDocumentMap _ownerCallerNameDocumentMap;
+
+        public StorageContext(
+            Identity user,
+            Identity application,
+            LazyInput input,
+            Flow flow,
+            IEnumerable<IVariableProvider> variableProviders,
+            IOwnerCallerNameDocumentMap ownerCallerNameDocumentMap)
+            : base(user, application, input, flow, variableProviders)
         {
+            _ownerCallerNameDocumentMap = ownerCallerNameDocumentMap;
         }
 
-        public override Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
+        public override async Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
         {
-            throw new NotImplementedException();
-        }
+            var storageDocument = new StorageDocument
+            {
+                Type = PlainText.MediaType,
+                Document = value
+            };
 
-        public override Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
-        {
-            throw new NotImplementedException();
+            if (expiration != default(TimeSpan))
+            {
+                storageDocument.Expiration = DateTimeOffset.UtcNow.Add(expiration);
+            }
+
+            var key = OwnerCallerName.Create(Application, User, name.ToLowerInvariant());
+
+            if (!await _ownerCallerNameDocumentMap.TryAddAsync(key, storageDocument, true))
+            {
+                throw new LimeException(ReasonCodes.COMMAND_PROCESSING_ERROR, "An unexpected error occurred while storing the document");
+            }
+
+            if (expiration != default(TimeSpan))
+            {
+                await _ownerCallerNameDocumentMap.SetRelativeKeyExpirationAsync(key, expiration);
+            }
         }
 
         public override Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _ownerCallerNameDocumentMap.TryRemoveAsync(OwnerCallerName.Create(Application, User, name.ToLowerInvariant()));
+        }
+
+        protected override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
+        {
+            var nameToLower = name.ToLowerInvariant();
+
+            var storageDocument = await _ownerCallerNameDocumentMap.GetValueOrDefaultAsync(
+                OwnerCallerName.Create(Application, User, nameToLower));
+
+            return storageDocument.ToString();
         }
     }
 }

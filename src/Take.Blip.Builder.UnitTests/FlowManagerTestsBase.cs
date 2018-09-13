@@ -34,14 +34,17 @@ namespace Take.Blip.Builder.UnitTests
             Context = Substitute.For<IContext>();
             Logger = new LoggerConfiguration().CreateLogger();
             ContextProvider
-                .CreateContext(Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
+                .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
             User = new Identity("user", "domain");
+            Application = new Identity("application", "domain");
             Context.User.Returns(User);
             TraceProcessor = Substitute.For<ITraceProcessor>();
         }
 
         public Identity User { get; set; }
+
+        public Identity Application { get; set; }
 
         public IBucketExtension BucketExtension { get; set; }
 

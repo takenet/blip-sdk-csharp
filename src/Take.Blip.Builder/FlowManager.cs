@@ -78,7 +78,7 @@ namespace Take.Blip.Builder
             _traceProcessor = traceProcessor;
         }
 
-        public async Task ProcessInputAsync(Document input, Identity user, Flow flow, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Document input, Identity user, Identity application, Flow flow, CancellationToken cancellationToken)
         {
             if (input == null)
             {
@@ -132,7 +132,7 @@ namespace Take.Blip.Builder
                         var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // Load the user context
-                        var context = _contextProvider.CreateContext(user, lazyInput, flow);
+                        var context = _contextProvider.CreateContext(user, application, lazyInput, flow);
 
                         // Calculate the number of state transitions
                         var transitions = 0;
