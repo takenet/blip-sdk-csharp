@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using Take.Blip.Builder.Diagnostics;
 
 namespace Take.Blip.Builder.Models
 {
@@ -36,6 +38,15 @@ namespace Take.Blip.Builder.Models
                     condition.Validate();
                 }
             }
+        }
+
+        public OutputTrace ToTrace()
+        {
+            return new OutputTrace
+            {
+                StateId = StateId,
+                ConditionsCount = Conditions?.Length ?? 0
+            };
         }
     }
 }

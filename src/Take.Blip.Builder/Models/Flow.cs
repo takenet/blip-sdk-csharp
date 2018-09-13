@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Models
@@ -31,6 +32,11 @@ namespace Take.Blip.Builder.Models
         /// The flow configuration.
         /// </summary>
         public Dictionary<string, string> Configuration { get; set; }
+
+        /// <summary>
+        /// The flow trace settings
+        /// </summary>
+        public TraceSettings TraceSettings { get; set; }
 
         public void Validate()
         {
@@ -94,6 +100,30 @@ namespace Take.Blip.Builder.Models
                     }
                 }
             }
+
+            // Try create trace settings from configuration keys
+            if (TraceSettings == null && 
+                Configuration != null &&
+                Configuration.TryGetValue("TraceMode", out var traceModeValue) && 
+                Enum.TryParse<TraceMode>(traceModeValue, true, out var traceMode) &&
+                Configuration.TryGetValue("TraceTargetType", out var traceTargetTypeValue) && 
+                Enum.TryParse<TraceTargetType>(traceModeValue, true, out var traceTargetType) &&
+                Configuration.TryGetValue("TraceTarget", out var traceTarget))
+            {
+                TraceSettings = new TraceSettings
+                {
+                    Mode = traceMode,
+                    TargetType = traceTargetType,
+                    Target = traceTarget
+                };
+
+                if (Configuration.TryGetValue("TraceSlowThreshold", out var traceSlowThresholdValue) && 
+                    int.TryParse(traceSlowThresholdValue, out var traceSlowThreshold))
+                {
+                    TraceSettings.SlowThreshold = traceSlowThreshold;
+                }
+            }
+            
 
             _isValid = true;
         }

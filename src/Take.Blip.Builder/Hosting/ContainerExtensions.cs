@@ -19,6 +19,7 @@ using Take.Blip.Builder.Actions.SendRawMessage;
 using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetVariable;
 using Take.Blip.Builder.Actions.TrackEvent;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
@@ -42,6 +43,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
             container.RegisterSingleton<ILogger>(LoggerProvider.Logger);
             container.RegisterSingleton<IDocumentTypeResolver>(new DocumentTypeResolver().WithBlipDocuments());
+            container.RegisterSingleton<ITraceProcessor, TraceProcessor>();
 
             container.RegisterCollection<IAction>(
                 new[]
