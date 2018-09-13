@@ -35,7 +35,7 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<IFlowManager, FlowManager>();
             container.RegisterSingleton<IStateManager, StateManager>();
-            container.RegisterSingleton<IContextProvider, ExtensionContextProvider>();
+            container.RegisterSingleton<IContextProvider, ContextProvider>();
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
             container.RegisterSingleton<IActionProvider, ActionProvider>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
@@ -71,7 +71,6 @@ namespace Take.Blip.Builder.Hosting
                     typeof(BucketVariableProvider),
                     typeof(CalendarVariableProvider),
                     typeof(ContactVariableProvider),
-                    typeof(ExtensionContextVariableProvider),
                     typeof(RandomVariableProvider),
                     typeof(FlowConfigurationVariableProvider),
                     typeof(InputVariableProvider),

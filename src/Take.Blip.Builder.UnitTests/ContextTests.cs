@@ -40,6 +40,7 @@ namespace Take.Blip.Builder.UnitTests
                 Configuration = new Dictionary<string, string>()
             };
             User = "user@msging.net";
+            Application = "application@msging.net";
             Input = new LazyInput(new PlainText()
                 {
                     Text = "Hello world!"
@@ -63,6 +64,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public Identity User { get; set; }
 
+        public Identity Application { get; set; }
+
         public LazyInput Input { get; set; }
 
         public Flow Flow { get; set; }
@@ -77,10 +80,11 @@ namespace Take.Blip.Builder.UnitTests
 
             return new ExtensionContext(
                 User,
+                Application,
                 Input,
-                Flow,                
-                ContextExtension,
-                container.GetAllInstances<IVariableProvider>());
+                Flow,                                
+                container.GetAllInstances<IVariableProvider>(),
+                ContextExtension);
         }
 
         [Fact]

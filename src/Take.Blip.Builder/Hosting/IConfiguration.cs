@@ -25,5 +25,7 @@ namespace Take.Blip.Builder.Hosting
         string SqlStorageConnectionString { get; }
 
         string SqlStorageDriverTypeName { get; }
-    }
+
+        string ContextType { get; }
+    }    
 }
