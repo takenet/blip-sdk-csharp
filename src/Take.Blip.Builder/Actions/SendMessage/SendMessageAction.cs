@@ -27,7 +27,6 @@ namespace Take.Blip.Builder.Actions.SendMessage
 
             var message = new Message(null)
             {
-                Id = EnvelopeId.NewId(),
                 To = context.User.ToNode()
             };            
 
