@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Take.Blip.Builder.Diagnostics;
 
 namespace Take.Blip.Builder.Models
 {
@@ -80,6 +81,15 @@ namespace Take.Blip.Builder.Models
                     outputs.Validate();
                 }
             }
+        }
+
+        public StateTrace ToTrace()
+        {
+            return new StateTrace()
+            {
+                Id = Id,
+                ExtensionData = ExtensionData
+            };
         }
     }
 }

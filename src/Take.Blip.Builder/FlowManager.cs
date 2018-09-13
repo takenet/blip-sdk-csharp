@@ -4,14 +4,17 @@ using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Serilog.Events;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils;
@@ -34,6 +37,9 @@ namespace Take.Blip.Builder
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
+        private readonly ITraceProcessor _traceProcessor;
+
+        private readonly ActionBlock<TraceEvent> _traceActionBlock;
 
         public FlowManager(
             IConfiguration configuration,
@@ -46,7 +52,8 @@ namespace Take.Blip.Builder
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             IVariableReplacer variableReplacer,
-            ILogger logger)
+            ILogger logger,
+            ITraceProcessor traceProcessor)
         {
             _configuration = configuration;
             _stateManager = stateManager;
@@ -59,6 +66,15 @@ namespace Take.Blip.Builder
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
             _variableReplacer = variableReplacer;
             _logger = logger;
+            _traceActionBlock = new ActionBlock<TraceEvent>(
+                ProcessTraceAsync,
+                new ExecutionDataflowBlockOptions()
+                {
+                    BoundedCapacity = configuration.TraceQueueBoundedCapacity,
+                    MaxDegreeOfParallelism = configuration.TraceQueueMaxDegreeOfParalelism,
+                    EnsureOrdered = false
+                });
+            _traceProcessor = traceProcessor;
         }
 
         public async Task ProcessInputAsync(Document input, Identity user, Flow flow, CancellationToken cancellationToken)
@@ -80,10 +96,24 @@ namespace Take.Blip.Builder
 
             flow.Validate();
 
-            var sw = Stopwatch.StartNew();
+            // Input tracing infrastructure
+            InputTrace inputTrace = null;
+            if (flow.TraceSettings != null &&
+                flow.TraceSettings.Mode != TraceMode.Disabled)
+            {
+                inputTrace = new InputTrace
+                {
+                    FlowId = flow.Id,
+                    User = user,
+                    Input = input.ToString()
+                };
+            }
+
+            var inputStopwatch = inputTrace != null
+                ? Stopwatch.StartNew()
+                : null;
             try
             {
-
                 // Create a cancellation token
                 using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
@@ -108,66 +138,94 @@ namespace Take.Blip.Builder
 
                         do
                         {
-                            linkedCts.Token.ThrowIfCancellationRequested();
+                            // Create trace instances, if required
+                            var (stateTrace, stateStopwatch) = inputTrace != null
+                                ? (state.ToTrace(), Stopwatch.StartNew())
+                                : (null, null);
 
-                            // Validate the input for the current state
-                            if (state.Input != null &&
-                                !state.Input.Bypass &&
-                                state.Input.Validation != null &&
-                                !ValidateDocument(lazyInput, state.Input.Validation))
+                            try
                             {
-                                if (state.Input.Validation.Error != null)
+
+                                linkedCts.Token.ThrowIfCancellationRequested();
+
+                                // Validate the input for the current state
+                                if (state.Input != null &&
+                                    !state.Input.Bypass &&
+                                    state.Input.Validation != null &&
+                                    !ValidateDocument(lazyInput, state.Input.Validation))
                                 {
-                                    // Send the validation error message
-                                    await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
+                                    if (state.Input.Validation.Error != null)
+                                    {
+                                        // Send the validation error message
+                                        await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
+                                            linkedCts.Token);
+                                    }
+
+                                    break;
+                                }
+
+                                // Set the input in the context
+                                if (!string.IsNullOrEmpty(state.Input?.Variable))
+                                {
+                                    await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
                                         linkedCts.Token);
                                 }
 
-                                break;
-                            }
+                                // Prepare to leave the current state executing the output actions
+                                if (state.OutputActions != null)
+                                {
+                                    
+                                    await ProcessActionsAsync(context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
+                                }
 
-                            // Set the input in the context
-                            if (!string.IsNullOrEmpty(state.Input?.Variable))
-                            {
-                                await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
-                                    linkedCts.Token);
-                            }
+                                // Store the previous state and determine the next 
+                                await _stateManager.SetPreviousStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
+                                state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
 
-                            // Prepare to leave the current state executing the output actions
-                            if (state.OutputActions != null)
-                            {
-                                await ProcessActionsAsync(context, state.OutputActions, linkedCts.Token);
-                            }
+                                // Store the next state
+                                if (state != null)
+                                {
+                                    await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, linkedCts.Token);
+                                }
+                                else
+                                {
+                                    await _stateManager.DeleteStateIdAsync(flow.Id, context.User, linkedCts.Token);
+                                }
 
-                            // Store the previous state and determine the next 
-                            await _stateManager.SetPreviousStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
-                            state = await ProcessOutputsAsync(lazyInput, context, flow, state, linkedCts.Token);
+                                // Process the next state input actions
+                                if (state?.InputActions != null)
+                                {
+                                    await ProcessActionsAsync(context, state.InputActions, stateTrace?.InputActions, linkedCts.Token);
+                                }
 
-                            // Store the next state
-                            if (state != null)
-                            {
-                                await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, linkedCts.Token);
+                                // Check if the state transition limit has reached (to avoid loops in the flow)
+                                if (transitions++ >= _configuration.MaxTransitionsByInput)
+                                {
+                                    throw new BuilderException("Max state transitions reached");
+                                }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                await _stateManager.DeleteStateIdAsync(flow.Id, context.User, linkedCts.Token);
+                                if (stateTrace != null)
+                                {
+                                    stateTrace.Error = ex.ToString();
+                                }
+                                throw;
                             }
-
-                            // Process the next state input actions
-                            if (state?.InputActions != null)
+                            finally
                             {
-                                await ProcessActionsAsync(context, state.InputActions, linkedCts.Token);
-                            }
-
-                            // Check if the state transition limit has reached (to avoid loops in the flow)
-                            if (transitions++ >= _configuration.MaxTransitionsByInput)
-                            {
-                                throw new BuilderException("Max state transitions reached");
+                                stateStopwatch?.Stop();
+                                if (inputTrace != null &&
+                                    stateTrace != null &&
+                                    stateStopwatch != null)
+                                {
+                                    stateTrace.ElapsedMilliseconds = stateStopwatch.ElapsedMilliseconds;
+                                    inputTrace.States.Add(stateTrace);
+                                }
                             }
 
                             // Continue processing if the next has do not expect the user input
                         } while (state != null && (state.Input == null || state.Input.Bypass));
-
                     }
                     finally
                     {
@@ -175,17 +233,37 @@ namespace Take.Blip.Builder
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error processing input '{Input}' for user '{User}'", input, user);
+
+                if (inputTrace != null)
+                {
+                    inputTrace.Error = ex.ToString();
+                }
+
+                throw;
+            }
             finally
             {
-                sw.Stop();
-
-                _logger.Write(
-                    GetLogLevel(sw.Elapsed),
-                    "Processing message '{MessageId}' elapsed time was {Elapsed} ms for user '{User}'",
-                    EnvelopeReceiverContext<Message>.Envelope?.Id,
-                    sw.ElapsedMilliseconds,
-                    user
-                    );
+                inputStopwatch?.Stop();
+                
+                // Check if we should trace the request
+                if (inputTrace != null &&
+                    flow.TraceSettings != null &&
+                    inputStopwatch != null &&
+                    (flow.TraceSettings.Mode == TraceMode.All || 
+                        (flow.TraceSettings.Mode == TraceMode.Slow && inputStopwatch.ElapsedMilliseconds >= (flow.TraceSettings.SlowThreshold ?? 5000))))
+                {
+                    inputTrace.ElapsedMilliseconds = inputStopwatch.ElapsedMilliseconds;
+                    await _traceActionBlock.SendAsync(
+                        new TraceEvent
+                        {
+                            Trace = inputTrace,
+                            Settings = flow.TraceSettings
+                        }, 
+                        cancellationToken);
+                }
             }
         }
 
@@ -213,14 +291,18 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessActionsAsync(IContext context, Action[] actions, CancellationToken cancellationToken)
+        private async Task ProcessActionsAsync(IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
         {
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
                 var action = _actionProvider.Get(stateAction.Type);
 
-                var sw = Stopwatch.StartNew();
+                // Trace infra
+                var (actionTrace, actionStopwatch) = actionTraces != null
+                    ? (stateAction.ToTrace(), Stopwatch.StartNew())
+                    : (null, null);
+
                 try
                 {
                     var settings = stateAction.Settings;
@@ -231,29 +313,39 @@ namespace Take.Blip.Builder
                         settings = JObject.Parse(settingsJson);
                     }
 
+                    if (actionTrace != null)
+                    {
+                        actionTrace.ParsedSettings = settings;
+                    }
+
                     await action.ExecuteAsync(context, settings, cancellationToken);
                 }
                 catch (Exception ex)
                 {
+                    if (actionTrace != null)
+                    {
+                        actionTrace.Error = ex.ToString();
+                    }
+
                     throw new ActionProcessingException(
                         $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
                 }
                 finally
                 {
-                    sw.Stop();
+                    actionStopwatch?.Stop();
 
-                    _logger.Write(
-                        GetLogLevel(sw.Elapsed),
-                        "Processing action '{ActionName}' elapsed time was {Elapsed} ms for user '{User}' and input '{Input}'",
-                        action.Type,
-                        sw.ElapsedMilliseconds,
-                        context.User,
-                        context.Input?.SerializedContent);
+                    if (actionTrace != null &&
+                        actionTraces != null &&
+                        actionStopwatch != null)
+                    {
+                        actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
+                        actionTraces.Add(actionTrace);
+                    }
                 }
             }
         }
 
-        private async Task<State> ProcessOutputsAsync(LazyInput lazyInput, IContext context, Flow flow, State state, CancellationToken cancellationToken)
+        private async Task<State> ProcessOutputsAsync(LazyInput lazyInput, IContext context, Flow flow, State state, ICollection<OutputTrace> outputTraces, CancellationToken cancellationToken)
         {
             var outputs = state.Outputs;
             state = null;
@@ -261,11 +353,14 @@ namespace Take.Blip.Builder
             // If there's any output in the current state
             if (outputs != null)
             {
-                var sw = Stopwatch.StartNew();
-                try
+                // Evalute each output conditions
+                foreach (var output in outputs.OrderBy(o => o.Order))
                 {
-                    // Evalute each output conditions
-                    foreach (var output in outputs.OrderBy(o => o.Order))
+                    var (outputTrace, outputStopwatch) = outputTraces != null
+                        ? (output.ToTrace(), Stopwatch.StartNew())
+                        : (null, null);
+
+                    try
                     {
                         var isValidOutput = true;
 
@@ -287,18 +382,26 @@ namespace Take.Blip.Builder
                             break;
                         }
                     }
-                }
-                finally
-                {
-                    sw.Stop();
+                    catch (Exception ex)
+                    {
+                        if (outputTrace != null)
+                        {
+                            outputTrace.Error = ex.ToString();
+                        }
+                        throw;
+                    }
+                    finally
+                    {
+                        outputStopwatch?.Stop();
 
-                    _logger.Write(
-                        GetLogLevel(sw.Elapsed),
-                        "Processing outputs for state '{StateId}' elapsed time was {Elapsed} ms for user '{User}' and input '{Input}'",
-                        state?.Id,
-                        sw.ElapsedMilliseconds,
-                        context.User,
-                        context.Input?.SerializedContent);
+                        if (outputTrace != null &&
+                            outputTraces != null &&
+                            outputStopwatch != null)
+                        {
+                            outputTrace.ElapsedMilliseconds = outputStopwatch.ElapsedMilliseconds;
+                            outputTraces.Add(outputTrace);
+                        }
+                    }
                 }
             }
 
@@ -362,24 +465,23 @@ namespace Take.Blip.Builder
             }
         }
 
-        private LogEventLevel GetLogLevel(TimeSpan elapsed)
+        private async Task ProcessTraceAsync(TraceEvent traceEvent)
         {
-            LogEventLevel logEventLevel;
-
-            if (elapsed >= _configuration.ErrorElapsedTimeThreshold)
+            try
             {
-                logEventLevel = LogEventLevel.Error;
+                using (var cts = new CancellationTokenSource(_configuration.TraceProcessingTimeout))
+                {
+                    await _traceProcessor.ProcessTraceAsync(traceEvent, cts.Token);
+                }
             }
-            else if (elapsed >= _configuration.WarningElapsedTimeThreshold)
+            catch (Exception ex)
             {
-                logEventLevel = LogEventLevel.Warning;
+                _logger.Error(
+                    ex,
+                    "Error tracing trace event for user '{User}' and input '{Input}'",
+                    traceEvent?.Trace?.User,
+                    traceEvent?.Trace?.Input);
             }
-            else
-            {
-                logEventLevel = LogEventLevel.Debug;
-            }
-
-            return logEventLevel;
         }
     }
 }

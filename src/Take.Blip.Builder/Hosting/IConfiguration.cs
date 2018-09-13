@@ -12,8 +12,10 @@ namespace Take.Blip.Builder.Hosting
 
         int MaxTransitionsByInput { get; }
         
-        TimeSpan WarningElapsedTimeThreshold { get; }
+        int TraceQueueBoundedCapacity { get; }
 
-        TimeSpan ErrorElapsedTimeThreshold { get; }
+        int TraceQueueMaxDegreeOfParalelism { get; }
+
+        TimeSpan TraceProcessingTimeout { get; }
     }
 }

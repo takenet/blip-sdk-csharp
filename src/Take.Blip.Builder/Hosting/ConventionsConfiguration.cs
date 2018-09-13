@@ -12,8 +12,10 @@ namespace Take.Blip.Builder.Hosting
 
         public int MaxTransitionsByInput => 10;
 
-        public TimeSpan WarningElapsedTimeThreshold => TimeSpan.FromMilliseconds(500);
+        public int TraceQueueBoundedCapacity => 512;
 
-        public TimeSpan ErrorElapsedTimeThreshold => TimeSpan.FromMilliseconds(1000);
+        public int TraceQueueMaxDegreeOfParalelism => 512;
+
+        public TimeSpan TraceProcessingTimeout => TimeSpan.FromSeconds(5);
     }
 }
