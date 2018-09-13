@@ -107,7 +107,7 @@ namespace Take.Blip.Builder.Models
                 Configuration.TryGetValue("TraceMode", out var traceModeValue) && 
                 Enum.TryParse<TraceMode>(traceModeValue, true, out var traceMode) &&
                 Configuration.TryGetValue("TraceTargetType", out var traceTargetTypeValue) && 
-                Enum.TryParse<TraceTargetType>(traceModeValue, true, out var traceTargetType) &&
+                Enum.TryParse<TraceTargetType>(traceTargetTypeValue, true, out var traceTargetType) &&
                 Configuration.TryGetValue("TraceTarget", out var traceTarget))
             {
                 TraceSettings = new TraceSettings

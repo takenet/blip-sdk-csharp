@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Models;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
@@ -79,7 +82,6 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
         }
-
 
         [Fact]
         public async Task FlowWithActionWithVariableShouldBeReplaced()
@@ -649,7 +651,6 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Any<CancellationToken>());
         }
 
-
         [Fact]
         public async Task FlowWithoutEntityConditionsShouldChangeStateAndSendMessage()
         {
@@ -768,6 +769,81 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Any<CancellationToken>());
         }
 
+        [Fact]
+        public async Task FlowWithTraceSettingsShouldCallTraceProcessor()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "text/plain";
+            var variableName = "variableName1";
+            var variableValue = "OutputVariable value 1";
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+
+            var messageContent = "Hello {{variableName1}}!";
+            var expectedMessageContent = $"Hello {variableValue}!";
+
+            var traceUrl = "http://myserver.com/tracing";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                },
+                Configuration = new Dictionary<string, string>
+                {
+                    { "TraceMode", "All" },
+                    { "TraceTargetType", "Http" },
+                    { "TraceTarget", traceUrl }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+
+            // Assert
+            TraceProcessor.Received(1).ProcessTraceAsync(
+                Arg.Is<TraceEvent>(e =>
+                    e.Settings.TargetType == TraceTargetType.Http &&
+                    e.Settings.Target == traceUrl &&
+                    e.Trace.User == User.ToString() &&
+                    e.Trace.Input == input &&
+                    e.Trace.States.Count == 2 &&
+                    e.Trace.States.ToArray()[0].Id == "root" &&
+                    e.Trace.States.ToArray()[1].Id == "ping"),
+                    
+                Arg.Any<CancellationToken>());
+        }
 
         public void Dispose()
         {
