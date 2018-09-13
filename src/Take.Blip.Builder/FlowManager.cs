@@ -246,15 +246,16 @@ namespace Take.Blip.Builder
             finally
             {
                 inputStopwatch?.Stop();
-                
+
                 // Check if we should trace the request
                 if (inputTrace != null &&
                     flow.TraceSettings != null &&
                     inputStopwatch != null &&
                     (
-                        flow.TraceSettings.Mode == TraceMode.All || 
-                        (new[] { TraceMode.Slow, TraceMode.ErrorSlow }.Contains(flow.TraceSettings.Mode) && inputStopwatch.ElapsedMilliseconds >= (flow.TraceSettings.SlowThreshold ?? 5000)) ||
-                        (new[] { TraceMode.Error, TraceMode.ErrorSlow }.Contains(flow.TraceSettings.Mode) && inputTrace.Error != null)))
+                        flow.TraceSettings.Mode == TraceMode.All ||
+                        (flow.TraceSettings.Mode.IsSlow() && inputStopwatch.ElapsedMilliseconds >= (flow.TraceSettings.SlowThreshold ?? 5000)) ||
+                        (flow.TraceSettings.Mode.IsError() && inputTrace.Error != null)
+                    ))
                 {
                     inputTrace.ElapsedMilliseconds = inputStopwatch.ElapsedMilliseconds;
                     await _traceActionBlock.SendAsync(
