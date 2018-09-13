@@ -39,8 +39,10 @@ namespace Take.Blip.Builder.Diagnostics
         {
             using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri))
             {
+                var json = JsonConvert.SerializeObject(trace, JsonSerializerSettingsContainer.Settings);
+
                 httpRequestMessage.Content = new StringContent(
-                    JsonConvert.SerializeObject(trace, JsonSerializerSettingsContainer.Settings),
+                    json,
                     Encoding.UTF8,
                     "application/json");
 

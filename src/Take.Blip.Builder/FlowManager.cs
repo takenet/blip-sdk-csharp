@@ -174,7 +174,6 @@ namespace Take.Blip.Builder
                                 // Prepare to leave the current state executing the output actions
                                 if (state.OutputActions != null)
                                 {
-                                    
                                     await ProcessActionsAsync(context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
                                 }
 
