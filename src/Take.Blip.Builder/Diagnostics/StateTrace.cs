@@ -9,6 +9,7 @@ namespace Take.Blip.Builder.Diagnostics
         {
             InputActions = new List<ActionTrace>();
             OutputActions = new List<ActionTrace>();
+            Outputs = new List<OutputTrace>();
         }
 
         public string Id { get; set; }
