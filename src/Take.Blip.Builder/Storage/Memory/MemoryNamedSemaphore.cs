@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Take.Blip.Builder
+namespace Take.Blip.Builder.Storage.Memory
 {
     public sealed class MemoryNamedSemaphore : INamedSemaphore
     {

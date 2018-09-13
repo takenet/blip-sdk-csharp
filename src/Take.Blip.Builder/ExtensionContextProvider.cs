@@ -6,17 +6,20 @@ using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder
 {
-    public class ContextProvider : IContextProvider
+    /// <summary>
+    /// Defines a context 
+    /// </summary>
+    public class ExtensionContextProvider : IContextProvider
     {
         private readonly IContextExtension _contextExtension;
         private readonly IEnumerable<IVariableProvider> _variableProviders;
 
-        public ContextProvider(IContextExtension contextExtension, IEnumerable<IVariableProvider> variableProviders)
+        public ExtensionContextProvider(IContextExtension contextExtension, IEnumerable<IVariableProvider> variableProviders)
         {
             _contextExtension = contextExtension;
             _variableProviders = variableProviders;
         }
 
-        public IContext CreateContext(Identity user, LazyInput input, Flow flow) => new Context(user, input, flow, _contextExtension, _variableProviders);
+        public IContext CreateContext(Identity user, LazyInput input, Flow flow) => new ExtensionContext(user, input, flow, _contextExtension, _variableProviders);
     }
 }

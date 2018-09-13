@@ -116,7 +116,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         {
             // Arrange
             LazyInput = new LazyInput(NoIntentMessage, null, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
-            Context = new Context("me", LazyInput, new Builder.Models.Flow(), null, new List<InputVariableProvider>());
+            Context = new ExtensionContext("me", LazyInput, new Builder.Models.Flow(), null, new List<InputVariableProvider>());
             var target = GetTarget();
 
             // Act
@@ -131,7 +131,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         {
             // Arrange
             LazyInput = new LazyInput(IntentsAndEntitiesMessage, null, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
-            Context = new Context("me", LazyInput, new Builder.Models.Flow(), null, new List<InputVariableProvider>());
+            Context = new ExtensionContext("me", LazyInput, new Builder.Models.Flow(), null, new List<InputVariableProvider>());
             var target = GetTarget();
 
             // Act
@@ -146,7 +146,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         {
             // Arrange
             LazyInput = new LazyInput(MultipleIntentsAndEntitiesMessage, null, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
-            Context = new Context("me", LazyInput, new Builder.Models.Flow(), null, new List<InputVariableProvider>());
+            Context = new ExtensionContext("me", LazyInput, new Builder.Models.Flow(), null, new List<InputVariableProvider>());
             var target = GetTarget();
 
             // Act
