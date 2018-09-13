@@ -3,7 +3,9 @@
     public enum TraceMode
     {
         Disabled,
+        Error,
         Slow,
+        ErrorSlow,
         All
     }
 }
