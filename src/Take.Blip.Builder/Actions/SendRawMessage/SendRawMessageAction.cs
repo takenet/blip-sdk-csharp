@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Take.Blip.Client;
@@ -20,13 +21,17 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
 
         public override Task ExecuteAsync(IContext context, SendRawMessageSettings settings, CancellationToken cancellationToken)
         {
-            var message = new Message(EnvelopeId.NewId())
+            var message = new Message(null)
             {
-                Id = EnvelopeId.NewId(),
                 To = context.User.ToNode(),
                 Content = _documentSerializer.Deserialize(settings.RawContent, settings.MediaType),
                 Metadata = settings.Metadata
             };
+
+            if (message.Content?.GetMediaType() != ChatState.MediaType)
+            {
+                message.Id = EnvelopeId.NewId();
+            }
 
             return _sender.SendMessageAsync(message, cancellationToken);
         }
