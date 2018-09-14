@@ -33,7 +33,7 @@ namespace Take.Blip.Builder
         public override Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
-            return _contextExtension.SetTextVariableAsync(User, name.ToLowerInvariant(), value, cancellationToken);
+            return _contextExtension.SetTextVariableAsync(User, name.ToLowerInvariant(), value, cancellationToken, expiration);
         }
 
         public override Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
