@@ -36,10 +36,15 @@ namespace Take.Blip.Builder
             return _contextExtension.SetTextVariableAsync(User, name.ToLowerInvariant(), value, cancellationToken, expiration);
         }
 
-        public override Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
+        public override async Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
-            return _contextExtension.DeleteVariableAsync(User, name.ToLowerInvariant(), cancellationToken);
+
+            try
+            {
+                await _contextExtension.DeleteVariableAsync(User, name.ToLowerInvariant(), cancellationToken);
+            }
+            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND) { }
         }
 
         protected override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
