@@ -2,6 +2,8 @@
 using Lime.Protocol.Serialization.Newtonsoft;
 using Serilog;
 using SimpleInjector;
+using StackExchange.Redis;
+using System;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ExecuteScript;
 using Take.Blip.Builder.Actions.ForwardMessageToDesk;
@@ -24,6 +26,8 @@ using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions;
+using Take.Elephant;
+using Take.Elephant.Sql;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -39,8 +43,7 @@ namespace Take.Blip.Builder.Hosting
                 .RegisterBuilderHosting()
                 .RegisterBuilderStorage()
                 .RegisterBuilderUtils()
-                .RegisterBuilderVariables()
-                ;
+                .RegisterBuilderVariables();
         }
 
         private static Container RegisterBuilderRoot(this Container container)
@@ -51,14 +54,6 @@ namespace Take.Blip.Builder.Hosting
 
             return container;
         }
-
-        private static Container RegisterBuilderDiagnostics(this Container container)
-        {
-            container.RegisterSingleton<ITraceProcessor, TraceProcessor>();
-
-            return container;
-        }
-
 
         private static Container RegisterBuilderActions(this Container container)
         {
@@ -85,9 +80,47 @@ namespace Take.Blip.Builder.Hosting
             return container;
         }
 
+        private static Container RegisterBuilderDiagnostics(this Container container)
+        {
+            container.RegisterSingleton<ITraceProcessor, TraceProcessor>();
+
+            return container;
+        }
+
         private static Container RegisterBuilderHosting(this Container container)
         {
             container.RegisterSingleton<IConfiguration, ConventionsConfiguration>();
+
+            return container;
+        }
+
+        private static Container RegisterBuilderStorage(this Container container)
+        {
+            container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
+            container.RegisterSingleton<IOwnerCallerNameDocumentMap, Storage.Specialized.OwnerCallerNameDocumentMap>();
+            container.RegisterSingleton<ISourceOwnerCallerNameDocumentMap, Storage.Sql.OwnerCallerNameDocumentMap>();
+            container.RegisterSingleton<ICacheOwnerCallerNameDocumentMap, Storage.Redis.OwnerCallerNameDocumentMap>();
+            container.RegisterSingleton<IDatabaseDriver>(() =>
+            {
+                var configuration = container.GetInstance<IConfiguration>();
+                var driverType = Type.GetType(configuration.SqlStorageDriverTypeName) ?? typeof(SqlDatabaseDriver);
+                return (IDatabaseDriver)container.GetInstance(driverType);
+
+            });
+            container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
+            container.RegisterSingleton<IConnectionMultiplexer>(() =>
+            {
+                var configuration = container.GetInstance<IConfiguration>();
+                return ConnectionMultiplexer.Connect(configuration.RedisStorageConfiguration);
+            });
+
+            return container;
+        }
+
+        private static Container RegisterBuilderUtils(this Container container)
+        {
+            container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
+            container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
 
             return container;
         }
@@ -105,22 +138,6 @@ namespace Take.Blip.Builder.Hosting
                     typeof(InputVariableProvider),
                     typeof(StateVariableProvider),
                 });
-
-            return container;
-        }
-
-        private static Container RegisterBuilderStorage(this Container container)
-        {
-            container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
-
-            return container;
-        }
-
-        private static Container RegisterBuilderUtils(this Container container)
-        {
-            container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
-            container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
-
 
             return container;
         }

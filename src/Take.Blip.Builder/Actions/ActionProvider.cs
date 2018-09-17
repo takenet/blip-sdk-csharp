@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Actions
         {
             if (!_actionDictionary.TryGetValue(name, out var action))
             {
-                throw new ArgumentException($"Unknown action '{action}'");
+                throw new ArgumentException($"Unknown action '{name}'");
             }
 
             return action;
