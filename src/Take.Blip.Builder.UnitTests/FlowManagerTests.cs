@@ -832,6 +832,8 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
+            await Task.Delay(100); // The trace is asynchronous
+
             TraceProcessor.Received(1).ProcessTraceAsync(
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Http &&
