@@ -45,25 +45,30 @@ namespace Take.Blip.Builder
         {
             var variable = VariableName.Parse(name);
 
+            string variableValue;
+
             if (variable.Source == VariableSource.Context)
             {
-                return await GetContextVariableAsync(variable.Name, cancellationToken);
+                variableValue = await GetContextVariableAsync(variable.Name, cancellationToken);
             }
-
-            if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
+            else
             {
-                throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
+                if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
+                {
+                    throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
+                }
+
+                variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
             }
 
-            var variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
-
-            if (string.IsNullOrWhiteSpace(variableValue) || string.IsNullOrWhiteSpace(variable.Property))
+            if (string.IsNullOrWhiteSpace(variableValue) || 
+                string.IsNullOrWhiteSpace(variable.Property))
             {
                 return variableValue;
             }
 
             return GetJsonProperty(variableValue, variable.Property);
-        }        
+        }
 
         public abstract Task DeleteVariableAsync(string name, CancellationToken cancellationToken);
 
