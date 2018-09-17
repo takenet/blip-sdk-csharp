@@ -27,6 +27,6 @@ namespace Take.Blip.Builder.Hosting
 
         public string SqlStorageDriverTypeName => typeof(SqlDatabaseDriver).FullName;
 
-        public string ContextType => nameof(StorageContext);
+        public string ContextType => nameof(ExtensionContext);
     }
 }

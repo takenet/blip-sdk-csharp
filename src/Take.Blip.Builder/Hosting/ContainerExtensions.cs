@@ -37,7 +37,6 @@ namespace Take.Blip.Builder.Hosting
                 .RegisterBuilderActions()
                 .RegisterBuilderDiagnostics()
                 .RegisterBuilderHosting()
-                .RegisterBuilderRoot()
                 .RegisterBuilderStorage()
                 .RegisterBuilderUtils()
                 .RegisterBuilderVariables()
