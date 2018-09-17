@@ -26,5 +26,7 @@ namespace Take.Blip.Builder.Hosting
         public string SqlStorageConnectionString => @"Server=(localdb)\MSSQLLocalDB;Database=Iris;Integrated Security=true";
 
         public string SqlStorageDriverTypeName => typeof(SqlDatabaseDriver).FullName;
+
+        public string ContextType => nameof(StorageContext);
     }
 }

@@ -74,7 +74,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(flow.Id, User, "state2", Arg.Any<CancellationToken>());
@@ -148,7 +148,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             StateManager.Received(0).SetStateIdAsync(flow.Id, User, "state2", Arg.Any<CancellationToken>());
@@ -221,7 +221,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(flow.Id, User, "state2", Arg.Any<CancellationToken>());
@@ -294,7 +294,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, Arg.Any<CancellationToken>());
+            await target.ProcessInputAsync(input, User, Application, flow, Arg.Any<CancellationToken>());
 
             // Assert
             StateManager.Received(0).SetStateIdAsync(flow.Id, User, "state2", Arg.Any<CancellationToken>());
@@ -368,8 +368,8 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(invalidInput, User, flow, CancellationToken);
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(invalidInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
@@ -451,8 +451,8 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(invalidInput, User, flow, CancellationToken);
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(invalidInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
@@ -532,7 +532,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
@@ -605,7 +605,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             StateManager.Received(0).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
