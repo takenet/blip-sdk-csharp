@@ -68,7 +68,7 @@ namespace Take.Blip.Builder
             var storageDocument = await _ownerCallerNameDocumentMap.GetValueOrDefaultAsync(
                 OwnerCallerName.Create(Application, User, nameToLower));
 
-            return storageDocument.ToString();
+            return storageDocument?.Document;
         }
     }
 }

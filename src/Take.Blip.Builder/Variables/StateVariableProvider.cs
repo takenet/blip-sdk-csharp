@@ -27,10 +27,10 @@ namespace Take.Blip.Builder.Variables
                 switch (names[0])
                 {
                     case "previous":
-                        stateId = await _stateManager.GetPreviousStateIdAsync(context.Flow.Id, context.User, cancellationToken);
+                        stateId = await _stateManager.GetPreviousStateIdAsync(context, cancellationToken);
                         break;
                     case "current":
-                        stateId = await _stateManager.GetStateIdAsync(context.Flow.Id, context.User, cancellationToken);
+                        stateId = await _stateManager.GetStateIdAsync(context, cancellationToken);
                         break;
 
                     default:
@@ -41,7 +41,7 @@ namespace Take.Blip.Builder.Variables
             }
             else
             {
-                stateId = await _stateManager.GetStateIdAsync(context.Flow.Id, context.User, cancellationToken);
+                stateId = await _stateManager.GetStateIdAsync(context, cancellationToken);
             }
 
             var state = context.Flow.States.FirstOrDefault(s => s.Id.Equals(stateId));

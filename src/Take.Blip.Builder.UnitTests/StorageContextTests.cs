@@ -1,15 +1,39 @@
-﻿using SimpleInjector;
+﻿using Lime.Messaging.Contents;
+using SimpleInjector;
 using System;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Storage;
+using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Builder.Variables;
 
 namespace Take.Blip.Builder.UnitTests
 {
     public class StorageContextTests : ContextBaseTests
     {
+        public StorageContextTests()
+        {
+            OwnerCallerNameDocumentMap = new OwnerCallerNameDocumentMap();
+        }
+
+        public IOwnerCallerNameDocumentMap OwnerCallerNameDocumentMap { get; set; }
+
         protected override void AddVariableValue(string variableName, string variableValue)
         {
-            throw new NotImplementedException();
+            var storageDocument = new StorageDocument()
+            {
+                Type = "text/plain",
+                Document = variableValue
+            };
+
+            OwnerCallerNameDocumentMap.TryAddAsync(
+                new OwnerCallerName()
+                {
+                    Owner = Application,
+                    Caller = User,
+                    Name = variableName.ToLowerInvariant()
+                },
+                storageDocument)
+                .Wait();
         }
 
         protected override ContextBase GetTarget()
@@ -25,7 +49,7 @@ namespace Take.Blip.Builder.UnitTests
                 Input,
                 Flow,
                 container.GetAllInstances<IVariableProvider>(),
-                null);
+                OwnerCallerNameDocumentMap);
         }
 
     }
