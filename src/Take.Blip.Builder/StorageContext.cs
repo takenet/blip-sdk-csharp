@@ -63,10 +63,8 @@ namespace Take.Blip.Builder
 
         protected override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
         {
-            var nameToLower = name.ToLowerInvariant();
-
-            var storageDocument = await _ownerCallerNameDocumentMap.GetValueOrDefaultAsync(
-                OwnerCallerName.Create(Application, User, nameToLower));
+            var key = OwnerCallerName.Create(Application, User, name.ToLowerInvariant());
+            var storageDocument = await _ownerCallerNameDocumentMap.GetValueOrDefaultAsync(key);
 
             return storageDocument?.Document;
         }

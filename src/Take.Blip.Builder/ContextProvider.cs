@@ -13,19 +13,18 @@ namespace Take.Blip.Builder
     /// </summary>
     public class ContextProvider : IContextProvider
     {
-        private readonly IConfiguration _configuration;         
+        private readonly IConfiguration _configuration;
         private readonly IEnumerable<IVariableProvider> _variableProviders;
         private readonly IContextExtension _contextExtension;
         private readonly IOwnerCallerNameDocumentMap _ownerCallerNameDocumentMap;
 
-
         public ContextProvider(
-            IConfiguration configuration,            
+            IConfiguration configuration,
             IEnumerable<IVariableProvider> variableProviders,
             IContextExtension contextExtension,
             IOwnerCallerNameDocumentMap ownerCallerNameDocumentMap)
         {
-            _contextExtension = contextExtension;            
+            _contextExtension = contextExtension;
             _configuration = configuration;
             _variableProviders = variableProviders;
             _ownerCallerNameDocumentMap = ownerCallerNameDocumentMap;
