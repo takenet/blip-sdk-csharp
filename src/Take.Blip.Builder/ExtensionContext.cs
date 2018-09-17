@@ -47,7 +47,7 @@ namespace Take.Blip.Builder
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND) { }
         }
 
-        protected override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
+        public override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
         {
             try
             {

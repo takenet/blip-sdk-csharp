@@ -13,12 +13,12 @@ namespace Take.Blip.Builder
 
         public Task<string> GetStateIdAsync(IContext context, CancellationToken cancellationToken)
         {
-            return context.GetVariableAsync(GetStateKey(context.Flow.Id), cancellationToken);
+            return context.GetContextVariableAsync(GetStateKey(context.Flow.Id), cancellationToken);
         }
 
         public Task<string> GetPreviousStateIdAsync(IContext context, CancellationToken cancellationToken)
         {
-            return context.GetVariableAsync(GetPreviousStateKey(context.Flow.Id), cancellationToken);
+            return context.GetContextVariableAsync(GetPreviousStateKey(context.Flow.Id), cancellationToken);
         }
 
         public Task SetStateIdAsync(IContext context, string stateId, CancellationToken cancellationToken)

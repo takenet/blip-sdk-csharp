@@ -74,7 +74,7 @@ namespace Take.Blip.Builder
 
         public abstract Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan));
 
-        protected abstract Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken);
+        public abstract Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken);
 
         private static string GetJsonProperty(string variableValue, string property)
         {

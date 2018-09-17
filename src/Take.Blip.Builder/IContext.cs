@@ -57,6 +57,11 @@ namespace Take.Blip.Builder
         Task<string> GetVariableAsync(string name, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Gets a variable directly from the context, without parsing the source and properties from variable the name.
+        /// </summary>
+        Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Deletes a variable value in the context.
         /// </summary>
         /// <param name="name"></param>
