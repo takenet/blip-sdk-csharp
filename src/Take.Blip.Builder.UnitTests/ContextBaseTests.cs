@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging;
 using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
-using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using NSubstitute;
 using Shouldly;
-using SimpleInjector;
-using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Contacts;
-using Take.Blip.Client.Extensions.Context;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests

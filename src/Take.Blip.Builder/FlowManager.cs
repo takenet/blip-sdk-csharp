@@ -127,12 +127,12 @@ namespace Take.Blip.Builder
                         var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
-                        // Try restore a stored state
-                        var stateId = await _stateManager.GetStateIdAsync(flow.Id, user, linkedCts.Token);
-                        var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
-
                         // Load the user context
                         var context = _contextProvider.CreateContext(user, application, lazyInput, flow);
+
+                        // Try restore a stored state
+                        var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
+                        var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // Calculate the number of state transitions
                         var transitions = 0;
@@ -179,17 +179,17 @@ namespace Take.Blip.Builder
                                 }
 
                                 // Store the previous state and determine the next 
-                                await _stateManager.SetPreviousStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
+                                await _stateManager.SetPreviousStateIdAsync(context, state.Id, cancellationToken);
                                 state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
 
                                 // Store the next state
                                 if (state != null)
                                 {
-                                    await _stateManager.SetStateIdAsync(flow.Id, context.User, state.Id, linkedCts.Token);
+                                    await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
                                 }
                                 else
                                 {
-                                    await _stateManager.DeleteStateIdAsync(flow.Id, context.User, linkedCts.Token);
+                                    await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
                                 }
 
                                 // Process the next state input actions
