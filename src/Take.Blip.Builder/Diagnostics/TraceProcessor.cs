@@ -56,7 +56,6 @@ namespace Take.Blip.Builder.Diagnostics
         private async Task ProcessLimeTraceAsync(Node node, InputTrace trace, CancellationToken cancellationToken)
         {
             throw new NotImplementedException("Lime trace target is not implemented");
-
         }
     }
 }

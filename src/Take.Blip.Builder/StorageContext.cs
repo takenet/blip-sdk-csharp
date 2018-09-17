@@ -61,7 +61,7 @@ namespace Take.Blip.Builder
             return _ownerCallerNameDocumentMap.TryRemoveAsync(OwnerCallerName.Create(Application, User, name.ToLowerInvariant()));
         }
 
-        protected override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
+        public override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
         {
             var key = OwnerCallerName.Create(Application, User, name.ToLowerInvariant());
             var storageDocument = await _ownerCallerNameDocumentMap.GetValueOrDefaultAsync(key);
