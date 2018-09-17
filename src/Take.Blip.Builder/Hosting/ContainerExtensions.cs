@@ -1,8 +1,6 @@
-﻿using Lime.Messaging;
-using Lime.Protocol.Serialization;
+﻿using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Serilog;
-using Serilog.Core;
 using SimpleInjector;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ExecuteScript;
@@ -33,20 +31,39 @@ namespace Take.Blip.Builder.Hosting
     {
         public static Container RegisterBuilder(this Container container)
         {
+            return container
+                .RegisterExternal()
+                .RegisterBuilderRoot()
+                .RegisterBuilderActions()
+                .RegisterBuilderDiagnostics()
+                .RegisterBuilderHosting()
+                .RegisterBuilderRoot()
+                .RegisterBuilderStorage()
+                .RegisterBuilderUtils()
+                .RegisterBuilderVariables()
+                ;
+        }
+
+        private static Container RegisterBuilderRoot(this Container container)
+        {
             container.RegisterSingleton<IFlowManager, FlowManager>();
             container.RegisterSingleton<IStateManager, StateManager>();
             container.RegisterSingleton<IContextProvider, ContextProvider>();
-            container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
-            container.RegisterSingleton<IActionProvider, ActionProvider>();
-            container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
-            container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
-            container.RegisterSingleton<IConfiguration, ConventionsConfiguration>();
-            container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
-            container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
-            container.RegisterSingleton<ILogger>(LoggerProvider.Logger);
-            container.RegisterSingleton<IDocumentTypeResolver>(new DocumentTypeResolver().WithBlipDocuments());
+
+            return container;
+        }
+
+        private static Container RegisterBuilderDiagnostics(this Container container)
+        {
             container.RegisterSingleton<ITraceProcessor, TraceProcessor>();
 
+            return container;
+        }
+
+
+        private static Container RegisterBuilderActions(this Container container)
+        {
+            container.RegisterSingleton<IActionProvider, ActionProvider>();
             container.RegisterCollection<IAction>(
                 new[]
                 {
@@ -65,6 +82,19 @@ namespace Take.Blip.Builder.Hosting
                     typeof(RedirectAction),
                     typeof(ForwardMessageToDeskAction),
                 });
+
+            return container;
+        }
+
+        private static Container RegisterBuilderHosting(this Container container)
+        {
+            container.RegisterSingleton<IConfiguration, ConventionsConfiguration>();
+
+            return container;
+        }
+
+        private static Container RegisterBuilderVariables(this Container container)
+        {
             container.RegisterCollection<IVariableProvider>(
                 new[]
                 {
@@ -76,6 +106,33 @@ namespace Take.Blip.Builder.Hosting
                     typeof(InputVariableProvider),
                     typeof(StateVariableProvider),
                 });
+
+            return container;
+        }
+
+        private static Container RegisterBuilderStorage(this Container container)
+        {
+            container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
+
+            return container;
+        }
+
+        private static Container RegisterBuilderUtils(this Container container)
+        {
+            container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
+            container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
+
+
+            return container;
+        }
+
+        private static Container RegisterExternal(this Container container)
+        {
+            container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
+            container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
+            container.RegisterSingleton<IDocumentTypeResolver>(new DocumentTypeResolver().WithBlipDocuments());
+            container.RegisterSingleton<ILogger>(LoggerProvider.Logger);
+
 
             return container;
         }
