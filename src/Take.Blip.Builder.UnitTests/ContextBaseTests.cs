@@ -23,15 +23,13 @@ using Xunit;
 
 namespace Take.Blip.Builder.UnitTests
 {
-    public class ContextTests : CancellationTokenTestsBase
+    public abstract class ContextBaseTests : CancellationTokenTestsBase
     {
-        public ContextTests()
+        public ContextBaseTests()
         {
             var documentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
 
-            ValuesDictionary = new Dictionary<string, Document>(StringComparer.InvariantCultureIgnoreCase);
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
-            ContextExtension = new DictionaryContextExtension(ValuesDictionary);
             ContactExtension = Substitute.For<IContactExtension>();
             Sender = Substitute.For<ISender>();
             Flow = new Flow()
@@ -52,13 +50,9 @@ namespace Take.Blip.Builder.UnitTests
                 CancellationToken);
         }
 
-        public IDictionary<string, Document> ValuesDictionary { get; }
-
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; }
 
         public IContactExtension ContactExtension { get; }
-
-        public IContextExtension ContextExtension { get; set; }
 
         public ISender Sender { get; set; }
 
@@ -69,23 +63,10 @@ namespace Take.Blip.Builder.UnitTests
         public LazyInput Input { get; set; }
 
         public Flow Flow { get; set; }
-        
-        private ExtensionContext GetTarget()
-        {
-            var container = new Container();
-            container.RegisterBuilder();
-            container.RegisterSingleton(ContactExtension);
-            container.RegisterSingleton(ContextExtension);
-            container.RegisterSingleton(Sender);
 
-            return new ExtensionContext(
-                User,
-                Application,
-                Input,
-                Flow,                                
-                container.GetAllInstances<IVariableProvider>(),
-                ContextExtension);
-        }
+        protected abstract ContextBase GetTarget();
+
+        protected abstract void AddVariableValue(string variableName, string variableValue);
 
         [Fact]
         public async Task GetExistingVariableShouldSucceed()
@@ -93,7 +74,7 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var variableName = "variableName1";
             var variableValue = "value1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            AddVariableValue(variableName, variableValue);
             var target = GetTarget();
 
             // Act
@@ -109,7 +90,7 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var variableName = "variableName1";
             var variableValue = "value1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            AddVariableValue(variableName, variableValue);
             var target = GetTarget();
 
             // Act
@@ -125,7 +106,7 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var variableName = "variableName1";
             var variableValue = "value1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            AddVariableValue(variableName, variableValue);
             var target = GetTarget();
 
             // Act
@@ -138,7 +119,7 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var variableName = "variableName1";
             var variableValue = "value1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            AddVariableValue(variableName, variableValue);
             var target = GetTarget();
 
             // Act
@@ -151,7 +132,7 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var variableName = "variableName1";
             var variableValue = "value1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = variableValue });
+            AddVariableValue(variableName, variableValue);
             var target = GetTarget();
 
             // Act
@@ -166,7 +147,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var variableName = "variableName1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}"});
+            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}");
             var target = GetTarget();
 
             // Act
@@ -181,7 +162,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var variableName = "variableName1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}" });
+            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}");
             var target = GetTarget();
 
             // Act
@@ -197,7 +178,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var variableName = "variableName1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}" });
+            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}");
             var target = GetTarget();
 
             // Act
@@ -212,7 +193,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var variableName = "variableName1";
-            ValuesDictionary.Add(variableName, new PlainText() { Text = "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}" });
+            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}");
             var target = GetTarget();
 
             // Act
@@ -410,57 +391,6 @@ namespace Take.Blip.Builder.UnitTests
         }
 
 
-        private class DictionaryContextExtension : IContextExtension
-        {            
-            public DictionaryContextExtension(IDictionary<string, Document> valuesDictionary)
-            {
-                ValuesDictionary = valuesDictionary;
-            }
 
-            public IDictionary<string, Document> ValuesDictionary { get; }
-
-            public async Task<T> GetVariableAsync<T>(Identity identity, string variableName, CancellationToken cancellationToken) where T : Document
-            {
-                if (!ValuesDictionary.TryGetValue(variableName, out var variableValue))
-                {
-                    throw new LimeException(ReasonCodes.COMMAND_RESOURCE_NOT_FOUND, "Not found");
-                }
-
-                return (T)variableValue;
-            }
-
-            public Task SetVariableAsync<T>(Identity identity, string variableName, T document, CancellationToken cancellationToken,
-                TimeSpan expiration = default(TimeSpan)) where T : Document
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task SetGlobalVariableAsync<T>(string variableName, T document, CancellationToken cancellationToken,
-                TimeSpan expiration = default(TimeSpan)) where T : Document
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task DeleteVariableAsync(Identity identity, string variableName, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task DeleteGlobalVariableAsync(string variableName, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<DocumentCollection> GetVariablesAsync(Identity identity, int skip = 0, int take = 100,
-                CancellationToken cancellationToken = default(CancellationToken))
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<DocumentCollection> GetIdentitiesAsync(int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken))
-            {
-                throw new NotImplementedException();
-            }
-        }
     }
 }
