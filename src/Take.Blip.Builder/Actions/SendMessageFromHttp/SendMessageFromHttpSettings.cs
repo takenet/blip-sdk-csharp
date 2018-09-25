@@ -15,6 +15,8 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
         public Uri Uri { get; set; }
 
         public Dictionary<string, string> Headers { get; set; }
+        public TimeSpan? RequestTimeout { get; set; }
+
 
         public void Validate()
         {

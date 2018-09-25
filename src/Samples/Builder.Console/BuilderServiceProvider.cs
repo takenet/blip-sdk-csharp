@@ -11,6 +11,7 @@ namespace Builder.Console
         {
             Options.AllowOverridingRegistrations = true;
             this.RegisterBuilder();
+            this.RegisterSingleton<IConfiguration, BuilderConfiguration>();
         }
 
         public void RegisterService(Type serviceType, object instance) => RegisterSingleton(serviceType, instance);

@@ -10,6 +10,9 @@ namespace Take.Blip.Client.Extensions.Contacts
 {
     public class ContactExtension : ExtensionBase, IContactExtension
     {
+        private static readonly Node CrmAddress = Node.Parse($"postmaster@crm.{Constants.DEFAULT_DOMAIN}");
+
+
         public ContactExtension(ISender sender)
             : base(sender)
         {
@@ -20,7 +23,8 @@ namespace Take.Blip.Client.Extensions.Contacts
             if (identity == null) throw new ArgumentNullException(nameof(identity));
 
             var requestCommand = CreateGetCommandRequest(
-                Smart.Format(CONTACT, new { contactIdentity = Uri.EscapeDataString(identity.ToString()) }));
+                Smart.Format(CONTACT, new { contactIdentity = Uri.EscapeDataString(identity.ToString()) }),
+                CrmAddress);
 
             return ProcessCommandAsync<Contact>(requestCommand, cancellationToken);
         }
@@ -34,13 +38,14 @@ namespace Take.Blip.Client.Extensions.Contacts
 
             var requestCommand = CreateSetCommandRequest(
                 contact,
-                CONTACTS);
+                CONTACTS,
+                CrmAddress);
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
         public Task MergeAsync(Identity identity, Contact contact, CancellationToken cancellationToken)
-        {            
+        {
             if (identity == null) throw new ArgumentNullException(nameof(identity));
             if (contact == null) throw new ArgumentNullException(nameof(contact));
 
@@ -48,7 +53,8 @@ namespace Take.Blip.Client.Extensions.Contacts
 
             var requestCommand = CreateMergeCommandRequest(
                 contact,
-                CONTACTS);
+                CONTACTS,
+                CrmAddress);
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }
@@ -58,7 +64,8 @@ namespace Take.Blip.Client.Extensions.Contacts
             if (identity == null) throw new ArgumentNullException(nameof(identity));
 
             var requestCommand = CreateDeleteCommandRequest(
-                Smart.Format(CONTACT, new { contactIdentity = Uri.EscapeDataString(identity.ToString()) }));
+                Smart.Format(CONTACT, new { contactIdentity = Uri.EscapeDataString(identity.ToString()) }),
+                CrmAddress);
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Take.Blip.Builder
+namespace Take.Blip.Builder.Storage
 {
     public interface INamedSemaphore
     {

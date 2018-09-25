@@ -40,10 +40,13 @@
           "id": "1.0",
           "inputActions": [
             {
-              "type": "Pause",
+              "type": "SendMessage",
               "settings": {
-                "sendComposing": true,
-                "randomize": true
+                "type": "application/vnd.chatstate+json",
+                "content": {
+                  "state":  "composing",
+                  "delay":  1000
+                }
               }
             },
             {
@@ -103,9 +106,13 @@
           "id": "2.0",
           "inputActions": [
             {
-              "type": "Pause",
+              "type": "SendMessage",
               "settings": {
-                "sendComposing": true
+                "type": "application/vnd.chatstate+json",
+                "content": {
+                  "state":  "composing",
+                  "delay":  1000
+                }
               }
             },
             {
@@ -142,9 +149,13 @@
           "id": "3.0",
           "inputActions": [
             {
-              "type": "Pause",
+              "type": "SendMessage",
               "settings": {
-                "sendComposing": true
+                "type": "application/vnd.chatstate+json",
+                "content": {
+                  "state":  "composing",
+                  "delay":  1000
+                }
               }
             },
             {
@@ -166,9 +177,13 @@
           "id": "4.0",
           "inputActions": [
             {
-              "type": "Pause",
+              "type": "SendMessage",
               "settings": {
-                "sendComposing": true
+                "type": "application/vnd.chatstate+json",
+                "content": {
+                  "state":  "composing",
+                  "delay":  1000
+                }
               }
             },
             {
@@ -180,10 +195,13 @@
               }
             },
             {
-              "type": "Pause",
+              "type": "SendMessage",
               "settings": {
-                "sendComposing": true,
-                "randomize": true
+                "type": "application/vnd.chatstate+json",
+                "content": {
+                  "state":  "composing",
+                  "delay":  1000
+                }
               }
             },
             {
