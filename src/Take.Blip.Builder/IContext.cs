@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
@@ -17,6 +18,11 @@ namespace Take.Blip.Builder
         Identity User { get; }
 
         /// <summary>
+        /// The identity of the application that is having the conversation with the user.
+        /// </summary>
+        Identity Application { get; }
+
+        /// <summary>
         /// The current input document of the user.
         /// </summary>
         LazyInput Input { get; }
@@ -25,6 +31,12 @@ namespace Take.Blip.Builder
         /// The flow that is being processed.
         /// </summary>
         Flow Flow { get; }
+
+        /// <summary>
+        /// Gets the local context data associated with the current input.
+        /// These values are transient.
+        /// </summary>
+        IDictionary<string, object> InputContext { get; }
 
         /// <summary>
         /// Sets a context variable value for the user.
@@ -43,6 +55,11 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<string> GetVariableAsync(string name, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets a variable directly from the context, without parsing the source and properties from variable the name.
+        /// </summary>
+        Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes a variable value in the context.

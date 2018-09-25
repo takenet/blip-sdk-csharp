@@ -13,6 +13,7 @@ namespace Take.Blip.Builder.Variables
     public class ContactVariableProvider : IVariableProvider
     {
         public const string CONTACT_EXTRAS_VARIABLE_PREFIX = "extras.";
+        
         private readonly ConcurrentDictionary<string, PropertyInfo> _contactPropertyCacheDictionary;
         private readonly IContactExtension _contactExtension;
 
@@ -26,14 +27,26 @@ namespace Take.Blip.Builder.Variables
 
         public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
+            Contact contact;
             try
             {
-                var contact = await _contactExtension.GetAsync(context.User, cancellationToken);
+                if (context.InputContext.TryGetValue(nameof(contact), out var contactValue))
+                {
+                    contact = (Contact)contactValue;
+                }
+                else
+                {
+                    contact = await _contactExtension.GetAsync(context.User, cancellationToken);
+                    context.InputContext[nameof(contact)] = contact;
+                }
+
                 if (contact == null) return null;
+                
                 return GetContactProperty(contact, name);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
+                context.InputContext[nameof(contact)] = null;
                 return null;
             }
         }

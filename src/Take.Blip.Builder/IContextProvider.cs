@@ -5,6 +5,6 @@ namespace Take.Blip.Builder
 {
     public interface IContextProvider
     {
-        IContext CreateContext(Identity user, LazyInput input, Flow flow);
+        IContext CreateContext(Identity user, Identity application, LazyInput input, Flow flow);
     }
 }

@@ -25,11 +25,10 @@ namespace Take.Blip.Builder.Actions.SendMessage
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendMessageAction)}' action");
 
-            var message = new Message(EnvelopeId.NewId())
+            var message = new Message(null)
             {
-                Id = EnvelopeId.NewId(),
                 To = context.User.ToNode()
-            };
+            };            
 
             var mediaType = MediaType.Parse((string)settings[Message.TYPE_KEY]);
             var rawContent = settings[Message.CONTENT_KEY];
@@ -47,11 +46,17 @@ namespace Take.Blip.Builder.Actions.SendMessage
             {
                 message.Metadata = ((JObject) metadata).ToObject<Dictionary<string, string>>();
             }
-            
+
+            var isChatState = mediaType == ChatState.MediaType;
+            if (!isChatState)
+            {
+                message.Id = EnvelopeId.NewId();
+            }
+
             await _sender.SendMessageAsync(message, cancellationToken);
 
             // Await the interval if it is a chatstate message
-            if (mediaType == ChatState.MediaType)
+            if (isChatState)
             {
                 var chatState = rawContent.ToObject<ChatState>(LimeSerializerContainer.Serializer);
                 if (chatState.Interval != null)

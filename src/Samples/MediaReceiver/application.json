@@ -1,0 +1,21 @@
+﻿{
+  /* TODO: Put your chatbot identifier and accessKey bellow. */
+  "identifier": "",
+  "accessKey": "",
+  "messageReceivers": [
+    {
+      "type": "PlainTextMessageReceiver",
+      "mediaType": "text/plain"
+    },
+    {
+      "type": "MediaMessageReceiver",
+      "mediaType": "application/vnd.lime.media-link"
+    }
+  ],
+  "settings": {
+    "key1": "value1",
+    "key2": 2
+  },
+  "settingsType": "Settings",
+  "startupType": "Startup"
+}

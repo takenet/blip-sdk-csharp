@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Models;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
@@ -63,12 +66,12 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -79,7 +82,6 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
         }
-
 
         [Fact]
         public async Task FlowWithActionWithVariableShouldBeReplaced()
@@ -133,12 +135,12 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -202,12 +204,12 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -267,12 +269,12 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -309,12 +311,12 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
             Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
-            StateManager.Received(0).SetStateIdAsync(Arg.Any<string>(), Arg.Any<Identity>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            StateManager.Received(0).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -407,12 +409,12 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
-            StateManager.DidNotReceive().SetStateIdAsync(flow.Id, User, "marco", Arg.Any<CancellationToken>());
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "marco", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -508,13 +510,13 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input1, User, flow, CancellationToken);
-            await target.ProcessInputAsync(input2, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input1, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(input2, User, Application, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "marco", Arg.Any<CancellationToken>());
-            StateManager.Received(2).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "marco", Arg.Any<CancellationToken>());
+            StateManager.Received(2).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -632,12 +634,12 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "my-intent", Arg.Any<CancellationToken>());
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "my-intent", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -648,7 +650,6 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
         }
-
 
         [Fact]
         public async Task FlowWithoutEntityConditionsShouldChangeStateAndSendMessage()
@@ -751,12 +752,12 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            StateManager.Received(1).SetStateIdAsync(flow.Id, User, "my-entity", Arg.Any<CancellationToken>());
-            StateManager.Received(1).DeleteStateIdAsync(flow.Id, User, Arg.Any<CancellationToken>());
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "my-entity", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -768,6 +769,83 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Any<CancellationToken>());
         }
 
+        [Fact]
+        public async Task FlowWithTraceSettingsShouldCallTraceProcessor()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "text/plain";
+            var variableName = "variableName1";
+            var variableValue = "OutputVariable value 1";
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+
+            var messageContent = "Hello {{variableName1}}!";
+            var expectedMessageContent = $"Hello {variableValue}!";
+
+            var traceUrl = "http://myserver.com/tracing";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                },
+                Configuration = new Dictionary<string, string>
+                {
+                    { "TraceMode", "All" },
+                    { "TraceTargetType", "Http" },
+                    { "TraceTarget", traceUrl }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+
+            // Assert
+            await Task.Delay(100); // The trace is asynchronous
+
+            TraceProcessor.Received(1).ProcessTraceAsync(
+                Arg.Is<TraceEvent>(e =>
+                    e.Settings.TargetType == TraceTargetType.Http &&
+                    e.Settings.Target == traceUrl &&
+                    e.Trace.User == User.ToString() &&
+                    e.Trace.Input == input &&
+                    e.Trace.States.Count == 2 &&
+                    e.Trace.States.ToArray()[0].Id == "root" &&
+                    e.Trace.States.ToArray()[1].Id == "ping"),
+                    
+                Arg.Any<CancellationToken>());
+        }
 
         public void Dispose()
         {

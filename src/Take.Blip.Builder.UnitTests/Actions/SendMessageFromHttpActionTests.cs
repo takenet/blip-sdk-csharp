@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging;
 using Lime.Messaging.Contents;
@@ -54,7 +55,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
             HttpClient
                 .SendAsync(Arg.Is<HttpRequestMessage>(r => r.RequestUri == uri && r.Method == HttpMethod.Get),
-                    CancellationToken)
+                    Arg.Any<CancellationToken>())
                 .Returns(httpResponseMessage);
             var settings = new SendMessageFromHttpSettings
             {
@@ -68,7 +69,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             // Assert
             await Sender.Received(1).SendMessageAsync(Arg.Is<Message>(m =>
-                m.To.ToIdentity().Equals(destination) && m.Type == PlainText.MediaType && m.Content.ToString().Equals(content)), CancellationToken);
+                m.To.ToIdentity().Equals(destination) && m.Type == PlainText.MediaType && m.Content.ToString().Equals(content)), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -106,7 +107,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
             HttpClient
                 .SendAsync(Arg.Is<HttpRequestMessage>(r => r.RequestUri == uri && r.Method == HttpMethod.Get),
-                    CancellationToken)
+                    Arg.Any<CancellationToken>())
                 .Returns(httpResponseMessage);
             var settings = new SendMessageFromHttpSettings
             {
@@ -130,7 +131,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     && ((Select)m.Content).Options[0].Text == content.Options[0].Text
                     && ((Select)m.Content).Options[1].Text == content.Options[1].Text
                     && ((Select)m.Content).Options[2].Text == content.Options[2].Text),
-                CancellationToken);
+                Arg.Any<CancellationToken>());
         }
     }
 }
