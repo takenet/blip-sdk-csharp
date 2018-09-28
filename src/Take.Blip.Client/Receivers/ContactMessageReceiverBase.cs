@@ -103,8 +103,8 @@ namespace Take.Blip.Client.Receivers
                 contact.Gender = account.Gender;
                 contact.PhoneNumber = account.PhoneNumber;
                 contact.PhotoUri = account.PhotoUri;
-                contact.Offset = account.Offset;
                 contact.TimeZoneName = account.TimeZoneName;
+                contact.Offset = account.Offset;
             }
 
             return contact;
