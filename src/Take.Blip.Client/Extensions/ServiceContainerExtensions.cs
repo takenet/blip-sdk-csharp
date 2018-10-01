@@ -22,7 +22,7 @@ namespace Take.Blip.Client.Extensions
 {
     public static class ServiceContainerExtensions
     {
-        internal static IServiceContainer RegisterExtensions(this IServiceContainer serviceContainer)
+        public static IServiceContainer RegisterExtensions(this IServiceContainer serviceContainer)
         {
             serviceContainer.RegisterService(typeof(IDocumentTypeResolver), new DocumentTypeResolver().WithBlipDocuments());
             Func<ISender> senderFactory = () => serviceContainer.GetService<ISender>();
