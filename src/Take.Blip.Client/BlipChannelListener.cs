@@ -15,7 +15,7 @@ using Take.Blip.Client.Receivers;
 
 namespace Take.Blip.Client
 {
-    public class BlipChannelListener : IBlipChannelListener, IDisposable
+    public class BlipChannelListener : IBlipChannelListener, IDisposable, IMessageReceiver, INotificationReceiver, ICommandReceiver
     {
         private readonly ISender _sender;
         private readonly bool _autoNotify;
@@ -59,13 +59,13 @@ namespace Take.Blip.Client
             };
 
             _messageActionBlock = new ActionBlock<Message>(
-                m => HandleMessageAsync(m, _cts.Token),
+                m => ReceiveAsync(m, _cts.Token),
                 dataflowBlockOptions);
             _notificationActionBlock = new ActionBlock<Notification>(
-                m => HandleNotificationAsync(m, _cts.Token),
+                n => ReceiveAsync(n, _cts.Token),
                 dataflowBlockOptions);
             _commandActionBlock = new ActionBlock<Command>(
-                m => HandleCommandAsync(m, _cts.Token),
+                c => ReceiveAsync(c, _cts.Token),
                 dataflowBlockOptions);
             _channelListener = new DataflowChannelListener(
                 _messageActionBlock,
@@ -176,7 +176,7 @@ namespace Take.Blip.Client
             return result;
         }
 
-        private async Task<bool> HandleMessageAsync(Message message, CancellationToken cancellationToken)
+        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             try
             {
@@ -221,11 +221,9 @@ namespace Take.Blip.Client
                     await _sender.SendNotificationAsync(message.ToFailedNotification(reason), CancellationToken.None);
                 }
             }
-
-            return true;
         }
 
-        private async Task<bool> HandleNotificationAsync(Notification notification, CancellationToken cancellationToken)
+        public async Task ReceiveAsync(Notification notification, CancellationToken cancellationToken)
         {
             try
             {
@@ -238,13 +236,11 @@ namespace Take.Blip.Client
             {
                 LogException(notification, ex);
             }
-
-            return true;
         }
 
-        private async Task<bool> HandleCommandAsync(Command command, CancellationToken cancellationToken)
+        public async Task ReceiveAsync(Command command, CancellationToken cancellationToken)
         {
-            if (command.Status != CommandStatus.Pending) return true;
+            if (command.Status != CommandStatus.Pending) return;
 
             try
             {
@@ -264,10 +260,9 @@ namespace Take.Blip.Client
                     Method = command.Method,
                     Status = CommandStatus.Failure,
                     Reason = ex.ToReason(),
-                }, cancellationToken);
+                }, 
+                cancellationToken);
             }
-
-            return true;
         }
 
         private async Task CallReceiversAsync<TEnvelope>(TEnvelope envelope, CancellationToken cancellationToken)
@@ -310,40 +305,6 @@ namespace Take.Blip.Client
             public Func<T, Task<bool>> Predicate { get; }
 
             public int Priority { get; }
-        }
-    }
-
-    /// <summary>
-    /// Stores information about the envelope receiver that is currently being called.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public static class EnvelopeReceiverContext<T> where T : Envelope
-    {
-        private static readonly AsyncLocal<T> _envelope = new AsyncLocal<T>();
-
-        /// <summary>
-        /// Gets the envelope that is currently being processed by the receiver.
-        /// </summary>
-        public static T Envelope => _envelope.Value;
-
-        /// <summary>
-        /// Creates a new context for the specified envelope type.
-        /// </summary>
-        /// <param name="envelope"></param>
-        /// <returns></returns>
-        public static IDisposable Create(T envelope)
-        {
-            // TODO: Create a stack to support multiple levels of contexts
-            _envelope.Value = envelope;
-            return new ClearEnvelopeReceiverContext();
-        }
-
-        private sealed class ClearEnvelopeReceiverContext : IDisposable
-        {
-            public void Dispose()
-            {
-                _envelope.Value = null;
-            }
         }
     }
 }
