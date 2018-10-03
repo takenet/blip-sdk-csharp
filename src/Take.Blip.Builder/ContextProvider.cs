@@ -23,10 +23,10 @@ namespace Take.Blip.Builder
         public ContextProvider(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             _configuration = configuration;
+            _serviceProvider = serviceProvider;
             _contextExtension = new Lazy<IContextExtension>(() => _serviceProvider.GetService<IContextExtension>());
             _variableProviders = new Lazy<IEnumerable<IVariableProvider>>(() => _serviceProvider.GetService<IEnumerable<IVariableProvider>>());
             _ownerCallerNameDocumentMap = new Lazy<IOwnerCallerNameDocumentMap>(() => _serviceProvider.GetService<IOwnerCallerNameDocumentMap>());
-            _serviceProvider = serviceProvider;
         }
 
         public IContext CreateContext(Identity user, Identity application, LazyInput input, Flow flow)
