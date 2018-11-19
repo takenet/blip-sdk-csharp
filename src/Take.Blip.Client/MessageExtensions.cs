@@ -23,7 +23,7 @@ namespace Take.Blip.Client
         public static Notification ToNotification(this Message message, Event @event) => new Notification
         {
             Id = message.Id,
-            To = message.From,
+            To = message.GetSender(),
             Event = @event
         };
     }
