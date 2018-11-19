@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,7 +91,11 @@ namespace Take.Blip.Client
         {
             lock (_syncRoot)
             {
-                if (_cts != null) throw new InvalidOperationException("The listener is already started");
+                if (_cts != null)
+                {
+                    throw new InvalidOperationException("The listener is already started");
+                }
+
                 _cts = new CancellationTokenSource();
                 _channelListener.Start(channel);
             }
@@ -102,7 +105,10 @@ namespace Take.Blip.Client
         {
             lock (_syncRoot)
             {
-                if (_cts == null) throw new InvalidOperationException("The listener is not started");
+                if (_cts == null)
+                {
+                    throw new InvalidOperationException("The listener is not started");
+                }
 
                 _messageActionBlock.Complete();
                 _notificationActionBlock.Complete();
@@ -126,8 +132,15 @@ namespace Take.Blip.Client
             Func<T, Task<bool>> predicate,
             int priority) where T : Envelope, new()
         {
-            if (receiverFactory == null) throw new ArgumentNullException(nameof(receiverFactory));
-            if (predicate == null) predicate = envelope => TaskUtil.TrueCompletedTask;
+            if (receiverFactory == null)
+            {
+                throw new ArgumentNullException(nameof(receiverFactory));
+            }
+
+            if (predicate == null)
+            {
+                predicate = envelope => TaskUtil.TrueCompletedTask;
+            }
 
             var predicateReceiverFactory = new ReceiverFactoryPredicate<T>(receiverFactory, predicate, priority);
             envelopeReceivers.Add(predicateReceiverFactory);
@@ -136,7 +149,10 @@ namespace Take.Blip.Client
         private async Task<IEnumerable<ReceiverFactoryPredicate<TEnvelope>>> GetReceiversAsync<TEnvelope>(TEnvelope envelope)
             where TEnvelope : Envelope, new()
         {
-            if (envelope == null) throw new ArgumentNullException(nameof(envelope));
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
 
             if (envelope is Message)
             {
@@ -178,9 +194,11 @@ namespace Take.Blip.Client
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+            var shouldNotify = _autoNotify && !string.IsNullOrWhiteSpace(message?.Id);
+
             try
             {
-                if (_autoNotify)
+                if (shouldNotify)
                 {
                     await _sender.SendNotificationAsync(message.ToReceivedNotification(), cancellationToken);
                 }
@@ -190,7 +208,7 @@ namespace Take.Blip.Client
                     await CallReceiversAsync(message, cancellationToken);
                 }
 
-                if (_autoNotify)
+                if (shouldNotify)
                 {
                     await _sender.SendNotificationAsync(message.ToConsumedNotification(), cancellationToken);
                 }
@@ -202,22 +220,22 @@ namespace Take.Blip.Client
                     LogException(message, ex);
                 }
 
-                Reason reason;
-                if (ex is LimeException limeException)
+                if (shouldNotify)
                 {
-                    reason = limeException.Reason;
-                }
-                else
-                {
-                    reason = new Reason
+                    Reason reason;
+                    if (ex is LimeException limeException)
                     {
-                        Code = ReasonCodes.APPLICATION_ERROR,
-                        Description = ex.Message
-                    };
-                }
+                        reason = limeException.Reason;
+                    }
+                    else
+                    {
+                        reason = new Reason
+                        {
+                            Code = ReasonCodes.APPLICATION_ERROR,
+                            Description = ex.Message
+                        };
+                    }
 
-                if (_autoNotify)
-                {
                     await _sender.SendNotificationAsync(message.ToFailedNotification(reason), CancellationToken.None);
                 }
             }
@@ -240,7 +258,10 @@ namespace Take.Blip.Client
 
         public async Task ReceiveAsync(Command command, CancellationToken cancellationToken)
         {
-            if (command.Status != CommandStatus.Pending) return;
+            if (command.Status != CommandStatus.Pending)
+            {
+                return;
+            }
 
             try
             {
@@ -260,7 +281,7 @@ namespace Take.Blip.Client
                     Method = command.Method,
                     Status = CommandStatus.Failure,
                     Reason = ex.ToReason(),
-                }, 
+                },
                 cancellationToken);
             }
         }
