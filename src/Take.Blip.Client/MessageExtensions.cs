@@ -1,4 +1,5 @@
-﻿using Lime.Protocol;
+﻿using System.Collections.Generic;
+using Lime.Protocol;
 
 namespace Take.Blip.Client
 {
@@ -24,7 +25,11 @@ namespace Take.Blip.Client
         {
             Id = message.Id,
             To = message.GetSender(),
-            Event = @event
+            Event = @event,
+            Metadata = new Dictionary<string, string>
+            {
+                { "#message.to", message.To }
+            }
         };
     }
 }
