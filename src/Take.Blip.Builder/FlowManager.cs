@@ -367,7 +367,7 @@ namespace Take.Blip.Builder
 
                     try
                     {
-                        var isValidOutput = await EvaluateConditionCollectionAsync(output.Conditions, lazyInput, context, cancellationToken);
+                         var isValidOutput = await EvaluateConditionsAsync(output.Conditions, lazyInput, context, cancellationToken);
 
                         if (isValidOutput)
                         {
