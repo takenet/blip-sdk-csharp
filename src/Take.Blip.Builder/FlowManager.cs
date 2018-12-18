@@ -1,13 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Lime.Messaging.Contents;
+﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -33,9 +34,9 @@ namespace Take.Blip.Builder
 
         public FlowManager(
             IConfiguration configuration,
-            IStateManager stateManager, 
-            IContextProvider contextProvider, 
-            INamedSemaphore namedSemaphore, 
+            IStateManager stateManager,
+            IContextProvider contextProvider,
+            INamedSemaphore namedSemaphore,
             IActionProvider actionProvider,
             ISender sender,
             IDocumentSerializer documentSerializer,
@@ -114,10 +115,10 @@ namespace Take.Blip.Builder
                         // Prepare to leave the current state executing the output actions
                         if (state.OutputActions != null)
                         {
-                            await ProcessActionsAsync(context, state.OutputActions, linkedCts.Token);
+                            await ProcessActionsAsync(lazyInput, context, state.OutputActions, linkedCts.Token);
                         }
 
-                        // Store the previous state and determine the next 
+                        // Store the previous state and determine the next
                         await _stateManager.SetPreviousStateIdAsync(flow.Id, context.User, state.Id, cancellationToken);
                         state = await ProcessOutputsAsync(lazyInput, context, flow, state, linkedCts.Token);
 
@@ -134,9 +135,9 @@ namespace Take.Blip.Builder
                         // Process the next state input actions
                         if (state?.InputActions != null)
                         {
-                            await ProcessActionsAsync(context, state.InputActions, linkedCts.Token);
+                            await ProcessActionsAsync(lazyInput, context, state.InputActions, linkedCts.Token);
                         }
-                            
+
                         // Check if the state transition limit has reached (to avoid loops in the flow)
                         if (transitions++ >= _configuration.MaxTransitionsByInput)
                         {
@@ -145,7 +146,6 @@ namespace Take.Blip.Builder
 
                         // Continue processing if the next has do not expect the user input
                     } while (state != null && (state.Input == null || state.Input.Bypass));
-                    
                 }
                 finally
                 {
@@ -178,29 +178,33 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessActionsAsync(IContext context, Action[] actions, CancellationToken cancellationToken)
+        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, CancellationToken cancellationToken)
         {
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
-            {                
-                var action = _actionProvider.Get(stateAction.Type);
-
-                try
+            {
+                var isValidAction = await EvaluateConditionCollectionAsync(stateAction.Conditions, lazyInput, context, cancellationToken);
+                if (isValidAction)
                 {
-                    var settings = stateAction.Settings;
-                    if (settings != null)
+                    var action = _actionProvider.Get(stateAction.Type);
+
+                    try
                     {
-                        var settingsJson = settings.ToString(Formatting.None);
-                        settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
-                        settings = JObject.Parse(settingsJson);
-                    }
+                        var settings = stateAction.Settings;
+                        if (settings != null)
+                        {
+                            var settingsJson = settings.ToString(Formatting.None);
+                            settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+                            settings = JObject.Parse(settingsJson);
+                        }
 
-                    await action.ExecuteAsync(context, settings, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    throw new ActionProcessingException(
-                        $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
+                        await action.ExecuteAsync(context, settings, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new ActionProcessingException(
+                            $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
+                    }
                 }
             }
         }
@@ -216,16 +220,7 @@ namespace Take.Blip.Builder
                 // Evalute each output conditions
                 foreach (var output in outputs.OrderBy(o => o.Order))
                 {
-                    var isValidOutput = true;
-
-                    if (output.Conditions != null)
-                    {
-                        foreach (var outputCondition in output.Conditions)
-                        {
-                            isValidOutput = await EvaluateConditionAsync(outputCondition, lazyInput, context, cancellationToken);
-                            if (!isValidOutput) break;
-                        }
-                    }
+                    var isValidOutput = await EvaluateConditionCollectionAsync(output.Conditions, lazyInput, context, cancellationToken);
 
                     if (isValidOutput)
                     {
@@ -238,10 +233,33 @@ namespace Take.Blip.Builder
             return state;
         }
 
+        private async Task<bool> EvaluateConditionCollectionAsync(
+            IEnumerable<Condition> conditions,
+            LazyInput lazyInput,
+            IContext context,
+            CancellationToken cancellationToken)
+        {
+            var isValidOutput = true;
+
+            if (conditions != null)
+            {
+                foreach (var outputCondition in conditions)
+                {
+                    isValidOutput = await EvaluateConditionAsync(outputCondition, lazyInput, context, cancellationToken);
+                    if (!isValidOutput)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return isValidOutput;
+        }
+
         private async Task<bool> EvaluateConditionAsync(
-            Condition condition, 
-            LazyInput lazyInput, 
-            IContext context, 
+            Condition condition,
+            LazyInput lazyInput,
+            IContext context,
             CancellationToken cancellationToken)
         {
             string comparisonValue;

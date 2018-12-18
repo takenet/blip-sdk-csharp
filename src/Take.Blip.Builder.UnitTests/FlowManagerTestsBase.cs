@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Lime.Protocol;
 using NSubstitute;
 using Serilog;
@@ -59,7 +58,7 @@ namespace Take.Blip.Builder.UnitTests
 
         public ILogger Logger { get; set; }
 
-        public IFlowManager GetTarget()
+        public virtual Container CreateContainer()
         {
             var container = new Container();
             container.Options.AllowOverridingRegistrations = true;
@@ -73,6 +72,12 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);
             container.RegisterSingleton(Logger);
+            return container;
+        }
+
+        public IFlowManager GetTarget()
+        {
+            var container = CreateContainer();
             return container.GetInstance<IFlowManager>();
         }
     }
