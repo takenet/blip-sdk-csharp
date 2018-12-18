@@ -2,8 +2,10 @@ using Lime.Protocol;
 using NSubstitute;
 using Serilog;
 using SimpleInjector;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Broadcast;
@@ -28,15 +30,19 @@ namespace Take.Blip.Builder.UnitTests
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
             Context = Substitute.For<IContext>();
-            Logger = Substitute.For<ILogger>();
+            Logger = new LoggerConfiguration().CreateLogger();
             ContextProvider
-                .CreateContext(Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
+                .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
             User = new Identity("user", "domain");
+            Application = new Identity("application", "domain");
             Context.User.Returns(User);
+            TraceProcessor = Substitute.For<ITraceProcessor>();
         }
 
         public Identity User { get; set; }
+
+        public Identity Application { get; set; }
 
         public IBucketExtension BucketExtension { get; set; }
 

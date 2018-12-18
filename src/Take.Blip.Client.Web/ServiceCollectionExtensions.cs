@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using Lime.Messaging;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
@@ -51,7 +52,7 @@ namespace Take.Blip.Client.Web
             if (string.IsNullOrWhiteSpace(workingDir)) workingDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
             var envelopeBuffer = new EnvelopeBuffer();
-            var envelopeSerializer = new JsonNetSerializer();
+            var envelopeSerializer = new EnvelopeSerializer(new DocumentTypeResolver().WithMessagingDocuments());
             var clientBuilder = new BlipClientBuilder(
                 new WebTransportFactory(envelopeBuffer, envelopeSerializer, application));
 

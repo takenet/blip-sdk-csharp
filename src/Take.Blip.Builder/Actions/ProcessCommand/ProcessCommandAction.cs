@@ -2,8 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Lime.Protocol.Serialization.Newtonsoft;
-using Newtonsoft.Json;
+using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Client;
 
@@ -12,10 +11,12 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
     public class ProcessCommandAction : IAction
     {
         private readonly ISender _sender;
+        private readonly IEnvelopeSerializer _envelopeSerializer;
 
-        public ProcessCommandAction(ISender sender)
+        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer)
         {
             _sender = sender;
+            _envelopeSerializer = envelopeSerializer;
         }
 
         public string Type => nameof(ProcessCommand);
@@ -39,7 +40,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
             if (string.IsNullOrWhiteSpace(variable)) return;
 
-            var resultCommandJson = JsonConvert.SerializeObject(resultCommand, JsonNetSerializer.Settings);
+            var resultCommandJson = _envelopeSerializer.Serialize(resultCommand);
             await context.SetVariableAsync(variable, resultCommandJson, cancellationToken);
         }
     }

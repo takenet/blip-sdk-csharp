@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging;
 using Lime.Protocol;
 using Lime.Protocol.Listeners;
 using Lime.Protocol.Security;
+using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Lime.Protocol.Server;
 using Lime.Protocol.Util;
@@ -31,7 +33,10 @@ namespace Take.Blip.Client.UnitTests
         {
             ListenerUri = listenerUri;
             _cts = new CancellationTokenSource();
-            _transportListener = new TcpTransportListener(ListenerUri, null, new JsonNetSerializer());
+            _transportListener = new TcpTransportListener(
+                ListenerUri,
+                null,
+                new EnvelopeSerializer(new DocumentTypeResolver().WithMessagingDocuments()));
             Channels = new Queue<ServerChannel>();
             Authentications = new Queue<Authentication>();
             Messages = new Queue<Message>();

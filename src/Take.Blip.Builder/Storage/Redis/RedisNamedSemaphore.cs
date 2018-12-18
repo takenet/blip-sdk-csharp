@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using Take.Blip.Builder.Hosting;
 
-namespace Take.Blip.Builder
+namespace Take.Blip.Builder.Storage.Redis
 {
     public sealed class RedisNamedSemaphore : INamedSemaphore
     {
@@ -22,7 +22,7 @@ namespace Take.Blip.Builder
         public async Task<IAsyncDisposable> WaitAsync(string handle, TimeSpan timeout, CancellationToken cancellationToken)
         {
             var db = _connectionMultiplexer.GetDatabase(_configuration.RedisDatabase);
-            var key = $"{KEY_PREFIX}:{handle}";
+            var key = $"{_configuration.RedisKeyPrefix}:{KEY_PREFIX}:{handle}";
             var value = Guid.NewGuid().ToString();
 
             while (!cancellationToken.IsCancellationRequested)
