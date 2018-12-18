@@ -12,6 +12,7 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using Take.Blip.Client.Session;
 using Take.Blip.Client.Activation;
+using Lime.Messaging;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -39,7 +40,7 @@ namespace Take.Blip.Client.Receivers
             _sessionManager = sessionManager;
             _settings = InputSettings.Parse(settings);
             _settings.Validate();
-            _documentSerializer = new DocumentSerializer();
+            _documentSerializer = new DocumentSerializer(new DocumentTypeResolver().WithMessagingDocuments());
             _stateManager = stateManager;
         }
 

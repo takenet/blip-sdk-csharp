@@ -18,14 +18,15 @@ namespace Take.Blip.Builder.Actions.MergeContact
 
         public string Type => nameof(MergeContact);
 
-        public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             var contact = settings.ToObject<Contact>(LimeSerializerContainer.Serializer);
             contact.Identity = contact.Identity;
-            return _contactExtension.MergeAsync(context.User, contact, cancellationToken);
+            await _contactExtension.MergeAsync(context.User, contact, cancellationToken);
+            context.InputContext.Remove(nameof(contact));
         }
     }
 }

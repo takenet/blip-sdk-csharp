@@ -9,54 +9,60 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Variables;
-using Take.Blip.Client.Extensions.Context;
 
 namespace Take.Blip.Builder
 {
-    public class Context : IContext
+    public abstract class ContextBase : IContext
     {
-        private readonly IContextExtension _contextExtension;
         private readonly IDictionary<VariableSource, IVariableProvider> _variableProviderDictionary;
 
-        public Context(            
+        public ContextBase(
             Identity user,
+            Identity application,
             LazyInput input,
             Flow flow,
-            IContextExtension contextExtension,
             IEnumerable<IVariableProvider> variableProviders)
         {
             User = user ?? throw new ArgumentNullException(nameof(user));
+            Application = application ?? throw new ArgumentNullException(nameof(application));
             Input = input ?? throw new ArgumentNullException(nameof(input));
             Flow = flow ?? throw new ArgumentNullException(nameof(flow));
-
-            _contextExtension = contextExtension;
+            InputContext = new Dictionary<string, object>();
             _variableProviderDictionary = variableProviders.ToDictionary(v => v.Source, v => v);
         }
 
         public Identity User { get; }
 
+        public Identity Application { get; }
+
         public LazyInput Input { get; }
 
         public Flow Flow { get; }
 
-        public Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
-        {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            return _contextExtension.SetTextVariableAsync(User, name.ToLowerInvariant(), value, cancellationToken);
-        }
+        public IDictionary<string, object> InputContext { get; }
 
         public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
         {
             var variable = VariableName.Parse(name);
 
-            if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
+            string variableValue;
+
+            if (variable.Source == VariableSource.Context)
             {
-                throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
+                variableValue = await GetContextVariableAsync(variable.Name, cancellationToken);
+            }
+            else
+            {
+                if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
+                {
+                    throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
+                }
+
+                variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
             }
 
-            var variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
-
-            if (string.IsNullOrWhiteSpace(variableValue) || string.IsNullOrWhiteSpace(variable.Property))
+            if (string.IsNullOrWhiteSpace(variableValue) || 
+                string.IsNullOrWhiteSpace(variable.Property))
             {
                 return variableValue;
             }
@@ -64,11 +70,11 @@ namespace Take.Blip.Builder
             return GetJsonProperty(variableValue, variable.Property);
         }
 
-        public Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
-        {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            return _contextExtension.DeleteVariableAsync(User, name.ToLowerInvariant(), cancellationToken);
-        }
+        public abstract Task DeleteVariableAsync(string name, CancellationToken cancellationToken);
+
+        public abstract Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan));
+
+        public abstract Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken);
 
         private static string GetJsonProperty(string variableValue, string property)
         {
@@ -90,6 +96,8 @@ namespace Take.Blip.Builder
                 return null;
             }
         }
+
+
 
         struct VariableName
         {

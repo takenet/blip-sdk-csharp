@@ -13,6 +13,7 @@ namespace Take.Blip.Builder.Utils
             Settings = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore
             };
             Settings.Converters.Add(
                 new StringEnumConverter

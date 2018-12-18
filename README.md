@@ -5,7 +5,7 @@ The **BLiP C# SDK** is a set of Nuget packages that allow the creation of [BLiP]
 
 ## Requirements
 
-- .NET Core 2.0 (download the SDK [here](https://dot.net/core))
+- .NET Core 2.0 or above (download the SDK [here](https://dot.net/core))
 
 ## Getting Started
 
@@ -27,7 +27,7 @@ There are available the following templates:
 - `blip-console` - Run as a console application
 - `blip-web` - Run as a ASP.NET Core application (experimental)
 
-For more details about the BLiP SDK, please refer to our SDK documentation [here](https://docs.blip.ai/#introduction).
+For more details about the BLiP SDK, please refer to our SDK documentation [here](https://docs.blip.ai/#sdk).
 
 ## License
 

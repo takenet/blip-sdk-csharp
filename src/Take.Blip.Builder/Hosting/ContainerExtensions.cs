@@ -1,6 +1,9 @@
 ﻿using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
+using Serilog;
 using SimpleInjector;
+using StackExchange.Redis;
+using System;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ExecuteScript;
 using Take.Blip.Builder.Actions.ForwardMessageToDesk;
@@ -16,8 +19,15 @@ using Take.Blip.Builder.Actions.SendRawMessage;
 using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetVariable;
 using Take.Blip.Builder.Actions.TrackEvent;
+using Take.Blip.Builder.Diagnostics;
+using Take.Blip.Builder.Storage;
+using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
+using Take.Blip.Client;
+using Take.Blip.Client.Extensions;
+using Take.Elephant;
+using Take.Elephant.Sql;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -25,18 +35,31 @@ namespace Take.Blip.Builder.Hosting
     {
         public static Container RegisterBuilder(this Container container)
         {
+            return container
+                .RegisterExternal()
+                .RegisterBuilderRoot()
+                .RegisterBuilderActions()
+                .RegisterBuilderDiagnostics()
+                .RegisterBuilderHosting()
+                .RegisterBuilderStorage()
+                .RegisterBuilderUtils()
+                .RegisterBuilderVariables();
+        }
+
+        private static Container RegisterBuilderRoot(this Container container)
+        {
             container.RegisterSingleton<IFlowManager, FlowManager>();
             container.RegisterSingleton<IStateManager, StateManager>();
             container.RegisterSingleton<IContextProvider, ContextProvider>();
-            container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
+
+            return container;
+        }
+
+        private static Container RegisterBuilderActions(this Container container)
+        {
             container.RegisterSingleton<IActionProvider, ActionProvider>();
-            container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
-            container.RegisterSingleton<IEnvelopeSerializer, JsonNetSerializer>();
-            container.RegisterSingleton<IConfiguration, ConventionsConfiguration>();
-            container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
-            container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
             container.RegisterCollection<IAction>(
-                new[] 
+                new[]
                 {
                     typeof(ExecuteScriptAction),
                     typeof(SendMessageAction),
@@ -53,18 +76,79 @@ namespace Take.Blip.Builder.Hosting
                     typeof(RedirectAction),
                     typeof(ForwardMessageToDeskAction),
                 });
+
+            return container;
+        }
+
+        private static Container RegisterBuilderDiagnostics(this Container container)
+        {
+            container.RegisterSingleton<ITraceProcessor, TraceProcessor>();
+
+            return container;
+        }
+
+        private static Container RegisterBuilderHosting(this Container container)
+        {
+            container.RegisterSingleton<IConfiguration, ConventionsConfiguration>();
+
+            return container;
+        }
+
+        private static Container RegisterBuilderStorage(this Container container)
+        {
+            container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
+            container.RegisterSingleton<IOwnerCallerNameDocumentMap, Storage.Specialized.OwnerCallerNameDocumentMap>();
+            container.RegisterSingleton<ISourceOwnerCallerNameDocumentMap, Storage.Sql.OwnerCallerNameDocumentMap>();
+            container.RegisterSingleton<ICacheOwnerCallerNameDocumentMap, Storage.Redis.OwnerCallerNameDocumentMap>();
+            container.RegisterSingleton<IDatabaseDriver>(() =>
+            {
+                var configuration = container.GetInstance<IConfiguration>();
+                var driverType = Type.GetType(configuration.SqlStorageDriverTypeName) ?? typeof(SqlDatabaseDriver);
+                return (IDatabaseDriver)container.GetInstance(driverType);
+
+            });
+            container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
+            container.RegisterSingleton<IConnectionMultiplexer>(() =>
+            {
+                var configuration = container.GetInstance<IConfiguration>();
+                return ConnectionMultiplexer.Connect(configuration.RedisStorageConfiguration);
+            });
+
+            return container;
+        }
+
+        private static Container RegisterBuilderUtils(this Container container)
+        {
+            container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
+            container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
+
+            return container;
+        }
+
+        private static Container RegisterBuilderVariables(this Container container)
+        {
             container.RegisterCollection<IVariableProvider>(
                 new[]
                 {
                     typeof(BucketVariableProvider),
                     typeof(CalendarVariableProvider),
                     typeof(ContactVariableProvider),
-                    typeof(ContextVariableProvider),
                     typeof(RandomVariableProvider),
                     typeof(FlowConfigurationVariableProvider),
                     typeof(InputVariableProvider),
                     typeof(StateVariableProvider),
                 });
+
+            return container;
+        }
+
+        private static Container RegisterExternal(this Container container)
+        {
+            container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
+            container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
+            container.RegisterSingleton<IDocumentTypeResolver>(new DocumentTypeResolver().WithBlipDocuments());
+            container.RegisterSingleton<ILogger>(LoggerProvider.Logger);
+
 
             return container;
         }

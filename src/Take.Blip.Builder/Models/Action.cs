@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
+using Take.Blip.Builder.Diagnostics;
 
 namespace Take.Blip.Builder.Models
 {
@@ -34,6 +35,15 @@ namespace Take.Blip.Builder.Models
         public void Validate()
         {
             this.ValidateObject();
+        }
+
+        public ActionTrace ToTrace()
+        {
+            return new ActionTrace
+            {
+                Order = Order,
+                Type = Type
+            };
         }
     }
 }

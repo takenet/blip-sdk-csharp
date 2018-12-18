@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,7 @@ using Take.Blip.Client.Receivers;
 
 namespace Take.Blip.Client
 {
-    public class BlipChannelListener : IBlipChannelListener, IDisposable
+    public class BlipChannelListener : IBlipChannelListener, IDisposable, IMessageReceiver, INotificationReceiver, ICommandReceiver
     {
         private readonly ISender _sender;
         private readonly bool _autoNotify;
@@ -59,13 +58,13 @@ namespace Take.Blip.Client
             };
 
             _messageActionBlock = new ActionBlock<Message>(
-                m => HandleMessageAsync(m, _cts.Token),
+                m => ReceiveAsync(m, _cts.Token),
                 dataflowBlockOptions);
             _notificationActionBlock = new ActionBlock<Notification>(
-                m => HandleNotificationAsync(m, _cts.Token),
+                n => ReceiveAsync(n, _cts.Token),
                 dataflowBlockOptions);
             _commandActionBlock = new ActionBlock<Command>(
-                m => HandleCommandAsync(m, _cts.Token),
+                c => ReceiveAsync(c, _cts.Token),
                 dataflowBlockOptions);
             _channelListener = new DataflowChannelListener(
                 _messageActionBlock,
@@ -92,7 +91,11 @@ namespace Take.Blip.Client
         {
             lock (_syncRoot)
             {
-                if (_cts != null) throw new InvalidOperationException("The listener is already started");
+                if (_cts != null)
+                {
+                    throw new InvalidOperationException("The listener is already started");
+                }
+
                 _cts = new CancellationTokenSource();
                 _channelListener.Start(channel);
             }
@@ -102,7 +105,10 @@ namespace Take.Blip.Client
         {
             lock (_syncRoot)
             {
-                if (_cts == null) throw new InvalidOperationException("The listener is not started");
+                if (_cts == null)
+                {
+                    throw new InvalidOperationException("The listener is not started");
+                }
 
                 _messageActionBlock.Complete();
                 _notificationActionBlock.Complete();
@@ -126,8 +132,15 @@ namespace Take.Blip.Client
             Func<T, Task<bool>> predicate,
             int priority) where T : Envelope, new()
         {
-            if (receiverFactory == null) throw new ArgumentNullException(nameof(receiverFactory));
-            if (predicate == null) predicate = envelope => TaskUtil.TrueCompletedTask;
+            if (receiverFactory == null)
+            {
+                throw new ArgumentNullException(nameof(receiverFactory));
+            }
+
+            if (predicate == null)
+            {
+                predicate = envelope => TaskUtil.TrueCompletedTask;
+            }
 
             var predicateReceiverFactory = new ReceiverFactoryPredicate<T>(receiverFactory, predicate, priority);
             envelopeReceivers.Add(predicateReceiverFactory);
@@ -136,7 +149,10 @@ namespace Take.Blip.Client
         private async Task<IEnumerable<ReceiverFactoryPredicate<TEnvelope>>> GetReceiversAsync<TEnvelope>(TEnvelope envelope)
             where TEnvelope : Envelope, new()
         {
-            if (envelope == null) throw new ArgumentNullException(nameof(envelope));
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
 
             if (envelope is Message)
             {
@@ -176,11 +192,13 @@ namespace Take.Blip.Client
             return result;
         }
 
-        private async Task<bool> HandleMessageAsync(Message message, CancellationToken cancellationToken)
+        public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
+            var shouldNotify = _autoNotify && !string.IsNullOrWhiteSpace(message?.Id);
+
             try
             {
-                if (_autoNotify)
+                if (shouldNotify)
                 {
                     await _sender.SendNotificationAsync(message.ToReceivedNotification(), cancellationToken);
                 }
@@ -190,7 +208,7 @@ namespace Take.Blip.Client
                     await CallReceiversAsync(message, cancellationToken);
                 }
 
-                if (_autoNotify)
+                if (shouldNotify)
                 {
                     await _sender.SendNotificationAsync(message.ToConsumedNotification(), cancellationToken);
                 }
@@ -202,30 +220,28 @@ namespace Take.Blip.Client
                     LogException(message, ex);
                 }
 
-                Reason reason;
-                if (ex is LimeException limeException)
+                if (shouldNotify)
                 {
-                    reason = limeException.Reason;
-                }
-                else
-                {
-                    reason = new Reason
+                    Reason reason;
+                    if (ex is LimeException limeException)
                     {
-                        Code = ReasonCodes.APPLICATION_ERROR,
-                        Description = ex.Message
-                    };
-                }
+                        reason = limeException.Reason;
+                    }
+                    else
+                    {
+                        reason = new Reason
+                        {
+                            Code = ReasonCodes.APPLICATION_ERROR,
+                            Description = ex.Message
+                        };
+                    }
 
-                if (_autoNotify)
-                {
                     await _sender.SendNotificationAsync(message.ToFailedNotification(reason), CancellationToken.None);
                 }
             }
-
-            return true;
         }
 
-        private async Task<bool> HandleNotificationAsync(Notification notification, CancellationToken cancellationToken)
+        public async Task ReceiveAsync(Notification notification, CancellationToken cancellationToken)
         {
             try
             {
@@ -238,13 +254,14 @@ namespace Take.Blip.Client
             {
                 LogException(notification, ex);
             }
-
-            return true;
         }
 
-        private async Task<bool> HandleCommandAsync(Command command, CancellationToken cancellationToken)
+        public async Task ReceiveAsync(Command command, CancellationToken cancellationToken)
         {
-            if (command.Status != CommandStatus.Pending) return true;
+            if (command.Status != CommandStatus.Pending)
+            {
+                return;
+            }
 
             try
             {
@@ -264,10 +281,9 @@ namespace Take.Blip.Client
                     Method = command.Method,
                     Status = CommandStatus.Failure,
                     Reason = ex.ToReason(),
-                }, cancellationToken);
+                },
+                cancellationToken);
             }
-
-            return true;
         }
 
         private async Task CallReceiversAsync<TEnvelope>(TEnvelope envelope, CancellationToken cancellationToken)
@@ -310,40 +326,6 @@ namespace Take.Blip.Client
             public Func<T, Task<bool>> Predicate { get; }
 
             public int Priority { get; }
-        }
-    }
-
-    /// <summary>
-    /// Stores information about the envelope receiver that is currently being called.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public static class EnvelopeReceiverContext<T> where T : Envelope
-    {
-        private static readonly AsyncLocal<T> _envelope = new AsyncLocal<T>();
-
-        /// <summary>
-        /// Gets the envelope that is currently being processed by the receiver.
-        /// </summary>
-        public static T Envelope => _envelope.Value;
-
-        /// <summary>
-        /// Creates a new context for the specified envelope type.
-        /// </summary>
-        /// <param name="envelope"></param>
-        /// <returns></returns>
-        public static IDisposable Create(T envelope)
-        {
-            // TODO: Create a stack to support multiple levels of contexts
-            _envelope.Value = envelope;
-            return new ClearEnvelopeReceiverContext();
-        }
-
-        private sealed class ClearEnvelopeReceiverContext : IDisposable
-        {
-            public void Dispose()
-            {
-                _envelope.Value = null;
-            }
         }
     }
 }

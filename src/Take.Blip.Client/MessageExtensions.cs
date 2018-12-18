@@ -1,4 +1,5 @@
-﻿using Lime.Protocol;
+﻿using System.Collections.Generic;
+using Lime.Protocol;
 
 namespace Take.Blip.Client
 {
@@ -23,8 +24,12 @@ namespace Take.Blip.Client
         public static Notification ToNotification(this Message message, Event @event) => new Notification
         {
             Id = message.Id,
-            To = message.From,
-            Event = @event
+            To = message.GetSender(),
+            Event = @event,
+            Metadata = new Dictionary<string, string>
+            {
+                { "#message.to", message.To }
+            }
         };
     }
 }
