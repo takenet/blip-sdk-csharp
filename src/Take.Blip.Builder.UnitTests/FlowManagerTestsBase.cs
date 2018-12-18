@@ -64,9 +64,12 @@ namespace Take.Blip.Builder.UnitTests
 
         public ILogger Logger { get; set; }
 
+        public ITraceProcessor TraceProcessor { get; set; }
+
         public virtual Container CreateContainer()
         {
             var container = new Container();
+
             container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
             container.RegisterSingleton(BucketExtension);
@@ -78,6 +81,8 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);
             container.RegisterSingleton(Logger);
+            container.RegisterSingleton(TraceProcessor);
+
             return container;
         }
 
