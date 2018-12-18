@@ -158,7 +158,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             ActionProvider.Received().Get("ActionFistState");
@@ -195,7 +195,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             ActionProvider.DidNotReceiveWithAnyArgs().Get(Arg.Any<string>());
@@ -241,7 +241,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             ActionProvider.Received().Get("ActionFistState");
@@ -278,7 +278,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, flow, CancellationToken);
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
 
             // Assert
             ActionProvider.DidNotReceiveWithAnyArgs().Get(Arg.Any<string>());
