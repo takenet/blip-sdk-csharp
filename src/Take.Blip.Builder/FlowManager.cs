@@ -297,7 +297,7 @@ namespace Take.Blip.Builder
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
-                var isValidAction = await EvaluateConditionCollectionAsync(stateAction.Conditions, lazyInput, context, cancellationToken);
+                 var isValidAction = await EvaluateConditionsAsync(stateAction.Conditions, lazyInput, context, cancellationToken);
                 if (isValidAction)
                 {
                     var action = _actionProvider.Get(stateAction.Type);
