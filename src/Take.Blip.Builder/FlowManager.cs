@@ -401,7 +401,7 @@ namespace Take.Blip.Builder
             return state;
         }
 
-        private async Task<bool> EvaluateConditionCollectionAsync(
+         private async Task<bool> EvaluateConditionsAsync(
             IEnumerable<Condition> conditions,
             LazyInput lazyInput,
             IContext context,
