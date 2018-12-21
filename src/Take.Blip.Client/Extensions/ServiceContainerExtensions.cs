@@ -12,6 +12,7 @@ using Take.Blip.Client.Extensions.Context;
 using Take.Blip.Client.Extensions.Delegation;
 using Take.Blip.Client.Extensions.Directory;
 using Take.Blip.Client.Extensions.EventTracker;
+using Take.Blip.Client.Extensions.HelpDesk;
 using Take.Blip.Client.Extensions.Profile;
 using Take.Blip.Client.Extensions.Resource;
 using Take.Blip.Client.Extensions.Scheduler;
@@ -36,6 +37,7 @@ namespace Take.Blip.Client.Extensions
             serviceContainer.RegisterService(typeof(IProfileExtension), () => new ProfileExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IBucketExtension), bucketExtensionFactory);
             serviceContainer.RegisterService(typeof(IAttendanceExtension), () => new AttendanceExtension(senderFactory()));
+            serviceContainer.RegisterService(typeof(IHelpDeskExtension), () => new HelpDeskExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(ITalkServiceExtension), () => new TalkServiceExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IThreadExtension), () => new ThreadExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IResourceExtension), () => new ResourceExtension(senderFactory()));
