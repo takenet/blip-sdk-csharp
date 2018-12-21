@@ -96,6 +96,34 @@ namespace Take.Blip.Client.UnitTests
         }
 
         [Fact]
+        public async Task BuildUsingExternalShouldSucceed()
+        {
+            // Arrange
+            var identifier = Dummy.CreateRandomString(10);
+            var token = Dummy.CreateRandomString(10);
+            var issuer = Dummy.CreateRandomString(10);
+            await Server.StartAsync(CancellationToken);
+            var target = GetTarget();
+
+            // Act
+            var actual = target
+                .UsingExternal(identifier, token, issuer)
+                .Build();
+
+            await actual.StartAsync(ChannelListener, CancellationToken);
+
+            // Assert
+            Server.Channels.Count.ShouldBe(1);
+            var serverChannel = Server.Channels.Dequeue();
+            serverChannel.RemoteNode.Name.ShouldBe(identifier);
+            var authentication = Server.Authentications.First();
+            var externalAuthentication = authentication.ShouldBeOfType<ExternalAuthentication>();
+            externalAuthentication.Token.ShouldBe(token);
+            externalAuthentication.Issuer.ShouldBe(issuer);
+        }
+
+
+        [Fact]
         public async Task BuildUsingDomainAndInstanceShouldSucceed()
         {
             // Arrange

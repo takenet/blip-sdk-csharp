@@ -74,6 +74,7 @@ namespace Take.Blip.Client.UnitTests
                             AuthenticationScheme.Key,
                             AuthenticationScheme.Plain,
                             AuthenticationScheme.Transport,
+                            AuthenticationScheme.External
                         },
                         (n, a) =>
                         {
