@@ -55,6 +55,10 @@ namespace Take.Blip.Client
 
         public string AccessKey { get; private set; }
 
+        public string Token { get; private set; }
+
+        public string Issuer { get; private set; }
+
         public TimeSpan SendTimeout { get; private set; }
 
         public int MaxConnectionRetries { get; private set; }
@@ -110,6 +114,17 @@ namespace Take.Blip.Client
             if (string.IsNullOrEmpty(accessKey)) throw new ArgumentNullException(nameof(accessKey));
             Identifier = identifier;
             AccessKey = accessKey;
+            return this;
+        }
+
+        public BlipClientBuilder UsingExternal(string identifier, string token, string issuer)
+        {
+            if (string.IsNullOrEmpty(identifier)) throw new ArgumentNullException(nameof(identifier));
+            if (string.IsNullOrEmpty(token)) throw new ArgumentNullException(nameof(token));
+            if (string.IsNullOrEmpty(issuer)) throw new ArgumentNullException(nameof(issuer));
+            Identifier = identifier;
+            Token = token;
+            Issuer = issuer;
             return this;
         }
 
@@ -266,6 +281,11 @@ namespace Take.Blip.Client
             if (AccessKey != null)
             {
                 result = new KeyAuthentication { Key = AccessKey };
+            }
+
+            if (Token != null && Issuer != null)
+            {
+                result = new ExternalAuthentication { Token = Token, Issuer = Issuer };
             }
 
             if (result == null)
