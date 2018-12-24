@@ -17,6 +17,11 @@ namespace Take.Blip.Builder.Models
         public int Order { get; set; }
 
         /// <summary>
+        /// The conditions of the conversation context to be evaluated in order to consider the current action valid. Optional.
+        /// </summary>
+        public Condition[] Conditions { get; set; }
+
+        /// <summary>
         /// The action type name. Required.
         /// </summary>
         [Required(ErrorMessage = "The action type is required")]
