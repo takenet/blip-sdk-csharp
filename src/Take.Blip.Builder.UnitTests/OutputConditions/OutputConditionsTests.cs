@@ -10,7 +10,6 @@ using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
 using Input = Take.Blip.Builder.Models.Input;
 
-
 namespace Take.Blip.Builder.UnitTests.OutputConditions
 {
     public class OutputConditionsTests : FlowManagerTestsBase
@@ -581,7 +580,6 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
             var endsInput = new PlainText() { Text = "Ping!" };
-
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.EndsWith, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();

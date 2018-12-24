@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -146,7 +145,6 @@ namespace Take.Blip.Builder
 
                             try
                             {
-
                                 linkedCts.Token.ThrowIfCancellationRequested();
 
                                 // Validate the input for the current state
@@ -175,10 +173,10 @@ namespace Take.Blip.Builder
                                 // Prepare to leave the current state executing the output actions
                                 if (state.OutputActions != null)
                                 {
-                                    await ProcessActionsAsync(context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
+                                    await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
                                 }
 
-                                // Store the previous state and determine the next 
+                                // Store the previous state and determine the next
                                 await _stateManager.SetPreviousStateIdAsync(context, state.Id, cancellationToken);
                                 state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
 
@@ -195,7 +193,7 @@ namespace Take.Blip.Builder
                                 // Process the next state input actions
                                 if (state?.InputActions != null)
                                 {
-                                    await ProcessActionsAsync(context, state.InputActions, stateTrace?.InputActions, linkedCts.Token);
+                                    await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, linkedCts.Token);
                                 }
 
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
@@ -264,7 +262,7 @@ namespace Take.Blip.Builder
                         {
                             Trace = inputTrace,
                             Settings = flow.TraceSettings
-                        }, 
+                        },
                         cancellationToken);
                 }
             }
@@ -294,55 +292,59 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessActionsAsync(IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
+        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
         {
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
-                var action = _actionProvider.Get(stateAction.Type);
-
-                // Trace infra
-                var (actionTrace, actionStopwatch) = actionTraces != null
-                    ? (stateAction.ToTrace(), Stopwatch.StartNew())
-                    : (null, null);
-
-                try
+                 var isValidAction = await EvaluateConditionsAsync(stateAction.Conditions, lazyInput, context, cancellationToken);
+                if (isValidAction)
                 {
-                    var settings = stateAction.Settings;
-                    if (settings != null)
+                    var action = _actionProvider.Get(stateAction.Type);
+
+                    // Trace infra
+                    var (actionTrace, actionStopwatch) = actionTraces != null
+                        ? (stateAction.ToTrace(), Stopwatch.StartNew())
+                        : (null, null);
+
+                    try
                     {
-                        var settingsJson = settings.ToString(Formatting.None);
-                        settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
-                        settings = JObject.Parse(settingsJson);
+                        var settings = stateAction.Settings;
+                        if (settings != null)
+                        {
+                            var settingsJson = settings.ToString(Formatting.None);
+                            settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+                            settings = JObject.Parse(settingsJson);
+                        }
+
+                        if (actionTrace != null)
+                        {
+                            actionTrace.ParsedSettings = settings;
+                        }
+
+                        await action.ExecuteAsync(context, settings, cancellationToken);
                     }
-
-                    if (actionTrace != null)
+                    catch (Exception ex)
                     {
-                        actionTrace.ParsedSettings = settings;
+                        if (actionTrace != null)
+                        {
+                            actionTrace.Error = ex.ToString();
+                        }
+
+                        throw new ActionProcessingException(
+                            $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
                     }
-
-                    await action.ExecuteAsync(context, settings, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    if (actionTrace != null)
+                    finally
                     {
-                        actionTrace.Error = ex.ToString();
-                    }
+                        actionStopwatch?.Stop();
 
-                    throw new ActionProcessingException(
-                        $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
-                }
-                finally
-                {
-                    actionStopwatch?.Stop();
-
-                    if (actionTrace != null &&
-                        actionTraces != null &&
-                        actionStopwatch != null)
-                    {
-                        actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
-                        actionTraces.Add(actionTrace);
+                        if (actionTrace != null &&
+                            actionTraces != null &&
+                            actionStopwatch != null)
+                        {
+                            actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
+                            actionTraces.Add(actionTrace);
+                        }
                     }
                 }
             }
@@ -365,19 +367,7 @@ namespace Take.Blip.Builder
 
                     try
                     {
-                        var isValidOutput = true;
-
-                        if (output.Conditions != null)
-                        {
-                            foreach (var outputCondition in output.Conditions)
-                            {
-                                isValidOutput = await EvaluateConditionAsync(outputCondition, lazyInput, context, cancellationToken);
-                                if (!isValidOutput)
-                                {
-                                    break;
-                                }
-                            }
-                        }
+                         var isValidOutput = await EvaluateConditionsAsync(output.Conditions, lazyInput, context, cancellationToken);
 
                         if (isValidOutput)
                         {
@@ -409,6 +399,29 @@ namespace Take.Blip.Builder
             }
 
             return state;
+        }
+
+         private async Task<bool> EvaluateConditionsAsync(
+            IEnumerable<Condition> conditions,
+            LazyInput lazyInput,
+            IContext context,
+            CancellationToken cancellationToken)
+        {
+            var isValidOutput = true;
+
+            if (conditions != null)
+            {
+                foreach (var outputCondition in conditions)
+                {
+                    isValidOutput = await EvaluateConditionAsync(outputCondition, lazyInput, context, cancellationToken);
+                    if (!isValidOutput)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return isValidOutput;
         }
 
         private async Task<bool> EvaluateConditionAsync(
