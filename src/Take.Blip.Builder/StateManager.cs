@@ -26,7 +26,8 @@ namespace Take.Blip.Builder
         public Task SetStateIdAsync(IContext context, string stateId, CancellationToken cancellationToken)
         {
             TimeSpan expiration = default(TimeSpan);
-            if (context.Flow.Configuration.TryGetValue(STATE_EXPIRATION_KEY, out var expirationValue))
+            if (context.Flow?.Configuration != null &&
+                context.Flow.Configuration.TryGetValue(STATE_EXPIRATION_KEY, out var expirationValue))
             {
                 TimeSpan.TryParse(expirationValue, out expiration);
             }
