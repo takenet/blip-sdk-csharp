@@ -1,4 +1,5 @@
-﻿using Lime.Protocol;
+﻿using Lime.Messaging.Contents;
+using Lime.Protocol;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,12 +8,11 @@ using System.Web;
 namespace Take.Blip.Client.Extensions.HelpDesk
 {
     /// <summary>
-    /// Automaticly forwards replies from an Blip App attendant
-    /// to user that have sent a message
+    /// Automaticly forwards replies from a BLiP Desk agent to the user
     /// </summary>
     public abstract class HelpDeskReplyMessageReceiverBase : IMessageReceiver
     {
-        private readonly ISender _sender;
+        protected readonly ISender _sender;
         private readonly IHelpDeskExtension _helpDeskExtension;
 
         public HelpDeskReplyMessageReceiverBase(
@@ -25,10 +25,11 @@ namespace Take.Blip.Client.Extensions.HelpDesk
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            if (_helpDeskExtension.FromAttendant(message))
+            if (_helpDeskExtension.IsFromAgent(message) && 
+                !message.Content.GetType().Equals(typeof(Redirect)))
             {
                 var customerIdentityString = Uri.UnescapeDataString(message.From.Name);
-                var customerIdentiy = Identity.Parse(customerIdentityString);
+                var customerIdentiy = Node.Parse(customerIdentityString);
                 await ReceiveAsync(message, customerIdentiy, cancellationToken);
             }
         }
@@ -36,6 +37,6 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         /// <summary>
         /// Receives helpDesk reply messages.
         /// </summary>
-        protected abstract Task ReceiveAsync(Message message, Identity customerIdentiy, CancellationToken cancellationToken = default(CancellationToken));
+        protected abstract Task ReceiveAsync(Message message, Node customerIdentiy, CancellationToken cancellationToken = default(CancellationToken));
     }
 }
