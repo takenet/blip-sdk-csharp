@@ -5,13 +5,14 @@ using System.Web;
 using System;
 using Lime.Messaging.Contents;
 using Takenet.Iris.Messaging.Resources;
+using System.Linq;
 
 namespace Take.Blip.Client.Extensions.HelpDesk
 {
     public class HelpDeskExtension : ExtensionBase, IHelpDeskExtension
     {
+        public const string DESK_DOMAIN = "desk.msging.net";
         private readonly ISender _sender;
-        private const string DESK_DOMAIN = "desk.msging.net";
         private const string ID_PREFIX = "fwd";
 
         public HelpDeskExtension(ISender sender)
@@ -73,6 +74,23 @@ namespace Take.Blip.Client.Extensions.HelpDesk
 
             var result = await _sender.ProcessCommandAsync(newTicketCommand, cancellationToken);
             EnsureSuccess(result);
+        }
+
+        public async Task<Ticket> GetUserOpenTicketsAsync(Identity customerIdentity, CancellationToken cancellationToken)
+        {
+
+            var openTicketCommand = new Command
+            {
+                Id = EnvelopeId.NewId(),
+                Method = CommandMethod.Get,
+                Uri = new LimeUri($"/tickets?$filter={Uri.EscapeDataString($"customerIdentity eq '{customerIdentity}' and status eq 'Open'")}"),
+                To = new Node("postmaster", DESK_DOMAIN, null),
+            };
+            var result = await _sender.ProcessCommandAsync(openTicketCommand, cancellationToken);
+            EnsureSuccess(result);
+
+            var ticketCollection = result.Resource as DocumentCollection;
+            return ticketCollection?.Items?.FirstOrDefault() as Ticket;
         }
     }
 }
