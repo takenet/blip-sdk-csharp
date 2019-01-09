@@ -35,5 +35,11 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         /// </summary>
         /// <param name="ticketId">The Ticket ID to be closed</param>
         Task CloseTicketAsUser(string ticketId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get user open ticket if any
+        /// </summary>
+        /// <param name="customerIdentity">The customer identity</param>
+        Task<Ticket> GetUserOpenTicketsAsync(Identity customerIdentity, CancellationToken cancellationToken);
     }
 }
