@@ -11,7 +11,7 @@ namespace Take.Blip.Client.Extensions.HelpDesk
 {
     public class HelpDeskExtension : ExtensionBase, IHelpDeskExtension
     {
-        public const string DESK_DOMAIN = "desk.msging.net";
+        public string DESK_DOMAIN { get; } = "desk.msging.net";
         private readonly ISender _sender;
         private const string ID_PREFIX = "fwd";
 
