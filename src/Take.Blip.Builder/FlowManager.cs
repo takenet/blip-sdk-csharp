@@ -97,21 +97,12 @@ namespace Take.Blip.Builder
             flow.Validate();
 
             // Input tracing infrastructure
-            InputTrace inputTrace = null;
-            if (flow.TraceSettings != null &&
-                flow.TraceSettings.Mode != TraceMode.Disabled)
-            {
-                inputTrace = new InputTrace
-                {
-                    FlowId = flow.Id,
-                    User = user,
-                    Input = input.ToString()
-                };
-            }
+            InputTrace inputTrace = CheckIfTraceIsConfigured(flow, user, input);
 
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
                 : null;
+
             try
             {
                 // Create a cancellation token
@@ -292,12 +283,35 @@ namespace Take.Blip.Builder
             }
         }
 
+        private InputTrace CheckIfTraceIsConfigured(Flow flow, Identity user, Document input)
+        {
+            var message = EnvelopeReceiverContext<Message>.Envelope;
+
+            if (message?.Metadata != null &&
+                message.Metadata.Keys.Contains("builder.trace.target"))
+            {
+                flow.TraceSettings = new TraceSettings(message.Metadata);
+            }
+
+            if (flow.TraceSettings != null &&
+                flow.TraceSettings.Mode != TraceMode.Disabled)
+            {
+                return new InputTrace
+                {
+                    FlowId = flow.Id,
+                    User = user,
+                    Input = input.ToString()
+                };
+            }
+            return null;
+        }
+
         private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
         {
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
-                 var isValidAction = await EvaluateConditionsAsync(stateAction.Conditions, lazyInput, context, cancellationToken);
+                var isValidAction = await EvaluateConditionsAsync(stateAction.Conditions, lazyInput, context, cancellationToken);
                 if (isValidAction)
                 {
                     var action = _actionProvider.Get(stateAction.Type);
@@ -367,7 +381,7 @@ namespace Take.Blip.Builder
 
                     try
                     {
-                         var isValidOutput = await EvaluateConditionsAsync(output.Conditions, lazyInput, context, cancellationToken);
+                        var isValidOutput = await EvaluateConditionsAsync(output.Conditions, lazyInput, context, cancellationToken);
 
                         if (isValidOutput)
                         {
@@ -401,11 +415,11 @@ namespace Take.Blip.Builder
             return state;
         }
 
-         private async Task<bool> EvaluateConditionsAsync(
-            IEnumerable<Condition> conditions,
-            LazyInput lazyInput,
-            IContext context,
-            CancellationToken cancellationToken)
+        private async Task<bool> EvaluateConditionsAsync(
+           IEnumerable<Condition> conditions,
+           LazyInput lazyInput,
+           IContext context,
+           CancellationToken cancellationToken)
         {
             var isValidOutput = true;
 
