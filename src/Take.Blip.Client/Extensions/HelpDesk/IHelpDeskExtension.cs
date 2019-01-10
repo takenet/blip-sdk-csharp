@@ -12,6 +12,11 @@ namespace Take.Blip.Client.Extensions.HelpDesk
     public interface IHelpDeskExtension
     {
         /// <summary>
+        ///  Desk application domain
+        /// </summary>
+        string DESK_DOMAIN { get; }
+
+        /// <summary>
         /// Forward a message to active HelpDesk application.
         /// </summary>
         /// <param name="message">The message to be forwarded to BLIP HelpDesk agents</param>
