@@ -6,10 +6,10 @@ namespace Take.Blip.Builder.Diagnostics
 {
     public class TraceSettings : IValidable
     {
-        private const string BuilderTraceMode = "builder.trace.mode";
-        private const string BuilderTraceTargetType = "builder.trace.targetType";
-        private const string BuilderTraceTarget = "builder.trace.target";
-        private const string BuilderTraceSlowthreshold = "builder.trace.slowThreshold";
+        public const string BUILDER_TRACE_MODE = "builder.trace.mode";
+        public const string BUILDER_TRACE_TARGET_TYPE = "builder.trace.targetType";
+        public const string BUILDER_TRACE_TARGET = "builder.trace.target";
+        public const string BUILDER_TRACE_SLOW_THRESHOLD = "builder.trace.slowThreshold";
 
         public TraceSettings()
         {
@@ -20,27 +20,23 @@ namespace Take.Blip.Builder.Diagnostics
         /// Mode, TargetType and Target required
         /// SlowThreshold optional
         /// </summary>
-        /// <param name="messageSettings"></param>
-        public TraceSettings(IDictionary<string, string> messageSettings)
+        /// <param name="messageMetadata"></param>
+        public TraceSettings(IDictionary<string, string> messageMetadata)
         {
-            if (messageSettings == null ||
-                !messageSettings.Keys.Contains(BuilderTraceMode) ||
-                !messageSettings.Keys.Contains(BuilderTraceTargetType) ||
-                !messageSettings.Keys.Contains(BuilderTraceTarget))
+            if (messageMetadata == null ||
+                !(messageMetadata.TryGetValue(BUILDER_TRACE_MODE, out var traceModeString) && Enum.TryParse<TraceMode>(traceModeString, out var traceMode)) ||
+                !(messageMetadata.TryGetValue(BUILDER_TRACE_TARGET_TYPE, out var traceTargeTypeString) && Enum.TryParse<TraceTargetType>(traceTargeTypeString, out var targetType)) ||
+                !(messageMetadata.TryGetValue(BUILDER_TRACE_TARGET, out var target)))
             {
-                throw new ArgumentException();
+                throw new ArgumentException(nameof(messageMetadata));
             }
-            Enum.TryParse<TraceMode>(messageSettings[BuilderTraceMode], out var traceMode);
             Mode = traceMode;
-
-            Enum.TryParse<TraceTargetType>(messageSettings[BuilderTraceTargetType], out var targetType);
+            Target = target;
             TargetType = targetType;
 
-            Target = messageSettings[BuilderTraceTarget];
-
-            if (messageSettings.Keys.Contains(BuilderTraceSlowthreshold))
+            if (messageMetadata.TryGetValue(BUILDER_TRACE_SLOW_THRESHOLD, out var slowThresholdString))
             {
-                int.TryParse(messageSettings[BuilderTraceSlowthreshold], out var slowThreshold);
+                int.TryParse(slowThresholdString, out var slowThreshold);
                 SlowThreshold = slowThreshold;
             }
         }

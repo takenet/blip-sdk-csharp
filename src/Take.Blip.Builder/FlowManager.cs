@@ -97,7 +97,29 @@ namespace Take.Blip.Builder
             flow.Validate();
 
             // Input tracing infrastructure
-            InputTrace inputTrace = CheckIfTraceIsConfigured(flow, user, input);
+            InputTrace inputTrace = null;
+            TraceSettings traceSettings = null;
+            var message = EnvelopeReceiverContext<Message>.Envelope;
+            if (message?.Metadata != null &&
+                message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
+            {
+                traceSettings = new TraceSettings(message.Metadata);
+            }
+            else
+            {
+                traceSettings = flow.TraceSettings;
+            }
+
+            if (traceSettings != null &&
+                traceSettings.Mode != TraceMode.Disabled)
+            {
+                inputTrace = new InputTrace
+                {
+                    FlowId = flow.Id,
+                    User = user,
+                    Input = input.ToString()
+                };
+            }
 
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
@@ -239,12 +261,12 @@ namespace Take.Blip.Builder
 
                 // Check if we should trace the request
                 if (inputTrace != null &&
-                    flow.TraceSettings != null &&
+                    traceSettings != null &&
                     inputStopwatch != null &&
                     (
-                        flow.TraceSettings.Mode == TraceMode.All ||
-                        (flow.TraceSettings.Mode.IsSlow() && inputStopwatch.ElapsedMilliseconds >= (flow.TraceSettings.SlowThreshold ?? 5000)) ||
-                        (flow.TraceSettings.Mode.IsError() && inputTrace.Error != null)
+                        traceSettings.Mode == TraceMode.All ||
+                        (traceSettings.Mode.IsSlow() && inputStopwatch.ElapsedMilliseconds >= (traceSettings.SlowThreshold ?? 5000)) ||
+                        (traceSettings.Mode.IsError() && inputTrace.Error != null)
                     ))
                 {
                     inputTrace.ElapsedMilliseconds = inputStopwatch.ElapsedMilliseconds;
@@ -252,7 +274,7 @@ namespace Take.Blip.Builder
                         new TraceEvent
                         {
                             Trace = inputTrace,
-                            Settings = flow.TraceSettings
+                            Settings = traceSettings
                         },
                         cancellationToken);
                 }
@@ -281,29 +303,6 @@ namespace Take.Blip.Builder
                 default:
                     throw new ArgumentOutOfRangeException(nameof(inputValidation));
             }
-        }
-
-        private InputTrace CheckIfTraceIsConfigured(Flow flow, Identity user, Document input)
-        {
-            var message = EnvelopeReceiverContext<Message>.Envelope;
-
-            if (message?.Metadata != null &&
-                message.Metadata.Keys.Contains("builder.trace.target"))
-            {
-                flow.TraceSettings = new TraceSettings(message.Metadata);
-            }
-
-            if (flow.TraceSettings != null &&
-                flow.TraceSettings.Mode != TraceMode.Disabled)
-            {
-                return new InputTrace
-                {
-                    FlowId = flow.Id,
-                    User = user,
-                    Input = input.ToString()
-                };
-            }
-            return null;
         }
 
         private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)

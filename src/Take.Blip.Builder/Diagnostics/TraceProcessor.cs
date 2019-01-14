@@ -61,7 +61,6 @@ namespace Take.Blip.Builder.Diagnostics
         {
             await _sender.SendMessageAsync(new Message
             {
-                Id = EnvelopeId.NewId(),
                 To = node,
                 Content = trace
             }, cancellationToken);
