@@ -193,7 +193,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Assert
             await Sender.Received(1).SendMessageAsync(
                 Arg.Is<Message>(m =>
-                    m.Id != null &&
+                    m.Id == null &&
                     m.Content != null &&
                     m.To != traceIndentity),
                 Arg.Any<CancellationToken>());

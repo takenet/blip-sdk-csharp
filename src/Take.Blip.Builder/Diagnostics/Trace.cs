@@ -5,7 +5,7 @@ namespace Take.Blip.Builder.Diagnostics
 {
     public class Trace : Document
     {
-        public static readonly MediaType MediaType = MediaType.Parse("application/vnd.takenet.trace+json");
+        public static readonly MediaType MediaType = MediaType.Parse("application/vnd.blip.trace+json");
 
         public Trace() : base(MediaType)
         {
