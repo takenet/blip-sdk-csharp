@@ -1,12 +1,19 @@
-﻿using System;
+﻿using Lime.Protocol;
+using System;
 
 namespace Take.Blip.Builder.Diagnostics
 {
-    public class Trace
+    public class Trace : Document
     {
-        public Trace()
+        public static readonly MediaType MediaType = MediaType.Parse("application/vnd.blip.trace+json");
+
+        public Trace() : base(MediaType)
         {
             Timestamp = DateTimeOffset.UtcNow;
+        }
+
+        public Trace(MediaType mediaType) : base(mediaType)
+        {
         }
 
         public DateTimeOffset Timestamp { get; set; }

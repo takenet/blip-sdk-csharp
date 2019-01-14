@@ -98,8 +98,20 @@ namespace Take.Blip.Builder
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
-            if (flow.TraceSettings != null &&
-                flow.TraceSettings.Mode != TraceMode.Disabled)
+            TraceSettings traceSettings = null;
+            var message = EnvelopeReceiverContext<Message>.Envelope;
+            if (message?.Metadata != null &&
+                message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
+            {
+                traceSettings = new TraceSettings(message.Metadata);
+            }
+            else
+            {
+                traceSettings = flow.TraceSettings;
+            }
+
+            if (traceSettings != null &&
+                traceSettings.Mode != TraceMode.Disabled)
             {
                 inputTrace = new InputTrace
                 {
@@ -112,6 +124,7 @@ namespace Take.Blip.Builder
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
                 : null;
+
             try
             {
                 // Create a cancellation token
@@ -248,12 +261,12 @@ namespace Take.Blip.Builder
 
                 // Check if we should trace the request
                 if (inputTrace != null &&
-                    flow.TraceSettings != null &&
+                    traceSettings != null &&
                     inputStopwatch != null &&
                     (
-                        flow.TraceSettings.Mode == TraceMode.All ||
-                        (flow.TraceSettings.Mode.IsSlow() && inputStopwatch.ElapsedMilliseconds >= (flow.TraceSettings.SlowThreshold ?? 5000)) ||
-                        (flow.TraceSettings.Mode.IsError() && inputTrace.Error != null)
+                        traceSettings.Mode == TraceMode.All ||
+                        (traceSettings.Mode.IsSlow() && inputStopwatch.ElapsedMilliseconds >= (traceSettings.SlowThreshold ?? 5000)) ||
+                        (traceSettings.Mode.IsError() && inputTrace.Error != null)
                     ))
                 {
                     inputTrace.ElapsedMilliseconds = inputStopwatch.ElapsedMilliseconds;
@@ -261,7 +274,7 @@ namespace Take.Blip.Builder
                         new TraceEvent
                         {
                             Trace = inputTrace,
-                            Settings = flow.TraceSettings
+                            Settings = traceSettings
                         },
                         cancellationToken);
                 }
@@ -297,7 +310,7 @@ namespace Take.Blip.Builder
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
-                 var isValidAction = await EvaluateConditionsAsync(stateAction.Conditions, lazyInput, context, cancellationToken);
+                var isValidAction = await EvaluateConditionsAsync(stateAction.Conditions, lazyInput, context, cancellationToken);
                 if (isValidAction)
                 {
                     var action = _actionProvider.Get(stateAction.Type);
@@ -367,7 +380,7 @@ namespace Take.Blip.Builder
 
                     try
                     {
-                         var isValidOutput = await EvaluateConditionsAsync(output.Conditions, lazyInput, context, cancellationToken);
+                        var isValidOutput = await EvaluateConditionsAsync(output.Conditions, lazyInput, context, cancellationToken);
 
                         if (isValidOutput)
                         {
@@ -401,11 +414,11 @@ namespace Take.Blip.Builder
             return state;
         }
 
-         private async Task<bool> EvaluateConditionsAsync(
-            IEnumerable<Condition> conditions,
-            LazyInput lazyInput,
-            IContext context,
-            CancellationToken cancellationToken)
+        private async Task<bool> EvaluateConditionsAsync(
+           IEnumerable<Condition> conditions,
+           LazyInput lazyInput,
+           IContext context,
+           CancellationToken cancellationToken)
         {
             var isValidOutput = true;
 
