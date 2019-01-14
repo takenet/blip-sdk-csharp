@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Lime.Protocol;
+using System.Collections.Generic;
 
 namespace Take.Blip.Builder.Diagnostics
 {
     public class InputTrace : Trace
     {
-        public InputTrace()
+        public new static readonly MediaType MediaType = MediaType.Parse("application/vnd.blip.input-trace+json");
+
+        public InputTrace() : base(MediaType)
         {
             States = new List<StateTrace>();
         }
