@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,6 +63,29 @@ namespace Take.Blip.Builder.Models
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public static async Task<bool> EvaluateConditionsAsync(
+           this IEnumerable<Condition> conditions,
+           LazyInput lazyInput,
+           IContext context,
+           CancellationToken cancellationToken)
+        {
+            var isValidOutput = true;
+
+            if (conditions != null)
+            {
+                foreach (var outputCondition in conditions)
+                {
+                    isValidOutput = await outputCondition.EvaluateConditionAsync(lazyInput, context, cancellationToken);
+                    if (!isValidOutput)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return isValidOutput;
         }
     }
 }
