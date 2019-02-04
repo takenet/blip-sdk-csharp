@@ -23,7 +23,6 @@ namespace Take.Blip.Client
         public BlipClientBuilder()
             : this(new TcpTransportFactory())
         {
-
         }
 
         public BlipClientBuilder(ITransportFactory transportFactory, ILogger logger = null)
@@ -44,7 +43,8 @@ namespace Take.Blip.Client
             RoundRobin = true;
             AutoNotify = true;
             ChannelCount = 1;
-            ReceiptEvents = new [] { Event.Accepted, Event.Dispatched, Event.Received, Event.Consumed, Event.Failed };
+            ReceiptEvents = new[] {Event.Accepted, Event.Dispatched, Event.Received, Event.Consumed, Event.Failed};
+            PresenceStatus = PresenceStatus.Available;
         }
 
         public string Identifier { get; private set; }
@@ -91,6 +91,8 @@ namespace Take.Blip.Client
 
         public Event[] ReceiptEvents { get; private set; }
 
+        public PresenceStatus PresenceStatus { get; private set; }
+
         public BlipClientBuilder UsingPassword(string identifier, string password)
         {
             if (string.IsNullOrEmpty(identifier)) throw new ArgumentNullException(nameof(identifier));
@@ -104,7 +106,8 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder UsingGuest()
         {
-            Identifier = Guid.NewGuid().ToString();
+            Identifier = Guid.NewGuid()
+                .ToString();
             return this;
         }
 
@@ -227,6 +230,12 @@ namespace Take.Blip.Client
             return this;
         }
 
+        public BlipClientBuilder WithPresenceStatus(PresenceStatus presenceStatus)
+        {
+            PresenceStatus = presenceStatus;
+            return this;
+        }
+
         /// <summary>
         /// Builds an <see cref="IBlipClient" /> with the configured parameters
         /// </summary>
@@ -280,12 +289,12 @@ namespace Take.Blip.Client
 
             if (AccessKey != null)
             {
-                result = new KeyAuthentication { Key = AccessKey };
+                result = new KeyAuthentication {Key = AccessKey};
             }
 
             if (Token != null && Issuer != null)
             {
-                result = new ExternalAuthentication { Token = Token, Issuer = Issuer };
+                result = new ExternalAuthentication {Token = Token, Issuer = Issuer};
             }
 
             if (result == null)
@@ -297,32 +306,45 @@ namespace Take.Blip.Client
             return result;
         }
 
-        private async Task SetPresenceAsync(IClientChannel clientChannel, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task SetPresenceAsync(IClientChannel clientChannel,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (IsGuest(clientChannel.LocalNode.Name)) return;
-            
+            if (IsGuest(clientChannel.LocalNode.Name))
+            {
+                return;
+            }
+
             await clientChannel.SetResourceAsync(
                     LimeUri.Parse(UriTemplates.PRESENCE),
-                    new Presence {Status = PresenceStatus.Available, RoutingRule = RoutingRule, RoundRobin = RoundRobin},
+                    new Presence
+                    {
+                        Status = PresenceStatus,
+                        RoutingRule = RoutingRule,
+                        RoundRobin = RoundRobin
+                    },
                     cancellationToken)
-                .ConfigureAwait(false);   
+                .ConfigureAwait(false);
         }
 
-        private async Task SetReceiptAsync(IClientChannel clientChannel, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task SetReceiptAsync(IClientChannel clientChannel,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (IsGuest(clientChannel.LocalNode.Name)
-                || ReceiptEvents.Length == 0) return;
-                        
+            if (IsGuest(clientChannel.LocalNode.Name) || ReceiptEvents.Length == 0)
+            {
+                return;
+            }
+
             await clientChannel.SetResourceAsync(
                     LimeUri.Parse(UriTemplates.RECEIPT),
-                    new Receipt { Events = ReceiptEvents },
+                    new Receipt {Events = ReceiptEvents},
                     cancellationToken)
-                    .ConfigureAwait(false);            
+                .ConfigureAwait(false);
         }
 
         private static bool IsGuest(string name) => Guid.TryParse(name, out var _);
 
-        private IOnDemandClientChannel CreateOnDemandClientChannel(IEstablishedClientChannelBuilder establishedClientChannelBuilder)
+        private IOnDemandClientChannel CreateOnDemandClientChannel(
+            IEstablishedClientChannelBuilder establishedClientChannelBuilder)
         {
             IOnDemandClientChannel onDemandClientChannel;
 
@@ -335,6 +357,7 @@ namespace Take.Blip.Client
             {
                 onDemandClientChannel = new MultiplexerClientChannel(establishedClientChannelBuilder, ChannelCount);
             }
+
             return onDemandClientChannel;
         }
     }
