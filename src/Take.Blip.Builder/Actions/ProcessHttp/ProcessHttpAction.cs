@@ -48,6 +48,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     }
 
                     AddUserToHeaders(httpRequestMessage, context);
+                    AddBotIdentityToHeaders(httpRequestMessage, context);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
                     using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
@@ -88,13 +89,38 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// <param name="context"></param>
         private void AddUserToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
-            if (context.Flow.Configuration != null &&
-                context.Flow.Configuration.TryGetValue("processHttpAddUserToRequestHeader", out string userHeaderValue) && 
-                bool.TryParse(userHeaderValue, out bool sendUserHeader) && 
-                sendUserHeader)
+            if (ShouldAddHeader("processHttpAddUserToRequestHeader", context))
             {
                 httpRequestMessage.Headers.Add("X-Blip-User", context.User);
             }
+        }
+
+        /// <summary>
+        /// Add 'X-Blip-Bot' header to request with the Bot's name as its value, if there is 
+        /// a configuration variable 'processHttpAddBotIdentityToRequestHeader' set to true
+        /// </summary>
+        /// <param name="httpRequestMessage"></param>
+        /// <param name="context"></param>
+        private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
+        {
+            if (ShouldAddHeader("processHttpAddBotIdentityToRequestHeader", context))
+            {
+                httpRequestMessage.Headers.Add("X-Blip-Bot", context.Application);
+            }
+        }
+
+        /// <summary>
+        /// Fully checks if a given config header should be added or not
+        /// </summary>
+        /// <param name="header">Config header to check for</param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private static bool ShouldAddHeader(string header, IContext context)
+        {
+            return context.Flow.Configuration != null &&
+                            context.Flow.Configuration.TryGetValue(header, out string identifierHeaderValue) &&
+                            bool.TryParse(identifierHeaderValue, out bool sendBotIdentifier) &&
+                            sendBotIdentifier;
         }
 
         public void Dispose()

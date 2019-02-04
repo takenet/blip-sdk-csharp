@@ -1,0 +1,17 @@
+﻿{
+  "identifier": "testeatendimento9",
+  "accessKey": "elhKNzJuNjhPWFRtMFR0Z1EzNkE=",
+  "messageReceivers": [
+    {
+      "type": "MessageReceiver",
+      "sender": "^(?!.*desk.msging.net).*$"
+    },
+    {
+      "type": "MessageReceiver",
+      "mediaType": "application/vnd.lime.redirect"
+    },
+    {
+      "type": "HelpDeskMessageReceiver"
+    }
+  ]
+}

@@ -83,6 +83,7 @@ namespace Take.Blip.Builder.Hosting
         private static Container RegisterBuilderDiagnostics(this Container container)
         {
             container.RegisterSingleton<ITraceProcessor, TraceProcessor>();
+            container.RegisterSingleton<ITraceManager, TraceManager>();
 
             return container;
         }
