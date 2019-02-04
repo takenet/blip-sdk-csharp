@@ -309,7 +309,7 @@ namespace Take.Blip.Client
         private async Task SetPresenceAsync(IClientChannel clientChannel,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (IsGuest(clientChannel.LocalNode.Name))
+            if (IsGuest(clientChannel.LocalNode.Name) || PresenceStatus == PresenceStatus.Unavailable)
             {
                 return;
             }
