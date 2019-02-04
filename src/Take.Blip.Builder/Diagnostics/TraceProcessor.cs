@@ -6,16 +6,20 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Diagnostics
 {
     public class TraceProcessor : ITraceProcessor
     {
         private readonly IHttpClient _httpClient;
+        private readonly ISender _sender;
 
-        public TraceProcessor(IHttpClient httpClient)
+        public TraceProcessor(IHttpClient httpClient,
+            ISender sender)
         {
             _httpClient = httpClient;
+            _sender = sender;
         }
 
         public Task ProcessTraceAsync(TraceEvent traceEvent, CancellationToken cancellationToken)
@@ -26,7 +30,7 @@ namespace Take.Blip.Builder.Diagnostics
             {
                 case TraceTargetType.Http:
                     return ProcessHttpTraceAsync(new Uri(traceEvent.Settings.Target), traceEvent.Trace, cancellationToken);
-                    
+
                 case TraceTargetType.Lime:
                     return ProcessLimeTraceAsync(traceEvent.Settings.Target, traceEvent.Trace, cancellationToken);
 
@@ -55,7 +59,11 @@ namespace Take.Blip.Builder.Diagnostics
 
         private async Task ProcessLimeTraceAsync(Node node, InputTrace trace, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException("Lime trace target is not implemented");
+            await _sender.SendMessageAsync(new Message
+            {
+                To = node,
+                Content = trace
+            }, cancellationToken);
         }
     }
 }

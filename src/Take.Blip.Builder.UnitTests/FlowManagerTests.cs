@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
-using Take.Blip.Builder.Diagnostics;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Take.Blip.Builder.Models;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
@@ -24,7 +21,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithoutConditionsShouldChangeStateAndSendMessage()
         {
             // Arrange
-            var input = new PlainText() {Text = "Ping!"};
+            var input = new PlainText() { Text = "Ping!" };
             var messageType = "text/plain";
             var messageContent = "Pong!";
             var flow = new Flow()
@@ -75,10 +72,10 @@ namespace Take.Blip.Builder.UnitTests
             Sender
                 .Received(1)
                 .SendMessageAsync(
-                    Arg.Is<Message>(m => 
+                    Arg.Is<Message>(m =>
                         m.Id != null
                         && m.To.ToIdentity().Equals(User)
-                        && m.Type.ToString().Equals(messageType) 
+                        && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
         }
@@ -340,7 +337,6 @@ namespace Take.Blip.Builder.UnitTests
                         Input = new Input()
                         {
                             Variable = "Word"
-                            
                         },
                         Outputs = new[]
                         {
@@ -616,7 +612,7 @@ namespace Take.Blip.Builder.UnitTests
                 .AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == input.Text), Arg.Any<CancellationToken>())
                 .Returns(new AnalysisResponse()
                 {
-                    Intentions = new []
+                    Intentions = new[]
                     {
                         new IntentionResponse
                         {
@@ -767,84 +763,6 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
-        }
-
-        [Fact]
-        public async Task FlowWithTraceSettingsShouldCallTraceProcessor()
-        {
-            // Arrange
-            var input = new PlainText() { Text = "Ping!" };
-            var messageType = "text/plain";
-            var variableName = "variableName1";
-            var variableValue = "OutputVariable value 1";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
-
-            var messageContent = "Hello {{variableName1}}!";
-            var expectedMessageContent = $"Hello {variableValue}!";
-
-            var traceUrl = "http://myserver.com/tracing";
-
-            var flow = new Flow()
-            {
-                Id = Guid.NewGuid().ToString(),
-                States = new[]
-                {
-                    new State
-                    {
-                        Id = "root",
-                        Root = true,
-                        Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "ping",
-                        InputActions = new[]
-                        {
-                            new Action
-                            {
-                                Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
-                            }
-                        }
-                    }
-                },
-                Configuration = new Dictionary<string, string>
-                {
-                    { "TraceMode", "All" },
-                    { "TraceTargetType", "Http" },
-                    { "TraceTarget", traceUrl }
-                }
-            };
-            var target = GetTarget();
-
-            // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
-
-            // Assert
-            await Task.Delay(100); // The trace is asynchronous
-
-            TraceProcessor.Received(1).ProcessTraceAsync(
-                Arg.Is<TraceEvent>(e =>
-                    e.Settings.TargetType == TraceTargetType.Http &&
-                    e.Settings.Target == traceUrl &&
-                    e.Trace.User == User.ToString() &&
-                    e.Trace.Input == input &&
-                    e.Trace.States.Count == 2 &&
-                    e.Trace.States.ToArray()[0].Id == "root" &&
-                    e.Trace.States.ToArray()[1].Id == "ping"),
-                    
-                Arg.Any<CancellationToken>());
         }
 
         public void Dispose()
