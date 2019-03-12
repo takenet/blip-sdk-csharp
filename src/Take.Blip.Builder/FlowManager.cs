@@ -215,8 +215,9 @@ namespace Take.Blip.Builder
                             }
                             finally
                             {
-                                // Continue processing if the next has do not expect the user input
-                                continueProcessing = (state != null && (state.Input == null || state.Input.Bypass));
+                                // Continue processing if the next state do not expect the user input
+                                var inputConditionIsValid =  state?.Input == null || await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
+                                continueProcessing = (state != null && (state.Input == null || state.Input.Bypass || !inputConditionIsValid));
                                 if (!continueProcessing)
                                 {
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
