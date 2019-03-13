@@ -140,7 +140,7 @@ namespace Take.Blip.Builder
 
                         // Create trace instances, if required
                         var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
-                        var continueProcessing = false;
+                        var stateWaitForInput = true;
                         do
                         {
                             try
@@ -148,9 +148,8 @@ namespace Take.Blip.Builder
                                 linkedCts.Token.ThrowIfCancellationRequested();
 
                                 // Validate the input for the current state
-                                if (state.Input != null &&
-                                    !state.Input.Bypass &&
-                                    state.Input.Validation != null &&
+                                if (stateWaitForInput && 
+                                    state.Input?.Validation != null &&
                                     !ValidateDocument(lazyInput, state.Input.Validation))
                                 {
                                     if (state.Input.Validation.Error != null)
@@ -216,14 +215,14 @@ namespace Take.Blip.Builder
                             finally
                             {
                                 // Continue processing if the next state do not expect the user input
-                                var inputConditionIsValid =  state?.Input == null || await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
-                                continueProcessing = (state != null && (state.Input == null || state.Input.Bypass || !inputConditionIsValid));
-                                if (!continueProcessing)
+                                var inputConditionIsValid =  state?.Input?.Conditions == null || await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
+                                stateWaitForInput = state == null || (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
+                                if (stateWaitForInput)
                                 {
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
                                 }
                             }
-                        } while (continueProcessing);
+                        } while (!stateWaitForInput);
                     }
                     finally
                     {
