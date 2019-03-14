@@ -17,6 +17,11 @@ namespace Take.Blip.Builder.Models
         public bool Bypass { get; set; }
 
         /// <summary>
+        /// The conditions of the conversation context to be evaluated in order to consider the current input valid. Optional.
+        /// </summary>
+        public Condition[] Conditions { get; set; }
+
+        /// <summary>
         /// Defines the validation rules for the input.
         /// </summary>
         public InputValidation Validation { get; set; }
