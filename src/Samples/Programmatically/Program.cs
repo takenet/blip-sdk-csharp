@@ -32,14 +32,14 @@ namespace Programmatically
                 m => Task.FromResult(m.Type == MediaType.TextPlain));
 
             listener.AddNotificationReceiver(
-                new LambdaNotificationReceiver( (notification, cancellationToken) =>
+                new LambdaNotificationReceiver((notification, cancellationToken) =>
                 {
                     Console.WriteLine("Notification '{0}' received from '{1}': {2}", notification.Id, notification.From, notification.Event);
                     return Task.CompletedTask;
                 }));
             
             listener.AddCommandReceiver(
-                new LambdaCommandReceiver( (command, cancellationToken) =>
+                new LambdaCommandReceiver((command, cancellationToken) =>
                 {
                     Console.WriteLine("Command '{0}' received from '{1}': {2} {3}", command.Id, command.From, command.Method, command.Uri);
                     return Task.CompletedTask;
