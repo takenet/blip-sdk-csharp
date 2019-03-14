@@ -3,6 +3,7 @@ using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Models;
@@ -422,6 +423,367 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Any<CancellationToken>());
             Context.Received(1).SetVariableAsync("Word", input.Text, Arg.Any<CancellationToken>());
             Context.Received(2).GetVariableAsync("Word", Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithInputContextConditionsSatisfiedShouldKeepStateAndWaitNextInput()
+        {
+            // Arrange
+            var inputOk = new PlainText() { Text = "OK!" };
+            var inputNOk = new PlainText() { Text = "NOK!" };
+            var messageType = "text/plain";
+            var okMessageContent = "OK";
+            var nokMessageContent = "NOK";
+            var variables = new Dictionary<string, string>();
+            Context
+                .When(c => c.SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()))
+                .Do(callInfo =>
+                {
+                    var key = callInfo.ArgAt<string>(0);
+                    var value = callInfo.ArgAt<string>(1);
+                    variables[key] = value;
+                });
+
+            Context
+                .GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(callInfo =>
+                {
+                    var key = callInfo.ArgAt<string>(0);
+                    if (variables.TryGetValue(key, out var value)) return value;
+                    return null;
+                });
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "Start"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "Start",
+                        Input = new Input()
+                        {
+                            Conditions = new []
+                            {
+                                new Condition
+                                {
+                                    Variable = "InputIsValid",
+                                    Source = ValueSource.Context,
+                                    Values = new[] { "true" }
+                                }
+                            }
+                        },
+                        InputActions = new []
+                        {
+                            new Action
+                            {
+                                Type = "ExecuteScript",
+                                Settings = new JObject()
+                                {
+                                    { "function", "run" },
+                                    { "source", "function run() { return true; }" }, // Satisfying Input condition above
+                                    { "outputVariable", "InputIsValid" }
+                                }
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                Conditions = new []
+                                {
+                                    new Condition
+                                    {
+                                        Variable = "InputIsValid",
+                                        Source = ValueSource.Context,
+                                        Values = new[] { "true" }
+                                    }
+                                },
+                                StateId = "Ok"
+                            },
+                            new Output
+                            {
+                                Conditions = new []
+                                {
+                                    new Condition
+                                    {
+                                        Variable = "InputIsValid",
+                                        Source = ValueSource.Context,
+                                        Values = new[] { "false" }
+                                    }
+                                },
+                                StateId = "NOk"
+                            },
+                            new Output
+                            {
+                                StateId = "error"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "Ok",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", okMessageContent }
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "NOk",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", nokMessageContent }
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "error",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", "failed to set variable" }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(inputOk, User, Application, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "error", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "Ok", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "NOk", Arg.Any<CancellationToken>());
+
+            Sender
+                .DidNotReceive()
+                .SendMessageAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
+
+            Context.Received(1).SetVariableAsync("InputIsValid", "True", Arg.Any<CancellationToken>());
+            Context.Received(1).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithInputContextConditionsNotSatisfiedShouldChangeStateAndSendMessage()
+        {
+            // Arrange
+            var inputOk = new PlainText() { Text = "OK!" };
+            var inputNOk = new PlainText() { Text = "NOK!" };
+            var messageType = "text/plain";
+            var okMessageContent = "OK";
+            var nokMessageContent = "NOK";
+            var variables = new Dictionary<string, string>();
+            Context
+                .When(c => c.SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()))
+                .Do(callInfo =>
+                {
+                    var key = callInfo.ArgAt<string>(0);
+                    var value = callInfo.ArgAt<string>(1);
+                    variables[key] = value;
+                });
+
+            Context
+                .GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(callInfo =>
+                {
+                    var key = callInfo.ArgAt<string>(0);
+                    if (variables.TryGetValue(key, out var value)) return value;
+                    return null;
+                });
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "Start"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "Start",
+                        Input = new Input()
+                        {
+                            Conditions = new []
+                            {
+                                new Condition
+                                {
+                                    Variable = "InputIsValid",
+                                    Source = ValueSource.Context,
+                                    Values = new[] { "true" }
+                                }
+                            }
+                        },
+                        InputActions = new []
+                        {
+                            new Action
+                            {
+                                Type = "ExecuteScript",
+                                Settings = new JObject()
+                                {
+                                    { "function", "run" },
+                                    { "source", "function run(content) { return false; }" }, // Not satisfying Input condition above
+                                    { "outputVariable", "InputIsValid" }
+                                }
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                Conditions = new []
+                                {
+                                    new Condition
+                                    {
+                                        Variable = "InputIsValid",
+                                        Source = ValueSource.Context,
+                                        Values = new[] { "true" }
+                                    }
+                                },
+                                StateId = "Ok"
+                            },
+                            new Output
+                            {
+                                Conditions = new []
+                                {
+                                    new Condition
+                                    {
+                                        Variable = "InputIsValid",
+                                        Source = ValueSource.Context,
+                                        Values = new[] { "false" }
+                                    }
+                                },
+                                StateId = "NOk"
+                            },
+                            new Output
+                            {
+                                StateId = "error"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "Ok",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", okMessageContent }
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "NOk",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", nokMessageContent }
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "error",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", "failed to set variable" }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(inputNOk, User, Application, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "error", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "NOk", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "Ok", Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(User)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == nokMessageContent),
+                    Arg.Any<CancellationToken>());
+            Context.Received(1).SetVariableAsync("InputIsValid", "False", Arg.Any<CancellationToken>());
+            Context.Received(3).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
         }
 
         [Fact]

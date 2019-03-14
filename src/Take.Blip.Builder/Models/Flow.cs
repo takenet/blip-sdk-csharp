@@ -57,6 +57,11 @@ namespace Take.Blip.Builder.Models
                 throw new ValidationException("The root state must expect an input");
             }
 
+            if (rootState.Input.Conditions?.Any() == true)
+            {
+                throw new ValidationException("The root state must not have any conditions");
+            }
+
             foreach (var state in States)
             {
                 state.Validate();
