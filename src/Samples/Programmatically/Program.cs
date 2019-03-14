@@ -16,7 +16,7 @@ namespace Programmatically
         static async Task Main(string[] args)
         {
             var client = new BlipClientBuilder()
-                .UsingAccessKey("meubotefree", "aURid3oxYTNrUTk5b0RBajU3VWw=")
+                .UsingAccessKey("", "")
                 .Build();
 
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
