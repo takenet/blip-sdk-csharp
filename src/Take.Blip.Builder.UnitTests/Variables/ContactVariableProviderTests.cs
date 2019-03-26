@@ -16,6 +16,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public ContactVariableProviderTests()
         {
             ContactExtension = Substitute.For<IContactExtension>();
+            CacheContactExtension = new CacheContactExtensionDecorator(ContactExtension);
             Context = Substitute.For<IContext>();
             InputContext = new Dictionary<string, object>();
             Context.InputContext.Returns(InputContext);
@@ -29,17 +30,18 @@ namespace Take.Blip.Builder.UnitTests.Variables
             Context.User.Returns(Contact.Identity);
         }
 
+        public IContactExtension CacheContactExtension { get; }
         public IContactExtension ContactExtension { get; }
 
-        public IContext Context { get;  }
+        public IContext Context { get; }
 
         public IDictionary<string, object> InputContext { get; }
 
-        public Contact Contact { get;  }
+        public Contact Contact { get; }
 
         public ContactVariableProvider GetTarget()
         {
-            return new ContactVariableProvider(ContactExtension);
+            return new ContactVariableProvider(CacheContactExtension);
         }
 
         [Fact]
@@ -61,7 +63,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Arrange
             var target = GetTarget();
 
-            Contact nullContact = null;        
+            Contact nullContact = null;
             ContactExtension.GetAsync(Arg.Any<Identity>(), Arg.Any<CancellationToken>()).Returns(nullContact);
 
             // Act
@@ -70,7 +72,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Asset
             actual.ShouldBeNull();
         }
-
 
         [Fact]
         public async Task GetNameTwiceWhenContactExistsShouldUseCachedValue()
