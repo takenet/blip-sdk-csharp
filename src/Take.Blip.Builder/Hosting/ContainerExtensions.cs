@@ -122,7 +122,7 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
             container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
-            container.RegisterSingleton<ICache<Contact>, ContactMomoryCache>();
+            container.RegisterSingleton<ICache<Contact>, ContactMemoryCache>();
 
             return container;
         }

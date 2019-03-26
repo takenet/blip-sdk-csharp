@@ -4,11 +4,11 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Take.Blip.Builder.Utils
 {
-    public class ContactMomoryCache : ICache<Contact>
+    public class ContactMemoryCache : ICache<Contact>
     {
         private readonly MemoryCache _contactCache;
 
-        public ContactMomoryCache()
+        public ContactMemoryCache()
         {
             _contactCache = new MemoryCache(new MemoryCacheOptions());
         }

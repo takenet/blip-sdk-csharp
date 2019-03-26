@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
     {
         public ContactVariableProviderTests()
         {
-            ContactMemoryCache = new ContactMomoryCache();
+            ContactMemoryCache = new ContactMemoryCache();
             ContactExtension = Substitute.For<IContactExtension>();
             Context = Substitute.For<IContext>();
             InputContext = new Dictionary<string, object>();
