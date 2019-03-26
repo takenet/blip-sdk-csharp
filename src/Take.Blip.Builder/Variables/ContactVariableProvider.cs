@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Network;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Client.Extensions.Contacts;
 
 namespace Take.Blip.Builder.Variables
@@ -13,42 +14,47 @@ namespace Take.Blip.Builder.Variables
     public class ContactVariableProvider : IVariableProvider
     {
         public const string CONTACT_EXTRAS_VARIABLE_PREFIX = "extras.";
-        
+
         private readonly ConcurrentDictionary<string, PropertyInfo> _contactPropertyCacheDictionary;
         private readonly IContactExtension _contactExtension;
+        private readonly ICache<Contact> _contactCache;
+        private readonly bool _cacheLocally;
 
-        public ContactVariableProvider(IContactExtension contactExtension)
+        public ContactVariableProvider(
+            IContactExtension contactExtension,
+            ICache<Contact> contactCache,
+            bool cacheLocally = true)
         {
             _contactExtension = contactExtension;
+            _contactCache = contactCache;
             _contactPropertyCacheDictionary = new ConcurrentDictionary<string, PropertyInfo>();
+            _cacheLocally = cacheLocally;
         }
 
         public VariableSource Source => VariableSource.Contact;
 
         public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
-            Contact contact;
-            try
+            Contact contact = null;
+            if (_cacheLocally) contact = _contactCache.Get(context.User.ToString());
+
+            if (contact == null)
             {
-                if (context.InputContext.TryGetValue(nameof(contact), out var contactValue))
-                {
-                    contact = (Contact)contactValue;
-                }
-                else
+                try
                 {
                     contact = await _contactExtension.GetAsync(context.User, cancellationToken);
-                    context.InputContext[nameof(contact)] = contact;
+                    if (contact != null && _cacheLocally)
+                    {
+                        _contactCache.Set(context.User.ToString(), contact);
+                    }
                 }
+                catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
+                {
+                    return null;
+                }
+            }
 
-                if (contact == null) return null;
-                
-                return GetContactProperty(contact, name);
-            }
-            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
-            {
-                context.InputContext[nameof(contact)] = null;
-                return null;
-            }
+            return GetContactProperty(contact, name);
         }
 
         private string GetContactProperty(Contact contact, string variableName)
