@@ -8,7 +8,7 @@ namespace Take.Blip.Builder.Utils
     {
         TItem Get(object key);
 
-        void Set(object key, TItem value);
+        void Set(object key, TItem value, TimeSpan cacheExpiration);
 
         void Remove(object key);
     }
