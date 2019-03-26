@@ -5,6 +5,7 @@ using Shouldly;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.Contacts;
 using Xunit;
@@ -15,6 +16,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
     {
         public ContactVariableProviderTests()
         {
+            ContactMemoryCache = new ContactMomoryCache();
             ContactExtension = Substitute.For<IContactExtension>();
             Context = Substitute.For<IContext>();
             InputContext = new Dictionary<string, object>();
@@ -30,16 +32,17 @@ namespace Take.Blip.Builder.UnitTests.Variables
         }
 
         public IContactExtension ContactExtension { get; }
+        public ICache<Contact> ContactMemoryCache { get; }
 
-        public IContext Context { get;  }
+        public IContext Context { get; }
 
         public IDictionary<string, object> InputContext { get; }
 
-        public Contact Contact { get;  }
+        public Contact Contact { get; }
 
         public ContactVariableProvider GetTarget()
         {
-            return new ContactVariableProvider(ContactExtension);
+            return new ContactVariableProvider(ContactExtension, ContactMemoryCache);
         }
 
         [Fact]
@@ -61,7 +64,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Arrange
             var target = GetTarget();
 
-            Contact nullContact = null;        
+            Contact nullContact = null;
             ContactExtension.GetAsync(Arg.Any<Identity>(), Arg.Any<CancellationToken>()).Returns(nullContact);
 
             // Act
@@ -70,7 +73,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Asset
             actual.ShouldBeNull();
         }
-
 
         [Fact]
         public async Task GetNameTwiceWhenContactExistsShouldUseCachedValue()

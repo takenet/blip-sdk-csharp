@@ -18,35 +18,34 @@ namespace Take.Blip.Builder.Variables
         private readonly ConcurrentDictionary<string, PropertyInfo> _contactPropertyCacheDictionary;
         private readonly IContactExtension _contactExtension;
         private readonly ICache<Contact> _contactCache;
-        private readonly bool _cacheLocally;
+        private readonly TimeSpan _cacheExpiration;
 
         public ContactVariableProvider(
             IContactExtension contactExtension,
-            ICache<Contact> contactCache,
-            bool cacheLocally = true)
+            ICache<Contact> contactCache)
         {
             _contactExtension = contactExtension;
             _contactCache = contactCache;
             _contactPropertyCacheDictionary = new ConcurrentDictionary<string, PropertyInfo>();
-            _cacheLocally = cacheLocally;
+            _cacheExpiration = TimeSpan.FromMinutes(30);
         }
 
         public VariableSource Source => VariableSource.Contact;
 
         public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
-            Contact contact = null;
-            if (_cacheLocally) contact = _contactCache.Get(context.User.ToString());
+            Contact contact = _contactCache.Get(context.User.ToString());
 
             if (contact == null)
             {
                 try
                 {
                     contact = await _contactExtension.GetAsync(context.User, cancellationToken);
-                    if (contact != null && _cacheLocally)
+                    if (contact == null)
                     {
-                        _contactCache.Set(context.User.ToString(), contact);
+                        return null;
                     }
+                    _contactCache.Set(context.User.ToString(), contact, _cacheExpiration);
                 }
                 catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
                 {
