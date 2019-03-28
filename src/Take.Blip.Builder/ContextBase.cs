@@ -8,6 +8,7 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 
 namespace Take.Blip.Builder
@@ -47,21 +48,29 @@ namespace Take.Blip.Builder
 
             string variableValue;
 
-            if (variable.Source == VariableSource.Context)
+            try
             {
-                variableValue = await GetContextVariableAsync(variable.Name, cancellationToken);
-            }
-            else
-            {
-                if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
+                ContextContainer.CurrentContext = this;
+                if (variable.Source == VariableSource.Context)
                 {
-                    throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
+                    variableValue = await GetContextVariableAsync(variable.Name, cancellationToken);
                 }
+                else
+                {
+                    if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
+                    {
+                        throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
+                    }
 
-                variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
+                    variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
+                }
+            }
+            finally
+            {
+                ContextContainer.CurrentContext = null;
             }
 
-            if (string.IsNullOrWhiteSpace(variableValue) || 
+            if (string.IsNullOrWhiteSpace(variableValue) ||
                 string.IsNullOrWhiteSpace(variable.Property))
             {
                 return variableValue;
@@ -97,9 +106,7 @@ namespace Take.Blip.Builder
             }
         }
 
-
-
-        struct VariableName
+        private struct VariableName
         {
             private static readonly Regex VariableNameRegex = new Regex("^(?<sourceOrName>[\\w\\d]+)(\\.(?<name>[\\w\\d\\.]+))?(@(?<property>([\\w\\d\\.](\\[(?<index>\\d+|\\$n)\\])?)+))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 

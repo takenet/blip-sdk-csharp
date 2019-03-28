@@ -4,6 +4,7 @@ using Lime.Protocol.Network;
 using SimpleInjector;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Hosting;
@@ -37,12 +38,15 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ContextExtension);
             container.RegisterSingleton(Sender);
 
+            var variableProviders = container.GetAllInstances<IVariableProvider>().Where(vp => vp.GetType() != typeof(ContactVariableProvider)).ToList();
+            variableProviders.Add(new ContactVariableProvider(CacheContactExtensionDecorator));
+
             return new ExtensionContext(
                 User,
                 Application,
                 Input,
                 Flow,
-                container.GetAllInstances<IVariableProvider>(),
+                variableProviders,
                 ContextExtension);
         }
 
