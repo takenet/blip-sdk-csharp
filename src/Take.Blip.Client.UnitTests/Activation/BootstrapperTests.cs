@@ -852,12 +852,6 @@ namespace Take.Blip.Client.UnitTests.Activation
         {
             Registrations.Add(serviceType, instanceFactory);
         }
-
-        public void RegisterDecorator(Type serviceType, Func<object> instanceFactory)
-        {
-            Registrations.Remove(serviceType);
-            Registrations.Add(serviceType, instanceFactory);
-        }
     }
 
     public class TestStateManager : IStateManager

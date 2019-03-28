@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Microsoft.Extensions.Caching.Memory;
+using Take.Blip.Client.Extensions.Contacts;
 
-namespace Take.Blip.Client.Extensions.Contacts
+namespace Take.Blip.Builder.Utils
 {
     public class CacheContactExtensionDecorator : IContactExtension
     {

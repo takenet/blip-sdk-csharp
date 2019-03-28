@@ -60,12 +60,5 @@ namespace Take.Blip.Client.Activation
             TypeDictionary[serviceType] = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
             (SecondaryServiceProvider as IServiceContainer)?.RegisterService(serviceType, instanceFactory);
         }
-
-        public void RegisterDecorator(Type serviceType, Func<object> instanceFactory)
-        {
-            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
-            TypeDictionary[serviceType] = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
-            (SecondaryServiceProvider as IServiceContainer)?.RegisterDecorator(serviceType, instanceFactory);
-        }
     }
 }

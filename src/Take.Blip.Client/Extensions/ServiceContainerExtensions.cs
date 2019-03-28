@@ -31,8 +31,6 @@ namespace Take.Blip.Client.Extensions
             serviceContainer.RegisterService(typeof(IDelegationExtension), () => new DelegationExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IDirectoryExtension), () => new DirectoryExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IContactExtension), () => new ContactExtension(senderFactory()));
-            Func<IContactExtension> contactExtensionFactory = () => serviceContainer.GetService<IContactExtension>();
-            serviceContainer.RegisterDecorator(typeof(IContactExtension), () => new CacheContactExtensionDecorator(contactExtensionFactory()));
             Func<IBucketExtension> bucketExtensionFactory = () => new BucketExtension(senderFactory());
             serviceContainer.RegisterService(typeof(ISchedulerExtension), () => new SchedulerExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IEventTrackExtension), () => new EventTrackExtension(senderFactory()));
