@@ -62,7 +62,8 @@ namespace Take.Blip.Builder.Utils
             await _contactExtension.SetAsync(identity, contact, cancellationToken);
 
             var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
-            await _cacheContactMap.TryRemoveAsync(key, cancellationToken);
+            await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
+            await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _cacheExpiration);
         }
 
         public async Task DeleteAsync(Identity identity, CancellationToken cancellationToken)
