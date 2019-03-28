@@ -5,6 +5,7 @@ using Shouldly;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.Contacts;
 using Xunit;
@@ -16,7 +17,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public ContactVariableProviderTests()
         {
             ContactExtension = Substitute.For<IContactExtension>();
-            CacheContactExtension = new CacheContactExtensionDecorator(ContactExtension);
+            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension);
             Context = Substitute.For<IContext>();
             InputContext = new Dictionary<string, object>();
             Context.InputContext.Returns(InputContext);
@@ -30,8 +31,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
             Context.User.Returns(Contact.Identity);
         }
 
-        public IContactExtension CacheContactExtension { get; }
         public IContactExtension ContactExtension { get; }
+        public IContactExtension CacheContactExtensionDecorator { get; }
 
         public IContext Context { get; }
 
@@ -41,7 +42,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public ContactVariableProvider GetTarget()
         {
-            return new ContactVariableProvider(CacheContactExtension);
+            return new ContactVariableProvider(CacheContactExtensionDecorator);
         }
 
         [Fact]

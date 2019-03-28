@@ -26,6 +26,7 @@ using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions;
+using Take.Blip.Client.Extensions.Contacts;
 using Take.Elephant;
 using Take.Elephant.Sql;
 
@@ -106,7 +107,6 @@ namespace Take.Blip.Builder.Hosting
                 var configuration = container.GetInstance<IConfiguration>();
                 var driverType = Type.GetType(configuration.SqlStorageDriverTypeName) ?? typeof(SqlDatabaseDriver);
                 return (IDatabaseDriver)container.GetInstance(driverType);
-
             });
             container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
             container.RegisterSingleton<IConnectionMultiplexer>(() =>
@@ -122,6 +122,7 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
             container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
+            container.RegisterDecorator<IContactExtension, CacheContactExtensionDecorator>();
 
             return container;
         }
@@ -149,7 +150,6 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
             container.RegisterSingleton<IDocumentTypeResolver>(new DocumentTypeResolver().WithBlipDocuments());
             container.RegisterSingleton<ILogger>(LoggerProvider.Logger);
-
 
             return container;
         }
