@@ -1,4 +1,5 @@
-﻿using Lime.Protocol.Serialization;
+﻿using Lime.Messaging.Resources;
+using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Serilog;
 using SimpleInjector;
@@ -102,6 +103,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IOwnerCallerNameDocumentMap, Storage.Specialized.OwnerCallerNameDocumentMap>();
             container.RegisterSingleton<ISourceOwnerCallerNameDocumentMap, Storage.Sql.OwnerCallerNameDocumentMap>();
             container.RegisterSingleton<ICacheOwnerCallerNameDocumentMap, Storage.Redis.OwnerCallerNameDocumentMap>();
+            container.RegisterSingleton<ICacheOwnerCallerContactMap, Storage.Redis.CacheOwnerCallerContactMap>();
             container.RegisterSingleton<IDatabaseDriver>(() =>
             {
                 var configuration = container.GetInstance<IConfiguration>();
@@ -109,6 +111,7 @@ namespace Take.Blip.Builder.Hosting
                 return (IDatabaseDriver)container.GetInstance(driverType);
             });
             container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
+            container.RegisterSingleton<ISerializer<Contact>, JsonSerializer<Contact>>();
             container.RegisterSingleton<IConnectionMultiplexer>(() =>
             {
                 var configuration = container.GetInstance<IConfiguration>();

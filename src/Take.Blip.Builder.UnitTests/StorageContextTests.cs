@@ -1,10 +1,16 @@
 ﻿using Lime.Messaging.Contents;
+using NSubstitute;
+using Serilog;
 using SimpleInjector;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
+using Take.Blip.Client.Extensions.Contacts;
 
 namespace Take.Blip.Builder.UnitTests
 {
@@ -43,14 +49,16 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(Sender);
 
+            var variableProviders = container.GetAllInstances<IVariableProvider>().Where(vp => vp.GetType() != typeof(ContactVariableProvider)).ToList();
+            variableProviders.Add(new ContactVariableProvider(CacheContactExtensionDecorator));
+
             return new StorageContext(
                 User,
                 Application,
                 Input,
                 Flow,
-                container.GetAllInstances<IVariableProvider>(),
+                variableProviders,
                 OwnerCallerNameDocumentMap);
         }
-
     }
 }
