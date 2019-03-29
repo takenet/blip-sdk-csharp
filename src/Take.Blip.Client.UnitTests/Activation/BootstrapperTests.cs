@@ -12,9 +12,9 @@ using Take.Blip.Client.Session;
 using Xunit;
 
 namespace Take.Blip.Client.UnitTests.Activation
-{    
+{
     public class BootstrapperTests : TestsBase
-    {        
+    {
         public BootstrapperTests()
         {
             Server = new DummyServer();
@@ -25,7 +25,6 @@ namespace Take.Blip.Client.UnitTests.Activation
 
         public ITypeResolver TypeResolver { get; } =
             new TypeResolver(new AssemblyProvider(typeof(BootstrapperTests).GetTypeInfo().Assembly, typeof(BlipClient).GetTypeInfo().Assembly));
-
 
         [Fact]
         public void EnsureDefaultApplicationJsonValuesAreCorrect()
@@ -55,7 +54,6 @@ namespace Take.Blip.Client.UnitTests.Activation
 
             // Assert
             actual.ShouldNotBeNull();
-
         }
 
         [Fact]
@@ -74,7 +72,6 @@ namespace Take.Blip.Client.UnitTests.Activation
 
             // Assert
             actual.ShouldNotBeNull();
-
         }
 
         [Fact]
@@ -93,7 +90,6 @@ namespace Take.Blip.Client.UnitTests.Activation
 
             // Assert
             actual.ShouldNotBeNull();
-
         }
 
         [Fact]
@@ -269,7 +265,6 @@ namespace Take.Blip.Client.UnitTests.Activation
             TestMessageReceiver.InstanceCount.ShouldBe(2);
         }
 
-
         [Fact]
         public async Task CreateWithRegisteringTunnelShouldAddReceiver()
         {
@@ -345,7 +340,6 @@ namespace Take.Blip.Client.UnitTests.Activation
                             { "setting5", 55 }
                         }
                     }
-
                 },
                 Settings = new Dictionary<string, object>
                 {
@@ -382,7 +376,6 @@ namespace Take.Blip.Client.UnitTests.Activation
                     {
                         Type = typeof(InvalidReceiver).Name,
                     }
-
                 },
                 HostName = Server.ListenerUri.Host
             };
@@ -408,7 +401,6 @@ namespace Take.Blip.Client.UnitTests.Activation
                     {
                         Type = typeof(DuplicatedReceiver).Name,
                     }
-
                 },
                 HostName = Server.ListenerUri.Host
             };
@@ -574,7 +566,6 @@ namespace Take.Blip.Client.UnitTests.Activation
                         Type = typeof(TestMessageReceiverWithCustomParameter).Name,
                         MediaType = "text/plain"
                     }
-
                 },
                 HostName = Server.ListenerUri.Host,
                 ServiceProviderType = typeof(TestServiceProvider).Name
@@ -605,7 +596,6 @@ namespace Take.Blip.Client.UnitTests.Activation
                         Type = nameof(SimpleMessageReceiver),
                         MediaType = "text/plain"
                     }
-
                 },
                 HostName = Server.ListenerUri.Host,
                 ServiceProviderType = nameof(TestServiceContainer)
@@ -676,7 +666,6 @@ namespace Take.Blip.Client.UnitTests.Activation
                             { "setting2", 22 }
                         }
                     }
-
                 },
                 HostName = Server.ListenerUri.Host,
                 ServiceProviderType = typeof(TestServiceProvider).Name,
@@ -713,7 +702,6 @@ namespace Take.Blip.Client.UnitTests.Activation
 
             TestMessageReceiverWithCustomSettings.TestApplicationSettings.ShouldBe(TestStartupWithCustomSettings.CustomSettings);
         }
-
 
         public override void Dispose(bool disposing)
         {

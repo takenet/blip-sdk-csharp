@@ -1,4 +1,5 @@
-﻿using Lime.Protocol.Serialization;
+﻿using Lime.Messaging.Resources;
+using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Serilog;
 using SimpleInjector;
@@ -26,6 +27,7 @@ using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions;
+using Take.Blip.Client.Extensions.Contacts;
 using Take.Elephant;
 using Take.Elephant.Sql;
 
@@ -101,14 +103,15 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IOwnerCallerNameDocumentMap, Storage.Specialized.OwnerCallerNameDocumentMap>();
             container.RegisterSingleton<ISourceOwnerCallerNameDocumentMap, Storage.Sql.OwnerCallerNameDocumentMap>();
             container.RegisterSingleton<ICacheOwnerCallerNameDocumentMap, Storage.Redis.OwnerCallerNameDocumentMap>();
+            container.RegisterSingleton<ICacheOwnerCallerContactMap, Storage.Redis.CacheOwnerCallerContactMap>();
             container.RegisterSingleton<IDatabaseDriver>(() =>
             {
                 var configuration = container.GetInstance<IConfiguration>();
                 var driverType = Type.GetType(configuration.SqlStorageDriverTypeName) ?? typeof(SqlDatabaseDriver);
                 return (IDatabaseDriver)container.GetInstance(driverType);
-
             });
             container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
+            container.RegisterSingleton<ISerializer<Contact>, JsonSerializer<Contact>>();
             container.RegisterSingleton<IConnectionMultiplexer>(() =>
             {
                 var configuration = container.GetInstance<IConfiguration>();
@@ -122,6 +125,7 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
             container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
+            container.RegisterDecorator<IContactExtension, CacheContactExtensionDecorator>();
 
             return container;
         }
@@ -149,7 +153,6 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
             container.RegisterSingleton<IDocumentTypeResolver>(new DocumentTypeResolver().WithBlipDocuments());
             container.RegisterSingleton<ILogger>(LoggerProvider.Logger);
-
 
             return container;
         }

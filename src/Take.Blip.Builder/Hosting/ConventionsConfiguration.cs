@@ -28,5 +28,7 @@ namespace Take.Blip.Builder.Hosting
         public virtual string SqlStorageDriverTypeName => typeof(SqlDatabaseDriver).FullName;
 
         public virtual string ContextType => nameof(ExtensionContext);
+
+        public TimeSpan ContactCacheExpiration => TimeSpan.FromMinutes(30);
     }
 }
