@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
-using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage;
