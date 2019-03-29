@@ -5,6 +5,7 @@ using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Client.Extensions.Contacts;
 
@@ -14,17 +15,18 @@ namespace Take.Blip.Builder.Utils
     {
         private readonly IContactExtension _contactExtension;
         private readonly ICacheOwnerCallerContactMap _cacheContactMap;
+        private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
-        private TimeSpan _cacheExpiration;
 
         public CacheContactExtensionDecorator(
             IContactExtension contactExtension,
             ICacheOwnerCallerContactMap cacheContactMap,
-            ILogger _logger)
+            ILogger _logger,
+            IConfiguration configuration)
         {
             _contactExtension = contactExtension;
             _cacheContactMap = cacheContactMap;
-            _cacheExpiration = TimeSpan.FromMinutes(30);
+            _configuration = configuration;
         }
 
         public async Task<Contact> GetAsync(Identity identity, CancellationToken cancellationToken)
@@ -38,7 +40,7 @@ namespace Take.Blip.Builder.Utils
                 try
                 {
                     await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
-                    await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _cacheExpiration);
+                    await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.CacheContactExpiration);
                 }
                 catch (Exception e)
                 {
@@ -63,7 +65,7 @@ namespace Take.Blip.Builder.Utils
 
             var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
             await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
-            await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _cacheExpiration);
+            await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.CacheContactExpiration);
         }
 
         public async Task DeleteAsync(Identity identity, CancellationToken cancellationToken)
