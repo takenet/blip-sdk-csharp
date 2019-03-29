@@ -14,7 +14,6 @@ using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
-using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Contacts;
@@ -33,7 +32,6 @@ namespace Take.Blip.Builder.UnitTests
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
             CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
-            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, CacheOwnerCallerContactMap, Logger, Configuration);
             Sender = Substitute.For<ISender>();
             Flow = new Flow()
             {
@@ -65,8 +63,6 @@ namespace Take.Blip.Builder.UnitTests
         public IConfiguration Configuration { get; }
 
         public ICacheOwnerCallerContactMap CacheOwnerCallerContactMap { get; }
-
-        public IContactExtension CacheContactExtensionDecorator { get; }
 
         public Identity User { get; set; }
 

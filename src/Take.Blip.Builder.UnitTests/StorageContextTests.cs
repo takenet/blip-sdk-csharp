@@ -1,16 +1,9 @@
-﻿using Lime.Messaging.Contents;
-using NSubstitute;
-using Serilog;
-using SimpleInjector;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using SimpleInjector;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
-using Take.Blip.Client.Extensions.Contacts;
 
 namespace Take.Blip.Builder.UnitTests
 {
@@ -45,19 +38,18 @@ namespace Take.Blip.Builder.UnitTests
         protected override ContextBase GetTarget()
         {
             var container = new Container();
+            container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
             container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(Sender);
-
-            var variableProviders = container.GetAllInstances<IVariableProvider>().Where(vp => vp.GetType() != typeof(ContactVariableProvider)).ToList();
-            variableProviders.Add(new ContactVariableProvider(CacheContactExtensionDecorator));
+            container.RegisterSingleton(CacheOwnerCallerContactMap);
 
             var storageContext = new StorageContext(
                 User,
                 Application,
                 Input,
                 Flow,
-                variableProviders,
+                container.GetAllInstances<IVariableProvider>(),
                 OwnerCallerNameDocumentMap);
             ContextContainer.CurrentContext = storageContext;
 

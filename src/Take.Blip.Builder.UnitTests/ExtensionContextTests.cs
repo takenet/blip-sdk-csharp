@@ -4,7 +4,6 @@ using Lime.Protocol.Network;
 using SimpleInjector;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Hosting;
@@ -34,20 +33,19 @@ namespace Take.Blip.Builder.UnitTests
         protected override ContextBase GetTarget()
         {
             var container = new Container();
+            container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
             container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(ContextExtension);
             container.RegisterSingleton(Sender);
-
-            var variableProviders = container.GetAllInstances<IVariableProvider>().Where(vp => vp.GetType() != typeof(ContactVariableProvider)).ToList();
-            variableProviders.Add(new ContactVariableProvider(CacheContactExtensionDecorator));
+            container.RegisterSingleton(CacheOwnerCallerContactMap);
 
             var extensionContext = new ExtensionContext(
                 User,
                 Application,
                 Input,
                 Flow,
-                variableProviders,
+                container.GetAllInstances<IVariableProvider>(),
                 ContextExtension);
             ContextContainer.CurrentContext = extensionContext;
 
