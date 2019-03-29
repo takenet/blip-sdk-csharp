@@ -52,13 +52,16 @@ namespace Take.Blip.Builder.UnitTests
             var variableProviders = container.GetAllInstances<IVariableProvider>().Where(vp => vp.GetType() != typeof(ContactVariableProvider)).ToList();
             variableProviders.Add(new ContactVariableProvider(CacheContactExtensionDecorator));
 
-            return new StorageContext(
+            var storageContext = new StorageContext(
                 User,
                 Application,
                 Input,
                 Flow,
                 variableProviders,
                 OwnerCallerNameDocumentMap);
+            ContextContainer.CurrentContext = storageContext;
+
+            return storageContext;
         }
     }
 }
