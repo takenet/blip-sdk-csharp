@@ -40,15 +40,13 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(CacheOwnerCallerContactMap);
 
-            var extensionContext = new ExtensionContext(
+            return new ExtensionContext(
                 User,
                 Application,
                 Input,
                 Flow,
                 container.GetAllInstances<IVariableProvider>(),
                 ContextExtension);
-
-            return extensionContext;
         }
 
         private class DictionaryContextExtension : IContextExtension

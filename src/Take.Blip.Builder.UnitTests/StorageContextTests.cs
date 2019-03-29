@@ -44,15 +44,13 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(CacheOwnerCallerContactMap);
 
-            var storageContext = new StorageContext(
+            return new StorageContext(
                 User,
                 Application,
                 Input,
                 Flow,
                 container.GetAllInstances<IVariableProvider>(),
                 OwnerCallerNameDocumentMap);
-
-            return storageContext;
         }
     }
 }
