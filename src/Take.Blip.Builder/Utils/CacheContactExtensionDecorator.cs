@@ -41,15 +41,7 @@ namespace Take.Blip.Builder.Utils
             if (contact == null)
             {
                 contact = await _contactExtension.GetAsync(identity, cancellationToken);
-                try
-                {
-                    await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
-                    await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.ContactCacheExpiration);
-                }
-                catch (Exception e)
-                {
-                    _logger.Error(e, $"Error adding contact {identity} for owner {GetApplicationIdentity(_applicationSettings)} on CacheOwnerCallerContactMap");
-                }
+                await AddToCache(contact, key, cancellationToken);
             }
 
             return contact;
@@ -66,8 +58,7 @@ namespace Take.Blip.Builder.Utils
             await _contactExtension.SetAsync(identity, contact, cancellationToken);
 
             var key = CreateKey(_applicationSettings, identity);
-            await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
-            await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.ContactCacheExpiration);
+            await AddToCache(contact, key, cancellationToken);
         }
 
         public async Task DeleteAsync(Identity identity, CancellationToken cancellationToken)
@@ -80,6 +71,19 @@ namespace Take.Blip.Builder.Utils
         {
             var key = CreateKey(_applicationSettings, identity);
             await _cacheContactMap.TryRemoveAsync(key, cancellationToken);
+        }
+
+        private async Task AddToCache(Contact contact, OwnerCaller key, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
+                await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.ContactCacheExpiration);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, $"Error adding contact {contact.Identity} for owner {GetApplicationIdentity(_applicationSettings)} on CacheOwnerCallerContactMap");
+            }
         }
 
         private OwnerCaller CreateKey(Application applicationSettings, Identity identity) =>
