@@ -10,6 +10,7 @@ using Lime.Protocol.Serialization.Newtonsoft;
 using NSubstitute;
 using Serilog;
 using Shouldly;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
@@ -30,8 +31,9 @@ namespace Take.Blip.Builder.UnitTests
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             ContactExtension = Substitute.For<IContactExtension>();
             Logger = Substitute.For<ILogger>();
+            Configuration = Substitute.For<IConfiguration>();
             CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
-            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, CacheOwnerCallerContactMap, Logger);
+            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, CacheOwnerCallerContactMap, Logger, Configuration);
             Sender = Substitute.For<ISender>();
             Flow = new Flow()
             {
@@ -49,6 +51,7 @@ namespace Take.Blip.Builder.UnitTests
                 new EnvelopeSerializer(documentTypeResolver),
                 ArtificialIntelligenceExtension,
                 CancellationToken);
+            Configuration.CacheContactExpiration.Returns(TimeSpan.FromMinutes(5));
         }
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; }
@@ -58,6 +61,8 @@ namespace Take.Blip.Builder.UnitTests
         public ISender Sender { get; set; }
 
         public ILogger Logger { get; }
+
+        public IConfiguration Configuration { get; }
 
         public ICacheOwnerCallerContactMap CacheOwnerCallerContactMap { get; }
 

@@ -3,9 +3,11 @@ using Lime.Protocol;
 using NSubstitute;
 using Serilog;
 using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
@@ -21,8 +23,9 @@ namespace Take.Blip.Builder.UnitTests.Variables
             ContactExtension = Substitute.For<IContactExtension>();
             Context = Substitute.For<IContext>();
             Logger = Substitute.For<ILogger>();
+            Configuration = Substitute.For<IConfiguration>();
             var cacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
-            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, cacheOwnerCallerContactMap, Logger);
+            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, cacheOwnerCallerContactMap, Logger, Configuration);
             InputContext = new Dictionary<string, object>();
             Context.InputContext.Returns(InputContext);
             Contact = new Contact()
@@ -34,6 +37,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             ContactExtension.GetAsync(Contact.Identity, CancellationToken).Returns(Contact);
             Context.User.Returns(Contact.Identity);
             Context.Application.Returns(new Identity("application", "domain.com"));
+            Configuration.CacheContactExpiration.Returns(TimeSpan.FromMinutes(5));
             ContextContainer.CurrentContext = Context;
         }
 
@@ -41,6 +45,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public IContactExtension CacheContactExtensionDecorator { get; }
         public IContext Context { get; }
         public ILogger Logger { get; }
+        public IConfiguration Configuration { get; }
         public IDictionary<string, object> InputContext { get; }
 
         public Contact Contact { get; }
