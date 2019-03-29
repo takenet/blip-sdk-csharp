@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.Context;
 
@@ -41,13 +42,16 @@ namespace Take.Blip.Builder.UnitTests
             var variableProviders = container.GetAllInstances<IVariableProvider>().Where(vp => vp.GetType() != typeof(ContactVariableProvider)).ToList();
             variableProviders.Add(new ContactVariableProvider(CacheContactExtensionDecorator));
 
-            return new ExtensionContext(
+            var extensionContext = new ExtensionContext(
                 User,
                 Application,
                 Input,
                 Flow,
                 variableProviders,
                 ContextExtension);
+            ContextContainer.CurrentContext = extensionContext;
+
+            return extensionContext;
         }
 
         private class DictionaryContextExtension : IContextExtension

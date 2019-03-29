@@ -48,26 +48,18 @@ namespace Take.Blip.Builder
 
             string variableValue;
 
-            try
+            if (variable.Source == VariableSource.Context)
             {
-                ContextContainer.CurrentContext = this;
-                if (variable.Source == VariableSource.Context)
-                {
-                    variableValue = await GetContextVariableAsync(variable.Name, cancellationToken);
-                }
-                else
-                {
-                    if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
-                    {
-                        throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
-                    }
-
-                    variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
-                }
+                variableValue = await GetContextVariableAsync(variable.Name, cancellationToken);
             }
-            finally
+            else
             {
-                ContextContainer.CurrentContext = null;
+                if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
+                {
+                    throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
+                }
+
+                variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
             }
 
             if (string.IsNullOrWhiteSpace(variableValue) ||
