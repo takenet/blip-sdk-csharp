@@ -27,6 +27,7 @@ namespace Take.Blip.Builder.Hosting
         string SqlStorageDriverTypeName { get; }
 
         string ContextType { get; }
-        TimeSpan CacheContactExpiration { get; }
+
+        TimeSpan ContactCacheExpiration { get; }
     }
 }

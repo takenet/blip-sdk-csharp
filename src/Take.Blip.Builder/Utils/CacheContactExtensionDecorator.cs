@@ -31,7 +31,7 @@ namespace Take.Blip.Builder.Utils
         public async Task<Contact> GetAsync(Identity identity, CancellationToken cancellationToken)
         {
             var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
-            Contact contact = await _cacheContactMap.GetValueOrDefaultAsync(key, cancellationToken);
+            var contact = await _cacheContactMap.GetValueOrDefaultAsync(key, cancellationToken);
 
             if (contact == null)
             {
@@ -39,7 +39,7 @@ namespace Take.Blip.Builder.Utils
                 try
                 {
                     await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
-                    await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.CacheContactExpiration);
+                    await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.ContactCacheExpiration);
                 }
                 catch (Exception e)
                 {
@@ -53,9 +53,7 @@ namespace Take.Blip.Builder.Utils
         public async Task MergeAsync(Identity identity, Contact contact, CancellationToken cancellationToken)
         {
             await _contactExtension.MergeAsync(identity, contact, cancellationToken);
-
-            var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
-            await _cacheContactMap.TryRemoveAsync(key, cancellationToken);
+            await RemoveFromCache(identity, cancellationToken);
         }
 
         public async Task SetAsync(Identity identity, Contact contact, CancellationToken cancellationToken)
@@ -64,13 +62,17 @@ namespace Take.Blip.Builder.Utils
 
             var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
             await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
-            await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.CacheContactExpiration);
+            await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.ContactCacheExpiration);
         }
 
         public async Task DeleteAsync(Identity identity, CancellationToken cancellationToken)
         {
             await _contactExtension.DeleteAsync(identity, cancellationToken);
+            await RemoveFromCache(identity, cancellationToken);
+        }
 
+        private async Task RemoveFromCache(Identity identity, CancellationToken cancellationToken)
+        {
             var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
             await _cacheContactMap.TryRemoveAsync(key, cancellationToken);
         }
