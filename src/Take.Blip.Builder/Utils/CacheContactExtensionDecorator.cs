@@ -6,6 +6,8 @@ using Lime.Protocol;
 using Serilog;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage;
+using Take.Blip.Client;
+using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.Contacts;
 
 namespace Take.Blip.Builder.Utils
@@ -16,21 +18,24 @@ namespace Take.Blip.Builder.Utils
         private readonly ICacheOwnerCallerContactMap _cacheContactMap;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        private readonly Application _applicationSettings;
 
         public CacheContactExtensionDecorator(
             IContactExtension contactExtension,
             ICacheOwnerCallerContactMap cacheContactMap,
             ILogger _logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            Application applicationSettings)
         {
             _contactExtension = contactExtension;
             _cacheContactMap = cacheContactMap;
             _configuration = configuration;
+            _applicationSettings = applicationSettings;
         }
 
         public async Task<Contact> GetAsync(Identity identity, CancellationToken cancellationToken)
         {
-            var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
+            var key = CreateKey(_applicationSettings, identity);
             var contact = await _cacheContactMap.GetValueOrDefaultAsync(key, cancellationToken);
 
             if (contact == null)
@@ -43,7 +48,7 @@ namespace Take.Blip.Builder.Utils
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(e, $"Error adding contact {identity} for owner {ContextContainer.CurrentContext.Application} on CacheOwnerCallerContactMap");
+                    _logger.Error(e, $"Error adding contact {identity} for owner {GetApplicationIdentity(_applicationSettings)} on CacheOwnerCallerContactMap");
                 }
             }
 
@@ -60,7 +65,7 @@ namespace Take.Blip.Builder.Utils
         {
             await _contactExtension.SetAsync(identity, contact, cancellationToken);
 
-            var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
+            var key = CreateKey(_applicationSettings, identity);
             await _cacheContactMap.TryAddAsync(key, contact, true, cancellationToken);
             await _cacheContactMap.SetRelativeKeyExpirationAsync(key, _configuration.ContactCacheExpiration);
         }
@@ -73,8 +78,14 @@ namespace Take.Blip.Builder.Utils
 
         private async Task RemoveFromCache(Identity identity, CancellationToken cancellationToken)
         {
-            var key = OwnerCaller.Create(ContextContainer.CurrentContext.Application, identity);
+            var key = CreateKey(_applicationSettings, identity);
             await _cacheContactMap.TryRemoveAsync(key, cancellationToken);
         }
+
+        private OwnerCaller CreateKey(Application applicationSettings, Identity identity) =>
+            OwnerCaller.Create(GetApplicationIdentity(applicationSettings), identity);
+
+        private Identity GetApplicationIdentity(Application applicationSettings) =>
+            new Identity(applicationSettings.Identifier, applicationSettings.Domain ?? Constants.DEFAULT_DOMAIN);
     }
 }

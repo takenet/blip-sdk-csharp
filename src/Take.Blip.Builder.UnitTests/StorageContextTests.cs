@@ -51,7 +51,6 @@ namespace Take.Blip.Builder.UnitTests
                 Flow,
                 container.GetAllInstances<IVariableProvider>(),
                 OwnerCallerNameDocumentMap);
-            ContextContainer.CurrentContext = storageContext;
 
             return storageContext;
         }

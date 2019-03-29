@@ -11,6 +11,7 @@ using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
+using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.Contacts;
 using Xunit;
 
@@ -24,8 +25,9 @@ namespace Take.Blip.Builder.UnitTests.Variables
             Context = Substitute.For<IContext>();
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
+            ApplicationSettings = Substitute.For<Application>();
             var cacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
-            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, cacheOwnerCallerContactMap, Logger, Configuration);
+            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, cacheOwnerCallerContactMap, Logger, Configuration, ApplicationSettings);
             InputContext = new Dictionary<string, object>();
             Context.InputContext.Returns(InputContext);
             Contact = new Contact()
@@ -38,7 +40,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
             Context.User.Returns(Contact.Identity);
             Context.Application.Returns(new Identity("application", "domain.com"));
             Configuration.ContactCacheExpiration.Returns(TimeSpan.FromMinutes(5));
-            ContextContainer.CurrentContext = Context;
+            ApplicationSettings.Identifier = "application";
+            ApplicationSettings.Domain = "domain.com";
         }
 
         public IContactExtension ContactExtension { get; }
@@ -46,6 +49,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public IContext Context { get; }
         public ILogger Logger { get; }
         public IConfiguration Configuration { get; }
+        public Application ApplicationSettings { get; }
         public IDictionary<string, object> InputContext { get; }
 
         public Contact Contact { get; }

@@ -130,7 +130,6 @@ namespace Take.Blip.Builder
 
                         // Load the user context
                         var context = _contextProvider.CreateContext(user, application, lazyInput, flow);
-                        ContextContainer.CurrentContext = context;
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
@@ -227,7 +226,6 @@ namespace Take.Blip.Builder
                     }
                     finally
                     {
-                        ContextContainer.CurrentContext = null;
                         await handle.DisposeAsync();
                     }
                 }

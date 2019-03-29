@@ -47,7 +47,6 @@ namespace Take.Blip.Builder.UnitTests
                 Flow,
                 container.GetAllInstances<IVariableProvider>(),
                 ContextExtension);
-            ContextContainer.CurrentContext = extensionContext;
 
             return extensionContext;
         }
