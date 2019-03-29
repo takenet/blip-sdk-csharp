@@ -49,7 +49,7 @@ namespace Take.Blip.Builder.UnitTests
                 new EnvelopeSerializer(documentTypeResolver),
                 ArtificialIntelligenceExtension,
                 CancellationToken);
-            Configuration.CacheContactExpiration.Returns(TimeSpan.FromMinutes(5));
+            Configuration.ContactCacheExpiration.Returns(TimeSpan.FromMinutes(5));
         }
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; }

@@ -29,6 +29,6 @@ namespace Take.Blip.Builder.Hosting
 
         public virtual string ContextType => nameof(ExtensionContext);
 
-        public TimeSpan CacheContactExpiration => TimeSpan.FromMinutes(30);
+        public TimeSpan ContactCacheExpiration => TimeSpan.FromMinutes(30);
     }
 }
