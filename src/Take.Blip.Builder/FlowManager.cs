@@ -219,6 +219,7 @@ namespace Take.Blip.Builder
                                 stateWaitForInput = state == null || (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
                                 if (stateWaitForInput)
                                 {
+                                    // Create a new trace if the next state waits for an input     
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
                                 }
                             }
@@ -243,7 +244,10 @@ namespace Take.Blip.Builder
             }
             finally
             {
-                await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cancellationToken);
+                using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
+                {
+                    await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                }
             }
         }
 
@@ -277,7 +281,7 @@ namespace Take.Blip.Builder
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
                 var isValidAction = await stateAction.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
-                if (isValidAction)
+                if (isValidAction)    
                 {
                     var action = _actionProvider.Get(stateAction.Type);
 
