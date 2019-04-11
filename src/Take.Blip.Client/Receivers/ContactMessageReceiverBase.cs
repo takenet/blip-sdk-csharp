@@ -1,12 +1,12 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using Lime.Messaging.Resources;
 using Lime.Protocol;
-using Lime.Messaging.Resources;
-using System;
 using Lime.Protocol.Network;
+using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Directory;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -20,62 +20,76 @@ namespace Take.Blip.Client.Receivers
         private readonly bool _cacheLocally;
         private readonly MemoryCache _contactCache;
         private readonly TimeSpan _cacheExpiration;
+        private readonly TimeSpan _getContactTimeout;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ContactMessageReceiverBase"/> class.
         /// </summary>
         /// <param name="contactExtension"></param>
         /// <param name="directoryExtension"></param>
+        /// <param name="getContactTimeout"></param>
         /// <param name="cacheLocally">Indicates if the contact information should be cached locally.</param>
         /// <param name="cacheExpiration">Defines the local cache expiration, if configured.</param>
         protected ContactMessageReceiverBase(
             IContactExtension contactExtension,
             IDirectoryExtension directoryExtension,
             bool cacheLocally = true,
-            TimeSpan cacheExpiration = default(TimeSpan))
+            TimeSpan cacheExpiration = default,
+            TimeSpan getContactTimeout = default)
         {
             _directoryExtension = directoryExtension;
             _contactExtension = contactExtension;
             _cacheLocally = cacheLocally;
             _contactCache = new MemoryCache(new MemoryCacheOptions());
-            _cacheExpiration = cacheExpiration == default(TimeSpan) ? TimeSpan.FromMinutes(30) : cacheExpiration;
+            _cacheExpiration = cacheExpiration == default ? TimeSpan.FromMinutes(30) : cacheExpiration;
+            _getContactTimeout = getContactTimeout == default ? TimeSpan.FromSeconds(10) : getContactTimeout;
         }
 
         public async Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default(CancellationToken))
         {
             var identity = envelope.From.ToIdentity();
-
-            // First, tries get it from the cache, if configured.
             Contact contact = null;
-            if (_cacheLocally) contact = _contactCache.Get(identity.ToString()) as Contact;
-            
-            if (contact == null)
+            try
             {
-                try
+                using (var cts = new CancellationTokenSource(_getContactTimeout))
                 {
-                    // Second, try from the roster.
-                    contact = await _contactExtension.GetAsync(identity, cancellationToken);
-                }
-                catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
-
-                // Third, try from the directory.
-                if (contact == null)
-                {
-                    try
+                    // First, tries get it from the cache, if configured.
+                    if (_cacheLocally)
                     {
-                        contact = await GetContactFromDirectoryAsync(identity, cancellationToken);
+                        contact = _contactCache.Get(identity.ToString()) as Contact;
                     }
-                    catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
-                }
-                
-                // Stores in the cache, if configured.
-                if (contact != null && _cacheLocally)
-                {
-                    _contactCache.Set(identity.ToString(), contact, DateTimeOffset.UtcNow.Add(_cacheExpiration));
+
+                    if (contact == null)
+                    {
+                        try
+                        {
+                            // Second, try from the roster.
+                            contact = await _contactExtension.GetAsync(identity, cancellationToken);
+                        }
+                        catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
+
+                        // Third, try from the directory.
+                        if (contact == null)
+                        {
+                            try
+                            {
+                                contact = await GetContactFromDirectoryAsync(identity, cancellationToken);
+                            }
+                            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
+                        }
+
+                        // Stores in the cache, if configured.
+                        if (contact != null && _cacheLocally)
+                        {
+                            _contactCache.Set(identity.ToString(), contact, DateTimeOffset.UtcNow.Add(_cacheExpiration));
+                        }
+                    }
                 }
             }
-
-            await ReceiveAsync(envelope, contact, cancellationToken);
+            finally
+            {
+                await ReceiveAsync(envelope, contact, cancellationToken);
+            }
         }
 
         /// <summary>
@@ -108,7 +122,7 @@ namespace Take.Blip.Client.Receivers
             }
 
             return contact;
-        }        
+        }
 
         private bool _disposed;
 
@@ -129,6 +143,5 @@ namespace Take.Blip.Client.Receivers
         {
             Dispose(true);
         }
-
     }
 }
