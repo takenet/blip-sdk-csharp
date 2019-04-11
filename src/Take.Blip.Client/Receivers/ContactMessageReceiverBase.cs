@@ -64,7 +64,7 @@ namespace Take.Blip.Client.Receivers
                         try
                         {
                             // Second, try from the roster.
-                            contact = await _contactExtension.GetAsync(identity, cancellationToken);
+                            contact = await _contactExtension.GetAsync(identity, cts.Token);
                         }
                         catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
 
@@ -73,7 +73,7 @@ namespace Take.Blip.Client.Receivers
                         {
                             try
                             {
-                                contact = await GetContactFromDirectoryAsync(identity, cancellationToken);
+                                contact = await GetContactFromDirectoryAsync(identity, cts.Token);
                             }
                             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
                         }
