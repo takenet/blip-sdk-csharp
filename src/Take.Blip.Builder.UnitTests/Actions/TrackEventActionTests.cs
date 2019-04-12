@@ -67,7 +67,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var category = "categoryX";
             var action = "actionA";
             var label = "labelll";
-            decimal value = (decimal)45.78;
+            var value = 45.78M;
             var identity = Identity.Parse("myidentity@msging.net");
             var messageId = EnvelopeId.NewId();
             var extras = new Dictionary<string, string>()
