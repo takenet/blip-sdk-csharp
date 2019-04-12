@@ -52,6 +52,7 @@ namespace Take.Blip.Client.Receivers
             try
             {
                 using (var cts = new CancellationTokenSource(_getContactTimeout))
+                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
                     // First, tries get it from the cache, if configured.
                     if (_cacheLocally)
