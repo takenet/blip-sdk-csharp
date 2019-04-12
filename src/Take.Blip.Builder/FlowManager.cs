@@ -37,7 +37,7 @@ namespace Take.Blip.Builder
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
-
+        
         public FlowManager(
             IConfiguration configuration,
             IStateManager stateManager,
@@ -303,8 +303,7 @@ namespace Take.Blip.Builder
                             if (settings != null)
                             {
                                 var settingsJson = settings.ToString(Formatting.None);
-                                settingsJson =
-                                    await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+                                settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
                                 settings = JObject.Parse(settingsJson);
                             }
 
@@ -315,16 +314,6 @@ namespace Take.Blip.Builder
 
                             await action.ExecuteAsync(context, settings, linkedCts.Token);
                         }
-                        catch (OperationCanceledException ex) when (cts.IsCancellationRequested)
-                        {
-                            if (actionTrace != null)
-                            {
-                                actionTrace.Error = ex.ToString();
-                            }
-
-                            throw new ActionProcessingException(
-                                $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms", ex);
-                        }
                         catch (Exception ex)
                         {
                             if (actionTrace != null)
@@ -332,8 +321,14 @@ namespace Take.Blip.Builder
                                 actionTrace.Error = ex.ToString();
                             }
 
-                            throw new ActionProcessingException(
-                                $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
+                            if (!stateAction.ContinueOnError)
+                            {
+                                var message = ex is OperationCanceledException && cts.IsCancellationRequested
+                                    ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
+                                    : $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}";
+                                
+                                throw new ActionProcessingException(message, ex);
+                            }
                         }
                         finally
                         {
