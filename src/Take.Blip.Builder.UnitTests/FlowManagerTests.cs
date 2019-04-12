@@ -1137,10 +1137,9 @@ namespace Take.Blip.Builder.UnitTests
             var input = new PlainText() { Text = "Ping!" };
             var messageType = "text/plain";
             var messageContent = "Pong!";
-
-            var timeoutMs = 16;
-            var timeout =  timeoutMs / 1000.0;
-            var fakeSender = new FakeSender(TimeSpan.FromMilliseconds(timeout * 2));            
+            
+            var timeout =  TimeSpan.FromMilliseconds(256);
+            var fakeSender = new FakeSender(timeout + timeout);            
             Sender = fakeSender;                                 
             var flow = new Flow()
             {
@@ -1168,7 +1167,7 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Timeout = timeout,
+                                Timeout = timeout.TotalSeconds,
                                 Settings = new JObject()
                                 {
                                     {"type", messageType},
@@ -1183,7 +1182,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Act
             var exception = await target.ProcessInputAsync(input, User, Application, flow, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
-            exception.Message.ShouldBe($"The processing of the action 'SendMessage' has timed out after {timeoutMs} ms");
+            exception.Message.ShouldBe($"The processing of the action 'SendMessage' has timed out after {timeout.TotalMilliseconds} ms");
             fakeSender.SentMessages.ShouldBeEmpty();
         }
         
