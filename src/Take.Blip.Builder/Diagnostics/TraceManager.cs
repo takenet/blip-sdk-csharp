@@ -29,7 +29,7 @@ namespace Take.Blip.Builder.Diagnostics
                 new ExecutionDataflowBlockOptions()
                 {
                     BoundedCapacity = configuration.TraceQueueBoundedCapacity,
-                    MaxDegreeOfParallelism = configuration.TraceQueueMaxDegreeOfParalelism,
+                    MaxDegreeOfParallelism = configuration.TraceQueueMaxDegreeOfParallelism,
                     EnsureOrdered = false
                 });
         }

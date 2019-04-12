@@ -15,7 +15,7 @@ namespace Take.Blip.Builder.Hosting
 
         public virtual int TraceQueueBoundedCapacity => 512;
 
-        public virtual int TraceQueueMaxDegreeOfParalelism => 512;
+        public virtual int TraceQueueMaxDegreeOfParallelism => 512;
 
         public virtual TimeSpan TraceTimeout => TimeSpan.FromSeconds(5);
 

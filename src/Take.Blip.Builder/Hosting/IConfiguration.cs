@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.Hosting
 
         int TraceQueueBoundedCapacity { get; }
 
-        int TraceQueueMaxDegreeOfParalelism { get; }
+        int TraceQueueMaxDegreeOfParallelism { get; }
 
         TimeSpan TraceTimeout { get; }
 
