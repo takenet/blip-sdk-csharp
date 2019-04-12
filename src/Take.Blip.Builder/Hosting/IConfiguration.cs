@@ -29,5 +29,7 @@ namespace Take.Blip.Builder.Hosting
         string ContextType { get; }
 
         TimeSpan ContactCacheExpiration { get; }
+        
+        TimeSpan DefaultActionExecutionTimeout { get; }
     }
 }
