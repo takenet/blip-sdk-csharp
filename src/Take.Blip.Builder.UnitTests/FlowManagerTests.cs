@@ -1161,7 +1161,7 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Timeout = 0.0000001, // Very small timeout to force cancellation
+                                Timeout = 0, // Very small timeout to force cancellation
                                 Settings = new JObject()
                                 {
                                     {"type", messageType},
