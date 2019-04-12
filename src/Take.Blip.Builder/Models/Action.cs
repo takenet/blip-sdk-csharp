@@ -22,6 +22,11 @@ namespace Take.Blip.Builder.Models
         public Condition[] Conditions { get; set; }
 
         /// <summary>
+        /// Gets the timeout for executing the action, in seconds. Optional.
+        /// </summary>
+        public double? Timeout { get; set; }
+        
+        /// <summary>
         /// The action type name. Required.
         /// </summary>
         [Required(ErrorMessage = "The action type is required")]
@@ -45,5 +50,11 @@ namespace Take.Blip.Builder.Models
                 Type = Type
             };
         }
+    }
+
+    public enum ActionExecutionMode
+    {
+        Synchronous,
+        Asynchronous
     }
 }
