@@ -45,14 +45,14 @@ namespace Take.Blip.Client.Receivers
             _getContactTimeout = getContactTimeout == default ? TimeSpan.FromSeconds(10) : getContactTimeout;
         }
 
-        public async Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default)
         {
             var identity = envelope.From.ToIdentity();
             Contact contact = null;
-            try
+            using (var cts = new CancellationTokenSource(_getContactTimeout))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
             {
-                using (var cts = new CancellationTokenSource(_getContactTimeout))
-                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+                try
                 {
                     // First, tries get it from the cache, if configured.
                     if (_cacheLocally)
@@ -86,11 +86,10 @@ namespace Take.Blip.Client.Receivers
                         }
                     }
                 }
+                catch (OperationCanceledException) when (cts.IsCancellationRequested)
+                { }
             }
-            finally
-            {
-                await ReceiveAsync(envelope, contact, cancellationToken);
-            }
+            await ReceiveAsync(envelope, contact, cancellationToken);
         }
 
         /// <summary>
