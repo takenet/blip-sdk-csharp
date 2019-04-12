@@ -86,7 +86,7 @@ namespace Take.Blip.Builder.Diagnostics
         {
             try
             {
-                using (var cts = new CancellationTokenSource(_configuration.TraceProcessingTimeout))
+                using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
                 {
                     await _traceProcessor.ProcessTraceAsync(traceEvent, cts.Token);
                 }

@@ -37,7 +37,7 @@ namespace Take.Blip.Builder
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
-
+        
         public FlowManager(
             IConfiguration configuration,
             IStateManager stateManager,
@@ -219,6 +219,7 @@ namespace Take.Blip.Builder
                                 stateWaitForInput = state == null || (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
                                 if (stateWaitForInput)
                                 {
+                                    // Create a new trace if the next state waits for an input     
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
                                 }
                             }
@@ -243,7 +244,10 @@ namespace Take.Blip.Builder
             }
             finally
             {
-                await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cancellationToken);
+                using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
+                {
+                    await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                }
             }
         }
 
@@ -277,7 +281,7 @@ namespace Take.Blip.Builder
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
                 var isValidAction = await stateAction.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
-                if (isValidAction)
+                if (isValidAction)    
                 {
                     var action = _actionProvider.Get(stateAction.Type);
 
@@ -286,43 +290,57 @@ namespace Take.Blip.Builder
                         ? (stateAction.ToTrace(), Stopwatch.StartNew())
                         : (null, null);
 
-                    try
+                    var executionTimeout = stateAction.Timeout.HasValue
+                        ? TimeSpan.FromSeconds(stateAction.Timeout.Value)
+                        : _configuration.DefaultActionExecutionTimeout;
+                        
+                    using (var cts = new CancellationTokenSource(executionTimeout))
+                    using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                     {
-                        var settings = stateAction.Settings;
-                        if (settings != null)
+                        try
                         {
-                            var settingsJson = settings.ToString(Formatting.None);
-                            settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
-                            settings = JObject.Parse(settingsJson);
+                            var settings = stateAction.Settings;
+                            if (settings != null)
+                            {
+                                var settingsJson = settings.ToString(Formatting.None);
+                                settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+                                settings = JObject.Parse(settingsJson);
+                            }
+
+                            if (actionTrace != null)
+                            {
+                                actionTrace.ParsedSettings = settings;
+                            }
+
+                            await action.ExecuteAsync(context, settings, linkedCts.Token);
                         }
-
-                        if (actionTrace != null)
+                        catch (Exception ex)
                         {
-                            actionTrace.ParsedSettings = settings;
+                            if (actionTrace != null)
+                            {
+                                actionTrace.Error = ex.ToString();
+                            }
+
+                            if (!stateAction.ContinueOnError)
+                            {
+                                var message = ex is OperationCanceledException && cts.IsCancellationRequested
+                                    ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
+                                    : $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}";
+                                
+                                throw new ActionProcessingException(message, ex);
+                            }
                         }
-
-                        await action.ExecuteAsync(context, settings, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (actionTrace != null)
+                        finally
                         {
-                            actionTrace.Error = ex.ToString();
-                        }
+                            actionStopwatch?.Stop();
 
-                        throw new ActionProcessingException(
-                            $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}", ex);
-                    }
-                    finally
-                    {
-                        actionStopwatch?.Stop();
-
-                        if (actionTrace != null &&
-                            actionTraces != null &&
-                            actionStopwatch != null)
-                        {
-                            actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
-                            actionTraces.Add(actionTrace);
+                            if (actionTrace != null &&
+                                actionTraces != null &&
+                                actionStopwatch != null)
+                            {
+                                actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
+                                actionTraces.Add(actionTrace);
+                            }
                         }
                     }
                 }

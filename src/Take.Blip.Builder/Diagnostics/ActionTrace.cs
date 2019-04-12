@@ -13,5 +13,8 @@ namespace Take.Blip.Builder.Diagnostics
 
         [DataMember(Name = "parsedSettings")]
         public JObject ParsedSettings { get; set; }
+        
+        [DataMember(Name = "continueOnError")]
+        public bool ContinueOnError { get; set; }
     }
 }

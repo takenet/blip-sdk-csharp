@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Hosting
 
         int TraceQueueMaxDegreeOfParalelism { get; }
 
-        TimeSpan TraceProcessingTimeout { get; }
+        TimeSpan TraceTimeout { get; }
 
         TimeSpan OnDemandCacheExpiration { get; }
 
@@ -29,5 +29,7 @@ namespace Take.Blip.Builder.Hosting
         string ContextType { get; }
 
         TimeSpan ContactCacheExpiration { get; }
+        
+        TimeSpan DefaultActionExecutionTimeout { get; }
     }
 }

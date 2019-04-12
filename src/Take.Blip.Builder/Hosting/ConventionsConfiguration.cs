@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Hosting
 
         public virtual int TraceQueueMaxDegreeOfParalelism => 512;
 
-        public virtual TimeSpan TraceProcessingTimeout => TimeSpan.FromSeconds(5);
+        public virtual TimeSpan TraceTimeout => TimeSpan.FromSeconds(5);
 
         public virtual string RedisKeyPrefix => "builder";
 
@@ -29,6 +29,8 @@ namespace Take.Blip.Builder.Hosting
 
         public virtual string ContextType => nameof(ExtensionContext);
 
-        public TimeSpan ContactCacheExpiration => TimeSpan.FromMinutes(30);
+        public virtual TimeSpan ContactCacheExpiration => TimeSpan.FromMinutes(30);
+
+        public virtual TimeSpan DefaultActionExecutionTimeout => TimeSpan.FromSeconds(30);
     }
 }

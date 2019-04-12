@@ -4,13 +4,16 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Shouldly;
 using Take.Blip.Builder.Models;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
 using Input = Take.Blip.Builder.Models.Input;
+using ISender = Take.Blip.Client.ISender;
 
 #pragma warning disable 4014
 
@@ -78,7 +81,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
         }
 
         [Fact]
@@ -1126,10 +1129,209 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
         }
+                       
+        [Fact]
+        public async Task TimeoutOnActionShouldOverrideDefaultConfiguration()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            
+            var timeout =  TimeSpan.FromMilliseconds(256);
+            var fakeSender = new FakeSender(timeout + timeout);            
+            Sender = fakeSender;                                 
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Timeout = timeout.TotalSeconds,
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
 
+            // Act
+            var exception = await target.ProcessInputAsync(input, User, Application, flow, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
+            exception.Message.ShouldBe($"The processing of the action 'SendMessage' has timed out after {timeout.TotalMilliseconds} ms");
+            fakeSender.SentMessages.ShouldBeEmpty();
+        }
+        
+        [Fact]
+        public async Task ActionWithInvalidSettingShouldBreakProcessing()
+        {
+              // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "application/json";
+            var messageContent = "NOT A JSON";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target
+                .ProcessInputAsync(input, User, Application, flow, CancellationToken)
+                .ShouldThrowAsync<ActionProcessingException>();           
+        }        
+        
+        [Fact]
+        public async Task ActionWithInvalidSettingShouldNotBreakProcessingWhenContinueOnErrorIsTrue()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "application/json";
+            var messageContent = "NOT A JSON";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                ContinueOnError = true,
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);           
+            
+            // Assert
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+        }                
+        
         public void Dispose()
         {
             CancellationTokenSource.Dispose();
+        }
+        
+        private class FakeSender : ISender
+        {
+            private readonly TimeSpan _delay;
+
+            public FakeSender(TimeSpan delay)
+            {
+                _delay = delay;
+                SentMessages = new List<Message>();
+            }
+            
+            public List<Message> SentMessages { get; }
+            
+           
+            public async Task SendMessageAsync(Message message, CancellationToken cancellationToken)
+            {
+                await Task.Delay(_delay, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                SentMessages.Add(message);
+            }
+
+            public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task SendCommandAsync(Command command, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<Command> ProcessCommandAsync(Command requestCommand, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
