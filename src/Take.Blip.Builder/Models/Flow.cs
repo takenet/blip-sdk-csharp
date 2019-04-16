@@ -15,7 +15,8 @@ namespace Take.Blip.Builder.Models
     public class Flow : IValidable
     {
         private bool _isValid;
-
+        private BuilderConfiguration _builderConfiguration;
+        
         /// <summary>
         /// The unique identifier of the flow. Required.
         /// </summary>
@@ -32,6 +33,24 @@ namespace Take.Blip.Builder.Models
         /// The flow configuration.
         /// </summary>
         public Dictionary<string, string> Configuration { get; set; }
+
+        /// <summary>
+        /// Provides a view over the 'builder:' <see cref="Configuration"/> keys.
+        /// </summary>
+        [JsonIgnore]
+        public BuilderConfiguration BuilderConfiguration
+        {
+            get
+            {
+                if (_builderConfiguration == null &&
+                    Configuration != null)
+                {
+                    _builderConfiguration = BuilderConfiguration.FromDictionary(Configuration);
+                }
+
+                return _builderConfiguration;
+            }
+        }
 
         /// <summary>
         /// The flow trace settings
@@ -70,7 +89,7 @@ namespace Take.Blip.Builder.Models
                 {
                     throw new ValidationException($"The state id '{state.Id}' is not unique in the flow");
                 }
-                
+
                 // Check if there's a direct path loop (without inputs) to this state in the flow.
                 if (state.Outputs != null)
                 {
@@ -83,7 +102,9 @@ namespace Take.Blip.Builder.Models
                         if (outputState.Outputs.Any(o => o.StateId == targetState.Id)) return true;
                         checkedStates.Add(output.StateId);
                         return outputState.Outputs.Any(o => CanBeReached(targetState, o, checkedStates));
-                    };
+                    }
+
+                    ;
 
                     foreach (var output in state.Outputs)
                     {
@@ -99,7 +120,7 @@ namespace Take.Blip.Builder.Models
                             if (CanBeReached(state, output, checkedStates))
                             {
                                 throw new ValidationException(
-                                     $"There is a loop in the flow starting in the state {state.Id} that does not requires user input");
+                                    $"There is a loop in the flow starting in the state {state.Id} that does not requires user input");
                             }
                         }
                     }
@@ -107,11 +128,11 @@ namespace Take.Blip.Builder.Models
             }
 
             // Try create trace settings from configuration keys
-            if (TraceSettings == null && 
+            if (TraceSettings == null &&
                 Configuration != null &&
-                Configuration.TryGetValue("TraceMode", out var traceModeValue) && 
+                Configuration.TryGetValue("TraceMode", out var traceModeValue) &&
                 Enum.TryParse<TraceMode>(traceModeValue, true, out var traceMode) &&
-                Configuration.TryGetValue("TraceTargetType", out var traceTargetTypeValue) && 
+                Configuration.TryGetValue("TraceTargetType", out var traceTargetTypeValue) &&
                 Enum.TryParse<TraceTargetType>(traceTargetTypeValue, true, out var traceTargetType) &&
                 Configuration.TryGetValue("TraceTarget", out var traceTarget))
             {
@@ -122,13 +143,13 @@ namespace Take.Blip.Builder.Models
                     Target = traceTarget
                 };
 
-                if (Configuration.TryGetValue("TraceSlowThreshold", out var traceSlowThresholdValue) && 
+                if (Configuration.TryGetValue("TraceSlowThreshold", out var traceSlowThresholdValue) &&
                     int.TryParse(traceSlowThresholdValue, out var traceSlowThreshold))
                 {
                     TraceSettings.SlowThreshold = traceSlowThreshold;
                 }
             }
-            
+
 
             _isValid = true;
         }

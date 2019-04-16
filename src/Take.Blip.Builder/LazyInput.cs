@@ -8,6 +8,7 @@ using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
+using Take.Blip.Builder.Models;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
@@ -20,20 +21,20 @@ namespace Take.Blip.Builder
     /// </summary>
     public class LazyInput
     {
-        private readonly IDictionary<string, string> _flowConfiguration;
+        private readonly BuilderConfiguration _builderConfiguration;
         private readonly Lazy<string> _lazySerializedContent;
         private readonly Lazy<Task<AnalysisResponse>> _lazyAnalyzedContent;
         private readonly Lazy<string> _lazySerializedMessage;
 
         public LazyInput(
             Document content,
-            IDictionary<string, string> flowConfiguration,
+            BuilderConfiguration builderConfiguration,
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             CancellationToken cancellationToken)
         {
-            _flowConfiguration = flowConfiguration;
+            _builderConfiguration = builderConfiguration;
             Content = content;
             _lazySerializedContent = new Lazy<string>(() => documentSerializer.Serialize(content));
             _lazyAnalyzedContent = new Lazy<Task<AnalysisResponse>>(async () =>
@@ -77,11 +78,8 @@ namespace Take.Blip.Builder
 
         public async Task<IntentionResponse> GetIntentAsync()
         {
-            double minimumIntentScore;
-
-            if (_flowConfiguration == null ||
-                !_flowConfiguration.TryGetValue($"builder:{nameof(minimumIntentScore)}", out var minimumScoreValue) ||
-                !double.TryParse(minimumScoreValue, NumberStyles.Float, CultureInfo.InvariantCulture, out minimumIntentScore))
+            if (_builderConfiguration?.MinimumIntentScore == null ||
+                !double.TryParse(_builderConfiguration.MinimumIntentScore, NumberStyles.Float, CultureInfo.InvariantCulture, out var minimumIntentScore))
             {               
                 minimumIntentScore = 0.5;
             }
