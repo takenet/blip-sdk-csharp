@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using Shouldly;
 using Take.Blip.Builder.Models;
 using Xunit;
@@ -439,16 +440,16 @@ namespace Take.Blip.Builder.UnitTests.Models
         public void GetBuilderConfigurationWhenExistsBuilderKeysShouldReturnValidInstance()
         {
             // Arrange
-            var minimumIntentScoreValue = "0.512";            
-            var stateExpiration = "00:30:00";
-            var actionExecutionTimeout = "30.121412";
+            var minimumIntentScoreValue = 0.512;            
+            var stateExpiration = TimeSpan.Parse("00:30:00");
+            var actionExecutionTimeout = 30.121412;
             var flow = new Flow()
             {
                 Configuration = new Dictionary<string, string>()
                 {
-                    {"builder:minimumIntentScore", minimumIntentScoreValue},
-                    {"builder:stateExpiration", stateExpiration},
-                    {"builder:actionExecutionTimeout", actionExecutionTimeout},
+                    {"builder:minimumIntentScore", minimumIntentScoreValue.ToString(CultureInfo.InvariantCulture)},
+                    {"builder:stateExpiration", stateExpiration.ToString()},
+                    {"builder:actionExecutionTimeout", actionExecutionTimeout.ToString(CultureInfo.InvariantCulture)},
                     {"myConfigurationKey", "anyValue"}
                 }
             };

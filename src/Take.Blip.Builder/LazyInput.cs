@@ -25,7 +25,7 @@ namespace Take.Blip.Builder
         private readonly Lazy<string> _lazySerializedContent;
         private readonly Lazy<Task<AnalysisResponse>> _lazyAnalyzedContent;
         private readonly Lazy<string> _lazySerializedMessage;
-
+        
         public LazyInput(
             Document content,
             BuilderConfiguration builderConfiguration,
@@ -78,11 +78,7 @@ namespace Take.Blip.Builder
 
         public async Task<IntentionResponse> GetIntentAsync()
         {
-            if (_builderConfiguration?.MinimumIntentScore == null ||
-                !double.TryParse(_builderConfiguration.MinimumIntentScore, NumberStyles.Float, CultureInfo.InvariantCulture, out var minimumIntentScore))
-            {               
-                minimumIntentScore = 0.5;
-            }
+            var minimumIntentScore = _builderConfiguration?.MinimumIntentScore ?? 0.5;
 
             return (await AnalyzedContent)?
                 .Intentions?

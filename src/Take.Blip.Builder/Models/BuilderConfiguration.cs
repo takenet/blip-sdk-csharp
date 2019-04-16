@@ -14,13 +14,13 @@ namespace Take.Blip.Builder.Models
     public class BuilderConfiguration
     {
         private const string CONFIGURATION_KEY_PREFIX = "builder:";
-        
-        public string StateExpiration { get; set; }
 
-        public string MinimumIntentScore { get; set; }
+        public TimeSpan? StateExpiration { get; set; }
 
-        public string ActionExecutionTimeout { get; set; }
-        
+        public double? MinimumIntentScore { get; set; }
+
+        public double? ActionExecutionTimeout { get; set; }
+           
         public static BuilderConfiguration FromDictionary(IDictionary<string, string> configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
@@ -29,7 +29,7 @@ namespace Take.Blip.Builder.Models
                 .Where(kv => kv.Key.StartsWith(CONFIGURATION_KEY_PREFIX))
                 .Select(kv => new KeyValuePair<string, string>(kv.Key.Replace(CONFIGURATION_KEY_PREFIX, ""), kv.Value))
                 .ToDictionary(kv => kv.Key, kv => kv.Value);
-                        
+            
             var jObject = JObject.FromObject(
                 builderConfiguration, JsonSerializer.Create(JsonSerializerSettingsContainer.Settings));
 
