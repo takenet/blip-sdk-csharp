@@ -290,8 +290,12 @@ namespace Take.Blip.Builder
                         ? (stateAction.ToTrace(), Stopwatch.StartNew())
                         : (null, null);
 
-                    var executionTimeout = stateAction.Timeout.HasValue
-                        ? TimeSpan.FromSeconds(stateAction.Timeout.Value)
+                    // Configure the action timeout, that can be defined in action or flow level
+                    var executionTimeoutInSeconds =
+                        stateAction.Timeout ?? context.Flow.BuilderConfiguration?.ActionExecutionTimeout;
+
+                    var executionTimeout = executionTimeoutInSeconds.HasValue
+                        ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
                         : _configuration.DefaultActionExecutionTimeout;
                         
                     using (var cts = new CancellationTokenSource(executionTimeout))
