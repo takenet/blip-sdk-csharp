@@ -125,7 +125,7 @@ namespace Take.Blip.Builder
                     try
                     {
                         // Create the input evaluator
-                        var lazyInput = new LazyInput(input, flow.Configuration, _documentSerializer,
+                        var lazyInput = new LazyInput(input, flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context

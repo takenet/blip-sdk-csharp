@@ -118,9 +118,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         private static bool ShouldAddHeader(string header, IContext context)
         {
             return context.Flow.Configuration != null &&
-                            context.Flow.Configuration.TryGetValue(header, out string identifierHeaderValue) &&
-                            bool.TryParse(identifierHeaderValue, out bool sendBotIdentifier) &&
-                            sendBotIdentifier;
+                context.Flow.Configuration.TryGetValue(header, out string identifierHeaderValue) &&
+                bool.TryParse(identifierHeaderValue, out bool sendBotIdentifier) &&
+                sendBotIdentifier;
         }
 
         public void Dispose()

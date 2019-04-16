@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Shouldly;
 using Take.Blip.Builder.Models;
@@ -431,8 +432,51 @@ namespace Take.Blip.Builder.UnitTests.Models
             };
 
             // Act
-            flow.Validate();
- 
+            flow.Validate(); 
         }
+
+        [Fact]
+        public void GetBuilderConfigurationWhenExistsBuilderKeysShouldReturnValidInstance()
+        {
+            // Arrange
+            var minimumIntentScoreValue = "0.512";            
+            var stateExpiration = "00:30:00";
+            var actionExecutionTimeout = "30.121412";
+            var flow = new Flow()
+            {
+                Configuration = new Dictionary<string, string>()
+                {
+                    {"builder:minimumIntentScore", minimumIntentScoreValue},
+                    {"builder:stateExpiration", stateExpiration},
+                    {"builder:actionExecutionTimeout", actionExecutionTimeout},
+                    {"myConfigurationKey", "anyValue"}
+                }
+            };
+            
+            // Act
+            var builderConfiguration = flow.BuilderConfiguration;
+            
+            // Assert
+            builderConfiguration.ShouldNotBeNull();
+            builderConfiguration.MinimumIntentScore.ShouldBe(minimumIntentScoreValue);
+            builderConfiguration.StateExpiration.ShouldBe(stateExpiration);
+            builderConfiguration.ActionExecutionTimeout.ShouldBe(actionExecutionTimeout);
+        }
+        
+        [Fact]
+        public void GetBuilderConfigurationIsNullShouldReturnNull()
+        {
+            // Arrange            
+            var flow = new Flow()
+            {
+                Configuration = null
+            };
+            
+            // Act
+            var builderConfiguration = flow.BuilderConfiguration;
+            
+            // Assert
+            builderConfiguration.ShouldBeNull();
+        }        
     }
 }

@@ -11,7 +11,6 @@ namespace Take.Blip.Builder
     {
         private const string PREVIOUS_STATE_PREFIX = "previous";
         private const string STATE_ID_KEY = "stateId";
-        private const string STATE_EXPIRATION_KEY = "builder:stateExpiration";
 
         public Task<string> GetStateIdAsync(IContext context, CancellationToken cancellationToken)
         {
@@ -26,8 +25,8 @@ namespace Take.Blip.Builder
         public Task SetStateIdAsync(IContext context, string stateId, CancellationToken cancellationToken)
         {
             TimeSpan expiration = default(TimeSpan);
-            if (context.Flow?.Configuration != null &&
-                context.Flow.Configuration.TryGetValue(STATE_EXPIRATION_KEY, out var expirationValue))
+            if (context.Flow?.BuilderConfiguration?.StateExpiration != null &&
+                context.Flow.Configuration.TryGetValue(context.Flow.BuilderConfiguration.StateExpiration, out var expirationValue))
             {
                 TimeSpan.TryParse(expirationValue, out expiration);
             }
