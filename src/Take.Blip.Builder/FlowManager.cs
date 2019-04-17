@@ -292,7 +292,7 @@ namespace Take.Blip.Builder
 
                     // Configure the action timeout, that can be defined in action or flow level
                     var executionTimeoutInSeconds =
-                        stateAction.Timeout ?? context.Flow.BuilderConfiguration?.ActionExecutionTimeout;
+                        stateAction.Timeout ?? context.Flow?.BuilderConfiguration?.ActionExecutionTimeout;
 
                     var executionTimeout = executionTimeoutInSeconds.HasValue
                         ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
