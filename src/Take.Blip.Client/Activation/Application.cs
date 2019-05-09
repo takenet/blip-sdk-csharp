@@ -187,6 +187,11 @@ namespace Take.Blip.Client.Activation
         public Event[] ReceiptEvents { get; set; }
 
         /// <summary>
+        /// Define the presence status to be set when connected.
+        /// </summary>
+        public PresenceStatus? PresenceStatus { get; set; }
+        
+        /// <summary>
         /// Indicates if the tunnel receivers for automatically forwarding envelopes
         /// should be registered.
         /// </summary>

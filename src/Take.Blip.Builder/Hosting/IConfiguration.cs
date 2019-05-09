@@ -13,12 +13,12 @@ namespace Take.Blip.Builder.Hosting
         string RedisKeyPrefix { get; }
 
         int MaxTransitionsByInput { get; }
-        
+
         int TraceQueueBoundedCapacity { get; }
 
-        int TraceQueueMaxDegreeOfParalelism { get; }
+        int TraceQueueMaxDegreeOfParallelism { get; }
 
-        TimeSpan TraceProcessingTimeout { get; }
+        TimeSpan TraceTimeout { get; }
 
         TimeSpan OnDemandCacheExpiration { get; }
 
@@ -27,5 +27,9 @@ namespace Take.Blip.Builder.Hosting
         string SqlStorageDriverTypeName { get; }
 
         string ContextType { get; }
-    }    
+
+        TimeSpan ContactCacheExpiration { get; }
+        
+        TimeSpan DefaultActionExecutionTimeout { get; }
+    }
 }

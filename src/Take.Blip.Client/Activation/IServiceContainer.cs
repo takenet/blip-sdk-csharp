@@ -20,7 +20,7 @@ namespace Take.Blip.Client.Activation
         /// </summary>
         /// <param name="serviceType">Type of the service.</param>
         /// <param name="instanceFactory">
-        /// A factory function which will be called 
+        /// A factory function which will be called
         /// only when a instance of <paramref name="serviceType"/> is requested.
         /// </param>
         void RegisterService(Type serviceType, Func<object> instanceFactory);

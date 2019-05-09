@@ -39,11 +39,9 @@ namespace Take.Blip.Builder.Variables
 
                 case "length":
                     return input.SerializedContent?.Length.ToString();
-            }
 
-            if (nameToLower.Equals("analysis"))
-            {
-                return await GetAnalyzedContentAsync(input);
+                case "analysis":
+                    return await GetAnalyzedContentAsync(input);
             }
 
             if (nameToLower.StartsWith("intent."))
@@ -65,7 +63,7 @@ namespace Take.Blip.Builder.Variables
         private async Task<string> GetAnalyzedContentAsync(LazyInput input)
         {
             var analyzedContent = await input.AnalyzedContent;
-            return _documentSerializer.Serialize(analyzedContent) ?? null;
+            return analyzedContent != default(AnalysisResponse) ? _documentSerializer.Serialize(analyzedContent) : default(string);
         }
 
         private async Task<string> GetIntentVariableAsync(LazyInput input, string intentProperty)

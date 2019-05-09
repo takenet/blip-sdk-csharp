@@ -1,11 +1,17 @@
 ﻿using Lime.Messaging.Resources;
 using Lime.Protocol;
 using NSubstitute;
+using Serilog;
 using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Storage.Memory;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
+using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.Contacts;
 using Xunit;
 
@@ -17,6 +23,11 @@ namespace Take.Blip.Builder.UnitTests.Variables
         {
             ContactExtension = Substitute.For<IContactExtension>();
             Context = Substitute.For<IContext>();
+            Logger = Substitute.For<ILogger>();
+            Configuration = Substitute.For<IConfiguration>();
+            ApplicationSettings = Substitute.For<Application>();
+            var cacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
+            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, cacheOwnerCallerContactMap, Logger, Configuration, ApplicationSettings);
             InputContext = new Dictionary<string, object>();
             Context.InputContext.Returns(InputContext);
             Contact = new Contact()
@@ -27,19 +38,25 @@ namespace Take.Blip.Builder.UnitTests.Variables
             };
             ContactExtension.GetAsync(Contact.Identity, CancellationToken).Returns(Contact);
             Context.User.Returns(Contact.Identity);
+            Context.Application.Returns(new Identity("application", "domain.com"));
+            Configuration.ContactCacheExpiration.Returns(TimeSpan.FromMinutes(5));
+            ApplicationSettings.Identifier = "application";
+            ApplicationSettings.Domain = "domain.com";
         }
 
         public IContactExtension ContactExtension { get; }
-
-        public IContext Context { get;  }
-
+        public IContactExtension CacheContactExtensionDecorator { get; }
+        public IContext Context { get; }
+        public ILogger Logger { get; }
+        public IConfiguration Configuration { get; }
+        public Application ApplicationSettings { get; }
         public IDictionary<string, object> InputContext { get; }
 
-        public Contact Contact { get;  }
+        public Contact Contact { get; }
 
         public ContactVariableProvider GetTarget()
         {
-            return new ContactVariableProvider(ContactExtension);
+            return new ContactVariableProvider(CacheContactExtensionDecorator);
         }
 
         [Fact]
@@ -61,7 +78,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Arrange
             var target = GetTarget();
 
-            Contact nullContact = null;        
+            Contact nullContact = null;
             ContactExtension.GetAsync(Arg.Any<Identity>(), Arg.Any<CancellationToken>()).Returns(nullContact);
 
             // Act
@@ -70,7 +87,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Asset
             actual.ShouldBeNull();
         }
-
 
         [Fact]
         public async Task GetNameTwiceWhenContactExistsShouldUseCachedValue()
