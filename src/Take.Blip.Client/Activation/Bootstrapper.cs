@@ -87,6 +87,7 @@ namespace Take.Blip.Client.Activation
             {
                 builder = builder.WithReceiptEvents(new[] { Event.Failed });
             }
+            if (application.PresenceStatus.HasValue) builder = builder.WithPresenceStatus(application.PresenceStatus.Value);
 
             if (typeResolver == null) typeResolver = new TypeResolver();
             var localServiceProvider = BuildServiceProvider(application, typeResolver);

@@ -13,7 +13,6 @@ namespace Take.Blip.Builder.Storage.Redis
             IConnectionMultiplexer connectionMultiplexer)
             : base($"{configuration.RedisKeyPrefix}:context-documents", connectionMultiplexer, serializer, configuration.RedisDatabase)
         {
-
         }
     }
 }

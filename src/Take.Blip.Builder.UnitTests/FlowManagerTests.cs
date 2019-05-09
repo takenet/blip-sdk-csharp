@@ -3,13 +3,17 @@ using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using System;
+using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Shouldly;
 using Take.Blip.Builder.Models;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
 using Input = Take.Blip.Builder.Models.Input;
+using ISender = Take.Blip.Client.ISender;
 
 #pragma warning disable 4014
 
@@ -77,7 +81,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(User)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
         }
 
         [Fact]
@@ -425,6 +429,367 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
+        public async Task FlowWithInputContextConditionsSatisfiedShouldKeepStateAndWaitNextInput()
+        {
+            // Arrange
+            var inputOk = new PlainText() { Text = "OK!" };
+            var inputNOk = new PlainText() { Text = "NOK!" };
+            var messageType = "text/plain";
+            var okMessageContent = "OK";
+            var nokMessageContent = "NOK";
+            var variables = new Dictionary<string, string>();
+            Context
+                .When(c => c.SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()))
+                .Do(callInfo =>
+                {
+                    var key = callInfo.ArgAt<string>(0);
+                    var value = callInfo.ArgAt<string>(1);
+                    variables[key] = value;
+                });
+
+            Context
+                .GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(callInfo =>
+                {
+                    var key = callInfo.ArgAt<string>(0);
+                    if (variables.TryGetValue(key, out var value)) return value;
+                    return null;
+                });
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "Start"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "Start",
+                        Input = new Input()
+                        {
+                            Conditions = new []
+                            {
+                                new Condition
+                                {
+                                    Variable = "InputIsValid",
+                                    Source = ValueSource.Context,
+                                    Values = new[] { "true" }
+                                }
+                            }
+                        },
+                        InputActions = new []
+                        {
+                            new Action
+                            {
+                                Type = "ExecuteScript",
+                                Settings = new JObject()
+                                {
+                                    { "function", "run" },
+                                    { "source", "function run() { return true; }" }, // Satisfying Input condition above
+                                    { "outputVariable", "InputIsValid" }
+                                }
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                Conditions = new []
+                                {
+                                    new Condition
+                                    {
+                                        Variable = "InputIsValid",
+                                        Source = ValueSource.Context,
+                                        Values = new[] { "true" }
+                                    }
+                                },
+                                StateId = "Ok"
+                            },
+                            new Output
+                            {
+                                Conditions = new []
+                                {
+                                    new Condition
+                                    {
+                                        Variable = "InputIsValid",
+                                        Source = ValueSource.Context,
+                                        Values = new[] { "false" }
+                                    }
+                                },
+                                StateId = "NOk"
+                            },
+                            new Output
+                            {
+                                StateId = "error"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "Ok",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", okMessageContent }
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "NOk",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", nokMessageContent }
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "error",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", "failed to set variable" }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(inputOk, User, Application, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "error", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "Ok", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "NOk", Arg.Any<CancellationToken>());
+
+            Sender
+                .DidNotReceive()
+                .SendMessageAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
+
+            Context.Received(1).SetVariableAsync("InputIsValid", "True", Arg.Any<CancellationToken>());
+            Context.Received(1).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithInputContextConditionsNotSatisfiedShouldChangeStateAndSendMessage()
+        {
+            // Arrange
+            var inputOk = new PlainText() { Text = "OK!" };
+            var inputNOk = new PlainText() { Text = "NOK!" };
+            var messageType = "text/plain";
+            var okMessageContent = "OK";
+            var nokMessageContent = "NOK";
+            var variables = new Dictionary<string, string>();
+            Context
+                .When(c => c.SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()))
+                .Do(callInfo =>
+                {
+                    var key = callInfo.ArgAt<string>(0);
+                    var value = callInfo.ArgAt<string>(1);
+                    variables[key] = value;
+                });
+
+            Context
+                .GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(callInfo =>
+                {
+                    var key = callInfo.ArgAt<string>(0);
+                    if (variables.TryGetValue(key, out var value)) return value;
+                    return null;
+                });
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "Start"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "Start",
+                        Input = new Input()
+                        {
+                            Conditions = new []
+                            {
+                                new Condition
+                                {
+                                    Variable = "InputIsValid",
+                                    Source = ValueSource.Context,
+                                    Values = new[] { "true" }
+                                }
+                            }
+                        },
+                        InputActions = new []
+                        {
+                            new Action
+                            {
+                                Type = "ExecuteScript",
+                                Settings = new JObject()
+                                {
+                                    { "function", "run" },
+                                    { "source", "function run(content) { return false; }" }, // Not satisfying Input condition above
+                                    { "outputVariable", "InputIsValid" }
+                                }
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                Conditions = new []
+                                {
+                                    new Condition
+                                    {
+                                        Variable = "InputIsValid",
+                                        Source = ValueSource.Context,
+                                        Values = new[] { "true" }
+                                    }
+                                },
+                                StateId = "Ok"
+                            },
+                            new Output
+                            {
+                                Conditions = new []
+                                {
+                                    new Condition
+                                    {
+                                        Variable = "InputIsValid",
+                                        Source = ValueSource.Context,
+                                        Values = new[] { "false" }
+                                    }
+                                },
+                                StateId = "NOk"
+                            },
+                            new Output
+                            {
+                                StateId = "error"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "Ok",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", okMessageContent }
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "NOk",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", nokMessageContent }
+                                }
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "error",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", "failed to set variable" }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(inputNOk, User, Application, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "error", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "NOk", Arg.Any<CancellationToken>());
+            StateManager.DidNotReceive().SetStateIdAsync(Context, "Ok", Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(User)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == nokMessageContent),
+                    Arg.Any<CancellationToken>());
+            Context.Received(1).SetVariableAsync("InputIsValid", "False", Arg.Any<CancellationToken>());
+            Context.Received(3).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         public async Task FlowWithConditionsAndMultipleInputsShouldChangeStatesAndSendMessages()
         {
             // Arrange
@@ -764,10 +1129,209 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
         }
+                       
+        [Fact]
+        public async Task TimeoutOnActionShouldOverrideDefaultConfiguration()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            
+            var timeout =  TimeSpan.FromMilliseconds(256);
+            var fakeSender = new FakeSender(timeout + timeout);            
+            Sender = fakeSender;                                 
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Timeout = timeout.TotalSeconds,
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
 
+            // Act
+            var exception = await target.ProcessInputAsync(input, User, Application, flow, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
+            exception.Message.ShouldBe($"The processing of the action 'SendMessage' has timed out after {timeout.TotalMilliseconds} ms");
+            fakeSender.SentMessages.ShouldBeEmpty();
+        }
+        
+        [Fact]
+        public async Task ActionWithInvalidSettingShouldBreakProcessing()
+        {
+              // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "application/json";
+            var messageContent = "NOT A JSON";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target
+                .ProcessInputAsync(input, User, Application, flow, CancellationToken)
+                .ShouldThrowAsync<ActionProcessingException>();           
+        }        
+        
+        [Fact]
+        public async Task ActionWithInvalidSettingShouldNotBreakProcessingWhenContinueOnErrorIsTrue()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            var messageType = "application/json";
+            var messageContent = "NOT A JSON";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                ContinueOnError = true,
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);           
+            
+            // Assert
+            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+        }                
+        
         public void Dispose()
         {
             CancellationTokenSource.Dispose();
+        }
+        
+        private class FakeSender : ISender
+        {
+            private readonly TimeSpan _delay;
+
+            public FakeSender(TimeSpan delay)
+            {
+                _delay = delay;
+                SentMessages = new List<Message>();
+            }
+            
+            public List<Message> SentMessages { get; }
+            
+           
+            public async Task SendMessageAsync(Message message, CancellationToken cancellationToken)
+            {
+                await Task.Delay(_delay, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                SentMessages.Add(message);
+            }
+
+            public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task SendCommandAsync(Command command, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<Command> ProcessCommandAsync(Command requestCommand, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

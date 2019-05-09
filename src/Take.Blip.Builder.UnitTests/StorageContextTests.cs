@@ -1,9 +1,8 @@
-﻿using Lime.Messaging.Contents;
-using SimpleInjector;
-using System;
+﻿using SimpleInjector;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 
 namespace Take.Blip.Builder.UnitTests
@@ -39,9 +38,11 @@ namespace Take.Blip.Builder.UnitTests
         protected override ContextBase GetTarget()
         {
             var container = new Container();
+            container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
             container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(Sender);
+            container.RegisterSingleton(CacheOwnerCallerContactMap);
 
             return new StorageContext(
                 User,
@@ -51,6 +52,5 @@ namespace Take.Blip.Builder.UnitTests
                 container.GetAllInstances<IVariableProvider>(),
                 OwnerCallerNameDocumentMap);
         }
-
     }
 }

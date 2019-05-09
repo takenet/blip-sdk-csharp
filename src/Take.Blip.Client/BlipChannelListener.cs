@@ -79,13 +79,22 @@ namespace Take.Blip.Client
         public Task<Command> CommandListenerTask => _channelListener.CommandListenerTask;
 
         public void AddMessageReceiver(IMessageReceiver messageReceiver, Func<Message, Task<bool>> messageFilter = null, int priority = 0)
-            => AddEnvelopeReceiver(_messageReceivers, () => messageReceiver, messageFilter, priority);
+        {
+            if (messageReceiver == null) throw new ArgumentNullException(nameof(messageReceiver));
+            AddEnvelopeReceiver(_messageReceivers, () => messageReceiver, messageFilter, priority);
+        }
 
         public void AddNotificationReceiver(INotificationReceiver notificationReceiver, Func<Notification, Task<bool>> notificationFilter = null, int priority = 0)
-            => AddEnvelopeReceiver(_notificationReceivers, () => notificationReceiver, notificationFilter, priority);
+        {
+            if (notificationReceiver == null) throw new ArgumentNullException(nameof(notificationReceiver));
+            AddEnvelopeReceiver(_notificationReceivers, () => notificationReceiver, notificationFilter, priority);
+        }
 
         public void AddCommandReceiver(ICommandReceiver commandReceiver, Func<Command, Task<bool>> commandFilter = null, int priority = 0)
-            => AddEnvelopeReceiver(_commandReceivers, () => commandReceiver, commandFilter, priority);
+        {
+            if (commandReceiver == null) throw new ArgumentNullException(nameof(commandReceiver));
+            AddEnvelopeReceiver(_commandReceivers, () => commandReceiver, commandFilter, priority);
+        }
 
         public void Start(IEstablishedReceiverChannel channel)
         {
@@ -298,7 +307,16 @@ namespace Take.Blip.Client
                 .First(r => r.Any());
 
             await Task.WhenAll(
-                receiverGroup.Select(r => r.ReceiverFactory().ReceiveAsync(envelope, cancellationToken)));
+                receiverGroup.Select(r =>
+                {
+                    var receiver = r.ReceiverFactory();
+                    if (receiver == null)
+                    {
+                        throw new ApplicationException("A receiver factory produced a null instance"); 
+                    }
+                
+                    return receiver.ReceiveAsync(envelope, cancellationToken);
+                }));
         }
 
         private void LogException<T>(T envelope, Exception ex) where T : Envelope

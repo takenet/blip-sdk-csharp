@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.Context;
 
@@ -32,10 +33,12 @@ namespace Take.Blip.Builder.UnitTests
         protected override ContextBase GetTarget()
         {
             var container = new Container();
+            container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
             container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(ContextExtension);
             container.RegisterSingleton(Sender);
+            container.RegisterSingleton(CacheOwnerCallerContactMap);
 
             return new ExtensionContext(
                 User,

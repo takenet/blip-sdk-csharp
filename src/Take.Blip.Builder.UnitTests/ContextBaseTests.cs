@@ -8,8 +8,12 @@ using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using NSubstitute;
+using Serilog;
 using Shouldly;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Storage;
+using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Contacts;
@@ -25,6 +29,9 @@ namespace Take.Blip.Builder.UnitTests
 
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             ContactExtension = Substitute.For<IContactExtension>();
+            Logger = Substitute.For<ILogger>();
+            Configuration = Substitute.For<IConfiguration>();
+            CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
             Sender = Substitute.For<ISender>();
             Flow = new Flow()
             {
@@ -33,15 +40,17 @@ namespace Take.Blip.Builder.UnitTests
             };
             User = "user@msging.net";
             Application = "application@msging.net";
-            Input = new LazyInput(new PlainText()
+            Input = new LazyInput(
+                new PlainText()
                 {
                     Text = "Hello world!"
                 },
-                Flow.Configuration,
+                Flow.BuilderConfiguration,
                 new DocumentSerializer(documentTypeResolver),
                 new EnvelopeSerializer(documentTypeResolver),
                 ArtificialIntelligenceExtension,
                 CancellationToken);
+            Configuration.ContactCacheExpiration.Returns(TimeSpan.FromMinutes(5));
         }
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; }
@@ -49,6 +58,12 @@ namespace Take.Blip.Builder.UnitTests
         public IContactExtension ContactExtension { get; }
 
         public ISender Sender { get; set; }
+
+        public ILogger Logger { get; }
+
+        public IConfiguration Configuration { get; }
+
+        public ICacheOwnerCallerContactMap CacheOwnerCallerContactMap { get; }
 
         public Identity User { get; set; }
 
@@ -166,7 +181,6 @@ namespace Take.Blip.Builder.UnitTests
             actual.ShouldBeNull();
         }
 
-
         [Fact]
         public async Task GetVariableWithJsonPropertyWithTwoLevelsShouldSucceed()
         {
@@ -239,7 +253,6 @@ namespace Take.Blip.Builder.UnitTests
             actual.ShouldBe(contact.Extras["property1"]);
         }
 
-
         [Fact]
         public async Task GetInvalidContactVariableShouldReturnNull()
         {
@@ -263,7 +276,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task GetCalendarVariableShouldSucceed()
         {
             // Arrange
-            var now = DateTimeOffset.UtcNow;            
+            var now = DateTimeOffset.UtcNow;
             var target = GetTarget();
 
             // Act
@@ -383,8 +396,5 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             actual.ShouldBe("value2");
         }
-
-
-
     }
 }
