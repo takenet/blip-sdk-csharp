@@ -10,7 +10,7 @@ namespace Take.Blip.Builder.Actions.SetVariable
 
         public string Value { get; set; }
 
-        public int? Expiration { get; set; }
+        public double? Expiration { get; set; }
 
         public void Validate()
         {

@@ -5,7 +5,8 @@ using SimpleInjector;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Utils;
+using Take.Blip.Builder.Storage;
+using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Broadcast;
@@ -38,6 +39,7 @@ namespace Take.Blip.Builder.UnitTests
             Application = new Identity("application", "domain");
             Context.User.Returns(User);
             TraceProcessor = Substitute.For<ITraceProcessor>();
+            CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
         }
 
         public Identity User { get; set; }
@@ -53,6 +55,8 @@ namespace Take.Blip.Builder.UnitTests
         public IBroadcastExtension BroadcastExtension { get; set; }
 
         public IContactExtension ContactExtension { get; set; }
+
+        public ICacheOwnerCallerContactMap CacheOwnerCallerContactMap { get; set; }
 
         public ISender Sender { get; set; }
 
@@ -77,6 +81,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(EventTrackExtension);
             container.RegisterSingleton(BroadcastExtension);
             container.RegisterSingleton(ContactExtension);
+            container.RegisterSingleton(CacheOwnerCallerContactMap);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);

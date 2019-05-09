@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using Shouldly;
 using Take.Blip.Builder.Models;
 using Xunit;
@@ -431,8 +433,51 @@ namespace Take.Blip.Builder.UnitTests.Models
             };
 
             // Act
-            flow.Validate();
- 
+            flow.Validate(); 
         }
+
+        [Fact]
+        public void GetBuilderConfigurationWhenExistsBuilderKeysShouldReturnValidInstance()
+        {
+            // Arrange
+            var minimumIntentScoreValue = 0.512;            
+            var stateExpiration = TimeSpan.Parse("00:30:00");
+            var actionExecutionTimeout = 30.121412;
+            var flow = new Flow()
+            {
+                Configuration = new Dictionary<string, string>()
+                {
+                    {"builder:minimumIntentScore", minimumIntentScoreValue.ToString(CultureInfo.InvariantCulture)},
+                    {"builder:stateExpiration", stateExpiration.ToString()},
+                    {"builder:actionExecutionTimeout", actionExecutionTimeout.ToString(CultureInfo.InvariantCulture)},
+                    {"myConfigurationKey", "anyValue"}
+                }
+            };
+            
+            // Act
+            var builderConfiguration = flow.BuilderConfiguration;
+            
+            // Assert
+            builderConfiguration.ShouldNotBeNull();
+            builderConfiguration.MinimumIntentScore.ShouldBe(minimumIntentScoreValue);
+            builderConfiguration.StateExpiration.ShouldBe(stateExpiration);
+            builderConfiguration.ActionExecutionTimeout.ShouldBe(actionExecutionTimeout);
+        }
+        
+        [Fact]
+        public void GetBuilderConfigurationIsNullShouldReturnNull()
+        {
+            // Arrange            
+            var flow = new Flow()
+            {
+                Configuration = null
+            };
+            
+            // Act
+            var builderConfiguration = flow.BuilderConfiguration;
+            
+            // Assert
+            builderConfiguration.ShouldBeNull();
+        }        
     }
 }

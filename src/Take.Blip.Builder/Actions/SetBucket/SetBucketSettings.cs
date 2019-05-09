@@ -13,7 +13,7 @@ namespace Take.Blip.Builder.Actions.SetBucket
 
         public string Type { get; set; }
 
-        public int? Expiration { get; set; }
+        public double? Expiration { get; set; }
 
         public string Document { get; set; }
 
