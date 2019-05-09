@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Actions.TrackEvent
         {
             get
             {
-                if (decimal.TryParse(Value, out var parsedValue))
+                if (decimal.TryParse(Value, NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedValue))
                 {
                     return parsedValue;
                 }

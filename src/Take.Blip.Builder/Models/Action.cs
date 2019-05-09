@@ -22,6 +22,21 @@ namespace Take.Blip.Builder.Models
         public Condition[] Conditions { get; set; }
 
         /// <summary>
+        /// Gets the timeout for executing the action, in seconds. Optional.
+        /// </summary>
+        public double? Timeout { get; set; }
+
+        /// <summary>
+        /// Indicates that the input processing should continue if any error occur in the action execution.
+        /// </summary>
+        public bool ContinueOnError { get; set; }
+
+        /// <summary>
+        /// TODO: Indicates if the action should be executed asynchronously, without blocking the input processing.
+        /// </summary>
+        public bool ExecuteAsynchronously { get; set; }
+        
+        /// <summary>
         /// The action type name. Required.
         /// </summary>
         [Required(ErrorMessage = "The action type is required")]
@@ -34,7 +49,7 @@ namespace Take.Blip.Builder.Models
 
         public void Validate()
         {
-            this.ValidateObject();
+            this.ValidateObject();           
         }
 
         public ActionTrace ToTrace()
@@ -42,7 +57,8 @@ namespace Take.Blip.Builder.Models
             return new ActionTrace
             {
                 Order = Order,
-                Type = Type
+                Type = Type,
+                ContinueOnError = ContinueOnError
             };
         }
     }

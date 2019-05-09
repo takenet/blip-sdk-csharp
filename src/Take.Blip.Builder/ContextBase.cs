@@ -8,6 +8,7 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 
 namespace Take.Blip.Builder
@@ -61,7 +62,7 @@ namespace Take.Blip.Builder
                 variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
             }
 
-            if (string.IsNullOrWhiteSpace(variableValue) || 
+            if (string.IsNullOrWhiteSpace(variableValue) ||
                 string.IsNullOrWhiteSpace(variable.Property))
             {
                 return variableValue;
@@ -97,9 +98,7 @@ namespace Take.Blip.Builder
             }
         }
 
-
-
-        struct VariableName
+        private struct VariableName
         {
             private static readonly Regex VariableNameRegex = new Regex("^(?<sourceOrName>[\\w\\d]+)(\\.(?<name>[\\w\\d\\.]+))?(@(?<property>([\\w\\d\\.](\\[(?<index>\\d+|\\$n)\\])?)+))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
