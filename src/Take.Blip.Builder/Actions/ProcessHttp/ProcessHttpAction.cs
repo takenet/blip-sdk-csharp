@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
 {
@@ -91,7 +92,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             if (ShouldAddHeader("processHttpAddUserToRequestHeader", context))
             {
-                httpRequestMessage.Headers.Add("X-Blip-User", context.User);
+                httpRequestMessage.Headers.Add(Constants.BLIP_USER_HEADER, context.User);
             }
         }
 
@@ -105,7 +106,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             if (ShouldAddHeader("processHttpAddBotIdentityToRequestHeader", context))
             {
-                httpRequestMessage.Headers.Add("X-Blip-Bot", context.Application);
+                httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.Application);
             }
         }
 
