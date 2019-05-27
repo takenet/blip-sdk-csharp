@@ -44,14 +44,14 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         public Task<DocumentCollection> GetAnswersAsync(string intentionId, int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken))
             => ProcessCommandAsync<DocumentCollection>(
                 CreateGetCommandRequest(
-                    $"{Smart.Format(UriTemplates.INTENTION_ANSWERS, new { intentionId })}?{GetQueryString(skip, take, ascending)}",
+                    $"{Smart.Format(UriTemplates.INTENTION_ANSWERS, new { intentionId })}?{GetQueryString(skip, take, @ascending)}",
                     ArtificialIntelligenceAddress),
                 cancellationToken);
 
         public Task<DocumentCollection> GetEntitiesAsync(int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken))
             => ProcessCommandAsync<DocumentCollection>(
                 CreateGetCommandRequest(
-                    $"{UriTemplates.ENTITIES}?{GetQueryString(skip, take, ascending)}",
+                    $"{UriTemplates.ENTITIES}?{GetQueryString(skip, take, @ascending)}",
                     ArtificialIntelligenceAddress),
                 cancellationToken);
 
@@ -72,14 +72,14 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         public Task<DocumentCollection> GetIntentionsAsync(int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken))
             => ProcessCommandAsync<DocumentCollection>(
                 CreateGetCommandRequest(
-                    $"{UriTemplates.INTENTIONS}?{GetQueryString(skip, take, ascending)}",
+                    $"{UriTemplates.INTENTIONS}?{GetQueryString(skip, take, @ascending)}",
                     ArtificialIntelligenceAddress),
                 cancellationToken);
 
         public Task<DocumentCollection> GetModelsAsync(int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken))
             => ProcessCommandAsync<DocumentCollection>(
                 CreateGetCommandRequest(
-                    $"{UriTemplates.MODELS}?{GetQueryString(skip, take, ascending)}",
+                    $"{UriTemplates.MODELS}?{GetQueryString(skip, take, @ascending)}",
                     ArtificialIntelligenceAddress),
                 cancellationToken);
 
@@ -93,7 +93,7 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         public Task<DocumentCollection> GetQuestionsAsync(string intentionId, int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken))
             => ProcessCommandAsync<DocumentCollection>(
                 CreateGetCommandRequest(
-                    $"{Smart.Format(UriTemplates.INTENTION_QUESTIONS, new { intentionId })}?{GetQueryString(skip, take, ascending)}",
+                    $"{Smart.Format(UriTemplates.INTENTION_QUESTIONS, new { intentionId })}?{GetQueryString(skip, take, @ascending)}",
                     ArtificialIntelligenceAddress),
                 cancellationToken);
 
