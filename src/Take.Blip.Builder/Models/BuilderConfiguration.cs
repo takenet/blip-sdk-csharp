@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Models
         public double? MinimumIntentScore { get; set; }
 
         public double? ActionExecutionTimeout { get; set; }
-           
+
         public static BuilderConfiguration FromDictionary(IDictionary<string, string> configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
