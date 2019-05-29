@@ -144,8 +144,7 @@ namespace Take.Blip.Builder
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
-                            // TODO: add tracing for flow input actions
-                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, null, linkedCts.Token);
+                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, linkedCts.Token);
                         }
 
                         var stateWaitForInput = true;
@@ -236,8 +235,7 @@ namespace Take.Blip.Builder
                         // Process the global output actions
                         if (flow.OutputActions != null)
                         {
-                            // TODO: add tracing for flow output actions
-                            await ProcessActionsAsync(lazyInput, context, flow.OutputActions, null, linkedCts.Token);
+                            await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, linkedCts.Token);
                         }
                     }
                     finally
