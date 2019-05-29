@@ -142,6 +142,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(FlowConfigurationVariableProvider),
                     typeof(InputVariableProvider),
                     typeof(StateVariableProvider),
+                    typeof(TunnelVariableProvider),
                 });
 
             return container;
