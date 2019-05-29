@@ -41,5 +41,10 @@
         /// Get values from the current state.
         /// </summary>
         State,
+        
+        /// <summary>
+        /// Gets values from current tunnel, if applicable.
+        /// </summary>
+        Tunnel,
     }
 }

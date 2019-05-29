@@ -58,10 +58,9 @@ namespace Take.Blip.Builder
             });
             _lazySerializedMessage = new Lazy<string>(() =>
             {
-                var message = EnvelopeReceiverContext<Message>.Envelope;
-                if (message != null)
+                if (Message != null)
                 {
-                    return envelopeSerializer.Serialize(message);
+                    return envelopeSerializer.Serialize(Message);
                 }
 
                 return null;                
@@ -70,6 +69,8 @@ namespace Take.Blip.Builder
 
         public Document Content { get; }
 
+        public Message Message => EnvelopeReceiverContext<Message>.Envelope;
+        
         public string SerializedContent => _lazySerializedContent.Value;
 
         public string SerializedMessage => _lazySerializedMessage.Value;
