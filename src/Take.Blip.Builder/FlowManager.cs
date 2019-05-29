@@ -140,6 +140,14 @@ namespace Take.Blip.Builder
 
                         // Create trace instances, if required
                         var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
+                        
+                        // Process the global input actions
+                        if (flow.InputActions != null)
+                        {
+                            // TODO: add tracing for flow input actions
+                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, null, linkedCts.Token);
+                        }
+
                         var stateWaitForInput = true;
                         do
                         {
@@ -224,6 +232,13 @@ namespace Take.Blip.Builder
                                 }
                             }
                         } while (!stateWaitForInput);
+                        
+                        // Process the global output actions
+                        if (flow.OutputActions != null)
+                        {
+                            // TODO: add tracing for flow output actions
+                            await ProcessActionsAsync(lazyInput, context, flow.OutputActions, null, linkedCts.Token);
+                        }
                     }
                     finally
                     {
