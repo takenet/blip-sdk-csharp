@@ -60,7 +60,8 @@ namespace Take.Blip.Builder.Actions.ManageList
             {
                 await _broadcastExtension.DeleteRecipientAsync(listName, context.User, cancellationToken);
             }
-            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.APPLICATION_ERROR || ex.Reason.Code == ReasonCodes.COMMAND_INVALID_ARGUMENT)
+            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.APPLICATION_ERROR || 
+                                           ex.Reason.Code == ReasonCodes.COMMAND_INVALID_ARGUMENT)
             {
                 // Ignores if the list doesn't exists or the recipient is not member of the list
             }
