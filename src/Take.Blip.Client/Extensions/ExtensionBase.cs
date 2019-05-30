@@ -40,7 +40,7 @@ namespace Take.Blip.Client.Extensions
             string uriPath,
             Node to = null,
             string id = null,
-            Node @from = null) where T : Document =>
+            Node from = null) where T : Document =>
             new Command(id ?? EnvelopeId.NewId())
             {
                 From = from,
