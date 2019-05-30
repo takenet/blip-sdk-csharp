@@ -293,71 +293,73 @@ namespace Take.Blip.Builder
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
-                var isValidAction = await stateAction.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
-                if (isValidAction)    
+                if (stateAction.Conditions != null &&
+                    !await stateAction.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken))
                 {
-                    var action = _actionProvider.Get(stateAction.Type);
+                    continue;
+                }
 
-                    // Trace infra
-                    var (actionTrace, actionStopwatch) = actionTraces != null
-                        ? (stateAction.ToTrace(), Stopwatch.StartNew())
-                        : (null, null);
+                var action = _actionProvider.Get(stateAction.Type);
 
-                    // Configure the action timeout, that can be defined in action or flow level
-                    var executionTimeoutInSeconds =
-                        stateAction.Timeout ?? context.Flow?.BuilderConfiguration?.ActionExecutionTimeout;
+                // Trace infra
+                var (actionTrace, actionStopwatch) = actionTraces != null
+                    ? (stateAction.ToTrace(), Stopwatch.StartNew())
+                    : (null, null);
 
-                    var executionTimeout = executionTimeoutInSeconds.HasValue
-                        ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
-                        : _configuration.DefaultActionExecutionTimeout;
+                // Configure the action timeout, that can be defined in action or flow level
+                var executionTimeoutInSeconds =
+                    stateAction.Timeout ?? context.Flow?.BuilderConfiguration?.ActionExecutionTimeout;
+
+                var executionTimeout = executionTimeoutInSeconds.HasValue
+                    ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
+                    : _configuration.DefaultActionExecutionTimeout;
                         
-                    using (var cts = new CancellationTokenSource(executionTimeout))
-                    using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+                using (var cts = new CancellationTokenSource(executionTimeout))
+                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+                {
+                    try
                     {
-                        try
+                        var settings = stateAction.Settings;
+                        if (settings != null)
                         {
-                            var settings = stateAction.Settings;
-                            if (settings != null)
-                            {
-                                var settingsJson = settings.ToString(Formatting.None);
-                                settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
-                                settings = JObject.Parse(settingsJson);
-                            }
-
-                            if (actionTrace != null)
-                            {
-                                actionTrace.ParsedSettings = settings;
-                            }
-
-                            await action.ExecuteAsync(context, settings, linkedCts.Token);
+                            var settingsJson = settings.ToString(Formatting.None);
+                            settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+                            settings = JObject.Parse(settingsJson);
                         }
-                        catch (Exception ex)
-                        {
-                            if (actionTrace != null)
-                            {
-                                actionTrace.Error = ex.ToString();
-                            }
 
-                            if (!stateAction.ContinueOnError)
-                            {
-                                var message = ex is OperationCanceledException && cts.IsCancellationRequested
-                                    ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
-                                    : $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}";
+                        if (actionTrace != null)
+                        {
+                            actionTrace.ParsedSettings = settings;
+                        }
+
+                        await action.ExecuteAsync(context, settings, linkedCts.Token);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (actionTrace != null)
+                        {
+                            actionTrace.Error = ex.ToString();
+                        }
+
+                        if (!stateAction.ContinueOnError)
+                        {
+                            var message = ex is OperationCanceledException && cts.IsCancellationRequested
+                                ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
+                                : $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}";
                                 
-                                throw new ActionProcessingException(message, ex);
-                            }
+                            throw new ActionProcessingException(message, ex);
                         }
-                        finally
-                        {
-                            actionStopwatch?.Stop();
+                    }
+                    finally
+                    {
+                        actionStopwatch?.Stop();
 
-                            if (actionTrace != null &&
-                                actionTraces != null &&
-                                actionStopwatch != null)
-                            {
-                                actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
-                                actionTraces.Add(actionTrace);
-                            }
+                        if (actionTrace != null &&
+                            actionTraces != null &&
+                            actionStopwatch != null)
+                        {
+                            actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
+                            actionTraces.Add(actionTrace);
                         }
                     }
                 }
@@ -381,9 +383,8 @@ namespace Take.Blip.Builder
 
                     try
                     {
-                        var isValidOutput = await output.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
-
-                        if (isValidOutput)
+                        if (output.Conditions == null ||
+                            await output.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken))
                         {
                             state = flow.States.SingleOrDefault(s => s.Id == output.StateId);
                             break;

@@ -28,6 +28,7 @@ namespace Take.Blip.Builder.Actions.ManageList
                 case ManageListSettingsAction.Remove:
                     await RemoveFromListAsync(context, settings.ListName, cancellationToken);
                     break;
+                
                 default:
                     throw new ArgumentOutOfRangeException();
             }
