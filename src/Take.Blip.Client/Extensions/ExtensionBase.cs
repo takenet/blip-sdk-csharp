@@ -35,7 +35,12 @@ namespace Take.Blip.Client.Extensions
             return responseCommand.Resource as T;
         }
 
-        protected Command CreateSetCommandRequest<T>(T resource, string uriPath, Node to = null, string id = null, Node from = null) where T : Document =>
+        protected Command CreateSetCommandRequest<T>(
+            T resource,
+            string uriPath,
+            Node to = null,
+            string id = null,
+            Node from = null) where T : Document =>
             new Command(id ?? EnvelopeId.NewId())
             {
                 From = from,
@@ -45,7 +50,12 @@ namespace Take.Blip.Client.Extensions
                 Resource = resource
             };
 
-        protected Command CreateMergeCommandRequest<T>(T resource, string uriPath, Node to = null, string id = null, Node from = null) where T : Document =>
+        protected Command CreateMergeCommandRequest<T>(
+            T resource,
+            string uriPath,
+            Node to = null,
+            string id = null,
+            Node from = null) where T : Document =>
             new Command(id ?? EnvelopeId.NewId())
             {
                 From = from,
@@ -64,7 +74,11 @@ namespace Take.Blip.Client.Extensions
                 Uri = new LimeUri(uriPath)
             };
 
-        protected Command CreateDeleteCommandRequest(string uriPath, Node to = null, string id = null, Node from = null) =>
+        protected Command CreateDeleteCommandRequest(
+            string uriPath, 
+            Node to = null, 
+            string id = null, 
+            Node from = null) =>
             new Command(id ?? EnvelopeId.NewId())
             {
                 From = from,
@@ -73,7 +87,12 @@ namespace Take.Blip.Client.Extensions
                 Uri = new LimeUri(uriPath)
             };
 
-        protected Command CreateObserveCommandRequest<T>(string uriPath, T resource = default(T), Node to = null, string id = null, Node from = null) where T : Document =>
+        protected Command CreateObserveCommandRequest<T>(
+            string uriPath,
+            T resource = default,
+            Node to = null,
+            string id = null,
+            Node from = null) where T : Document =>
             new Command(id)
             {
                 From = from,
