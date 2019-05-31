@@ -19,6 +19,7 @@ using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
+using Take.Blip.Client.Extensions.Tunnel;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -87,7 +88,7 @@ namespace Take.Blip.Builder
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
-            TraceSettings traceSettings = null;
+            TraceSettings traceSettings;
             var message = EnvelopeReceiverContext<Message>.Envelope;
             if (message?.Metadata != null &&
                 message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
@@ -264,7 +265,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
+        private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
         {
             switch (inputValidation.Rule)
             {
@@ -332,7 +333,34 @@ namespace Take.Blip.Builder
                             actionTrace.ParsedSettings = settings;
                         }
 
-                        await action.ExecuteAsync(context, settings, linkedCts.Token);
+                        // Define a ISender interceptor for changing the commands "from" if configured.
+                        IDisposable interceptor = null;
+
+                        if (context.Flow?.BuilderConfiguration?.ProcessCommandsAsTunnelOwner != null && 
+                            context.Flow.BuilderConfiguration.ProcessCommandsAsTunnelOwner.Value && 
+                            lazyInput.Message.TryGetTunnelInformation(out var tunnelInformation))
+                        {
+                            interceptor = EnvelopeInterceptorFactory<Command>.Create(command =>
+                            {
+                                if (command.From == null)
+                                {
+                                    var ownerCommand = command.ShallowCopy();
+                                    ownerCommand.From = tunnelInformation.Owner.ToNode();
+                                    //clonedCommand.Pp = "";
+                                    return ownerCommand;
+                                }
+                                return command;
+                            });
+                        }
+
+                        try
+                        {
+                            await action.ExecuteAsync(context, settings, linkedCts.Token);
+                        }
+                        finally
+                        {
+                            interceptor?.Dispose();
+                        }
                     }
                     catch (Exception ex)
                     {
