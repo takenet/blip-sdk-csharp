@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Take.Blip.Builder.Utils
+namespace Take.Blip.Client
 {
     public static class DictionaryExtensions
     {

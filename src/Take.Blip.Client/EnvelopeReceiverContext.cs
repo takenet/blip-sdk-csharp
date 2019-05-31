@@ -24,6 +24,11 @@ namespace Take.Blip.Client
         /// <returns></returns>
         public static IDisposable Create(T envelope)
         {
+            if (_envelope.Value != null)
+            {
+                throw new InvalidOperationException("The envelope is already defined");
+            }
+            
             // TODO: Create a stack to support multiple levels of contexts
             _envelope.Value = envelope;
             return new ClearEnvelopeReceiverContext();
