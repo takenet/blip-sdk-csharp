@@ -1,6 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Client;
+using Take.Blip.Client.Extensions.Tunnel;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -13,7 +15,7 @@ namespace Take.Blip.Builder.Variables
             var message = context.Input.Message;
             if (message == null) return Task.FromResult<string>(null);
             
-            var value = message.Metadata?.GetValueOrDefault($"#tunnel.{name}");
+            var value = message.Metadata?.GetValueOrDefault($"{TunnelExtension.TUNNEL_METADATA_KEY_PREFIX}.{name}");
             return Task.FromResult(value);
         }
     }
