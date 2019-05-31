@@ -8,6 +8,10 @@ namespace Take.Blip.Client.Extensions.Tunnel
     public class TunnelExtension : ITunnelExtension
     {
         public static readonly Node TunnelAddress = Node.Parse($"postmaster@tunnel.{Constants.DEFAULT_DOMAIN}");
+        
+        public const string TUNNEL_METADATA_KEY_PREFIX = "#tunnel";
+        public const string TUNNEL_OWNER_METADATA_KEY = TUNNEL_METADATA_KEY_PREFIX + ".owner";
+        public const string TUNNEL_ORIGINATOR_METADATA_KEY = TUNNEL_METADATA_KEY_PREFIX + ".originator";
 
         private readonly ISender _sender;
 
