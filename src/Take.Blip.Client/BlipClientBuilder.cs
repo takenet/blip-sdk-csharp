@@ -246,6 +246,11 @@ namespace Take.Blip.Client
                 .WithSendTimeout(SendTimeout)
                 .WithEnvelopeBufferSize(100)
                 .AddCommandModule(c => new ReplyPingChannelModule(c))
+                .AddBuiltHandler((c, t) =>
+                {
+                    FillEnvelopeRecipientsChannelModule.CreateAndRegister(c);
+                    return Task.CompletedTask;
+                })
                 .AddBuiltHandler(
                     (c, t) =>
                     {
