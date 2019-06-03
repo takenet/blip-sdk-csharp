@@ -115,6 +115,18 @@ namespace Take.Blip.Builder
                 ? Stopwatch.StartNew()
                 : null;
 
+            // Sets the owner context if configured.
+            IDisposable ownerContext = null;
+
+            if (flow.BuilderConfiguration?.ProcessCommandsAsTunnelOwner != null && 
+                flow.BuilderConfiguration.ProcessCommandsAsTunnelOwner.Value &&
+                EnvelopeReceiverContext<Message>.Envelope != null &&
+                EnvelopeReceiverContext<Message>.Envelope.TryGetTunnelInformation(out var tunnelInformation) &&
+                tunnelInformation.Owner != null)
+            {
+                ownerContext = OwnerContext.Create(tunnelInformation.Owner);
+            }            
+            
             try
             {
                 // Create a cancellation token
@@ -253,6 +265,8 @@ namespace Take.Blip.Builder
                 {
                     inputTrace.Error = ex.ToString();
                 }
+                
+                ownerContext?.Dispose();
 
                 throw;
             }
@@ -332,35 +346,8 @@ namespace Take.Blip.Builder
                         {
                             actionTrace.ParsedSettings = settings;
                         }
-
-                        // Define a ISender interceptor for changing the commands "from" if configured.
-                        IDisposable interceptor = null;
-
-                        if (context.Flow?.BuilderConfiguration?.ProcessCommandsAsTunnelOwner != null && 
-                            context.Flow.BuilderConfiguration.ProcessCommandsAsTunnelOwner.Value && 
-                            lazyInput.Message.TryGetTunnelInformation(out var tunnelInformation))
-                        {
-                            interceptor = EnvelopeInterceptorFactory<Command>.Create(command =>
-                            {
-                                if (command.From == null)
-                                {
-                                    var ownerCommand = command.ShallowCopy();
-                                    ownerCommand.From = tunnelInformation.Owner.ToNode();
-                                    //clonedCommand.Pp = "";
-                                    return ownerCommand;
-                                }
-                                return command;
-                            });
-                        }
-
-                        try
-                        {
-                            await action.ExecuteAsync(context, settings, linkedCts.Token);
-                        }
-                        finally
-                        {
-                            interceptor?.Dispose();
-                        }
+                        
+                        await action.ExecuteAsync(context, settings, linkedCts.Token);
                     }
                     catch (Exception ex)
                     {
