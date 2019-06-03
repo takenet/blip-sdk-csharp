@@ -13,12 +13,30 @@
   "settings": {
     "flow": {
       "id": "0",
+      "configuration": {
+        "builder:processCommandsAsTunnelOwner": "true"
+      },
       "states": [
         {
           "id": "0.0",
           "root": true,
           "input": {},
           "outputActions": [
+            {
+              "type": "TrackEvent",
+              "settings": {
+                "category": "flow",
+                "action": "0.0",
+                "fireAndForget": "false"
+              }
+            },
+            {
+              "type": "SetVariable",
+              "settings": {
+                "variable": "my-variable",
+                "value": "value0"
+              }
+            },
             {
               "type": "SendMessage",
               "settings": {
@@ -40,6 +58,21 @@
           "id": "1.0",
           "inputActions": [
             {
+              "type": "TrackEvent",
+              "settings": {
+                "category": "flow",
+                "action": "1.0",
+                "fireAndForget": "false"
+              }
+            },
+            {
+              "type": "SetVariable",
+              "settings": {
+                "variable": "my-variable",
+                "value": "value1"
+              }
+            },
+            {
               "type": "SendMessage",
               "settings": {
                 "type": "application/vnd.chatstate+json",
@@ -60,17 +93,17 @@
                     {
                       "text": "Criar chatbot",
                       "type": "application/vnd.blip.builder-state",
-                      "value": "2.0"
+                      "value": "2"
                     },
                     {
                       "text": "Dúvidas",
                       "type": "application/vnd.blip.builder-state",
-                      "value": "3.0"
+                      "value": "3"
                     },
                     {
                       "text": "Sugestões",
                       "type": "application/vnd.blip.builder-state",
-                      "value": "4.0"
+                      "value": "4"
                     }
                   ]
                 }
@@ -82,19 +115,19 @@
             {
               "stateId": "2.0",
               "conditions": [
-                { "values": [ "2.0" ] }
+                { "values": [ "2" ] }
               ]
             },
             {
               "stateId": "3.0",
               "conditions": [
-                { "values": [ "3.0" ] }
+                { "values": [ "3" ] }
               ]
             },
             {
               "stateId": "4.0",
               "conditions": [
-                { "values": [ "4.0" ] }
+                { "values": [ "4" ] }
               ]
             },
             {
@@ -105,6 +138,21 @@
         {
           "id": "2.0",
           "inputActions": [
+            {
+              "type": "TrackEvent",
+              "settings": {
+                "category": "flow",
+                "action": "2.0",
+                "fireAndForget": "false"
+              }
+            },
+            {
+              "type": "SetVariable",
+              "settings": {
+                "variable": "my-variable",
+                "value": "value2"
+              }
+            },
             {
               "type": "SendMessage",
               "settings": {
@@ -149,6 +197,21 @@
           "id": "3.0",
           "inputActions": [
             {
+              "type": "TrackEvent",
+              "settings": {
+                "category": "flow",
+                "action": "3.0",
+                "fireAndForget": "false"
+              }
+            },
+            {
+              "type": "SetVariable",
+              "settings": {
+                "variable": "my-variable",
+                "value": "value3"
+              }
+            },
+            {
               "type": "SendMessage",
               "settings": {
                 "type": "application/vnd.chatstate+json",
@@ -176,6 +239,21 @@
         {
           "id": "4.0",
           "inputActions": [
+            {
+              "type": "TrackEvent",
+              "settings": {
+                "category": "flow",
+                "action": "4.0",
+                "fireAndForget": "false"
+              }
+            },
+            {
+              "type": "SetVariable",
+              "settings": {
+                "variable": "my-variable",
+                "value": "value4"
+              }
+            },
             {
               "type": "SendMessage",
               "settings": {

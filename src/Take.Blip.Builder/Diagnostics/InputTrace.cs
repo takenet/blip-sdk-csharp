@@ -12,6 +12,8 @@ namespace Take.Blip.Builder.Diagnostics
         public InputTrace() : base(MediaType)
         {
             States = new List<StateTrace>();
+            InputActions = new List<ActionTrace>();
+            OutputActions = new List<ActionTrace>();
         }
 
         [DataMember(Name = "flowId")]
@@ -25,5 +27,11 @@ namespace Take.Blip.Builder.Diagnostics
 
         [DataMember(Name = "states")]
         public ICollection<StateTrace> States { get; set; }
+        
+        [DataMember(Name = "inputActions")]
+        public ICollection<ActionTrace> InputActions { get; set; }
+
+        [DataMember(Name = "outputActions")]
+        public ICollection<ActionTrace> OutputActions { get; set; }
     }
 }

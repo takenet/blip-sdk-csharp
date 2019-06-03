@@ -15,12 +15,26 @@ namespace Take.Blip.Builder.Models
     {
         private const string CONFIGURATION_KEY_PREFIX = "builder:";
 
+        /// <summary>
+        /// The expiration for a user state in a flow.
+        /// </summary>
         public TimeSpan? StateExpiration { get; set; }
 
+        /// <summary>
+        /// The minimum AI intent score to be considered valid.
+        /// </summary>
         public double? MinimumIntentScore { get; set; }
 
+        /// <summary>
+        /// The global timeout for action execution. 
+        /// </summary>
         public double? ActionExecutionTimeout { get; set; }
 
+        /// <summary>
+        /// Indicates that the commands should be processed as the owner of a tunnel (a router bot), if the input message is from a tunnel user.
+        /// </summary>
+        public bool? ProcessCommandsAsTunnelOwner { get; set; }
+        
         public static BuilderConfiguration FromDictionary(IDictionary<string, string> configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
