@@ -1,4 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Take.Blip.Builder.Models
 {
@@ -61,5 +65,61 @@ namespace Take.Blip.Builder.Models
                 throw new ValidationException("The condition values should be provided if comparison is not Exists or NotExists");
             }
         }
+        
+        public async Task<bool> EvaluateConditionAsync(
+            LazyInput lazyInput,
+            IContext context,
+            CancellationToken cancellationToken)
+        {
+            string comparisonValue;
+
+            switch (Source)
+            {
+                case ValueSource.Input:
+                    comparisonValue = lazyInput.SerializedContent;
+                    break;
+
+                case ValueSource.Context:
+                    comparisonValue = await context.GetVariableAsync(Variable, cancellationToken);
+                    break;
+
+                case ValueSource.Intent:
+                    comparisonValue = (await lazyInput.GetIntentAsync())?.Name;
+                    break;
+
+                case ValueSource.Entity:
+                    comparisonValue = (await lazyInput.GetEntityValue(Entity))?.Value;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            switch (Comparison.GetComparisonType())
+            {
+                case ComparisonType.Unary:
+                    var unaryComparisonFunc = Comparison.ToUnaryDelegate();
+
+                    return unaryComparisonFunc(comparisonValue);
+
+                case ComparisonType.Binary:
+                    var binaryComparisonFunc = Comparison.ToBinaryDelegate();
+
+                    switch (Operator)
+                    {
+                        case ConditionOperator.Or:
+                            return Values.Any(v => binaryComparisonFunc(comparisonValue, v));
+
+                        case ConditionOperator.And:
+                            return Values.All(v => binaryComparisonFunc(comparisonValue, v));
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }        
     }
 }

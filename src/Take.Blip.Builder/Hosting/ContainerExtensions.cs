@@ -53,6 +53,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IFlowManager, FlowManager>();
             container.RegisterSingleton<IStateManager, StateManager>();
             container.RegisterSingleton<IContextProvider, ContextProvider>();
+            container.RegisterDecorator<ISender, OwnerSenderDecorator>(Lifestyle.Singleton);
 
             return container;
         }
@@ -142,6 +143,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(FlowConfigurationVariableProvider),
                     typeof(InputVariableProvider),
                     typeof(StateVariableProvider),
+                    typeof(TunnelVariableProvider),
                 });
 
             return container;

@@ -30,7 +30,7 @@ namespace Take.Blip.Builder
             _ownerCallerNameDocumentMap = ownerCallerNameDocumentMap;
         }
 
-        public override async Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
+        public override async Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default)
         {
             var storageDocument = new StorageDocument
             {
@@ -38,19 +38,19 @@ namespace Take.Blip.Builder
                 Document = value
             };
 
-            if (expiration != default(TimeSpan))
+            if (expiration != default)
             {
                 storageDocument.Expiration = DateTimeOffset.UtcNow.Add(expiration);
             }
 
-            var key = OwnerCallerName.Create(Application, User, name.ToLowerInvariant());
+            var key = CreateContextKey(name);
 
-            if (!await _ownerCallerNameDocumentMap.TryAddAsync(key, storageDocument, true))
+            if (!await _ownerCallerNameDocumentMap.TryAddAsync(key, storageDocument, true, cancellationToken))
             {
                 throw new LimeException(ReasonCodes.COMMAND_PROCESSING_ERROR, "An unexpected error occurred while storing the document");
             }
 
-            if (expiration != default(TimeSpan))
+            if (expiration != default)
             {
                 await _ownerCallerNameDocumentMap.SetRelativeKeyExpirationAsync(key, expiration);
             }
@@ -58,15 +58,21 @@ namespace Take.Blip.Builder
 
         public override Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
         {
-            return _ownerCallerNameDocumentMap.TryRemoveAsync(OwnerCallerName.Create(Application, User, name.ToLowerInvariant()));
+            return _ownerCallerNameDocumentMap.TryRemoveAsync(CreateContextKey(name));
         }
 
         public override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
         {
-            var key = OwnerCallerName.Create(Application, User, name.ToLowerInvariant());
-            var storageDocument = await _ownerCallerNameDocumentMap.GetValueOrDefaultAsync(key);
+            var storageDocument = await _ownerCallerNameDocumentMap.GetValueOrDefaultAsync(CreateContextKey(name), cancellationToken);
 
             return storageDocument?.Document;
         }
+
+        private OwnerCallerName CreateContextKey(string name)
+        {
+            var owner = OwnerContext.Owner ?? Application;
+            return OwnerCallerName.Create(owner, User, name.ToLowerInvariant());
+        }
     }
+    
 }
