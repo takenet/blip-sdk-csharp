@@ -136,12 +136,13 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterCollection<IVariableProvider>(
                 new[]
                 {
+                    typeof(ApplicationVariableProvider),
                     typeof(BucketVariableProvider),
                     typeof(CalendarVariableProvider),
+                    typeof(ConfigurationVariableProvider),
                     typeof(ContactVariableProvider),
-                    typeof(RandomVariableProvider),
-                    typeof(FlowConfigurationVariableProvider),
                     typeof(InputVariableProvider),
+                    typeof(RandomVariableProvider),
                     typeof(StateVariableProvider),
                     typeof(TunnelVariableProvider),
                 });
