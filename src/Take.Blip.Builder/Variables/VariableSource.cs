@@ -46,5 +46,10 @@
         /// Gets values from current tunnel, if applicable.
         /// </summary>
         Tunnel,
+        
+        /// <summary>
+        /// Gets values from the SDK Application
+        /// </summary>
+        Application,
     }
 }

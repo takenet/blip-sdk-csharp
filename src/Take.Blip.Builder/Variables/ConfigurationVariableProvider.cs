@@ -4,7 +4,7 @@ using Lime.Protocol;
 
 namespace Take.Blip.Builder.Variables
 {
-    public class FlowConfigurationVariableProvider : IVariableProvider
+    public class ConfigurationVariableProvider : IVariableProvider
     {
         public VariableSource Source => VariableSource.Config;
 
