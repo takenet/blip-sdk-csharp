@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.Tunnel;
@@ -13,10 +14,31 @@ namespace Take.Blip.Builder.Variables
         public Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
             var message = context.Input.Message;
-            if (message == null) return Task.FromResult<string>(null);
+            if (message == null ||
+                !message.TryGetTunnelInformation(out var tunnelInformation))
+            {
+                return Task.FromResult<string>(null);
+            }
             
-            var value = message.Metadata?.GetValueOrDefault($"{TunnelExtension.TUNNEL_METADATA_KEY_PREFIX}.{name}");
-            return Task.FromResult(value);
+            return GetVariable(name, tunnelInformation).AsCompletedTask();
+        }
+
+        private static string GetVariable(string name, TunnelInformation tunnelInformation)
+        {
+            switch (name)
+            {
+                case "owner":
+                    return tunnelInformation.Owner;
+                
+                case "originator":
+                    return tunnelInformation.Originator;
+                
+                case "destination":
+                    return tunnelInformation.Destination;
+                
+                default:
+                    return null;
+            }
         }
     }
 }

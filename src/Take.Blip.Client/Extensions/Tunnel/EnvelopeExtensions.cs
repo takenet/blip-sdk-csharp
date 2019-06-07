@@ -16,7 +16,8 @@ namespace Take.Blip.Client.Extensions.Tunnel
 
             tunnelInformation = new TunnelInformation(
                 envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_OWNER_METADATA_KEY),
-                envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_ORIGINATOR_METADATA_KEY));
+                envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_ORIGINATOR_METADATA_KEY),
+                envelope.From.ToIdentity());
             return true;
         }
     }
