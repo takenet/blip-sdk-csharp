@@ -29,15 +29,15 @@ namespace Take.Blip.Builder
             _ownerCallerNameDocumentMap = new Lazy<IOwnerCallerNameDocumentMap>(() => _serviceProvider.GetService<IOwnerCallerNameDocumentMap>());
         }
 
-        public IContext CreateContext(Identity userIdentity, Identity applicationIdentity, LazyInput input, Flow flow)
+        public IContext CreateContext(Identity userIdentity, Identity ownerIdentity, LazyInput input, Flow flow)
         {
             switch (_configuration.ContextType)
             {
                 case nameof(StorageContext):
-                    return new StorageContext(userIdentity, applicationIdentity, input, flow, _variableProviders.Value, _ownerCallerNameDocumentMap.Value);
+                    return new StorageContext(userIdentity, ownerIdentity, input, flow, _variableProviders.Value, _ownerCallerNameDocumentMap.Value);
 
                 default:
-                    return new ExtensionContext(userIdentity, applicationIdentity, input, flow, _variableProviders.Value, _contextExtension.Value);
+                    return new ExtensionContext(userIdentity, ownerIdentity, input, flow, _variableProviders.Value, _contextExtension.Value);
             }
         }
     }

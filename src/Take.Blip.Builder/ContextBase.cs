@@ -25,7 +25,7 @@ namespace Take.Blip.Builder
             IEnumerable<IVariableProvider> variableProviders)
         {
             UserIdentity = user ?? throw new ArgumentNullException(nameof(user));
-            ApplicationIdentity = application ?? throw new ArgumentNullException(nameof(application));
+            OwnerIdentity = application ?? throw new ArgumentNullException(nameof(application));
             Input = input ?? throw new ArgumentNullException(nameof(input));
             Flow = flow ?? throw new ArgumentNullException(nameof(flow));
             InputContext = new Dictionary<string, object>();
@@ -34,7 +34,7 @@ namespace Take.Blip.Builder
 
         public Identity UserIdentity { get; }
 
-        public Identity ApplicationIdentity { get; }
+        public Identity OwnerIdentity { get; }
 
         public LazyInput Input { get; }
 

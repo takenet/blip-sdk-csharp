@@ -38,7 +38,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             };
             ContactExtension.GetAsync(Contact.Identity, CancellationToken).Returns(Contact);
             Context.UserIdentity.Returns(Contact.Identity);
-            Context.ApplicationIdentity.Returns(new Identity("application", "domain.com"));
+            Context.OwnerIdentity.Returns(new Identity("application", "domain.com"));
             Configuration.ContactCacheExpiration.Returns(TimeSpan.FromMinutes(5));
             ApplicationSettings.Identifier = "application";
             ApplicationSettings.Domain = "domain.com";

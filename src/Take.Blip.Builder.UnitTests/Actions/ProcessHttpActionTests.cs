@@ -173,7 +173,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
             Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
             Context.UserIdentity.Returns(Identity.Parse(userIdentity));
-            Context.ApplicationIdentity.Returns(Identity.Parse(botIdentity));
+            Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
 
             var settings = new ProcessHttpSettings
             {
@@ -229,7 +229,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
             Context.Flow.Configuration.Add(botIdentifierConfigVariableName, botIdentifierVariableValue);
             Context.UserIdentity.Returns(Identity.Parse(userIdentity));
-            Context.ApplicationIdentity.Returns(Identity.Parse(botIdentity));
+            Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
 
             var settings = new ProcessHttpSettings
             {
