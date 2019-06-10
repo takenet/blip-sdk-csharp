@@ -63,7 +63,9 @@ namespace Take.Blip.Builder.Variables
         private async Task<string> GetAnalyzedContentAsync(LazyInput input)
         {
             var analyzedContent = await input.AnalyzedContent;
-            return analyzedContent != default(AnalysisResponse) ? _documentSerializer.Serialize(analyzedContent) : default(string);
+            return analyzedContent != default(AnalysisResponse) 
+                ? _documentSerializer.Serialize(analyzedContent) 
+                : default;
         }
 
         private async Task<string> GetIntentVariableAsync(LazyInput input, string intentProperty)

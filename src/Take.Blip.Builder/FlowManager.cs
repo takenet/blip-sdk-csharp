@@ -90,29 +90,27 @@ namespace Take.Blip.Builder
 
             flow.Validate();
             
-            // Determine the user / application pair
+            // Determine the user / owner pair
             Identity userIdentity;
             Identity ownerIdentity;
 
-            // Sets the owner context if configured.
-            IDisposable ownerContext = null;
-
-            if (flow.BuilderConfiguration?.UseTunnelOwnerAsApplication != null && 
-                flow.BuilderConfiguration.UseTunnelOwnerAsApplication.Value &&
-                message.TryGetTunnelInformation(out var tunnelInformation) &&
-                tunnelInformation.Owner != null)
+            if (flow.BuilderConfiguration.UseTunnelOwnerContext == true &&
+                message.TryGetTunnelInformation(out var tunnelInformation))
             {
                 userIdentity = tunnelInformation.Originator.ToNode();
                 ownerIdentity = tunnelInformation.Owner;
-                
-                ownerContext = OwnerContext.Create(ownerIdentity);
+            }
+            else if (flow.BuilderConfiguration.OwnerIdentity != null)
+            {
+                userIdentity = message.From.ToIdentity();
+                ownerIdentity = flow.BuilderConfiguration.OwnerIdentity;
             }
             else
             {
                 userIdentity = message.From.ToIdentity();
                 ownerIdentity = _applicationIdentity;
             }
-
+            
             // Input tracing infrastructure
             InputTrace inputTrace = null;
             TraceSettings traceSettings;
@@ -141,6 +139,13 @@ namespace Take.Blip.Builder
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
                 : null;
+
+            // Sets the owner context if required
+            IDisposable ownerContext = null;
+            if (ownerIdentity != _applicationIdentity)
+            {
+                ownerContext = OwnerContext.Create(ownerIdentity);
+            }
             
             try
             {
