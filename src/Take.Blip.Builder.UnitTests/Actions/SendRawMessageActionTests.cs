@@ -37,9 +37,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task SendWithPlainHttpContentShouldSucceed()
         {
             // Arrange
-            var destination = new Identity(Guid.NewGuid().ToString(), "msging.net");
-            Context.User.Returns(destination);
-
             var content = "This is a text content";
             var settings = new SendRawMessageSettings()
             {
@@ -53,15 +50,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             // Assert
             await Sender.Received(1).SendMessageAsync(Arg.Is<Message>(m =>
-                m.To.ToIdentity().Equals(destination) && m.Type == PlainText.MediaType && m.Content.ToString().Equals(content)), CancellationToken);
+                m.To.Equals(From) && m.Type == PlainText.MediaType && m.Content.ToString().Equals(content)), CancellationToken);
         }
 
         [Fact]
         public async Task SendWithJsonHttpContentShouldSucceed()
         {
             // Arrange
-            var destination = new Identity(Guid.NewGuid().ToString(), "msging.net");
-            Context.User.Returns(destination);
             var select = new Select()
             {
                 Text = "This is the header",
@@ -98,7 +93,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             await Sender.Received(1).SendMessageAsync(
                 Arg.Is<Message>(m =>
-                    m.To.ToIdentity().Equals(destination)
+                    m.To.ToIdentity().Equals(From)
                     && m.Type == Select.MediaType
                     && m.Content is Select
                     && ((Select)m.Content).Text == select.Text

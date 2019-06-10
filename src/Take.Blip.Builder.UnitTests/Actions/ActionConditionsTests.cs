@@ -155,10 +155,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
             DefineInputActionsForDefinedState(flow, firstStateId, inputActions);
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ActionProvider.Received().Get("ActionFistState");
@@ -192,10 +193,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             DefineInputActionsForDefinedState(flow, firstStateId, inputActions);
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ActionProvider.DidNotReceiveWithAnyArgs().Get(Arg.Any<string>());
@@ -238,10 +240,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
             DefineOutputActionsForDefinedState(flow, "root", outputActions);
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ActionProvider.Received().Get("ActionFistState");
@@ -275,10 +278,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             DefineOutputActionsForDefinedState(flow, "root", outputActions);
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ActionProvider.DidNotReceiveWithAnyArgs().Get(Arg.Any<string>());

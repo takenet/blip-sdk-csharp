@@ -41,9 +41,14 @@ namespace Take.Blip.Builder.UnitTests
             User = "user@msging.net";
             Application = "application@msging.net";
             Input = new LazyInput(
-                new PlainText()
-                {
-                    Text = "Hello world!"
+                new Message()
+                { 
+                    From = User.ToNode(),
+                    To = Application.ToNode(),
+                    Content = new PlainText()
+                    {
+                        Text = "Hello world!"
+                    }
                 },
                 Flow.BuilderConfiguration,
                 new DocumentSerializer(documentTypeResolver),

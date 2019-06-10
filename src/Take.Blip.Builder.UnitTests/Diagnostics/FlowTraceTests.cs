@@ -23,6 +23,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
         {
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
@@ -79,7 +80,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -102,6 +103,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
         {
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
@@ -158,7 +160,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -287,7 +289,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
 
             // Act
             var input = new PlainText() { Text = "Ping!" };
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            Message.Content = input;
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -419,7 +422,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
 
             // Act
             var input = new PlainText() { Text = "Ping!" };
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            Message.Content = input;
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -447,16 +451,13 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var traceIdentity = new Identity(Guid.NewGuid().ToString(), "msging.net");
             var mode = "All";
             var targetType = "Lime";
-            EnvelopeReceiverContext<Message>.Create(new Message
+            
+            Message.Metadata = new Dictionary<string, string>
             {
-                Id = Guid.NewGuid().ToString(),
-                Metadata = new Dictionary<string, string>
-                {
-                    { "builder.trace.mode", mode },
-                    { "builder.trace.targetType", targetType },
-                    { "builder.trace.target", traceIdentity },
-                }
-            });
+                { "builder.trace.mode", mode },
+                { "builder.trace.targetType", targetType },
+                { "builder.trace.target", traceIdentity },
+            };
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
@@ -506,7 +507,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
 
             // Act
             var input = new PlainText() { Text = "Ping!" };
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            Message.Content = input;
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous

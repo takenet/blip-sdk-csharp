@@ -27,7 +27,7 @@ namespace Take.Blip.Builder.Actions.SendMessage
 
             var message = new Message(null)
             {
-                To = context.User.ToNode()
+                To = context.Input.Message.From
             };            
 
             var mediaType = MediaType.Parse((string)settings[Message.TYPE_KEY]);

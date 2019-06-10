@@ -1,4 +1,5 @@
 using Lime.Protocol;
+using Lime.Protocol.Serialization;
 using NSubstitute;
 using Serilog;
 using SimpleInjector;
@@ -8,6 +9,7 @@ using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client;
+using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
@@ -36,16 +38,42 @@ namespace Take.Blip.Builder.UnitTests
                 .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
             User = new Identity("user", "domain");
-            Application = new Identity("application", "domain");
+            ApplicationIdentity = new Identity("application", "domain");
+            Application = new Application()
+            {
+                Identifier = ApplicationIdentity.Name,
+                Domain = ApplicationIdentity.Domain
+            };
+            Message = new Message()
+            {
+                From = User.ToNode(),
+                To = ApplicationIdentity.ToNode()
+            };
             Context.User.Returns(User);
+            Input = new LazyInput(
+                Message,
+                new BuilderConfiguration(),
+                Substitute.For<IDocumentSerializer>(),
+                Substitute.For<IEnvelopeSerializer>(),
+                ArtificialIntelligenceExtension,
+                CancellationToken); 
+            Context.Input.Returns(Input);            
+            
             TraceProcessor = Substitute.For<ITraceProcessor>();
             CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
         }
 
         public Identity User { get; set; }
 
-        public Identity Application { get; set; }
+        public Application Application { get; set; }
 
+        
+        public Identity ApplicationIdentity { get; set; }
+        
+        public Message Message { get; set; }
+
+        public LazyInput Input { get; set; }
+        
         public IBucketExtension BucketExtension { get; set; }
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; set; }
@@ -76,6 +104,7 @@ namespace Take.Blip.Builder.UnitTests
 
             container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
+            container.RegisterSingleton(Application);
             container.RegisterSingleton(BucketExtension);
             container.RegisterSingleton(ArtificialIntelligenceExtension);
             container.RegisterSingleton(EventTrackExtension);

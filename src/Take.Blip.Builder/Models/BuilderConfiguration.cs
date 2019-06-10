@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Utils;
@@ -15,6 +16,17 @@ namespace Take.Blip.Builder.Models
     {
         private const string CONFIGURATION_KEY_PREFIX = "builder:";
 
+        /// <summary>
+        /// The application identity to be used as owner on commands with the BLiP API.
+        /// If not provided, the value is determined from the input message.
+        /// </summary>
+        public Identity Application { get; set; }
+        
+        /// <summary>
+        /// Indicates that the tunnel owner should be used as application if the input message is from a tunnel user.
+        /// </summary>
+        public bool? UseTunnelOwnerAsApplication { get; set; }        
+        
         /// <summary>
         /// The expiration for a user state in a flow.
         /// </summary>
@@ -30,11 +42,6 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         public double? ActionExecutionTimeout { get; set; }
 
-        /// <summary>
-        /// Indicates that the commands should be processed as the owner of a tunnel (a router bot), if the input message is from a tunnel user.
-        /// </summary>
-        public bool? ProcessCommandsAsTunnelOwner { get; set; }
-        
         public static BuilderConfiguration FromDictionary(IDictionary<string, string> configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
