@@ -15,12 +15,12 @@ namespace Take.Blip.Builder
         /// <summary>
         /// The identity of the user in the conversation.
         /// </summary>
-        Identity User { get; }
+        Identity UserIdentity { get; }
 
         /// <summary>
         /// The identity of the application that is having the conversation with the user.
         /// </summary>
-        Identity Application { get; }
+        Identity ApplicationIdentity { get; }
 
         /// <summary>
         /// The current input document of the user.

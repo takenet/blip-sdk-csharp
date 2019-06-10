@@ -36,7 +36,7 @@ namespace Take.Blip.Builder.Variables
                 }
                 else
                 {
-                    contact = await _contactExtension.GetAsync(context.User, cancellationToken);
+                    contact = await _contactExtension.GetAsync(context.UserIdentity, cancellationToken);
                     context.InputContext[nameof(contact)] = contact;
                 }
 

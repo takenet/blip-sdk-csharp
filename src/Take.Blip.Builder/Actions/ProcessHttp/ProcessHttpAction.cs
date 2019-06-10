@@ -91,7 +91,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             if (ShouldAddHeader("processHttpAddUserToRequestHeader", context))
             {
-                httpRequestMessage.Headers.Add("X-Blip-User", context.User);
+                httpRequestMessage.Headers.Add("X-Blip-User", context.UserIdentity);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             if (ShouldAddHeader("processHttpAddBotIdentityToRequestHeader", context))
             {
-                httpRequestMessage.Headers.Add("X-Blip-Bot", context.Application);
+                httpRequestMessage.Headers.Add("X-Blip-Bot", context.ApplicationIdentity);
             }
         }
 

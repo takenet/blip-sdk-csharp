@@ -23,7 +23,7 @@ namespace Take.Blip.Builder.Actions.Redirect
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
-            return _sender.SendMessageAsync(redirect, context.User.ToNode(), cancellationToken);
+            return _sender.SendMessageAsync(redirect, context.UserIdentity.ToNode(), cancellationToken);
         }
     }
 }

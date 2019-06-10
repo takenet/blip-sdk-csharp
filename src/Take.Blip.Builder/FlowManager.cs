@@ -91,8 +91,8 @@ namespace Take.Blip.Builder
             flow.Validate();
             
             // Determine the user / application pair
-            Identity user;
-            Identity application;
+            Identity userIdentity;
+            Identity applicationIdentity;
 
             // Sets the owner context if configured.
             IDisposable ownerContext = null;
@@ -102,15 +102,15 @@ namespace Take.Blip.Builder
                 message.TryGetTunnelInformation(out var tunnelInformation) &&
                 tunnelInformation.Owner != null)
             {
-                user = tunnelInformation.Originator.ToNode();
-                application = tunnelInformation.Owner;
+                userIdentity = tunnelInformation.Originator.ToNode();
+                applicationIdentity = tunnelInformation.Owner;
                 
                 ownerContext = OwnerContext.Create(tunnelInformation.Owner);
             }
             else
             {
-                user = message.From.ToIdentity();
-                application = _applicationIdentity;
+                userIdentity = message.From.ToIdentity();
+                applicationIdentity = _applicationIdentity;
             }
 
             // Input tracing infrastructure
@@ -133,7 +133,7 @@ namespace Take.Blip.Builder
                 inputTrace = new InputTrace
                 {
                     FlowId = flow.Id,
-                    User = user,
+                    User = userIdentity,
                     Input = message.Content.ToString()
                 };
             }
@@ -149,7 +149,7 @@ namespace Take.Blip.Builder
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
-                    var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{user}", _configuration.InputProcessingTimeout, linkedCts.Token);
+                    var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
                         // Create the input evaluator
@@ -157,7 +157,7 @@ namespace Take.Blip.Builder
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context
-                        var context = _contextProvider.CreateContext(user, application, lazyInput, flow);
+                        var context = _contextProvider.CreateContext(userIdentity, applicationIdentity, lazyInput, flow);
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
@@ -190,7 +190,7 @@ namespace Take.Blip.Builder
                                     if (state.Input.Validation.Error != null)
                                     {
                                         // Send the validation error message
-                                        await _sender.SendMessageAsync(state.Input.Validation.Error, user.ToNode(),
+                                        await _sender.SendMessageAsync(state.Input.Validation.Error, userIdentity.ToNode(),
                                             linkedCts.Token);
                                     }
 
@@ -276,7 +276,7 @@ namespace Take.Blip.Builder
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error processing input '{Input}' for user '{User}'", message.Content, user);
+                _logger.Error(ex, "Error processing input '{Input}' for user '{User}'", message.Content, userIdentity);
 
                 if (inputTrace != null)
                 {

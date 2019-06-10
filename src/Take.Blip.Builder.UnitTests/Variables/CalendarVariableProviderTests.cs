@@ -15,7 +15,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         {
             Identity = new Identity("name", "domain.com");
             Context = Substitute.For<IContext>();
-            Context.User.Returns(Identity);
+            Context.UserIdentity.Returns(Identity);
         }
 
         public CalendarVariableProvider GetTarget()

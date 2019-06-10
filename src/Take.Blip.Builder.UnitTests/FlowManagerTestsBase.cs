@@ -49,7 +49,7 @@ namespace Take.Blip.Builder.UnitTests
                 From = User.ToNode(),
                 To = ApplicationIdentity.ToNode()
             };
-            Context.User.Returns(User);
+            Context.UserIdentity.Returns(User);
             Input = new LazyInput(
                 Message,
                 new BuilderConfiguration(),
