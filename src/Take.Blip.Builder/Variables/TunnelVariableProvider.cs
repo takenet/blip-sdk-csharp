@@ -1,8 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Take.Blip.Builder.Utils;
-using Take.Blip.Client;
 using Take.Blip.Client.Extensions.Tunnel;
 
 namespace Take.Blip.Builder.Variables

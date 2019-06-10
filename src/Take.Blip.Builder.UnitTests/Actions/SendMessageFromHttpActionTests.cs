@@ -7,12 +7,15 @@ using Lime.Messaging;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
+using Lime.Protocol.Serialization.Newtonsoft;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Take.Blip.Builder.Actions.SendMessageFromHttp;
+using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions;
+using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
@@ -25,6 +28,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             HttpClient = Substitute.For<IHttpClient>();
             DocumentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
             DocumentSerializer = new DocumentSerializer(DocumentTypeResolver);
+
+            Context.Input.Returns(Input);
         }
 
         public ISender Sender { get; set; }
@@ -35,6 +40,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         private IDocumentSerializer DocumentSerializer { get; }
 
+
+        
         private SendMessageFromHttpAction GetTarget()
         {
             return new SendMessageFromHttpAction(Sender, HttpClient, DocumentSerializer);
@@ -44,8 +51,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task SendWithPlainHttpContentShouldSucceed()
         {
             // Arrange
-            var destination = new Identity(Guid.NewGuid().ToString(), "msging.net");
-            Context.User.Returns(destination);
+            
             var uri = new Uri("https://myserver.com/content/id");
             var content = "This is a text content";
             var httpResponseMessage = new HttpResponseMessage()
@@ -69,15 +75,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             // Assert
             await Sender.Received(1).SendMessageAsync(Arg.Is<Message>(m =>
-                m.To.ToIdentity().Equals(destination) && m.Type == PlainText.MediaType && m.Content.ToString().Equals(content)), Arg.Any<CancellationToken>());
+                m.To.Equals(From) && m.Type == PlainText.MediaType && m.Content.ToString().Equals(content)), Arg.Any<CancellationToken>());
         }
 
         [Fact]
         public async Task SendWithJsonHttpContentShouldSucceed()
         {
             // Arrange
-            var destination = new Identity(Guid.NewGuid().ToString(), "msging.net");
-            Context.User.Returns(destination);
             var uri = new Uri("https://myserver.com/content/id");
             var content = new Select()
             {
@@ -122,7 +126,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             await Sender.Received(1).SendMessageAsync(
                 Arg.Is<Message>(m =>
-                    m.To.ToIdentity().Equals(destination)
+                    m.To.ToIdentity().Equals(From)
                     && m.Type == Select.MediaType
                     && m.Content is Select
                     && ((Select)m.Content).Text == content.Text

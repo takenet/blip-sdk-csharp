@@ -52,10 +52,16 @@ namespace Take.Blip.Builder.Models
         {
             get
             {
-                if (_builderConfiguration == null &&
-                    Configuration != null)
+                if (_builderConfiguration == null)
                 {
-                    _builderConfiguration = BuilderConfiguration.FromDictionary(Configuration);
+                    if (Configuration != null)
+                    {
+                        _builderConfiguration = BuilderConfiguration.FromDictionary(Configuration);
+                    }
+                    else
+                    {
+                        _builderConfiguration = new BuilderConfiguration();
+                    }
                 }
 
                 return _builderConfiguration;

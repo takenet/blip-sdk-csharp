@@ -463,21 +463,5 @@ namespace Take.Blip.Builder.UnitTests.Models
             builderConfiguration.StateExpiration.ShouldBe(stateExpiration);
             builderConfiguration.ActionExecutionTimeout.ShouldBe(actionExecutionTimeout);
         }
-        
-        [Fact]
-        public void GetBuilderConfigurationIsNullShouldReturnNull()
-        {
-            // Arrange            
-            var flow = new Flow()
-            {
-                Configuration = null
-            };
-            
-            // Act
-            var builderConfiguration = flow.BuilderConfiguration;
-            
-            // Assert
-            builderConfiguration.ShouldBeNull();
-        }        
     }
 }

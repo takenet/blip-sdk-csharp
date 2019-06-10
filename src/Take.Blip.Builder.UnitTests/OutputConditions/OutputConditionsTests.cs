@@ -19,6 +19,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
         {
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var messageType = "text/plain";
             var pongMessageContent = "Pong!";
             var poloMessageContent = "Polo!";
@@ -95,7 +96,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -117,6 +118,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
         {
             // Arrange
             var input = new PlainText() { Text = "XPTO!" };
+            Message.Content = input;
             var messageType = "text/plain";
             var pongMessageContent = "Pong!";
             var poloMessageContent = "Polo!";
@@ -193,7 +195,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -216,6 +218,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var messageContent = "Pong!";
 
             var input = new PlainText() { Text = validInput };
+            Message.Content = input;
 
             var variableName = "MyVariable";
             var flow = new Flow()
@@ -272,10 +275,10 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(validInput);
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
             
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
 
             await StateManager.Received(1).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 
@@ -408,19 +411,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "Ping!";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var equalsInput = new PlainText() { Text = validInputValue };
+            var input = new PlainText() { Text = validInputValue };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.Equals, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(equalsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(equalsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.Received(1).SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, equalsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
             await Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -441,19 +445,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "Ping!";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var equalsInput = new PlainText() { Text = "Not Ping!" };
+            var input = new PlainText() { Text = "Not Ping!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.Equals, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(equalsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(equalsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, equalsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -465,19 +470,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "ing";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var containsInput = new PlainText() { Text = "Ping!" };
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.Contains, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(containsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(containsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.Received(1).SetStateIdAsync(Arg.Any<IContext>(), "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, containsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
             await Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -498,19 +504,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "Ping!";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var containsInput = new PlainText() { Text = "ing" };
+            var input = new PlainText() { Text = "ing" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.Contains, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(containsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(containsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, containsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -522,19 +529,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "Pin";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var startsInput = new PlainText() { Text = "Ping!" };
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.StartsWith, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(startsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(startsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.Received(1).SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, startsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
             await Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -555,19 +563,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "Ping!";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var startsInput = new PlainText() { Text = "Pin" };
+            var input = new PlainText() { Text = "Pin" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.StartsWith, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(startsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(startsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, startsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -579,19 +588,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "g!";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var endsInput = new PlainText() { Text = "Ping!" };
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.EndsWith, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(endsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(endsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.Received(1).SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, endsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
             await Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -612,19 +622,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "Ping!";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var endsInput = new PlainText() { Text = "g!" };
+            var input = new PlainText() { Text = "g!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.EndsWith, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(endsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(endsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, endsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -636,19 +647,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "Ping!";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var approximateInput = new PlainText() { Text = "Pamg!" };
+            var input = new PlainText() { Text = "Pamg!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.ApproximateTo, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(approximateInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(approximateInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.Received(1).SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, approximateInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
             await Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -669,19 +681,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var validInputValue = "Ping!";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var approximateInput = new PlainText() { Text = "Pamh!" };
+            var input = new PlainText() { Text = "Pamh!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.ApproximateTo, variableName, validInputValue, sentMessageType, sentMessageContent);
             var target = GetTarget();
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(approximateInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(approximateInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, approximateInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -692,19 +705,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var variableName = "MyVariable";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var existsInput = new PlainText() { Text = "Ping!" };
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.Exists, variableName, sentMessageType, sentMessageContent);
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(existsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(existsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.Received(1).SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, existsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
             await Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -724,19 +738,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var variableName = "MyVariable";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var existsInput = new PlainText();
+            var input = new PlainText();
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.Exists, variableName, sentMessageType, sentMessageContent);
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(existsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(existsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, existsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -747,19 +762,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var variableName = "MyVariable";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var existsInput = new PlainText();
+            var input = new PlainText();
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.NotExists, variableName, sentMessageType, sentMessageContent);
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(existsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(existsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.Received(1).SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, existsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
             await Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -779,19 +795,20 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var variableName = "MyVariable";
             var sentMessageType = "text/plain";
             var sentMessageContent = "Pong!";
-            var existsInput = new PlainText() { Text = "Ping!" };
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
 
             var flow = CreateVariableComparisonFlow(ConditionComparison.NotExists, variableName, sentMessageType, sentMessageContent);
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(existsInput.Text);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(existsInput, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(User, Application, Arg.Any<LazyInput>(), flow);
+            ContextProvider.Received(1).CreateContext(User, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(variableName, existsInput.Text, Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
         }
     }
 }

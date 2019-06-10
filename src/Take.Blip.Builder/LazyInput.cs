@@ -27,16 +27,16 @@ namespace Take.Blip.Builder
         private readonly Lazy<string> _lazySerializedMessage;
         
         public LazyInput(
-            Document content,
+            Message message,
             BuilderConfiguration builderConfiguration,
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             CancellationToken cancellationToken)
         {
-            _builderConfiguration = builderConfiguration;
-            Content = content;
-            _lazySerializedContent = new Lazy<string>(() => documentSerializer.Serialize(content));
+            Message = message ?? throw new ArgumentNullException(nameof(message));
+            _builderConfiguration = builderConfiguration ?? throw new ArgumentNullException(nameof(builderConfiguration));
+            _lazySerializedContent = new Lazy<string>(() => documentSerializer.Serialize(Content));
             _lazyAnalyzedContent = new Lazy<Task<AnalysisResponse>>(async () =>
             {
                 // Only analyze the input if the type is plain text.
@@ -67,9 +67,9 @@ namespace Take.Blip.Builder
             });
         }
 
-        public Document Content { get; }
-
-        public Message Message => EnvelopeReceiverContext<Message>.Envelope;
+        public Message Message { get; }
+        
+        public Document Content => Message.Content;
         
         public string SerializedContent => _lazySerializedContent.Value;
 

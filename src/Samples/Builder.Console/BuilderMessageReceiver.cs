@@ -21,6 +21,6 @@ namespace Builder.Console
         }
 
         public virtual Task ReceiveAsync(Message envelope, CancellationToken cancellationToken) 
-            => _flowManager.ProcessInputAsync(envelope.Content, envelope.From.ToIdentity(), _applicationIdentity, _settings.Flow, cancellationToken);
+            => _flowManager.ProcessInputAsync(envelope, _settings.Flow, cancellationToken);
     }
 }

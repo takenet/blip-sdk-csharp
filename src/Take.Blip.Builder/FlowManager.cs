@@ -18,6 +18,7 @@ using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
+using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Tunnel;
 using Action = Take.Blip.Builder.Models.Action;
@@ -38,6 +39,7 @@ namespace Take.Blip.Builder
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
+        private readonly Identity _applicationIdentity;
         
         public FlowManager(
             IConfiguration configuration,
@@ -51,7 +53,8 @@ namespace Take.Blip.Builder
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             IVariableReplacer variableReplacer,
             ILogger logger,
-            ITraceManager traceManager)
+            ITraceManager traceManager,
+            Application application)
         {
             _configuration = configuration;
             _stateManager = stateManager;
@@ -65,18 +68,19 @@ namespace Take.Blip.Builder
             _variableReplacer = variableReplacer;
             _logger = logger;
             _traceManager = traceManager;
+            _applicationIdentity = new Identity(application.Identifier, application.Domain ?? Constants.DEFAULT_DOMAIN);
         }
 
-        public async Task ProcessInputAsync(Document input, Identity user, Identity application, Flow flow, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
         {
-            if (input == null)
+            if (message == null)
             {
-                throw new ArgumentNullException(nameof(input));
+                throw new ArgumentNullException(nameof(message));
             }
 
-            if (user == null)
+            if (message.From == null)
             {
-                throw new ArgumentNullException(nameof(user));
+                throw new ArgumentException("Message 'from' must be present", nameof(message));
             }
 
             if (flow == null)
@@ -85,12 +89,35 @@ namespace Take.Blip.Builder
             }
 
             flow.Validate();
+            
+            // Determine the user / application pair
+            Identity user;
+            Identity application;
+
+            // Sets the owner context if configured.
+            IDisposable ownerContext = null;
+
+            if (flow.BuilderConfiguration?.UseTunnelOwnerAsApplication != null && 
+                flow.BuilderConfiguration.UseTunnelOwnerAsApplication.Value &&
+                message.TryGetTunnelInformation(out var tunnelInformation) &&
+                tunnelInformation.Owner != null)
+            {
+                user = tunnelInformation.Originator.ToNode();
+                application = tunnelInformation.Owner;
+                
+                ownerContext = OwnerContext.Create(tunnelInformation.Owner);
+            }
+            else
+            {
+                user = message.From.ToIdentity();
+                application = _applicationIdentity;
+            }
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
             TraceSettings traceSettings;
-            var message = EnvelopeReceiverContext<Message>.Envelope;
-            if (message?.Metadata != null &&
+            
+            if (message.Metadata != null &&
                 message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
             {
                 traceSettings = new TraceSettings(message.Metadata);
@@ -107,25 +134,13 @@ namespace Take.Blip.Builder
                 {
                     FlowId = flow.Id,
                     User = user,
-                    Input = input.ToString()
+                    Input = message.Content.ToString()
                 };
             }
 
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
                 : null;
-
-            // Sets the owner context if configured.
-            IDisposable ownerContext = null;
-
-            if (flow.BuilderConfiguration?.ProcessCommandsAsTunnelOwner != null && 
-                flow.BuilderConfiguration.ProcessCommandsAsTunnelOwner.Value &&
-                EnvelopeReceiverContext<Message>.Envelope != null &&
-                EnvelopeReceiverContext<Message>.Envelope.TryGetTunnelInformation(out var tunnelInformation) &&
-                tunnelInformation.Owner != null)
-            {
-                ownerContext = OwnerContext.Create(tunnelInformation.Owner);
-            }            
             
             try
             {
@@ -138,7 +153,7 @@ namespace Take.Blip.Builder
                     try
                     {
                         // Create the input evaluator
-                        var lazyInput = new LazyInput(input, flow.BuilderConfiguration, _documentSerializer,
+                        var lazyInput = new LazyInput(message, flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context
@@ -235,8 +250,10 @@ namespace Take.Blip.Builder
                             finally
                             {
                                 // Continue processing if the next state do not expect the user input
-                                var inputConditionIsValid = state?.Input?.Conditions == null || await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
-                                stateWaitForInput = state == null || (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
+                                var inputConditionIsValid = state?.Input?.Conditions == null || 
+                                                            await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
+                                stateWaitForInput = state == null || 
+                                                    (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
                                 if (stateWaitForInput)
                                 {
                                     // Create a new trace if the next state waits for an input     
@@ -259,7 +276,7 @@ namespace Take.Blip.Builder
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error processing input '{Input}' for user '{User}'", input, user);
+                _logger.Error(ex, "Error processing input '{Input}' for user '{User}'", message.Content, user);
 
                 if (inputTrace != null)
                 {
