@@ -14,11 +14,19 @@ namespace Take.Blip.Client.Extensions.Tunnel
                 return false;
             }
 
-            tunnelInformation = new TunnelInformation(
-                envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_OWNER_METADATA_KEY),
-                envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_ORIGINATOR_METADATA_KEY),
-                envelope.From.ToIdentity());
-            return true;
+            try
+            {
+                tunnelInformation = new TunnelInformation(
+                    envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_OWNER_METADATA_KEY),
+                    envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_ORIGINATOR_METADATA_KEY),
+                    envelope.From.ToIdentity());
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                tunnelInformation = null;
+                return false;
+            }
         }
     }
 }
