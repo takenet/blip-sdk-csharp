@@ -70,7 +70,7 @@ namespace Take.Blip.Builder
 
         private OwnerCallerName CreateContextKey(string name)
         {
-            var owner = OwnerContext.Owner ?? ApplicationIdentity;
+            var owner = OwnerContext.Owner ?? OwnerIdentity;
             return OwnerCallerName.Create(owner, UserIdentity, name.ToLowerInvariant());
         }
     }

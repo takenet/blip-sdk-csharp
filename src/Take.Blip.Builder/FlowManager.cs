@@ -92,7 +92,7 @@ namespace Take.Blip.Builder
             
             // Determine the user / application pair
             Identity userIdentity;
-            Identity applicationIdentity;
+            Identity ownerIdentity;
 
             // Sets the owner context if configured.
             IDisposable ownerContext = null;
@@ -103,14 +103,14 @@ namespace Take.Blip.Builder
                 tunnelInformation.Owner != null)
             {
                 userIdentity = tunnelInformation.Originator.ToNode();
-                applicationIdentity = tunnelInformation.Owner;
+                ownerIdentity = tunnelInformation.Owner;
                 
-                ownerContext = OwnerContext.Create(tunnelInformation.Owner);
+                ownerContext = OwnerContext.Create(ownerIdentity);
             }
             else
             {
                 userIdentity = message.From.ToIdentity();
-                applicationIdentity = _applicationIdentity;
+                ownerIdentity = _applicationIdentity;
             }
 
             // Input tracing infrastructure
@@ -157,7 +157,7 @@ namespace Take.Blip.Builder
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context
-                        var context = _contextProvider.CreateContext(userIdentity, applicationIdentity, lazyInput, flow);
+                        var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
