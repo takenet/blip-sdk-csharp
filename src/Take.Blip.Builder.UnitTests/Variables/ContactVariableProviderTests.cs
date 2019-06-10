@@ -37,8 +37,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
                 Address = "184 Alpha Avenue"
             };
             ContactExtension.GetAsync(Contact.Identity, CancellationToken).Returns(Contact);
-            Context.User.Returns(Contact.Identity);
-            Context.Application.Returns(new Identity("application", "domain.com"));
+            Context.UserIdentity.Returns(Contact.Identity);
+            Context.ApplicationIdentity.Returns(new Identity("application", "domain.com"));
             Configuration.ContactCacheExpiration.Returns(TimeSpan.FromMinutes(5));
             ApplicationSettings.Identifier = "application";
             ApplicationSettings.Domain = "domain.com";

@@ -26,7 +26,7 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                 value: settings.ParsedValue,
                 messageId: EnvelopeReceiverContext<Message>.Envelope?.Id,
                 extras: settings.Extras,
-                contactIdentity: context.User,
+                contactIdentity: context.UserIdentity,
                 fireAndForget: settings.FireAndForget ?? true,
                 cancellationToken: cancellationToken
                 );

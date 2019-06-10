@@ -24,17 +24,17 @@ namespace Take.Blip.Builder
             Flow flow,
             IEnumerable<IVariableProvider> variableProviders)
         {
-            User = user ?? throw new ArgumentNullException(nameof(user));
-            Application = application ?? throw new ArgumentNullException(nameof(application));
+            UserIdentity = user ?? throw new ArgumentNullException(nameof(user));
+            ApplicationIdentity = application ?? throw new ArgumentNullException(nameof(application));
             Input = input ?? throw new ArgumentNullException(nameof(input));
             Flow = flow ?? throw new ArgumentNullException(nameof(flow));
             InputContext = new Dictionary<string, object>();
             _variableProviderDictionary = variableProviders.ToDictionary(v => v.Source, v => v);
         }
 
-        public Identity User { get; }
+        public Identity UserIdentity { get; }
 
-        public Identity Application { get; }
+        public Identity ApplicationIdentity { get; }
 
         public LazyInput Input { get; }
 
