@@ -17,6 +17,7 @@ using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Contacts;
+using Take.Blip.Client.Extensions.Tunnel;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests
@@ -29,6 +30,7 @@ namespace Take.Blip.Builder.UnitTests
 
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             ContactExtension = Substitute.For<IContactExtension>();
+            TunnelExtension = Substitute.For<ITunnelExtension>();
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
             CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
@@ -62,6 +64,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContactExtension ContactExtension { get; }
 
+        public ITunnelExtension TunnelExtension { get; }
+        
         public ISender Sender { get; set; }
 
         public ILogger Logger { get; }

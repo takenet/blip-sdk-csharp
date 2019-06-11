@@ -21,6 +21,7 @@ using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Tunnel;
+using Takenet.Iris.Messaging.Resources;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -36,6 +37,7 @@ namespace Take.Blip.Builder
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
+        private readonly ITunnelExtension _tunnelExtension;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
@@ -51,6 +53,7 @@ namespace Take.Blip.Builder
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
+            ITunnelExtension tunnelExtension,
             IVariableReplacer variableReplacer,
             ILogger logger,
             ITraceManager traceManager,
@@ -65,6 +68,7 @@ namespace Take.Blip.Builder
             _documentSerializer = documentSerializer;
             _envelopeSerializer = envelopeSerializer;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
+            _tunnelExtension = tunnelExtension;
             _variableReplacer = variableReplacer;
             _logger = logger;
             _traceManager = traceManager;
@@ -93,12 +97,17 @@ namespace Take.Blip.Builder
             // Determine the user / owner pair
             Identity userIdentity;
             Identity ownerIdentity;
-
-            if (flow.BuilderConfiguration.UseTunnelOwnerContext == true &&
-                message.TryGetTunnelInformation(out var tunnelInformation))
+            Tunnel tunnel = null;
+            
+            if (flow.BuilderConfiguration.UseTunnelOwnerContext == true)
             {
-                userIdentity = tunnelInformation.Originator.ToNode();
-                ownerIdentity = tunnelInformation.Owner;
+                tunnel = await _tunnelExtension.TryGetTunnelForMessageAsync(message, cancellationToken);
+            }
+            
+            if (tunnel != null)
+            {
+                userIdentity = tunnel.Originator.ToIdentity();
+                ownerIdentity = tunnel.Owner;
             }
             else if (flow.BuilderConfiguration.OwnerIdentity != null)
             {

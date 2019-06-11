@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol.Network;
 
 namespace Take.Blip.Client.Extensions.Tunnel
 {
@@ -18,6 +19,14 @@ namespace Take.Blip.Client.Extensions.Tunnel
         public TunnelExtension(ISender sender)
         {
             _sender = sender;
+        }
+
+        public Task<Takenet.Iris.Messaging.Resources.Tunnel> GetTunnelAsync(Identity tunnelIdentity, CancellationToken cancellationToken)
+        {
+            return _sender.GetResourceAsync<Takenet.Iris.Messaging.Resources.Tunnel>(
+                new LimeUri($"/tunnels/{tunnelIdentity}"),
+                cancellationToken,
+                to: TunnelAddress);
         }
 
         public Task<Node> ForwardMessageAsync(Message message, Identity destination, CancellationToken cancellationToken)
