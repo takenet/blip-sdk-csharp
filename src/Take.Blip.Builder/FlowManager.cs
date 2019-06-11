@@ -95,31 +95,8 @@ namespace Take.Blip.Builder
             flow.Validate();
             
             // Determine the user / owner pair
-            Identity userIdentity;
-            Identity ownerIdentity;
-            Tunnel tunnel = null;
-            
-            if (flow.BuilderConfiguration.UseTunnelOwnerContext == true)
-            {
-                tunnel = await _tunnelExtension.TryGetTunnelForMessageAsync(message, cancellationToken);
-            }
-            
-            if (tunnel != null)
-            {
-                userIdentity = tunnel.Originator.ToIdentity();
-                ownerIdentity = tunnel.Owner;
-            }
-            else if (flow.BuilderConfiguration.OwnerIdentity != null)
-            {
-                userIdentity = message.From.ToIdentity();
-                ownerIdentity = flow.BuilderConfiguration.OwnerIdentity;
-            }
-            else
-            {
-                userIdentity = message.From.ToIdentity();
-                ownerIdentity = _applicationIdentity;
-            }
-            
+            var (userIdentity, ownerIdentity) = await GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
+
             // Input tracing infrastructure
             InputTrace inputTrace = null;
             TraceSettings traceSettings;
@@ -308,6 +285,36 @@ namespace Take.Blip.Builder
                     await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
                 }
             }
+        }
+
+        private async Task<(Identity userIdentity, Identity ownerIdentity)> GetUserOwnerIdentitiesAsync(Message message, BuilderConfiguration builderConfiguration, CancellationToken cancellationToken)
+        {
+            Identity userIdentity;
+            Identity ownerIdentity;
+            Tunnel tunnel = null;
+
+            if (builderConfiguration.UseTunnelOwnerContext == true)
+            {
+                tunnel = await _tunnelExtension.TryGetTunnelForMessageAsync(message, cancellationToken);
+            }
+
+            if (tunnel != null)
+            {
+                userIdentity = tunnel.Originator.ToIdentity();
+                ownerIdentity = tunnel.Owner;
+            }
+            else if (builderConfiguration.OwnerIdentity != null)
+            {
+                userIdentity = message.From.ToIdentity();
+                ownerIdentity = builderConfiguration.OwnerIdentity;
+            }
+            else
+            {
+                userIdentity = message.From.ToIdentity();
+                ownerIdentity = _applicationIdentity;
+            }
+
+            return (userIdentity, ownerIdentity);
         }
 
         private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
