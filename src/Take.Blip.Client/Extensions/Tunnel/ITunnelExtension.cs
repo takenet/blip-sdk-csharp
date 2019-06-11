@@ -25,7 +25,10 @@ namespace Take.Blip.Client.Extensions.Tunnel
             Message message,
             CancellationToken cancellationToken)
         {
-            if (!message.From.Domain.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase))
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
+            if (message.From?.Domain == null ||
+                !message.From.Domain.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }

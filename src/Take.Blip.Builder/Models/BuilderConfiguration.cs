@@ -51,8 +51,7 @@ namespace Take.Blip.Builder.Models
                 .Select(kv => new KeyValuePair<string, string>(kv.Key.Replace(CONFIGURATION_KEY_PREFIX, ""), kv.Value))
                 .ToDictionary(kv => kv.Key, kv => kv.Value);
             
-            var jObject = JObject.FromObject(
-                builderConfiguration, JsonSerializer.Create(JsonSerializerSettingsContainer.Settings));
+            var jObject = JObject.FromObject(builderConfiguration, JsonSerializer.Create(JsonSerializerSettingsContainer.Settings));
 
             return jObject.ToObject<BuilderConfiguration>();
         }
