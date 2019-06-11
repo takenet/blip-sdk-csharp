@@ -1,25 +1,30 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Lime.Protocol;
 using Take.Blip.Client.Extensions.Tunnel;
+using Takenet.Iris.Messaging.Resources;
 
 namespace Take.Blip.Builder.Variables
 {
     public class TunnelVariableProvider : IVariableProvider
     {
+        private readonly ITunnelExtension _tunnelExtension;
+
+        public TunnelVariableProvider(ITunnelExtension tunnelExtension)
+        {
+            _tunnelExtension = tunnelExtension;
+        }
+        
         public VariableSource Source => VariableSource.Tunnel;
         
-        public Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
-            if (!context.Input.Message.TryGetTunnelInformation(out var tunnelInformation))
-            {
-                return Task.FromResult<string>(null);
-            }
+            var tunnel = await _tunnelExtension.TryGetTunnelForMessageAsync(context.Input.Message, cancellationToken);
+            if (tunnel == null) return null;
             
-            return GetVariable(name, tunnelInformation).AsCompletedTask();
+            return GetVariable(name, tunnel);
         }
 
-        private static string GetVariable(string name, TunnelInformation tunnelInformation)
+        private static string GetVariable(string name, Tunnel tunnelInformation)
         {
             switch (name)
             {
