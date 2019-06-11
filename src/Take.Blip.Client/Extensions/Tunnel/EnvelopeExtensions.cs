@@ -7,28 +7,23 @@ namespace Take.Blip.Client.Extensions.Tunnel
     {
         public static bool TryGetTunnelInformation<T>(this T envelope, out Takenet.Iris.Messaging.Resources.Tunnel tunnelInformation) where T : Envelope
         {
-            if (envelope.From?.Domain == null ||
-                !envelope.From.Domain.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase))
-            {
-                tunnelInformation = null;
-                return false;
-            }
-
-            try
+            if (envelope.From?.Domain != null &&
+                envelope.From.Domain.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase) &&
+                envelope.Metadata != null &&
+                envelope.Metadata.TryGetValue(TunnelExtension.TUNNEL_OWNER_METADATA_KEY, out var owner) &&
+                envelope.Metadata.TryGetValue(TunnelExtension.TUNNEL_ORIGINATOR_METADATA_KEY, out var originator))
             {
                 tunnelInformation = new Takenet.Iris.Messaging.Resources.Tunnel()
                 {
-                    Owner = envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_OWNER_METADATA_KEY),
-                    Originator = envelope.Metadata.GetValueOrDefault(TunnelExtension.TUNNEL_ORIGINATOR_METADATA_KEY),
+                    Owner = owner,
+                    Originator = originator,
                     Destination = envelope.From.ToIdentity()
                 };
                 return true;
             }
-            catch (ArgumentException)
-            {
-                tunnelInformation = null;
-                return false;
-            }
+
+            tunnelInformation = null;
+            return false;
         }
     }
 }
