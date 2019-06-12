@@ -33,14 +33,14 @@ namespace Take.Blip.Builder.UnitTests.Variables
             Context.Input.Returns(LazyInput);
             Owner = new Identity("owner", "msging.net");
             Originator = new Node("originator", "msging.net", "instance");
-            TunnelIdentity = new Identity(EnvelopeId.NewId(),
-                Take.Blip.Client.Extensions.Tunnel.TunnelExtension.TunnelAddress.Domain);
-
+            TunnelIdentity = new Identity(EnvelopeId.NewId(), Take.Blip.Client.Extensions.Tunnel.TunnelExtension.TunnelAddress.Domain);
+            ApplicationIdentity = new Identity("application", "msging.net");
+            Message.To = ApplicationIdentity.ToNode();
             Tunnel = new Tunnel()
             {
                 Owner = Owner,
                 Originator = Originator,
-                Destination = TunnelIdentity
+                Destination = ApplicationIdentity
             };
         }
 
@@ -62,7 +62,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public Tunnel Tunnel { get; }
         
-
+        public Identity ApplicationIdentity { get; }
+        
         private TunnelVariableProvider GetTarget()
         {
             return new TunnelVariableProvider(TunnelExtension);
@@ -85,13 +86,14 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var actualOriginator = await target.GetVariableAsync("originator", Context, CancellationToken);
             var actualOwner = await target.GetVariableAsync("owner", Context, CancellationToken);
             var actualDestination = await target.GetVariableAsync("destination", Context, CancellationToken);
+            var actualIdentity = await target.GetVariableAsync("identity", Context, CancellationToken);
             
             // Assert
             actualOriginator.ShouldBe(Originator);
             actualOwner.ShouldBe(Owner);
-            actualDestination.ShouldBe(Message.From.ToIdentity());
+            actualDestination.ShouldBe(ApplicationIdentity);
+            actualIdentity.ShouldBe(TunnelIdentity);
         }
-        
 
         [Fact]
         public async Task GetFromIncompleteMetadataShouldReturnNull()
@@ -109,11 +111,13 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var actualOriginator = await target.GetVariableAsync("originator", Context, CancellationToken);
             var actualOwner = await target.GetVariableAsync("owner", Context, CancellationToken);
             var actualDestination = await target.GetVariableAsync("destination", Context, CancellationToken);
+            var actualIdentity = await target.GetVariableAsync("identity", Context, CancellationToken);
             
             // Assert
             actualOriginator.ShouldBeNull();
             actualOwner.ShouldBeNull();
             actualDestination.ShouldBeNull();
+            actualIdentity.ShouldBeNull();
         }        
         
         [Fact]
@@ -133,11 +137,13 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var actualOriginator = await target.GetVariableAsync("originator", Context, CancellationToken);
             var actualOwner = await target.GetVariableAsync("owner", Context, CancellationToken);
             var actualDestination = await target.GetVariableAsync("destination", Context, CancellationToken);
+            var actualIdentity = await target.GetVariableAsync("identity", Context, CancellationToken);
             
             // Assert
             actualOriginator.ShouldBeNull();
             actualOwner.ShouldBeNull();
             actualDestination.ShouldBeNull();
+            actualIdentity.ShouldBeNull();
         }    
         
         [Fact]
@@ -153,11 +159,13 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var actualOriginator = await target.GetVariableAsync("originator", Context, CancellationToken);
             var actualOwner = await target.GetVariableAsync("owner", Context, CancellationToken);
             var actualDestination = await target.GetVariableAsync("destination", Context, CancellationToken);
+            var actualIdentity = await target.GetVariableAsync("identity", Context, CancellationToken);
             
             // Assert
             actualOriginator.ShouldBe(Originator);
             actualOwner.ShouldBe(Owner);
-            actualDestination.ShouldBe(Message.From.ToIdentity());
+            actualDestination.ShouldBe(ApplicationIdentity);
+            actualIdentity.ShouldBe(TunnelIdentity);
         }
         
         [Fact]
@@ -174,11 +182,13 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var actualOriginator = await target.GetVariableAsync("originator", Context, CancellationToken);
             var actualOwner = await target.GetVariableAsync("owner", Context, CancellationToken);
             var actualDestination = await target.GetVariableAsync("destination", Context, CancellationToken);
+            var actualIdentity = await target.GetVariableAsync("identity", Context, CancellationToken);
             
             // Assert
             actualOriginator.ShouldBeNull();
             actualOwner.ShouldBeNull();
             actualDestination.ShouldBeNull();
+            actualIdentity.ShouldBeNull();
         }
     }
 }

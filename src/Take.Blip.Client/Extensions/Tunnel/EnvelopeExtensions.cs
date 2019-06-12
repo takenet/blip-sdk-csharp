@@ -17,7 +17,7 @@ namespace Take.Blip.Client.Extensions.Tunnel
                 {
                     Owner = owner,
                     Originator = originator,
-                    Destination = envelope.From.ToIdentity()
+                    Destination = envelope.To?.ToIdentity()
                 };
                 return true;
             }
