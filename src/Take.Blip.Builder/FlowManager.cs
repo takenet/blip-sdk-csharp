@@ -20,8 +20,6 @@ using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
-using Take.Blip.Client.Extensions.Tunnel;
-using Takenet.Iris.Messaging.Resources;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -37,10 +35,10 @@ namespace Take.Blip.Builder
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
-        private readonly ITunnelExtension _tunnelExtension;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
+        private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly Identity _applicationIdentity;
         
         public FlowManager(
@@ -53,10 +51,10 @@ namespace Take.Blip.Builder
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
-            ITunnelExtension tunnelExtension,
             IVariableReplacer variableReplacer,
             ILogger logger,
             ITraceManager traceManager,
+            IUserOwnerResolver userOwnerResolver, 
             Application application)
         {
             _configuration = configuration;
@@ -68,11 +66,11 @@ namespace Take.Blip.Builder
             _documentSerializer = documentSerializer;
             _envelopeSerializer = envelopeSerializer;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
-            _tunnelExtension = tunnelExtension;
             _variableReplacer = variableReplacer;
             _logger = logger;
             _traceManager = traceManager;
-            _applicationIdentity = new Identity(application.Identifier, application.Domain ?? Constants.DEFAULT_DOMAIN);
+            _userOwnerResolver = userOwnerResolver;
+            _applicationIdentity = application.Identity;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -95,7 +93,7 @@ namespace Take.Blip.Builder
             flow.Validate();
             
             // Determine the user / owner pair
-            var (userIdentity, ownerIdentity) = await GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
+            var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
@@ -285,36 +283,6 @@ namespace Take.Blip.Builder
                     await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
                 }
             }
-        }
-
-        private async Task<(Identity userIdentity, Identity ownerIdentity)> GetUserOwnerIdentitiesAsync(Message message, BuilderConfiguration builderConfiguration, CancellationToken cancellationToken)
-        {
-            Identity userIdentity;
-            Identity ownerIdentity;
-            Tunnel tunnel = null;
-
-            if (builderConfiguration.UseTunnelOwnerContext == true)
-            {
-                tunnel = await _tunnelExtension.TryGetTunnelForMessageAsync(message, cancellationToken);
-            }
-
-            if (tunnel != null)
-            {
-                userIdentity = tunnel.Originator.ToIdentity();
-                ownerIdentity = tunnel.Owner;
-            }
-            else if (builderConfiguration.OwnerIdentity != null)
-            {
-                userIdentity = message.From.ToIdentity();
-                ownerIdentity = builderConfiguration.OwnerIdentity;
-            }
-            else
-            {
-                userIdentity = message.From.ToIdentity();
-                ownerIdentity = _applicationIdentity;
-            }
-
-            return (userIdentity, ownerIdentity);
         }
 
         private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)

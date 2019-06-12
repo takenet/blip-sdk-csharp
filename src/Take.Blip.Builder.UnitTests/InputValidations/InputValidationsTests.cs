@@ -86,7 +86,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -161,7 +161,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
@@ -235,7 +235,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -309,7 +309,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
@@ -323,7 +323,7 @@ namespace Take.Blip.Builder.UnitTests
             Message.Content = input;
             var invalidInputMessage = new Message()
             {
-                From = User.ToNode(),
+                From = UserIdentity.ToNode(),
                 To = ApplicationIdentity.ToNode(),
                 Content = new MediaLink()
             };
@@ -389,7 +389,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
@@ -398,7 +398,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -412,7 +412,7 @@ namespace Take.Blip.Builder.UnitTests
             Message.Content = input;
             var invalidInputMessage = new Message()
             {
-                From = User.ToNode(),
+                From = UserIdentity.ToNode(),
                 To = ApplicationIdentity.ToNode(),
                 Content = new MediaLink()
             };
@@ -478,7 +478,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
@@ -487,7 +487,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -560,7 +560,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -634,7 +634,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
