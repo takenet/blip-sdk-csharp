@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Take.Blip.Client.Extensions.Tunnel;
 using Takenet.Iris.Messaging.Resources;
 
@@ -21,10 +22,10 @@ namespace Take.Blip.Builder.Variables
             var tunnel = await _tunnelExtension.TryGetTunnelForMessageAsync(context.Input.Message, cancellationToken);
             if (tunnel == null) return null;
             
-            return GetVariable(name, tunnel);
+            return GetVariable(name, tunnel, context.Input.Message.From.ToIdentity());
         }
 
-        private static string GetVariable(string name, Tunnel tunnelInformation)
+        private static string GetVariable(string name, Tunnel tunnelInformation, Identity tunnelIdentity)
         {
             switch (name)
             {
@@ -36,6 +37,9 @@ namespace Take.Blip.Builder.Variables
                 
                 case "destination":
                     return tunnelInformation.Destination;
+                
+                case "identity":
+                    return tunnelIdentity;
                 
                 default:
                     return null;

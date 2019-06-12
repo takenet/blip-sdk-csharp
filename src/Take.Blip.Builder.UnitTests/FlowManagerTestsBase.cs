@@ -31,7 +31,6 @@ namespace Take.Blip.Builder.UnitTests
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
             BroadcastExtension = Substitute.For<IBroadcastExtension>();
             ContactExtension = Substitute.For<IContactExtension>();
-            TunnelExtension = Substitute.For<ITunnelExtension>();
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
@@ -90,8 +89,6 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContactExtension ContactExtension { get; set; }
         
-        public ITunnelExtension TunnelExtension { get; set; }
-
         public ICacheOwnerCallerContactMap CacheOwnerCallerContactMap { get; set; }
 
         public ISender Sender { get; set; }
@@ -120,7 +117,6 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(EventTrackExtension);
             container.RegisterSingleton(BroadcastExtension);
             container.RegisterSingleton(ContactExtension);
-            container.RegisterSingleton(TunnelExtension);
             container.RegisterSingleton(CacheOwnerCallerContactMap);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
