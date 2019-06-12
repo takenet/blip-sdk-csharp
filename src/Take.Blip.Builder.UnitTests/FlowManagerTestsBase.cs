@@ -1,3 +1,4 @@
+using System.Threading;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using NSubstitute;
@@ -39,7 +40,7 @@ namespace Take.Blip.Builder.UnitTests
             ContextProvider
                 .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
-            User = new Identity("user", "domain");
+            UserIdentity = new Identity("user", "domain");
             ApplicationIdentity = new Identity("application", "domain");
             Application = new Application()
             {
@@ -48,10 +49,10 @@ namespace Take.Blip.Builder.UnitTests
             };
             Message = new Message()
             {
-                From = User.ToNode(),
+                From = UserIdentity.ToNode(),
                 To = ApplicationIdentity.ToNode()
             };
-            Context.UserIdentity.Returns(User);
+            Context.UserIdentity.Returns(UserIdentity);
             Input = new LazyInput(
                 Message,
                 new BuilderConfiguration(),
@@ -61,17 +62,20 @@ namespace Take.Blip.Builder.UnitTests
                 CancellationToken); 
             Context.Input.Returns(Input);            
             
-            TraceProcessor = Substitute.For<ITraceProcessor>();
+            TraceProcessor = Substitute.For<ITraceProcessor>();            
             CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
+            UserOwnerResolver = Substitute.For<IUserOwnerResolver>();
+            UserOwnerResolver
+                .GetUserOwnerIdentitiesAsync(Arg.Any<Message>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
+                .Returns(new UserOwner(UserIdentity, ApplicationIdentity));
         }
 
-        public Identity User { get; set; }
+        public Identity UserIdentity { get; set; }
 
         public Application Application { get; set; }
 
-        
         public Identity ApplicationIdentity { get; set; }
-        
+
         public Message Message { get; set; }
 
         public LazyInput Input { get; set; }
@@ -102,6 +106,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public ITraceProcessor TraceProcessor { get; set; }
 
+        public IUserOwnerResolver UserOwnerResolver { get; }
+
         public virtual Container CreateContainer()
         {
             var container = new Container();
@@ -121,6 +127,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(StateManager);
             container.RegisterSingleton(Logger);
             container.RegisterSingleton(TraceProcessor);
+            container.RegisterSingleton(UserOwnerResolver);
 
             return container;
         }

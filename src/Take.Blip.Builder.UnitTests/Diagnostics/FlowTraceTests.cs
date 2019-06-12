@@ -89,7 +89,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Http &&
                     e.Settings.Target == traceUrl &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
@@ -169,7 +169,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
@@ -299,7 +299,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
@@ -432,7 +432,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
@@ -518,7 +518,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     e.Settings.Mode == TraceMode.All &&
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIdentity &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
