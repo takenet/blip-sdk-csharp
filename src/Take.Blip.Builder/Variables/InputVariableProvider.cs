@@ -130,16 +130,19 @@ namespace Take.Blip.Builder.Variables
                     return message.From;
                 
                 case "fromidentity":
-                    return message.From.ToIdentity();
+                    return message.From?.ToIdentity();
 
                 case "to":
                     return message.To;
                 
                 case "toidentity":
-                    return message.To.ToIdentity();
+                    return message.To?.ToIdentity();
+
+                case "pp":
+                    return message.Pp;
                 
-                case "type":
-                    return message.Type.ToString();
+                case "ppidentity":
+                    return message.Pp?.ToIdentity();
                 
                 default:
                     return null;
