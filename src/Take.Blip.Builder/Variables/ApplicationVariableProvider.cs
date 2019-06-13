@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
+using Newtonsoft.Json;
 using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Builder.Variables
@@ -26,13 +27,24 @@ namespace Take.Blip.Builder.Variables
             switch (name.ToLowerInvariant())
             {
                 case "identifier":
-                    return _application?.Identifier;
+                    return _application.Identifier;
                 
                 case "domain":
-                    return _application?.Domain;
+                    return _application.Domain;
                 
                 case "instance":
-                    return _application?.Instance;
+                    return _application.Instance;
+                
+                case "identity":
+                    return _application.Identity;                
+                
+                case "node":
+                    return _application.Node;
+                
+                case "settings":
+                    return _application.Settings != null
+                        ? JsonConvert.SerializeObject(_application.Settings, Application.SerializerSettings)
+                        : null;
                 
                 default:
                     return null;
