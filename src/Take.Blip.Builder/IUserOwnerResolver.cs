@@ -7,6 +7,6 @@ namespace Take.Blip.Builder
 {
     public interface IUserOwnerResolver
     {
-        Task<UserOwner> GetUserOwnerIdentitiesAsync(Message message, BuilderConfiguration builderConfiguration, CancellationToken cancellationToken);
+        Task<UserOwner> GetUserOwnerIdentitiesAsync<T>(T envelope, BuilderConfiguration builderConfiguration, CancellationToken cancellationToken) where T : Envelope;
     }
 }

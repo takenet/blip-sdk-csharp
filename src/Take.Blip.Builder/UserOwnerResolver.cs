@@ -1,8 +1,8 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Take.Blip.Builder.Models;
-using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.Tunnel;
 using Takenet.Iris.Messaging.Resources;
@@ -20,15 +20,23 @@ namespace Take.Blip.Builder
             _applicationIdentity = application.Identity;
         }
 
-        public async Task<UserOwner> GetUserOwnerIdentitiesAsync(Message message, BuilderConfiguration builderConfiguration, CancellationToken cancellationToken)
+        public async Task<UserOwner> GetUserOwnerIdentitiesAsync<T>(T envelope, BuilderConfiguration builderConfiguration, CancellationToken cancellationToken) 
+            where T : Envelope
         {
+            if (envelope == null) throw new ArgumentNullException(nameof(envelope));
+            if (envelope.From == null)
+            {
+                throw new ArgumentException("Envelope 'from' is required", nameof(envelope));
+            }
+            if (builderConfiguration == null) throw new ArgumentNullException(nameof(builderConfiguration));
+            
             Identity userIdentity;
             Identity ownerIdentity;
             Tunnel tunnel = null;
 
             if (builderConfiguration.UseTunnelOwnerContext == true)
             {
-                tunnel = await _tunnelExtension.TryGetTunnelForMessageAsync(message, cancellationToken);
+                tunnel = await _tunnelExtension.TryGetTunnelAsync(envelope, cancellationToken);
             }
 
             if (tunnel != null)
@@ -38,12 +46,12 @@ namespace Take.Blip.Builder
             }
             else if (builderConfiguration.OwnerIdentity != null)
             {
-                userIdentity = message.From.ToIdentity();
+                userIdentity = envelope.From.ToIdentity();
                 ownerIdentity = builderConfiguration.OwnerIdentity;
             }
             else
             {
-                userIdentity = message.From.ToIdentity();
+                userIdentity = envelope.From.ToIdentity();
                 ownerIdentity = _applicationIdentity;
             }
 
