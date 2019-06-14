@@ -5,7 +5,7 @@ namespace Take.Blip.Client.Extensions.Tunnel
 {
     public static class EnvelopeExtensions
     {
-        public static bool TryGetTunnelInformation<T>(this T envelope, out Takenet.Iris.Messaging.Resources.Tunnel tunnelInformation) where T : Envelope
+        public static bool TryGetTunnelFromEnvelope<T>(this T envelope, out Takenet.Iris.Messaging.Resources.Tunnel tunnelInformation) where T : Envelope
         {
             if (envelope.From?.Domain != null &&
                 envelope.From.Domain.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase) &&
