@@ -30,14 +30,11 @@ namespace Take.Blip.Builder.Variables
             Contact contact;
             try
             {
-                if (context.InputContext.TryGetValue(nameof(contact), out var contactValue))
-                {
-                    contact = (Contact)contactValue;
-                }
-                else
+                contact = context.GetContact();
+                if (contact == null)
                 {
                     contact = await _contactExtension.GetAsync(context.UserIdentity, cancellationToken);
-                    context.InputContext[nameof(contact)] = contact;
+                    context.SetContact(contact);
                 }
 
                 if (contact == null) return null;
@@ -46,7 +43,7 @@ namespace Take.Blip.Builder.Variables
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
-                context.InputContext[nameof(contact)] = null;
+                context.SetContact(null);
                 return null;
             }
         }

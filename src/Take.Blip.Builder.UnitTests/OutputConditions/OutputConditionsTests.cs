@@ -96,7 +96,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             await StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -195,7 +195,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -275,7 +275,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(validInput);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
             
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
@@ -419,7 +419,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -453,7 +453,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -478,7 +478,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -512,7 +512,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -537,7 +537,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -571,7 +571,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -596,7 +596,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -630,7 +630,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -655,7 +655,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -689,7 +689,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(input.Text);
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -713,7 +713,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -746,7 +746,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -770,7 +770,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
@@ -803,7 +803,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
