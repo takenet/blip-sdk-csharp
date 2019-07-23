@@ -39,7 +39,7 @@ namespace Take.Blip.Client.UnitTests.Extensions.Tunnel
                 .Received(1)
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
-                        m.To == "originator@domain.local/instance"
+                        m.To == "originator@domain.local"
                         && m.From == null
                         && m.Content == message.Content),
                     Arg.Any<CancellationToken>());
