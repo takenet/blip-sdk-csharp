@@ -19,7 +19,7 @@ namespace Take.Blip.Client.Extensions.Tunnel
             _senderFunc = senderFunc;
         }
 
-        public virtual async Task ReceiveAsync(TEnvelope envelope, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task ReceiveAsync(TEnvelope envelope, CancellationToken cancellationToken = default)
         {
             if (!(envelope.From?.Domain?.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase) ?? false)
                 || envelope.From?.Instance == null)
@@ -28,10 +28,10 @@ namespace Take.Blip.Client.Extensions.Tunnel
             }
 
             // Retrieve the original destination
-            var originator = Node.Parse(Uri.UnescapeDataString(envelope.From.Instance));
+            var originator = Identity.Parse(Uri.UnescapeDataString(envelope.From.Instance));
             var originatorEnvelope = envelope.ShallowCopy();
             originatorEnvelope.From = null;
-            originatorEnvelope.To = originator;
+            originatorEnvelope.To = originator.ToNode();
             await _senderFunc(originatorEnvelope, cancellationToken);
         }
     }
