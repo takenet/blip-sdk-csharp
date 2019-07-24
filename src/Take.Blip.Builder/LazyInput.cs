@@ -47,7 +47,9 @@ namespace Take.Blip.Builder
                     return await artificialIntelligenceExtension.AnalyzeAsync(
                         new AnalysisRequest
                         {
-                            Text = _lazySerializedContent.Value
+                            Text = _lazySerializedContent.Value,
+                            MessageId = Message.Id,
+                            UserIdentity = Message.From.ToIdentity().ToString(),
                         },
                         cancellationToken);
                 }
