@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Messaging.Resources;
 using System;
+using System.Reflection;
 using Lime.Protocol.Network;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Directory;
@@ -32,13 +33,13 @@ namespace Take.Blip.Client.Receivers
             IContactExtension contactExtension,
             IDirectoryExtension directoryExtension,
             bool cacheLocally = true,
-            TimeSpan cacheExpiration = default(TimeSpan))
+            TimeSpan cacheExpiration = default)
         {
             _directoryExtension = directoryExtension;
             _contactExtension = contactExtension;
             _cacheLocally = cacheLocally;
             _contactCache = new MemoryCache(new MemoryCacheOptions());
-            _cacheExpiration = cacheExpiration == default(TimeSpan) ? TimeSpan.FromMinutes(30) : cacheExpiration;
+            _cacheExpiration = cacheExpiration == default ? TimeSpan.FromMinutes(30) : cacheExpiration;
         }
 
         public virtual async Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default(CancellationToken))
@@ -57,22 +58,22 @@ namespace Take.Blip.Client.Receivers
                     contact = await _contactExtension.GetAsync(identity, cancellationToken);
                 }
                 catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
-
-                // Third, try from the directory.
-                if (contact == null)
+            }
+            
+            // Third, try from the directory.
+            if (contact == null)
+            {
+                try
                 {
-                    try
-                    {
-                        contact = await GetContactFromDirectoryAsync(identity, cancellationToken);
-                    }
-                    catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
+                    contact = await GetContactFromDirectoryAsync(identity, cancellationToken);
                 }
+                catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
+            }
                 
-                // Stores in the cache, if configured.
-                if (contact != null && _cacheLocally)
-                {
-                    _contactCache.Set(identity.ToString(), contact, DateTimeOffset.UtcNow.Add(_cacheExpiration));
-                }
+            // Stores in the cache, if configured.
+            if (contact != null && _cacheLocally)
+            {
+                _contactCache.Set(identity.ToString(), contact, DateTimeOffset.UtcNow.Add(_cacheExpiration));
             }
 
             await ReceiveAsync(envelope, contact, cancellationToken);
@@ -94,17 +95,11 @@ namespace Take.Blip.Client.Receivers
             if (account != null)
             {
                 contact.Name = account.FullName;
-                contact.Address = account.Address;
-                contact.CellPhoneNumber = account.CellPhoneNumber;
-                contact.City = account.City;
-                contact.Culture = account.Culture;
-                contact.Email = account.Email;
-                contact.Extras = account.Extras;
-                contact.Gender = account.Gender;
-                contact.PhoneNumber = account.PhoneNumber;
-                contact.PhotoUri = account.PhotoUri;
-                contact.TimeZoneName = account.TimeZoneName;
-                contact.Offset = account.Offset;
+                foreach (var property in typeof(ContactDocument).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    var accountValue = property.GetValue(account);
+                    property.SetValue(contact, accountValue);
+                }
             }
 
             return contact;
