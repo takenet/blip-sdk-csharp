@@ -48,28 +48,23 @@ namespace Take.Blip.Client.Receivers
 
             // First, tries get it from the cache, if configured.
             Contact contact = null;
-            if (_cacheLocally) contact = _contactCache.Get(identity.ToString()) as Contact;
-            
+            if (_cacheLocally)
+            {
+                contact = _contactCache.Get(identity.ToString()) as Contact;
+            }
+
             if (contact == null)
             {
                 try
                 {
                     // Second, try from the roster.
-                    contact = await _contactExtension.GetAsync(identity, cancellationToken);
+                    contact = await _contactExtension.GetFromContactsOrDirectoryAsync(_directoryExtension, identity, cancellationToken);
                 }
-                catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
+                catch (LimeException ex) when (
+                    ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || 
+                    ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
             }
-            
-            // Third, try from the directory.
-            if (contact == null)
-            {
-                try
-                {
-                    contact = await GetContactFromDirectoryAsync(identity, cancellationToken);
-                }
-                catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
-            }
-                
+
             // Stores in the cache, if configured.
             if (contact != null && _cacheLocally)
             {
@@ -83,28 +78,7 @@ namespace Take.Blip.Client.Receivers
         /// Receives a message with the contact information.
         /// </summary>
         protected abstract Task ReceiveAsync(Message message, Contact contact, CancellationToken cancellationToken = default(CancellationToken));
-
-        private async Task<Contact> GetContactFromDirectoryAsync(Identity identity, CancellationToken cancellationToken)
-        {
-            var contact = new Contact
-            {
-                Identity = identity
-            };
-
-            var account = await _directoryExtension.GetDirectoryAccountAsync(identity, cancellationToken);
-            if (account != null)
-            {
-                contact.Name = account.FullName;
-                foreach (var property in typeof(ContactDocument).GetProperties(BindingFlags.Public | BindingFlags.Instance))
-                {
-                    var accountValue = property.GetValue(account);
-                    property.SetValue(contact, accountValue);
-                }
-            }
-
-            return contact;
-        }        
-
+        
         private bool _disposed;
 
         protected virtual void Dispose(bool disposing)

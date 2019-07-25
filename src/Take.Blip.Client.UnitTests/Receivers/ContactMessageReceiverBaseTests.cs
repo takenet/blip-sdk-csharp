@@ -61,6 +61,7 @@ namespace Take.Blip.Client.UnitTests.Receivers
             target.ReceivedItems.Count.ShouldBe(1);
             target.ReceivedItems[0].message.ShouldBe(message);
             var actualContact = target.ReceivedItems[0].contact;
+            actualContact.ShouldNotBeNull();
             foreach (var property in typeof(Contact).GetProperties())
             {
                 property
@@ -91,6 +92,7 @@ namespace Take.Blip.Client.UnitTests.Receivers
             target.ReceivedItems.Count.ShouldBe(1);
             target.ReceivedItems[0].message.ShouldBe(message);
             var actualContact = target.ReceivedItems[0].contact;
+            actualContact.ShouldNotBeNull();
             actualContact.Name.ShouldBe(account.FullName);
             
             foreach (var property in typeof(ContactDocument).GetProperties())
