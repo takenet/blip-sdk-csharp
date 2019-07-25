@@ -105,7 +105,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IOwnerCallerNameDocumentMap, Storage.Specialized.OwnerCallerNameDocumentMap>();
             container.RegisterSingleton<ISourceOwnerCallerNameDocumentMap, Storage.Sql.OwnerCallerNameDocumentMap>();
             container.RegisterSingleton<ICacheOwnerCallerNameDocumentMap, Storage.Redis.OwnerCallerNameDocumentMap>();
-            container.RegisterSingleton<ICacheOwnerCallerContactMap, Storage.Redis.CacheOwnerCallerContactMap>();
+            container.RegisterSingleton<IOwnerCallerContactMap, Storage.Redis.OwnerCallerContactMap>();
             container.RegisterSingleton<IDatabaseDriver>(() =>
             {
                 var configuration = container.GetInstance<IConfiguration>();

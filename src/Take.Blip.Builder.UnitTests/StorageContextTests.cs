@@ -43,7 +43,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(TunnelExtension);
             container.RegisterSingleton(Sender);
-            container.RegisterSingleton(CacheOwnerCallerContactMap);
+            container.RegisterSingleton(OwnerCallerContactMap);
 
             return new StorageContext(
                 User,
