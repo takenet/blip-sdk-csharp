@@ -69,7 +69,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
@@ -139,7 +139,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
@@ -209,7 +209,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
@@ -275,7 +275,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
@@ -318,7 +318,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
@@ -416,7 +416,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -596,7 +596,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(inputOk, flow, null, CancellationToken);
+            await target.ProcessInputAsync(inputOk, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
@@ -774,7 +774,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(inputNOk, flow, null, CancellationToken);
+            await target.ProcessInputAsync(inputNOk, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
@@ -901,8 +901,8 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input1, flow, null, CancellationToken);
-            await target.ProcessInputAsync(input2, flow, null, CancellationToken);
+            await target.ProcessInputAsync(input1, flow, CancellationToken);
+            await target.ProcessInputAsync(input2, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -1026,7 +1026,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
@@ -1145,7 +1145,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
@@ -1214,7 +1214,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            var exception = await target.ProcessInputAsync(Message, flow, null, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
+            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
             exception.Message.ShouldBe($"The processing of the action 'SendMessage' has timed out after {timeout.TotalMilliseconds} ms");
             fakeSender.SentMessages.ShouldBeEmpty();
         }
@@ -1267,7 +1267,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Act
             await target
-                .ProcessInputAsync(Message, flow, null, CancellationToken)
+                .ProcessInputAsync(Message, flow, CancellationToken)
                 .ShouldThrowAsync<ActionProcessingException>();           
         }        
         
@@ -1319,7 +1319,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);           
+            await target.ProcessInputAsync(Message, flow, CancellationToken);           
             
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
