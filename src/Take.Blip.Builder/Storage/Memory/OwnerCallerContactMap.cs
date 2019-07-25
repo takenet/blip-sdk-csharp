@@ -3,7 +3,7 @@ using Take.Elephant.Memory;
 
 namespace Take.Blip.Builder.Storage.Memory
 {
-    public class CacheOwnerCallerContactMap : Map<OwnerCaller, Contact>, ICacheOwnerCallerContactMap
+    public class OwnerCallerContactMap : Map<OwnerCaller, Contact>, IOwnerCallerContactMap
     {
     }
 }

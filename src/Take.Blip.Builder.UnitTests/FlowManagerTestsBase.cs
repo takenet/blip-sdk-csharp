@@ -62,7 +62,7 @@ namespace Take.Blip.Builder.UnitTests
             Context.Input.Returns(Input);            
             
             TraceProcessor = Substitute.For<ITraceProcessor>();            
-            CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
+            OwnerCallerContactMap = new OwnerCallerContactMap();
             UserOwnerResolver = Substitute.For<IUserOwnerResolver>();
             UserOwnerResolver
                 .GetUserOwnerIdentitiesAsync(Arg.Any<Message>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
@@ -89,7 +89,7 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContactExtension ContactExtension { get; set; }
         
-        public ICacheOwnerCallerContactMap CacheOwnerCallerContactMap { get; set; }
+        public IOwnerCallerContactMap OwnerCallerContactMap { get; set; }
 
         public ISender Sender { get; set; }
 
@@ -117,7 +117,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(EventTrackExtension);
             container.RegisterSingleton(BroadcastExtension);
             container.RegisterSingleton(ContactExtension);
-            container.RegisterSingleton(CacheOwnerCallerContactMap);
+            container.RegisterSingleton(OwnerCallerContactMap);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);
