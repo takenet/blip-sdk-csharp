@@ -38,8 +38,20 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public static string MultipleIntentsAndEntitiesText = "I have a plane and a toy car";
 
+        public static string MessagId = "Message-Id";
+
+        public static string UserFromName = "test";
+
+        public static string UserFromDomain = "take.net";
+
         public Message NoIntentMessage = new Message()
         {
+            Id = MessagId,
+            From = new Node
+            {
+                Name = UserFromName,
+                Domain = UserFromDomain
+            },
             Content = new PlainText
             {
                 Text = NoIntentInputText
@@ -48,6 +60,12 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public Message IntentsAndEntitiesMessage = new Message()
         {
+            Id = MessagId,
+            From = new Node
+            {
+                Name = UserFromName,
+                Domain = UserFromDomain
+            },
             Content = new PlainText
             {
                 Text = IntentsAndEntitiesText
@@ -55,7 +73,13 @@ namespace Take.Blip.Builder.UnitTests.Variables
         };
 
         public Message MultipleIntentsAndEntitiesMessage = new Message() 
-        { 
+        {
+            Id = MessagId,
+            From = new Node
+            {
+                Name = UserFromName,
+                Domain = UserFromDomain
+            },
             Content = new PlainText
             {
                 Text = MultipleIntentsAndEntitiesText
