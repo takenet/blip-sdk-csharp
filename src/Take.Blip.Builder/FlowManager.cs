@@ -143,7 +143,7 @@ namespace Take.Blip.Builder
                     try
                     {
                         // Create the input evaluator
-                        var lazyInput = new LazyInput(message, flow.BuilderConfiguration, _documentSerializer,
+                        var lazyInput = new LazyInput(message, userIdentity,  flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context

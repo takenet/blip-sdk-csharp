@@ -28,6 +28,7 @@ namespace Take.Blip.Builder
         
         public LazyInput(
             Message message,
+            Identity userIdentity,
             BuilderConfiguration builderConfiguration,
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
@@ -49,7 +50,7 @@ namespace Take.Blip.Builder
                         {
                             Text = _lazySerializedContent.Value,
                             MessageId = Message.Id,
-                            UserIdentity = Message.From.ToIdentity().ToString(),
+                            UserIdentity = userIdentity.ToString(),
                         },
                         cancellationToken);
                 }
