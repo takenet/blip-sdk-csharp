@@ -52,6 +52,7 @@ namespace Take.Blip.Builder.UnitTests
                         Text = "Hello world!"
                     }
                 },
+                User,
                 Flow.BuilderConfiguration,
                 new DocumentSerializer(documentTypeResolver),
                 new EnvelopeSerializer(documentTypeResolver),

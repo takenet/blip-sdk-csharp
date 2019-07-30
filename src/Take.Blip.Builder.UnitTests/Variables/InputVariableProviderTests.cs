@@ -40,18 +40,11 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public static string MessagId = "Message-Id";
 
-        public static string UserFromName = "test";
-
-        public static string UserFromDomain = "take.net";
+        public Identity UserIdentiy = new Identity("user", "domain");
 
         public Message NoIntentMessage = new Message()
         {
             Id = MessagId,
-            From = new Node
-            {
-                Name = UserFromName,
-                Domain = UserFromDomain
-            },
             Content = new PlainText
             {
                 Text = NoIntentInputText
@@ -61,11 +54,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public Message IntentsAndEntitiesMessage = new Message()
         {
             Id = MessagId,
-            From = new Node
-            {
-                Name = UserFromName,
-                Domain = UserFromDomain
-            },
             Content = new PlainText
             {
                 Text = IntentsAndEntitiesText
@@ -75,11 +63,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public Message MultipleIntentsAndEntitiesMessage = new Message() 
         {
             Id = MessagId,
-            From = new Node
-            {
-                Name = UserFromName,
-                Domain = UserFromDomain
-            },
             Content = new PlainText
             {
                 Text = MultipleIntentsAndEntitiesText
@@ -152,7 +135,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public async Task CheckIfOneIntentVariableIsValid()
         {
             // Arrange
-            LazyInput = new LazyInput(NoIntentMessage, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
+            LazyInput = new LazyInput(NoIntentMessage, UserIdentiy, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
             Context = new ExtensionContext("me", "app", LazyInput, new Builder.Models.Flow(), new List<InputVariableProvider>(), null);
             var target = GetTarget();
 
@@ -167,7 +150,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public async Task CheckIfMultipleIntentsVariableIsValid()
         {
             // Arrange
-            LazyInput = new LazyInput(IntentsAndEntitiesMessage, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
+            LazyInput = new LazyInput(IntentsAndEntitiesMessage, UserIdentiy, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
             Context = new ExtensionContext("me", "app", LazyInput, new Builder.Models.Flow(), new List<InputVariableProvider>(), null);
             var target = GetTarget();
 
@@ -182,7 +165,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public async Task CheckIfMultipleIntentsAndEntitiesVariableIsValid()
         {
             // Arrange
-            LazyInput = new LazyInput(MultipleIntentsAndEntitiesMessage, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
+            LazyInput = new LazyInput(MultipleIntentsAndEntitiesMessage, UserIdentiy, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
             Context = new ExtensionContext("me", "app", LazyInput, new Builder.Models.Flow(), new List<InputVariableProvider>(), null);
             var target = GetTarget();
 
