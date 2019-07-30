@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Messaging.Resources;
 using System;
+using System.Reflection;
 using Lime.Protocol.Network;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Directory;
@@ -18,7 +19,6 @@ namespace Take.Blip.Client.Receivers
         private readonly IContactExtension _contactExtension;
         private readonly IDirectoryExtension _directoryExtension;
         private readonly bool _cacheLocally;
-        private readonly MemoryCache _contactCache;
         private readonly TimeSpan _cacheExpiration;
 
         /// <summary>
@@ -32,84 +32,65 @@ namespace Take.Blip.Client.Receivers
             IContactExtension contactExtension,
             IDirectoryExtension directoryExtension,
             bool cacheLocally = true,
-            TimeSpan cacheExpiration = default(TimeSpan))
+            TimeSpan cacheExpiration = default)
         {
             _directoryExtension = directoryExtension;
             _contactExtension = contactExtension;
             _cacheLocally = cacheLocally;
-            _contactCache = new MemoryCache(new MemoryCacheOptions());
-            _cacheExpiration = cacheExpiration == default(TimeSpan) ? TimeSpan.FromMinutes(30) : cacheExpiration;
+            _cacheExpiration = cacheExpiration == default ? TimeSpan.FromMinutes(30) : cacheExpiration;
+            ContactCache = new MemoryCache(new MemoryCacheOptions());
         }
 
         public virtual async Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default(CancellationToken))
         {
             var identity = envelope.From.ToIdentity();
+            var contact = await GetContactAsync(identity, cancellationToken);
+            await ReceiveAsync(envelope, contact, cancellationToken);
+        }
+        
+        protected MemoryCache ContactCache { get; }
 
+        /// <summary>
+        /// Gets the contact for the specified identity.
+        /// </summary>
+        protected virtual async Task<Contact> GetContactAsync(Identity identity, CancellationToken cancellationToken)
+        {
             // First, tries get it from the cache, if configured.
             Contact contact = null;
-            if (_cacheLocally) contact = _contactCache.Get(identity.ToString()) as Contact;
-            
+            if (_cacheLocally)
+            {
+                contact = ContactCache.Get(identity.ToString()) as Contact;
+            }
+
             if (contact == null)
             {
                 try
                 {
                     // Second, try from the roster.
-                    contact = await _contactExtension.GetAsync(identity, cancellationToken);
+                    contact = await _contactExtension.GetFromContactsOrDirectoryAsync(_directoryExtension, identity, cancellationToken);
                 }
-                catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
-
-                // Third, try from the directory.
-                if (contact == null)
+                catch (LimeException ex) when (
+                    ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND ||
+                    ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED)
                 {
-                    try
-                    {
-                        contact = await GetContactFromDirectoryAsync(identity, cancellationToken);
-                    }
-                    catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
-                }
-                
-                // Stores in the cache, if configured.
-                if (contact != null && _cacheLocally)
-                {
-                    _contactCache.Set(identity.ToString(), contact, DateTimeOffset.UtcNow.Add(_cacheExpiration));
+                    contact = null;
                 }
             }
+            
+            // Stores in the cache, if configured.
+            if (contact != null && _cacheLocally)
+            {
+                ContactCache.Set(identity.ToString(), contact, DateTimeOffset.UtcNow.Add(_cacheExpiration));
+            }
 
-            await ReceiveAsync(envelope, contact, cancellationToken);
+            return contact;
         }
 
         /// <summary>
         /// Receives a message with the contact information.
         /// </summary>
         protected abstract Task ReceiveAsync(Message message, Contact contact, CancellationToken cancellationToken = default(CancellationToken));
-
-        private async Task<Contact> GetContactFromDirectoryAsync(Identity identity, CancellationToken cancellationToken)
-        {
-            var contact = new Contact
-            {
-                Identity = identity
-            };
-
-            var account = await _directoryExtension.GetDirectoryAccountAsync(identity, cancellationToken);
-            if (account != null)
-            {
-                contact.Name = account.FullName;
-                contact.Address = account.Address;
-                contact.CellPhoneNumber = account.CellPhoneNumber;
-                contact.City = account.City;
-                contact.Culture = account.Culture;
-                contact.Email = account.Email;
-                contact.Extras = account.Extras;
-                contact.Gender = account.Gender;
-                contact.PhoneNumber = account.PhoneNumber;
-                contact.PhotoUri = account.PhotoUri;
-                contact.TimeZoneName = account.TimeZoneName;
-                contact.Offset = account.Offset;
-            }
-
-            return contact;
-        }        
-
+        
         private bool _disposed;
 
         protected virtual void Dispose(bool disposing)
@@ -118,7 +99,7 @@ namespace Take.Blip.Client.Receivers
             {
                 if (disposing)
                 {
-                    _contactCache.Dispose();
+                    ContactCache.Dispose();
                 }
 
                 _disposed = true;
@@ -129,6 +110,5 @@ namespace Take.Blip.Client.Receivers
         {
             Dispose(true);
         }
-
     }
 }

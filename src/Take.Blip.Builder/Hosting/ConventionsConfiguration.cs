@@ -29,6 +29,8 @@ namespace Take.Blip.Builder.Hosting
 
         public virtual string ContextType => nameof(ExtensionContext);
 
+        public bool ContactCacheEnabled => true;
+
         public virtual TimeSpan ContactCacheExpiration => TimeSpan.FromMinutes(30);
 
         public virtual TimeSpan DefaultActionExecutionTimeout => TimeSpan.FromSeconds(30);

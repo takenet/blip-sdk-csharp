@@ -41,7 +41,7 @@ namespace Take.Blip.Builder
 
             if (tunnel != null)
             {
-                userIdentity = tunnel.Originator.ToIdentity();
+                userIdentity = tunnel.Originator;
                 ownerIdentity = tunnel.Owner;
             }
             else if (builderConfiguration.OwnerIdentity != null)

@@ -7,7 +7,7 @@ namespace Take.Blip.Builder.Storage
     /// Defines a service for storing contacts for a given owner and caller.
     /// It is used to cache contacts when using contact extension.
     /// </summary>
-    public interface ICacheOwnerCallerContactMap : IExpirableKeyMap<OwnerCaller, Contact>
+    public interface IOwnerCallerContactMap : IExpirableKeyMap<OwnerCaller, Contact>
     {
     }
 }
