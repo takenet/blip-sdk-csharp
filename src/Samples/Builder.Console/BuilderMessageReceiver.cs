@@ -15,23 +15,20 @@ namespace Builder.Console
     {
         private readonly IFlowManager _flowManager;
         private readonly BuilderSettings _settings;
-        private readonly Identity _applicationIdentity;
 
         public BuilderMessageReceiver(
             IContactExtension contactExtension,
             IDirectoryExtension directoryExtension,
             IFlowManager flowManager,
-            BuilderSettings settings,
-            Application application)
+            BuilderSettings settings)
             : base(contactExtension, directoryExtension)
         {
             _flowManager = flowManager;
             _settings = settings;
-            _applicationIdentity = $"{application.Identifier}@{application.Domain ?? Constants.DEFAULT_DOMAIN}";
         }
 
         protected override Task ReceiveAsync(Message message, Contact contact, CancellationToken cancellationToken)
-            => _flowManager.ProcessInputAsync(message, _settings.Flow, contact, cancellationToken);
+            => _flowManager.ProcessInputAsync(message, _settings.Flow, cancellationToken);
 
     }
 }
