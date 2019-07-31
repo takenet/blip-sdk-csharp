@@ -28,6 +28,7 @@ namespace Take.Blip.Builder
         
         public LazyInput(
             Message message,
+            Identity userIdentity,
             BuilderConfiguration builderConfiguration,
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
@@ -47,7 +48,9 @@ namespace Take.Blip.Builder
                     return await artificialIntelligenceExtension.AnalyzeAsync(
                         new AnalysisRequest
                         {
-                            Text = _lazySerializedContent.Value
+                            Text = _lazySerializedContent.Value,
+                            MessageId = Message.Id,
+                            UserIdentity = userIdentity.ToString(),
                         },
                         cancellationToken);
                 }

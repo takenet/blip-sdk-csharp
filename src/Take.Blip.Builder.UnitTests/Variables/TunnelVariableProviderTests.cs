@@ -23,8 +23,10 @@ namespace Take.Blip.Builder.UnitTests.Variables
             Context = Substitute.For<IContext>();
             BuilderConfiguration = new BuilderConfiguration();
             Message = new Message();
+            UserIdentity = new Identity("user", "msging.net");
             LazyInput = new LazyInput(
-                Message, 
+                Message,
+                UserIdentity,
                 BuilderConfiguration, 
                 Substitute.For<IDocumentSerializer>(),
                 Substitute.For<IEnvelopeSerializer>(),
@@ -55,6 +57,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public Message Message { get; }
 
         public Identity Owner { get;  }
+
+        public Identity UserIdentity { get; }
 
         public Node Originator { get;  }
 
