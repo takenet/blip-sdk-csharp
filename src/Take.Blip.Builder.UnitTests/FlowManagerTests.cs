@@ -803,6 +803,7 @@ namespace Take.Blip.Builder.UnitTests
             var input1 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Ping!" }};
             var context1 = Substitute.For<IContext>();
             var lazyInput1 = new LazyInput(input1,
+                UserIdentity,
                 new BuilderConfiguration(),
                 Substitute.For<IDocumentSerializer>(),
                 Substitute.For<IEnvelopeSerializer>(),
@@ -812,6 +813,7 @@ namespace Take.Blip.Builder.UnitTests
             var input2 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Marco!" }};
             var context2 = Substitute.For<IContext>();
             var lazyInput2 = new LazyInput(input2,
+                UserIdentity,
                 new BuilderConfiguration(),
                 Substitute.For<IDocumentSerializer>(),
                 Substitute.For<IEnvelopeSerializer>(),
