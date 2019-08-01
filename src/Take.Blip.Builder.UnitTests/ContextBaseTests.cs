@@ -33,7 +33,7 @@ namespace Take.Blip.Builder.UnitTests
             TunnelExtension = Substitute.For<ITunnelExtension>();
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
-            CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
+            OwnerCallerContactMap = new OwnerCallerContactMap();
             Sender = Substitute.For<ISender>();
             Flow = new Flow()
             {
@@ -73,7 +73,7 @@ namespace Take.Blip.Builder.UnitTests
 
         public IConfiguration Configuration { get; }
 
-        public ICacheOwnerCallerContactMap CacheOwnerCallerContactMap { get; }
+        public IOwnerCallerContactMap OwnerCallerContactMap { get; }
 
         public Identity User { get; set; }
 

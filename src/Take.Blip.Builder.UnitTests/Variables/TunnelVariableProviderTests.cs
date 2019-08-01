@@ -93,7 +93,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var actualIdentity = await target.GetVariableAsync("identity", Context, CancellationToken);
             
             // Assert
-            actualOriginator.ShouldBe(Originator);
+            actualOriginator.ShouldBe(Identity.Parse(Originator).ToString());
             actualOwner.ShouldBe(Owner);
             actualDestination.ShouldBe(ApplicationIdentity);
             actualIdentity.ShouldBe(TunnelIdentity);

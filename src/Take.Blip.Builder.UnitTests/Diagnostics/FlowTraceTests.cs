@@ -80,7 +80,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -160,7 +160,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -290,7 +290,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Act
             var input = new PlainText() { Text = "Ping!" };
             Message.Content = input;
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -423,7 +423,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Act
             var input = new PlainText() { Text = "Ping!" };
             Message.Content = input;
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -508,7 +508,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Act
             var input = new PlainText() { Text = "Ping!" };
             Message.Content = input;
-            await target.ProcessInputAsync(Message, flow, null, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
