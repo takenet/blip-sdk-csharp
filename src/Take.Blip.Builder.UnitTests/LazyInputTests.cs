@@ -35,6 +35,7 @@ namespace Take.Blip.Builder.UnitTests
             
             var jsonInput = new LazyInput(
                messageWithAnalyzable,
+               UserIdentity,
                new BuilderConfiguration(),
                new DocumentSerializer(new DocumentTypeResolver()),
                new EnvelopeSerializer(new DocumentTypeResolver()),
@@ -66,6 +67,7 @@ namespace Take.Blip.Builder.UnitTests
 
             var jsonInput = new LazyInput(
                messageWithAnalyzable,
+               UserIdentity,
                new BuilderConfiguration(),
                new DocumentSerializer(new DocumentTypeResolver()),
                new EnvelopeSerializer(new DocumentTypeResolver()),
@@ -96,6 +98,7 @@ namespace Take.Blip.Builder.UnitTests
 
             var jsonInput = new LazyInput(
                messageWithAnalyzable,
+               UserIdentity,
                new BuilderConfiguration(),
                new DocumentSerializer(new DocumentTypeResolver()),
                new EnvelopeSerializer(new DocumentTypeResolver()),
