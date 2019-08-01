@@ -11,9 +11,10 @@ namespace Take.Blip.Client.Extensions.HelpDesk
 {
     public class HelpDeskExtension : ExtensionBase, IHelpDeskExtension
     {
-        public string DESK_DOMAIN { get; } = "desk.msging.net";
+        public const string DEFAULT_DESK_DOMAIN = "desk." + Constants.DEFAULT_DOMAIN;
+        public const string ID_PREFIX = "fwd";
+        
         private readonly ISender _sender;
-        private const string ID_PREFIX = "fwd";
 
         public HelpDeskExtension(ISender sender)
             : base(sender)
@@ -24,7 +25,7 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         public async Task ForwardMessageToAgentAsync(Message message, CancellationToken cancellationToken)
         {
             var customerName = Uri.EscapeDataString(message.From.ToIdentity().ToString());
-            var deskNode = new Identity(customerName, DESK_DOMAIN).ToNode();
+            var deskNode = new Identity(customerName, DEFAULT_DESK_DOMAIN).ToNode();
 
             var fwMessage = new Message
             {
@@ -38,7 +39,7 @@ namespace Take.Blip.Client.Extensions.HelpDesk
 
         public bool IsFromAgent(Message message)
         {
-            return message.From.Domain.Equals(DESK_DOMAIN);
+            return message.From.Domain.Equals(DEFAULT_DESK_DOMAIN);
         }
 
         public async Task<Ticket> CreateTicketAsync(Identity customerIdentity, Document context, CancellationToken cancellationToken)
@@ -48,7 +49,7 @@ namespace Take.Blip.Client.Extensions.HelpDesk
                 Id = EnvelopeId.NewId(),
                 Method = CommandMethod.Set,
                 Uri = new LimeUri($"/tickets/{Uri.EscapeDataString(customerIdentity.ToString())}"),
-                To = new Node("postmaster", DESK_DOMAIN, null),
+                To = new Node("postmaster", DEFAULT_DESK_DOMAIN, null),
                 Resource = context
             };
 
@@ -64,7 +65,7 @@ namespace Take.Blip.Client.Extensions.HelpDesk
                 Id = EnvelopeId.NewId(),
                 Method = CommandMethod.Set,
                 Uri = new LimeUri($"/tickets/change-status"),
-                To = new Node("postmaster", DESK_DOMAIN, null),
+                To = new Node("postmaster", DEFAULT_DESK_DOMAIN, null),
                 Resource = new Ticket
                 {
                     Id = ticketId,
@@ -78,13 +79,12 @@ namespace Take.Blip.Client.Extensions.HelpDesk
 
         public async Task<Ticket> GetUserOpenTicketsAsync(Identity customerIdentity, CancellationToken cancellationToken)
         {
-
             var openTicketCommand = new Command
             {
                 Id = EnvelopeId.NewId(),
                 Method = CommandMethod.Get,
                 Uri = new LimeUri($"/tickets?$filter={Uri.EscapeDataString($"customerIdentity eq '{customerIdentity}' and status eq 'Open'")}"),
-                To = new Node("postmaster", DESK_DOMAIN, null),
+                To = new Node("postmaster", DEFAULT_DESK_DOMAIN, null),
             };
             var result = await _sender.ProcessCommandAsync(openTicketCommand, cancellationToken);
             EnsureSuccess(result);

@@ -4,14 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Take.Blip.Client;
+using static Take.Blip.Client.Extensions.HelpDesk.HelpDeskExtension;
 
 namespace Take.Blip.Builder.Actions.ForwardMessageToDesk
 {
     public class ForwardMessageToDeskAction : ActionBase<ForwardMessageToDeskSettings>
     {
-        public const string DEFAULT_DESK_DOMAIN = "desk." + Constants.DEFAULT_DOMAIN;
-        public const string ID_PREFIX = "fwd";
-
         private readonly ISender _sender;
 
         public ForwardMessageToDeskAction(ISender sender) 
