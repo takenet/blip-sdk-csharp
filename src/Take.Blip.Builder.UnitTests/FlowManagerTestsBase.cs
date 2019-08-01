@@ -54,6 +54,7 @@ namespace Take.Blip.Builder.UnitTests
             Context.UserIdentity.Returns(UserIdentity);
             Input = new LazyInput(
                 Message,
+                UserIdentity,
                 new BuilderConfiguration(),
                 Substitute.For<IDocumentSerializer>(),
                 Substitute.For<IEnvelopeSerializer>(),

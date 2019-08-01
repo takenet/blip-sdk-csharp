@@ -13,12 +13,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             Context = Substitute.For<IContext>();
             From = new Node(Guid.NewGuid().ToString(), "msging.net", "");
+            UserIdentity = From.ToIdentity();
             Message = new Message()
             {
                 From = From
             };
             Input = new LazyInput(
                 Message,
+                UserIdentity,
                 new BuilderConfiguration(),
                 new DocumentSerializer(new DocumentTypeResolver()),
                 new EnvelopeSerializer(new DocumentTypeResolver()),
@@ -30,6 +32,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public IContext Context { get; }
 
         public Node From { get; }
+
+        public Identity UserIdentity { get; }
 
         public Message Message { get; set; }
         
