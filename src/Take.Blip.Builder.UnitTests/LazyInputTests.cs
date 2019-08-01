@@ -30,7 +30,7 @@ namespace Take.Blip.Builder.UnitTests
             var messageWithAnalyzable = new Message()
             {
                 Content = new JsonDocument(json, MediaType.ApplicationJson),
-                Metadata = new Dictionary<string, string> { { "ai.analyzable", "true" }, { "key", "value" } }
+                Metadata = new Dictionary<string, string> { { "builder.analyzable", "true" }, { "key", "value" } }
             };
             
             var jsonInput = new LazyInput(
@@ -46,7 +46,6 @@ namespace Take.Blip.Builder.UnitTests
             await jsonInput.AnalyzedContent;
 
             // Assert
-            jsonInput.Analyzable.ShouldBe(true);
             await ArtificialIntelligenceExtension.Received(1).AnalyzeAsync(Arg.Is<AnalysisRequest>(
                 a => a.Text.Equals(requestJson)
             ), CancellationToken);
@@ -78,7 +77,6 @@ namespace Take.Blip.Builder.UnitTests
             await jsonInput.AnalyzedContent;
 
             // Assert
-            jsonInput.Analyzable.ShouldBe(false);
             await ArtificialIntelligenceExtension.Received(0).AnalyzeAsync(
                 Arg.Any<AnalysisRequest>(), Arg.Any<CancellationToken>()
             );
@@ -109,7 +107,6 @@ namespace Take.Blip.Builder.UnitTests
             await jsonInput.AnalyzedContent;
 
             // Assert
-            jsonInput.Analyzable.ShouldBe(false);
             await ArtificialIntelligenceExtension.Received(0).AnalyzeAsync(
                 Arg.Any<AnalysisRequest>(), Arg.Any<CancellationToken>()
             );
