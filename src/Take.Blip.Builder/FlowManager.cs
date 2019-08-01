@@ -74,7 +74,7 @@ namespace Take.Blip.Builder
             _applicationIdentity = application.Identity;
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, Contact contact, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -148,11 +148,7 @@ namespace Take.Blip.Builder
 
                         // Load the user context
                         var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
-                        if (contact != null)
-                        {
-                            context.SetContact(contact);
-                        }
-
+                        
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);

@@ -16,9 +16,8 @@ namespace Take.Blip.Builder
         /// </summary>
         /// <param name="message">The input message.</param>
         /// <param name="flow">The builder flow.</param>
-        /// <param name="contact">The contact for the message sender, if available.</param>
         /// <param name="cancellationToken">The operation cancellation token.</param>
         /// <returns></returns>
-        Task ProcessInputAsync(Message message, Flow flow, Contact contact, CancellationToken cancellationToken);
+        Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken);
     }
 }
