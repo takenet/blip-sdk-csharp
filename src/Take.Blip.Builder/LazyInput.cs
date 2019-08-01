@@ -25,7 +25,7 @@ namespace Take.Blip.Builder
         private readonly Lazy<string> _lazySerializedContent;
         private readonly Lazy<Task<AnalysisResponse>> _lazyAnalyzedContent;
         private readonly Lazy<string> _lazySerializedMessage;
-        
+
         public LazyInput(
             Message message,
             Identity userIdentity,
@@ -49,8 +49,10 @@ namespace Take.Blip.Builder
                         new AnalysisRequest
                         {
                             Text = _lazySerializedContent.Value,
-                            MessageId = Message.Id,
-                            UserIdentity = userIdentity.ToString(),
+                            Extras = new Dictionary<string, string> {
+                                ["MessageId"] = Message.Id,
+                                ["UserIdentity"] = userIdentity.ToString()
+                            }
                         },
                         cancellationToken);
                 }
@@ -66,14 +68,14 @@ namespace Take.Blip.Builder
                     return envelopeSerializer.Serialize(Message);
                 }
 
-                return null;                
+                return null;
             });
         }
 
         public Message Message { get; }
-        
+
         public Document Content => Message.Content;
-        
+
         public string SerializedContent => _lazySerializedContent.Value;
 
         public string SerializedMessage => _lazySerializedMessage.Value;
