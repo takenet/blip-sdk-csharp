@@ -23,11 +23,13 @@ namespace Take.Blip.Builder
     {
         private readonly BuilderConfiguration _builderConfiguration;
         private readonly Lazy<string> _lazySerializedContent;
+        private readonly Lazy<bool> _analyzable;
         private readonly Lazy<Task<AnalysisResponse>> _lazyAnalyzedContent;
         private readonly Lazy<string> _lazySerializedMessage;
-        
+
         public LazyInput(
             Message message,
+            Identity userIdentity,
             BuilderConfiguration builderConfiguration,
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
@@ -37,17 +39,25 @@ namespace Take.Blip.Builder
             Message = message ?? throw new ArgumentNullException(nameof(message));
             _builderConfiguration = builderConfiguration ?? throw new ArgumentNullException(nameof(builderConfiguration));
             _lazySerializedContent = new Lazy<string>(() => documentSerializer.Serialize(Content));
+            _analyzable = new Lazy<bool>(() =>
+            {
+                string result = null;
+                Message?.Metadata?.TryGetValue("builder.analyzable", out result);
+                return result?.ToLower() == "true";
+            });
             _lazyAnalyzedContent = new Lazy<Task<AnalysisResponse>>(async () =>
             {
-                // Only analyze the input if the type is plain text.
-                if (Content.GetMediaType() != PlainText.MediaType) return null;
+                // Only analyze the input if the type is plain text or analyzable metadata is true.
+                if (!_analyzable.Value && Content.GetMediaType() != PlainText.MediaType) return null;
 
                 try
                 {
                     return await artificialIntelligenceExtension.AnalyzeAsync(
                         new AnalysisRequest
                         {
-                            Text = _lazySerializedContent.Value
+                            Text = _lazySerializedContent.Value,
+                            MessageId = Message.Id,
+                            UserIdentity = userIdentity.ToString(),
                         },
                         cancellationToken);
                 }
@@ -63,14 +73,14 @@ namespace Take.Blip.Builder
                     return envelopeSerializer.Serialize(Message);
                 }
 
-                return null;                
+                return null;
             });
         }
 
         public Message Message { get; }
-        
+
         public Document Content => Message.Content;
-        
+
         public string SerializedContent => _lazySerializedContent.Value;
 
         public string SerializedMessage => _lazySerializedMessage.Value;
