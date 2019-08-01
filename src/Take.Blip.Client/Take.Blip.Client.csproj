@@ -25,12 +25,11 @@
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SmartFormat.NET" Version="2.1.0.2" />
-    <PackageReference Include="Takenet.Iris.Messaging" Version="19.27.443" />
-    <PackageReference Include="Takenet.Iris.Messaging.ArtificialIntelligence" Version="2.90.720" />
-    <PackageReference Include="Takenet.Iris.Messaging.Crm" Version="19.27.443" />
-    <PackageReference Include="Takenet.Iris.Messaging.Desk" Version="2.90.720" />
-    <PackageReference Include="Takenet.Iris.Messaging.Media" Version="19.27.443" />
-    <PackageReference Include="Takenet.Iris.Messaging.Portal" Version="2.90.720" />
+    <PackageReference Include="Takenet.Iris.Messaging" Version="19.31.446" />
+    <PackageReference Include="Takenet.Iris.Messaging.ArtificialIntelligence" Version="19.31.446" />
+    <PackageReference Include="Takenet.Iris.Messaging.Desk" Version="19.31.446" />
+    <PackageReference Include="Takenet.Iris.Messaging.Media" Version="19.31.446" />
+    <PackageReference Include="Takenet.Iris.Messaging.Portal" Version="19.31.446" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
