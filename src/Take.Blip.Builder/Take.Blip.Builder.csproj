@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Actions\CreateTicket" />
+  </ItemGroup>
+
 </Project>
