@@ -51,5 +51,10 @@
         /// Gets values from the SDK Application
         /// </summary>
         Application,
+        
+        /// <summary>
+        /// Get values from the current help desk ticket, if there is one.
+        /// </summary>
+        Ticket,
     }
 }
