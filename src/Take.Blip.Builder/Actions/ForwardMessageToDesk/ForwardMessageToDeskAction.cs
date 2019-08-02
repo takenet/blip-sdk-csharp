@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
@@ -30,6 +31,14 @@ namespace Take.Blip.Builder.Actions.ForwardMessageToDesk
                     null),
                 Content = context.Input.Content
             };
+
+            if (!string.IsNullOrWhiteSpace(settings.TicketId))
+            {
+                message.Metadata = new Dictionary<string, string>
+                {
+                    {"desk.ticketId", settings.TicketId}
+                };
+            }
             
             return _sender.SendMessageAsync(message, cancellationToken);
         }

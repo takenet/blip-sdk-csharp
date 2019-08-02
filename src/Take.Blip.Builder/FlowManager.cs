@@ -200,9 +200,11 @@ namespace Take.Blip.Builder
                                     await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
                                 }
 
-                                // Store the previous state and determine the next
-                                await _stateManager.SetPreviousStateIdAsync(context, state.Id, cancellationToken);
+                                var previousStateId = state.Id;
+                                // Determine the next state
                                 state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
+                                // Store the previous state
+                                await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
 
                                 // Create trace instances, if required
                                 (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
