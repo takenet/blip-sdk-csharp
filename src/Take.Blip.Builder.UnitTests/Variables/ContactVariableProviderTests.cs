@@ -79,6 +79,23 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Asset
             actual.ShouldBe(Contact.Name);
         }
+        
+        [Fact]
+        public async Task GetExtrasPropertyShouldReturnsValue()
+        {
+            // Arrange
+            Contact.Extras = new Dictionary<string, string>()
+            {
+                ["extra1"] = "value1"
+            };
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("extras.extra1", Context, CancellationToken);
+
+            // Asset
+            actual.ShouldBe(Contact.Extras["extra1"]);
+        }
 
         [Fact]
         public async Task GetNameWhenContactDoesNotExistsShouldReturnNull()
