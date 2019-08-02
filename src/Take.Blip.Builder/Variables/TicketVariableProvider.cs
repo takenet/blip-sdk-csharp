@@ -11,7 +11,7 @@ namespace Take.Blip.Builder.Variables
         private readonly IHelpDeskExtension _helpDeskExtension;
 
         public TicketVariableProvider(IHelpDeskExtension helpDeskExtension)
-            : base(VariableSource.Ticket)
+            : base(VariableSource.Ticket, ContextExtensions.TICKET_KEY)
         {
             _helpDeskExtension = helpDeskExtension;
         }

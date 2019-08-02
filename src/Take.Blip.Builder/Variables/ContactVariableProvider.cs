@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Variables
         private readonly IContactExtension _contactExtension;
 
         public ContactVariableProvider(IContactExtension contactExtension)
-            : base(VariableSource.Contact)
+            : base(VariableSource.Contact, ContextExtensions.CONTACT_KEY)
         {
             _contactExtension = contactExtension;
         }

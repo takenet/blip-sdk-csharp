@@ -9,18 +9,18 @@ using Lime.Protocol.Network;
 namespace Take.Blip.Builder.Variables
 {
     /// <summary>
-    /// Defines a base provider that can retrieve and cache variables for a specific user.
+    /// Defines a base provider that can retrieve variables for a specific user.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class UserVariableProviderBase<T> : IVariableProvider
     {
         private readonly ConcurrentDictionary<string, PropertyInfo> _propertyCacheDictionary;
-        private readonly string _contextCacheKey;
+        private readonly string _inputContextKey;
 
-        protected UserVariableProviderBase(VariableSource source)
+        protected UserVariableProviderBase(VariableSource source, string inputContextKey)
         {
             Source = source;
-            _contextCacheKey = source.ToString().ToLowerInvariant();
+            _inputContextKey = inputContextKey;
             _propertyCacheDictionary = new ConcurrentDictionary<string, PropertyInfo>();
         }
 
@@ -31,11 +31,11 @@ namespace Take.Blip.Builder.Variables
             T item;
             try
             {
-                item = context.GetValue<T>(_contextCacheKey);
+                item = context.GetValue<T>(_inputContextKey);
                 if (item == null)
                 {
                     item = await GetAsync(context.UserIdentity, cancellationToken);
-                    context.SetValue(_contextCacheKey, item);
+                    context.SetValue(_inputContextKey, item);
                 }
 
                 if (item == null) return null;
@@ -44,7 +44,7 @@ namespace Take.Blip.Builder.Variables
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
-                context.SetValue<T>(_contextCacheKey, default);
+                context.RemoveValue(_inputContextKey);
                 return null;
             }
         }

@@ -8,8 +8,8 @@ namespace Take.Blip.Builder
 {
     public static class ContextExtensions
     {
-        private const string CONTACT_KEY = "contact";
-        private const string TICKET_KEY = "ticket";
+        public const string CONTACT_KEY = "contact";
+        public const string TICKET_KEY = "ticket";
 
         public static Contact GetContact(this IContext context) 
             => GetValue<Contact>(context, CONTACT_KEY);

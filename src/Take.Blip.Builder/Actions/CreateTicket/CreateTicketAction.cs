@@ -14,15 +14,15 @@ namespace Take.Blip.Builder.Actions.CreateTicket
             _helpDeskExtension = helpDeskExtension;
         }
 
-        public override Task ExecuteAsync(IContext context, CreateTicketSettings settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(IContext context, CreateTicketSettings settings, CancellationToken cancellationToken)
         {
             if (settings.CustomerIdentity == null)
             {
                 settings.CustomerIdentity = context.UserIdentity;
             }
-            
-            
-            throw new System.NotImplementedException();
+
+            var ticket = await _helpDeskExtension.CreateTicketAsync(settings, cancellationToken);
+            context.SetTicket(ticket);
         }
     }
 }
