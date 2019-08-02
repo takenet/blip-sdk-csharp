@@ -16,6 +16,7 @@ using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.EventTracker;
+using Take.Blip.Client.Extensions.HelpDesk;
 using Take.Blip.Client.Extensions.Tunnel;
 
 #pragma warning disable 4014
@@ -31,6 +32,7 @@ namespace Take.Blip.Builder.UnitTests
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
             BroadcastExtension = Substitute.For<IBroadcastExtension>();
             ContactExtension = Substitute.For<IContactExtension>();
+            HelpDeskExtension = Substitute.For<IHelpDeskExtension>();
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
@@ -90,6 +92,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContactExtension ContactExtension { get; set; }
         
+        public IHelpDeskExtension HelpDeskExtension { get; set; }
+        
         public IOwnerCallerContactMap OwnerCallerContactMap { get; set; }
 
         public ISender Sender { get; set; }
@@ -118,6 +122,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(EventTrackExtension);
             container.RegisterSingleton(BroadcastExtension);
             container.RegisterSingleton(ContactExtension);
+            container.RegisterSingleton(HelpDeskExtension);
             container.RegisterSingleton(OwnerCallerContactMap);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
