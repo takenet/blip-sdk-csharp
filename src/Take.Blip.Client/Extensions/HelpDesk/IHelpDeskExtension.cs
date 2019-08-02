@@ -31,6 +31,14 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         Task<Ticket> CreateTicketAsync(Identity customerIdentity, Document context, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Create a ticket.
+        /// </summary>
+        /// <param name="ticket"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Ticket> CreateTicketAsync(Ticket ticket, CancellationToken cancellationToken);
+        
+        /// <summary>
         /// Close ticket as a user
         /// </summary>
         /// <param name="ticketId">The Ticket ID to be closed</param>
