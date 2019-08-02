@@ -41,6 +41,7 @@ namespace Take.Blip.Builder.UnitTests
             container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
             container.RegisterSingleton(ContactExtension);
+            container.RegisterSingleton(HelpDeskExtension);
             container.RegisterSingleton(TunnelExtension);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(OwnerCallerContactMap);

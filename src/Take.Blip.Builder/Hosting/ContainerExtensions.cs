@@ -6,6 +6,7 @@ using SimpleInjector;
 using StackExchange.Redis;
 using System;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.CreateTicket;
 using Take.Blip.Builder.Actions.ExecuteScript;
 using Take.Blip.Builder.Actions.ForwardMessageToDesk;
 using Take.Blip.Builder.Actions.ManageList;
@@ -79,6 +80,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(SetBucketAction),
                     typeof(RedirectAction),
                     typeof(ForwardMessageToDeskAction),
+                    typeof(CreateTicketAction),
                 });
 
             return container;
@@ -146,6 +148,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(RandomVariableProvider),
                     typeof(StateVariableProvider),
                     typeof(TunnelVariableProvider),
+                    typeof(TicketVariableProvider),
                 });
 
             return container;
