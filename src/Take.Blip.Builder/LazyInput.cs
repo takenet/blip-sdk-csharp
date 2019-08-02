@@ -56,7 +56,8 @@ namespace Take.Blip.Builder
                         new AnalysisRequest
                         {
                             Text = _lazySerializedContent.Value,
-                            Extras = new Dictionary<string, string> {
+                            Extras = new Dictionary<string, string>
+                            {
                                 ["MessageId"] = Message.Id,
                                 ["UserIdentity"] = userIdentity.ToString()
                             }
