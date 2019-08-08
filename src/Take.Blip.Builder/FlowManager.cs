@@ -180,8 +180,7 @@ namespace Take.Blip.Builder
                                     if (state.Input.Validation.Error != null)
                                     {
                                         // Send the validation error message
-                                        await _sender.SendMessageAsync(state.Input.Validation.Error, userIdentity.ToNode(),
-                                            linkedCts.Token);
+                                        await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
                                     }
 
                                     break;
