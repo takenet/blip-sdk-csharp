@@ -40,8 +40,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         private IDocumentSerializer DocumentSerializer { get; }
 
-
-        
         private SendMessageFromHttpAction GetTarget()
         {
             return new SendMessageFromHttpAction(Sender, HttpClient, DocumentSerializer);

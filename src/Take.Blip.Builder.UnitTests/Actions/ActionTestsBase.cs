@@ -11,12 +11,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
     {
         public ActionTestsBase()
         {
+            Flow = new Flow();
             Context = Substitute.For<IContext>();
+            Context.Flow.Returns(Flow);
             From = new Node(Guid.NewGuid().ToString(), "msging.net", "");
+            To = new Node("application", "msging.net", "");
             UserIdentity = From.ToIdentity();
+            OwnerIdentity = To.ToIdentity();
             Message = new Message()
             {
-                From = From
+                From = From,
+                To = To
             };
             Input = new LazyInput(
                 Message,
@@ -27,16 +32,24 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 null,
                 CancellationToken);
             Context.Input.Returns(Input);
+            Context.OwnerIdentity.Returns(OwnerIdentity);
+            Context.UserIdentity.Returns(UserIdentity);
         }
 
         public IContext Context { get; }
 
+        public Flow Flow { get; }
+
         public Node From { get; }
 
+        public Node To { get; }
+        
         public Identity UserIdentity { get; }
 
-        public Message Message { get; set; }
+        public Identity OwnerIdentity { get; }
         
-        public LazyInput Input { get; set; }
+        public Message Message { get; }
+        
+        public LazyInput Input { get; }
     }
 }
