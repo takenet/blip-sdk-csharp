@@ -119,15 +119,15 @@ namespace Take.Blip.Builder.Models
             }
         }
 
-        public static Func<string, bool> ToUnaryDelegate (this ConditionComparison conditionComparison)
+        public static Func<string, bool> ToUnaryDelegate(this ConditionComparison conditionComparison)
         {
             switch (conditionComparison)
             {
                 case ConditionComparison.Exists:
-                    return (v) => string.IsNullOrEmpty(v) == false;
+                    return (v) => !string.IsNullOrEmpty(v);
 
                 case ConditionComparison.NotExists:
-                    return (v) => string.IsNullOrEmpty(v);
+                    return string.IsNullOrEmpty;
                 
                 case ConditionComparison.Equals:
                 case ConditionComparison.NotEquals:
@@ -140,7 +140,7 @@ namespace Take.Blip.Builder.Models
                 case ConditionComparison.LessThan:
                 case ConditionComparison.GreaterThanOrEquals:
                 case ConditionComparison.LessThanOrEquals:
-                    throw new ArgumentException("Not unary comparison condition: ", nameof(conditionComparison));
+                    throw new ArgumentException("The provided value is not an unary comparison", nameof(conditionComparison));
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(conditionComparison));
@@ -187,7 +187,7 @@ namespace Take.Blip.Builder.Models
 
                 case ConditionComparison.Exists:
                 case ConditionComparison.NotExists:
-                    throw new ArgumentException("Not binary comparison condition: ", nameof(conditionComparison));
+                    throw new ArgumentException("The provided value is not a binary comparison", nameof(conditionComparison));
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(conditionComparison));
