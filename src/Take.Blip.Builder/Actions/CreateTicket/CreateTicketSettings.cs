@@ -6,6 +6,8 @@ namespace Take.Blip.Builder.Actions.CreateTicket
 {
     public class CreateTicketSettings : Ticket, IValidable
     {
+        public string Variable { get; set; }
+        
         public void Validate()
         {
 
