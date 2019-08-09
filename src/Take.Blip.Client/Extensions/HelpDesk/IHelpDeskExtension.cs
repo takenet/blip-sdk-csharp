@@ -48,6 +48,15 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         /// Get user open ticket if any
         /// </summary>
         /// <param name="customerIdentity">The customer identity</param>
+        [Obsolete("Use 'GetCustomerTicketAsync' instead")]
         Task<Ticket> GetUserOpenTicketsAsync(Identity customerIdentity, CancellationToken cancellationToken);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerIdentity"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Ticket> GetCustomerActiveTicketAsync(Identity customerIdentity, CancellationToken cancellationToken);
     }
 }

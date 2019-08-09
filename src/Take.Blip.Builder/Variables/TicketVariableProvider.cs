@@ -17,6 +17,6 @@ namespace Take.Blip.Builder.Variables
         }
 
         protected override Task<Ticket> GetAsync(Identity userIdentity, CancellationToken cancellationToken) 
-            => _helpDeskExtension.GetUserOpenTicketsAsync(userIdentity, cancellationToken);
+            => _helpDeskExtension.GetCustomerActiveTicketAsync(userIdentity, cancellationToken);
     }
 }
