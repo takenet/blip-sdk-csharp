@@ -1,4 +1,5 @@
 ﻿using System;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
@@ -17,7 +18,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Message = new Message()
             {
                 From = From,
-                To = To
+                To = To,
+                Content = new PlainText()
+                {
+                    Text = "Hello BLiP"
+                }
             };
             Input = new LazyInput(
                 Message,
