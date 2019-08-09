@@ -14,6 +14,7 @@ using Take.Blip.Builder.Actions.MergeContact;
 using Take.Blip.Builder.Actions.ProcessCommand;
 using Take.Blip.Builder.Actions.ProcessHttp;
 using Take.Blip.Builder.Actions.Redirect;
+using Take.Blip.Builder.Actions.RemoveVariable;
 using Take.Blip.Builder.Actions.SendCommand;
 using Take.Blip.Builder.Actions.SendMessage;
 using Take.Blip.Builder.Actions.SendMessageFromHttp;
@@ -81,6 +82,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(RedirectAction),
                     typeof(ForwardMessageToDeskAction),
                     typeof(CreateTicketAction),
+                    typeof(DeleteVariableAction),
                 });
 
             return container;
