@@ -22,7 +22,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             DocumentSerializer = new DocumentSerializer(DocumentTypeResolver);
         }
 
-        public ISender Sender { get; set; }
+        public ISender Sender { get; }
 
         private IDocumentTypeResolver DocumentTypeResolver { get; }
 
