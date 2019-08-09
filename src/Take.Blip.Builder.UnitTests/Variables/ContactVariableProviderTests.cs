@@ -18,12 +18,11 @@ using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Variables
 {
-    public class ContactVariableProviderTests : CancellationTokenTestsBase
+    public class ContactVariableProviderTests : ContextTestsBase
     {
         public ContactVariableProviderTests()
         {
             ContactExtension = Substitute.For<IContactExtension>();
-            Context = Substitute.For<IContext>();
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
             Application = Substitute.For<Application>();
@@ -49,8 +48,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public IContactExtension ContactExtension { get; }
         
         public IContactExtension CacheContactExtensionDecorator { get; }
-        
-        public IContext Context { get; }
         
         public ILogger Logger { get; }
         

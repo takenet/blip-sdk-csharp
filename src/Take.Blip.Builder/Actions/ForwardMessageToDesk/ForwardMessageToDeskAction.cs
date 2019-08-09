@@ -4,9 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Take.Blip.Client;
-using Take.Blip.Client.Activation;
-using Take.Blip.Client.Extensions.HelpDesk;
-using Takenet.Iris.Messaging.Resources;
 using static Take.Blip.Client.Extensions.HelpDesk.HelpDeskExtension;
 
 namespace Take.Blip.Builder.Actions.ForwardMessageToDesk

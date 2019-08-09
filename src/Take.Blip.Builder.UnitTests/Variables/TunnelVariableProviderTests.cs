@@ -15,12 +15,11 @@ using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Variables
 {
-    public class TunnelVariableProviderTests : CancellationTokenTestsBase
+    public class TunnelVariableProviderTests : ContextTestsBase
     {
         public TunnelVariableProviderTests()
         {
             TunnelExtension = Substitute.For<ITunnelExtension>();
-            Context = Substitute.For<IContext>();
             BuilderConfiguration = new BuilderConfiguration();
             Message = new Message();
             UserIdentity = new Identity("user", "msging.net");
@@ -47,8 +46,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
         }
 
         public ITunnelExtension TunnelExtension { get; }
-        
-        public IContext Context { get; }
         
         public LazyInput LazyInput { get; }
 
