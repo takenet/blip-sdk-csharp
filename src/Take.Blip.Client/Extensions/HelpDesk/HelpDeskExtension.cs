@@ -110,5 +110,21 @@ namespace Take.Blip.Client.Extensions.HelpDesk
             var ticketCollection = result.Resource as DocumentCollection;
             return ticketCollection?.Items?.FirstOrDefault() as Ticket;
         }
+
+        public async Task<Ticket> GetCustomerActiveTicketAsync(Identity customerIdentity, CancellationToken cancellationToken)
+        {
+            var openTicketCommand = new Command
+            {
+                Id = EnvelopeId.NewId(),
+                To = _deskNode,
+                Method = CommandMethod.Get,
+                Uri = new LimeUri($"/tickets?$filter={Uri.EscapeDataString($"customerIdentity eq '{customerIdentity}' and (status eq 'Open' or status eq 'Waiting' or status eq 'Assigned')")}"),
+            };
+            var result = await _sender.ProcessCommandAsync(openTicketCommand, cancellationToken);
+            EnsureSuccess(result);
+
+            var ticketCollection = result.Resource as DocumentCollection;
+            return ticketCollection?.Items?.FirstOrDefault() as Ticket;        
+        }
     }
 }
