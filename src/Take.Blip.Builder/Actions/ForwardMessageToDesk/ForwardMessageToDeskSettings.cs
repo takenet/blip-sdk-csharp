@@ -9,7 +9,7 @@ namespace Take.Blip.Builder.Actions.ForwardMessageToDesk
         public string DeskDomain { get; set; }
 
         public string TicketId { get; set; }
-        
+
         public void Validate()
         {
             
