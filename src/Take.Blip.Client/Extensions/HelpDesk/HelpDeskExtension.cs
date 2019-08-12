@@ -57,7 +57,7 @@ namespace Take.Blip.Client.Extensions.HelpDesk
 
             var result = await _sender.ProcessCommandAsync(newTicketCommand, cancellationToken);
             EnsureSuccess(result);
-            return result.Resource as Ticket;
+            return (Ticket)result.Resource;
         }
 
         public async Task<Ticket> CreateTicketAsync(Ticket ticket, CancellationToken cancellationToken)
@@ -73,7 +73,7 @@ namespace Take.Blip.Client.Extensions.HelpDesk
 
             var result = await _sender.ProcessCommandAsync(newTicketCommand, cancellationToken);
             EnsureSuccess(result);
-            return result.Resource as Ticket;
+            return (Ticket)result.Resource;
         }
 
         public async Task CloseTicketAsUser(string ticketId, CancellationToken cancellationToken)
