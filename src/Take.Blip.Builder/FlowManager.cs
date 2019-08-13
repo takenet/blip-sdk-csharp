@@ -125,12 +125,7 @@ namespace Take.Blip.Builder
                 ? Stopwatch.StartNew()
                 : null;
 
-            // Sets the owner context if required
-            IDisposable ownerContext = null;
-            if (ownerIdentity != _applicationIdentity)
-            {
-                ownerContext = OwnerContext.Create(ownerIdentity);
-            }
+            var ownerContext = OwnerContext.Create(ownerIdentity);
             
             try
             {
@@ -275,8 +270,6 @@ namespace Take.Blip.Builder
                     inputTrace.Error = ex.ToString();
                 }
                 
-                ownerContext?.Dispose();
-
                 throw;
             }
             finally
@@ -285,6 +278,8 @@ namespace Take.Blip.Builder
                 {
                     await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
                 }
+
+                ownerContext.Dispose();
             }
         }
 
