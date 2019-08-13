@@ -1,4 +1,6 @@
+using System;
 using System.Threading;
+using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using NSubstitute;
@@ -33,6 +35,7 @@ namespace Take.Blip.Builder.UnitTests
             BroadcastExtension = Substitute.For<IBroadcastExtension>();
             ContactExtension = Substitute.For<IContactExtension>();
             HelpDeskExtension = Substitute.For<IHelpDeskExtension>();
+            TunnelExtension = Substitute.For<ITunnelExtension>();
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
@@ -62,9 +65,9 @@ namespace Take.Blip.Builder.UnitTests
                 Substitute.For<IEnvelopeSerializer>(),
                 ArtificialIntelligenceExtension,
                 CancellationToken); 
-            Context.Input.Returns(Input);            
-            
-            TraceProcessor = Substitute.For<ITraceProcessor>();            
+            Context.Input.Returns(Input);
+
+            TraceProcessor = Substitute.For<ITraceProcessor>();
             OwnerCallerContactMap = new OwnerCallerContactMap();
             UserOwnerResolver = Substitute.For<IUserOwnerResolver>();
             UserOwnerResolver
@@ -92,8 +95,10 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContactExtension ContactExtension { get; set; }
         
-        public IHelpDeskExtension HelpDeskExtension { get; set; }
-        
+        public IHelpDeskExtension HelpDeskExtension { get; set; }        
+
+        public ITunnelExtension TunnelExtension { get; set; }
+
         public IOwnerCallerContactMap OwnerCallerContactMap { get; set; }
 
         public ISender Sender { get; set; }
@@ -123,6 +128,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(BroadcastExtension);
             container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(HelpDeskExtension);
+            container.RegisterSingleton(TunnelExtension);
             container.RegisterSingleton(OwnerCallerContactMap);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
@@ -137,6 +143,13 @@ namespace Take.Blip.Builder.UnitTests
         public IFlowManager GetTarget()
         {
             var container = CreateContainer();
+            return container.GetInstance<IFlowManager>();
+        }
+
+        public IFlowManager GetTarget(Action<Container> additionalSetup)
+        {
+            var container = CreateContainer();
+            additionalSetup(container);
             return container.GetInstance<IFlowManager>();
         }
     }
