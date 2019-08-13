@@ -1,15 +1,17 @@
 using Lime.Messaging.Contents;
+using Lime.Messaging.Resources;
 using Lime.Protocol;
+using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Shouldly;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Lime.Protocol.Serialization;
-using Shouldly;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Storage;
+using Take.Blip.Builder.Storage.Memory;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
@@ -324,6 +326,83 @@ namespace Take.Blip.Builder.UnitTests
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
             Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
             StateManager.Received(0).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        [Trait("Category", "Integration")]
+        public async Task FlowWithContactVariableReplacementShouldGetContact()
+        {
+            // Arrange
+            var input = new PlainText { Text = "Hi!" };
+            var contactName = "Bob";
+            var messageType = "text/plain";
+            ContactExtension
+                .GetAsync(UserIdentity, Arg.Any<CancellationToken>())
+                .Returns(new Contact { Identity = UserIdentity, Name = contactName });
+            Message.Content = input;
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "welcome"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "welcome",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType },
+                                    {"content", "Hello, {{contact.name}}"}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget(container =>
+            {
+                OwnerCallerContactMap = Substitute.ForPartsOf<OwnerCallerContactMap>();
+                container.RegisterSingleton(OwnerCallerContactMap);
+                container.RegisterSingleton<IContextProvider, ContextProvider>();
+                container.RegisterSingleton<IServiceProvider>(container);
+            });
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            OwnerCallerContactMap
+                .Received()
+                .GetValueOrDefaultAsync(
+                    Arg.Is<OwnerCaller>(v => v.Owner != null && v.Caller == Message.From.ToIdentity()),
+                    Arg.Any<CancellationToken>());
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == $"Hello, {contactName}"),
+                    Arg.Any<CancellationToken>());
         }
 
         [Fact]
