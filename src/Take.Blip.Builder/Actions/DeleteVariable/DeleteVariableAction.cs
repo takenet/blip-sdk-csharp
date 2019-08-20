@@ -1,12 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Take.Blip.Builder.Actions.RemoveVariable
+namespace Take.Blip.Builder.Actions.DeleteVariable
 {
     public class DeleteVariableAction : ActionBase<DeleteVariableSettings>
     {
         public DeleteVariableAction() 
-            : base(nameof(RemoveVariable))
+            : base(nameof(DeleteVariable))
         {
         }
 
