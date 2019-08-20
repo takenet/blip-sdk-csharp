@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Take.Blip.Client;
+using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Builder
 {
@@ -11,10 +12,12 @@ namespace Take.Blip.Builder
     public sealed class OwnerSenderDecorator : ISender
     {
         private readonly ISender _sender;
+        private readonly Identity _applicationIdentity;
 
-        public OwnerSenderDecorator(ISender sender)
+        public OwnerSenderDecorator(ISender sender, Application application)
         {
             _sender = sender;
+            _applicationIdentity = application.Identity;
         }
 
         public Task SendMessageAsync(Message message, CancellationToken cancellationToken)
@@ -37,12 +40,13 @@ namespace Take.Blip.Builder
             return _sender.ProcessCommandAsync(Intercept(requestCommand), cancellationToken);
         }
 
-        private static Command Intercept(Command command)
+        private Command Intercept(Command command)
         {
             if (command.From == null)
             {
                 var owner = OwnerContext.Owner;
-                if (owner != null)
+                if (owner != null &&
+                    owner != _applicationIdentity)
                 {
                     var ownerCommand = command.ShallowCopy();
                     ownerCommand.From = owner.ToNode();
