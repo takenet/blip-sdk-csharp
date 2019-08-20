@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Take.Blip.Builder.Models;
 
-namespace Take.Blip.Builder.Actions.RemoveVariable
+namespace Take.Blip.Builder.Actions.DeleteVariable
 {
     public class DeleteVariableSettings : IValidable
     {
@@ -11,7 +11,7 @@ namespace Take.Blip.Builder.Actions.RemoveVariable
         {
             if (Variable == null)
             {
-                throw new ValidationException($"The '{nameof(Variable)}' setting value is required for '{nameof(RemoveVariable)}' action");
+                throw new ValidationException($"The '{nameof(Variable)}' setting value is required for '{nameof(DeleteVariable)}' action");
             }
         }
     }

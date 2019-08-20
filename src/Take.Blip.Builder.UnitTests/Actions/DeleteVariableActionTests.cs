@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using NSubstitute;
-using Take.Blip.Builder.Actions.RemoveVariable;
+using Take.Blip.Builder.Actions.DeleteVariable;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions

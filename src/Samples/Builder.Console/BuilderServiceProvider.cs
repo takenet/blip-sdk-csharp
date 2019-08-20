@@ -1,6 +1,8 @@
 ﻿using System;
+using Serilog;
 using SimpleInjector;
 using Take.Blip.Builder.Hosting;
+using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 
 namespace Builder.Console
@@ -11,7 +13,8 @@ namespace Builder.Console
         {
             Options.AllowOverridingRegistrations = true;
             this.RegisterBuilder();
-            this.RegisterSingleton<IConfiguration, BuilderConfiguration>();
+            RegisterSingleton<IConfiguration, BuilderConfiguration>();
+            RegisterSingleton<ILogger>(new LoggerConfiguration().WriteTo.Trace().CreateLogger());
         }
 
         public void RegisterService(Type serviceType, object instance) => RegisterSingleton(serviceType, instance);
