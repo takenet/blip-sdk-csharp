@@ -41,10 +41,11 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ContextExtension);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(OwnerCallerContactMap);
+            container.RegisterSingleton(Application);
 
             return new ExtensionContext(
                 User,
-                Application,
+                ApplicationIdentity,
                 Input,
                 Flow,
                 container.GetAllInstances<IVariableProvider>(),

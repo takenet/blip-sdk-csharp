@@ -15,6 +15,7 @@ using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client;
+using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.HelpDesk;
@@ -43,12 +44,17 @@ namespace Take.Blip.Builder.UnitTests
                 Configuration = new Dictionary<string, string>()
             };
             User = "user@msging.net";
-            Application = "application@msging.net";
+            Application = new Application()
+            {
+                Identifier = "application",
+                Domain = "msging.net",
+                Instance = "default"
+            };
             Input = new LazyInput(
                 new Message()
                 { 
                     From = User.ToNode(),
-                    To = Application.ToNode(),
+                    To = ApplicationIdentity.ToNode(),
                     Content = new PlainText()
                     {
                         Text = "Hello world!"
@@ -80,8 +86,10 @@ namespace Take.Blip.Builder.UnitTests
         public IOwnerCallerContactMap OwnerCallerContactMap { get; }
 
         public Identity User { get; set; }
+        
+        public Application Application { get; }
 
-        public Identity Application { get; set; }
+        public Identity ApplicationIdentity => Application.Identity;
 
         public LazyInput Input { get; set; }
 
