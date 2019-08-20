@@ -27,7 +27,7 @@ namespace Take.Blip.Builder.UnitTests
             OwnerCallerNameDocumentMap.TryAddAsync(
                 new OwnerCallerName()
                 {
-                    Owner = Application,
+                    Owner = ApplicationIdentity,
                     Caller = User,
                     Name = variableName.ToLowerInvariant()
                 },
@@ -45,10 +45,11 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(TunnelExtension);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(OwnerCallerContactMap);
+            container.RegisterSingleton(Application);
 
             return new StorageContext(
                 User,
-                Application,
+                ApplicationIdentity,
                 Input,
                 Flow,
                 container.GetAllInstances<IVariableProvider>(),

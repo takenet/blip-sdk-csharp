@@ -67,7 +67,7 @@ namespace Builder.Console
 
             // Clone the notification and change the routing information
             var deskNotification = notification.ShallowCopy();
-            deskNotification.From = (ticket.RoutingOwnerIdentity ?? ticket.OwnerIdentity).ToNode();
+            deskNotification.From = null;
 
             if (notification.From.Domain.Equals(HelpDeskExtension.DEFAULT_DESK_DOMAIN, StringComparison.OrdinalIgnoreCase))
             {
