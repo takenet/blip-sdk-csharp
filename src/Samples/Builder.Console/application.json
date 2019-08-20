@@ -1,303 +1,527 @@
 ﻿{
-  "identifier": "blipsdkdemo",
-  "accessKey": "YVQ1NWxnODE0NURnZ3VqY2RSVjI=",
-  "hostName": "hmg.msging.net",
-  "port": 55321,
+  "identifier": "desktests",
+  "accessKey": "",
+  "hostName": "hmg-tcp.msging.net",
+  "port": 443,
   "messageReceivers": [
     {
       "type": "BuilderMessageReceiver"
     }
   ],
+  "notificationReceivers": [
+    {
+      "type": "BuilderDeskNotificationReceiver"
+    }
+  ],
   "serviceProviderType": "BuilderServiceProvider",
-  "settingsType": "BuilderSettings",
   "settings": {
     "flow": {
-      "id": "0",
-      "configuration": {
-        "builder:useTunnelOwnerContext": "true"
-      },
+      "id": "dc23b871-b1d1-42b3-b687-c2b3c12dbf79",
       "states": [
         {
-          "id": "0.0",
+          "id": "onboarding",
           "root": true,
-          "input": {},
+          "name": "Start",
+          "inputActions": [],
+          "input": {
+            "bypass": false
+          },
+          "outputActions": [],
+          "outputs": [
+            {
+              "stateId": "welcome",
+              "conditions": [
+                {
+                  "source": "input",
+                  "comparison": "matches",
+                  "values": [
+                    ".*"
+                  ]
+                }
+              ]
+            },
+            {
+              "stateId": "fallback"
+            }
+          ]
+        },
+        {
+          "id": "fallback",
+          "name": "Exceptions",
+          "inputActions": [],
+          "input": {
+            "bypass": true
+          },
+          "outputActions": [],
+          "outputs": [
+            {
+              "stateId": "onboarding"
+            }
+          ]
+        },
+        {
+          "id": "welcome",
+          "name": "Welcome",
+          "inputActions": [
+            {
+              "type": "SendMessage",
+              "settings": {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "type": "application/vnd.lime.chatstate+json",
+                "content": {
+                  "state": "composing",
+                  "interval": 1000
+                },
+                "metadata": {
+                  "#stateName": "{{state.name}}",
+                  "#stateId": "{{state.id}}",
+                  "#messageId": "{{input.message@id}}"
+                }
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "type": "text/plain",
+                "content": "Hi, I'll put in touch with an human.",
+                "metadata": {
+                  "#stateName": "{{state.name}}",
+                  "#stateId": "{{state.id}}",
+                  "#messageId": "{{input.message@id}}"
+                }
+              }
+            }
+          ],
+          "input": {
+            "bypass": true
+          },
+          "outputActions": [],
+          "outputs": [
+            {
+              "stateId": "desk:9e2bce90-a3bf-4a9f-90e2-298ca3d04154",
+              "conditions": [
+                {
+                  "source": "input",
+                  "comparison": "exists",
+                  "values": []
+                }
+              ]
+            },
+            {
+              "stateId": "fallback"
+            }
+          ]
+        },
+        {
+          "id": "7293d179-b772-47b1-bb74-3e1dd0876c1b",
+          "root": false,
+          "name": "Ticket closed",
+          "inputActions": [
+            {
+              "type": "SendMessage",
+              "settings": {
+                "id": "36ff45bc-fc99-4d8a-8cf3-1713713a6ca0",
+                "type": "application/vnd.lime.chatstate+json",
+                "content": {
+                  "state": "composing",
+                  "interval": 1000
+                },
+                "metadata": {
+                  "#stateName": "{{state.name}}",
+                  "#stateId": "{{state.id}}",
+                  "#messageId": "{{input.message@id}}"
+                }
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "id": "43a88dba-23e4-4e59-8b9a-1216195d8f3b",
+                "type": "text/plain",
+                "content": "Ticket closed.",
+                "metadata": {
+                  "#stateName": "{{state.name}}",
+                  "#stateId": "{{state.id}}",
+                  "#messageId": "{{input.message@id}}"
+                }
+              }
+            }
+          ],
+          "input": {
+            "bypass": true
+          },
+          "outputActions": [],
+          "outputs": [
+            {
+              "stateId": "onboarding"
+            }
+          ]
+        },
+        {
+          "id": "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2",
+          "root": false,
+          "name": "Atendimento humano",
+          "inputActions": [
+            {
+              "type": "ExecuteScript",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "state.previous.id",
+                  "comparison": "notEquals",
+                  "values": [
+                    "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2"
+                  ]
+                }
+              ],
+              "settings": {
+                "function": "run",
+                "source": "function run(identity) {\n return (identity !== undefined) ? encodeURIComponent(identity) : identity;\n}",
+                "inputVariables": [
+                  "input.message.fromidentity"
+                ],
+                "outputVariable": "helpDeskEncodedFromIdentity"
+              }
+            },
+            {
+              "type": "ProcessCommand",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "state.previous.id",
+                  "comparison": "notEquals",
+                  "values": [
+                    "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2"
+                  ]
+                }
+              ],
+              "settings": {
+                "from": "{{application.identifier}}@{{application.domain}}",
+                "to": "postmaster@desk.msging.net",
+                "method": "get",
+                "uri": "/tickets?$filter=customerIdentity%20eq%20%27{{helpDeskEncodedFromIdentity}}%27%20and%20%28status%20eq%20%27Open%27%20or%20status%20eq%20%27Waiting%27%20or%20status%20eq%20%27Assigned%27%29",
+                "metadata": {
+                  "server.shouldStore": true
+                },
+                "variable": "helpDeskGetOpenTicketCommandResponse"
+              }
+            },
+            {
+              "type": "ExecuteScript",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "state.previous.id",
+                  "comparison": "notEquals",
+                  "values": [
+                    "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2"
+                  ]
+                }
+              ],
+              "settings": {
+                "function": "run",
+                "source": "function run(commandResponse) {\n var response = JSON.parse(commandResponse)\n var ticketExists = (response && response.resource && response.resource.items && response.resource.items.length > 0);\n return ticketExists ? \"true\" : \"false\";\n}",
+                "inputVariables": [
+                  "helpDeskGetOpenTicketCommandResponse"
+                ],
+                "outputVariable": "helpDeskHasTicket"
+              }
+            },
+            {
+              "type": "ProcessCommand",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskHasTicket",
+                  "comparison": "notEquals",
+                  "values": [
+                    "true"
+                  ]
+                }
+              ],
+              "settings": {
+                "from": "{{application.identifier}}@{{application.domain}}",
+                "to": "postmaster@desk.msging.net",
+                "method": "set",
+                "uri": "/tickets/{{helpDeskEncodedFromIdentity}}",
+                "variable": "helpDeskOpenTicketCommandResponse",
+                "type": "text/plain",
+                "resource": "{{input.content}}",
+                "metadata": {
+                  "server.shouldStore": true
+                }
+              }
+            },
+            {
+              "type": "ExecuteScript",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskHasTicket",
+                  "comparison": "notEquals",
+                  "values": [
+                    "true"
+                  ]
+                }
+              ],
+              "settings": {
+                "function": "run",
+                "source": "function run(commandResponse) {\n var response = commandResponse ? JSON.parse(commandResponse) : {}\n var ticketExists = response && response.type === \"application/vnd.iris.ticket+json\" && response.resource \n return ticketExists ? \"true\" : \"false\";\n}",
+                "inputVariables": [
+                  "helpDeskOpenTicketCommandResponse"
+                ],
+                "outputVariable": "helpDeskHasTicket"
+              }
+            },
+            {
+              "type": "ForwardMessageToDesk",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskHasTicket",
+                  "comparison": "equals",
+                  "values": [
+                    "true"
+                  ]
+                }
+              ],
+              "settings": {}
+            }
+          ],
+          "input": {
+            "bypass": false,
+            "conditions": [
+              {
+                "source": "context",
+                "variable": "helpDeskHasTicket",
+                "comparison": "equals",
+                "values": [
+                  "true"
+                ]
+              }
+            ]
+          },
           "outputActions": [
             {
-              "type": "TrackEvent",
-              "settings": {
-                "category": "flow",
-                "action": "0.0",
-                "fireAndForget": "false"
-              }
-            },
-            {
               "type": "SetVariable",
-              "settings": {
-                "variable": "my-variable",
-                "value": "value0"
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "text/plain",
-                "content": "Olá ${contact.name}, eu sou o bot de ajuda do BLiP. 🤖\n\nEstou aqui para tirar suas dúvidas sobre a nossa plataforma.",
-                "metadata": {
-                  "#message.replaceVariables": "true"
-                }
-              }
-            }
-          ],
-          "outputs": [
-            {
-              "stateId": "1.0"
-            }
-          ]
-        },
-        {
-          "id": "1.0",
-          "inputActions": [
-            {
-              "type": "TrackEvent",
-              "settings": {
-                "category": "flow",
-                "action": "1.0",
-                "fireAndForget": "false"
-              }
-            },
-            {
-              "type": "SetVariable",
-              "settings": {
-                "variable": "my-variable",
-                "value": "value1"
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "application/vnd.chatstate+json",
-                "content": {
-                  "state":  "composing",
-                  "delay":  1000
-                }
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "application/vnd.lime.select+json",
-                "content": {
-                  "text": "Sobre qual dos assuntos abaixo ⬇  você quer conversar?",
-                  "scope": "immediate",
-                  "options": [
-                    {
-                      "text": "Criar chatbot",
-                      "type": "application/vnd.blip.builder-state",
-                      "value": "2"
-                    },
-                    {
-                      "text": "Dúvidas",
-                      "type": "application/vnd.blip.builder-state",
-                      "value": "3"
-                    },
-                    {
-                      "text": "Sugestões",
-                      "type": "application/vnd.blip.builder-state",
-                      "value": "4"
-                    }
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedAttendant",
+                    "ClosedClient"
                   ]
                 }
+              ],
+              "settings": {
+                "variable": "helpDeskHasTicket",
+                "value": "false"
               }
             }
           ],
-          "input": {},
           "outputs": [
             {
-              "stateId": "2.0",
               "conditions": [
-                { "values": [ "2" ] }
-              ]
-            },
-            {
-              "stateId": "3.0",
-              "conditions": [
-                { "values": [ "3" ] }
-              ]
-            },
-            {
-              "stateId": "4.0",
-              "conditions": [
-                { "values": [ "4" ] }
-              ]
-            },
-            {
-              "stateId": "1.0"
-            }
-          ]
-        },
-        {
-          "id": "2.0",
-          "inputActions": [
-            {
-              "type": "TrackEvent",
-              "settings": {
-                "category": "flow",
-                "action": "2.0",
-                "fireAndForget": "false"
-              }
-            },
-            {
-              "type": "SetVariable",
-              "settings": {
-                "variable": "my-variable",
-                "value": "value2"
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "application/vnd.chatstate+json",
-                "content": {
-                  "state":  "composing",
-                  "delay":  1000
-                }
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "application/vnd.lime.select+json",
-                "content": {
-                  "text": "Qual o seu nível de conhecimento em programação? 🤔",
-                  "scope": "immediate",
-                  "options": [
-                    {
-                      "text": "Pouca coisa 🙄",
-                      "type": "application/vnd.blip.builder-state",
-                      "value": "2.1"
-                    },
-                    {
-                      "text": "Sei o suﬁciente 🤓",
-                      "type": "application/vnd.blip.builder-state",
-                      "value": "2.2"
-                    }
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedAttendant"
                   ]
                 }
-              }
-            }
-          ],
-          "input": {},
-          "outputs": [
+              ],
+              "stateId": "7293d179-b772-47b1-bb74-3e1dd0876c1b"
+            },
             {
-              "stateId": "1.0"
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedClient"
+                  ]
+                }
+              ],
+              "stateId": "7293d179-b772-47b1-bb74-3e1dd0876c1b"
+            },
+            {
+              "stateId": "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2"
             }
           ]
         },
         {
-          "id": "3.0",
+          "id": "desk:9e2bce90-a3bf-4a9f-90e2-298ca3d04154",
+          "root": false,
+          "name": "Customer service",
           "inputActions": [
             {
-              "type": "TrackEvent",
-              "settings": {
-                "category": "flow",
-                "action": "3.0",
-                "fireAndForget": "false"
-              }
-            },
-            {
               "type": "SetVariable",
-              "settings": {
-                "variable": "my-variable",
-                "value": "value3"
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "application/vnd.chatstate+json",
-                "content": {
-                  "state":  "composing",
-                  "delay":  1000
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "state.previous.id",
+                  "comparison": "notEquals",
+                  "values": [
+                    "desk:9e2bce90-a3bf-4a9f-90e2-298ca3d04154"
+                  ]
                 }
+              ],
+              "settings": {
+                "variable": "helpDeskTicketId",
+                "value": "{{ticket.id}}"
               }
             },
             {
-              "type": "SendMessage",
+              "type": "CreateTicket",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskTicketId",
+                  "comparison": "notExists"
+                }
+              ],
               "settings": {
-                "type": "text/plain",
-                "content": "Qual a sua dúvida?"
+                "variable": "helpDeskTicketId"
+              }
+            },
+            {
+              "type": "ForwardMessageToDesk",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskTicketId",
+                  "comparison": "exists"
+                }
+              ],
+              "settings": {
+                "ticketId": "{{helpDeskTicketId}}"
               }
             }
           ],
-          "input": {},
-          "outputs": [
-            {
-              "stateId": "1.0"
-            }
-          ]
-        },
-        {
-          "id": "4.0",
-          "inputActions": [
-            {
-              "type": "TrackEvent",
-              "settings": {
-                "category": "flow",
-                "action": "4.0",
-                "fireAndForget": "false"
+          "input": {
+            "bypass": false,
+            "conditions": [
+              {
+                "source": "context",
+                "variable": "helpDeskTicketId",
+                "comparison": "exists"
               }
-            },
+            ]
+          },
+          "outputActions": [
             {
-              "type": "SetVariable",
-              "settings": {
-                "variable": "my-variable",
-                "value": "value4"
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "application/vnd.chatstate+json",
-                "content": {
-                  "state":  "composing",
-                  "delay":  1000
+              "type": "DeleteVariable",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedAttendant",
+                    "ClosedClient"
+                  ]
                 }
-              }
-            },
-            {
-              "type": "SendMessage",
+              ],
               "settings": {
-                "type": "text/plain",
-                "content": "Opa, sugestões são sempre bem vindas"
-
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "application/vnd.chatstate+json",
-                "content": {
-                  "state":  "composing",
-                  "delay":  1000
-                }
-              }
-            },
-            {
-              "type": "SendMessage",
-              "settings": {
-                "type": "text/plain",
-                "content": "Pode falar."
+                "variable": "helpDeskTicketId"
               }
             }
           ],
-          "input": {},
           "outputs": [
             {
-              "stateId": "1.0"
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedAttendant"
+                  ]
+                }
+              ],
+              "stateId": "7293d179-b772-47b1-bb74-3e1dd0876c1b"
+            },
+            {
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedClient"
+                  ]
+                }
+              ],
+              "stateId": "7293d179-b772-47b1-bb74-3e1dd0876c1b"
+            },
+            {
+              "stateId": "desk:9e2bce90-a3bf-4a9f-90e2-298ca3d04154"
             }
           ]
         }
-      ]
+      ],
+      "configuration": {
+        "builder:minimumIntentScore": "0.5",
+        "builder:stateTrack": "false",
+        "builder:processCommandsAsTunnelOwner": "true",
+        "builder:useTunnelOwnerContext": "true"
+      },
+      "inputActions": [],
+      "outputActions": []
     }
-  }
+  },
+  "settingsType": "BuilderSettings"
 }
