@@ -41,7 +41,7 @@ namespace Take.Blip.Client.Extensions.Context
             var requestCommand = CreateSetCommandRequest(
                 document,
                 uriPath, 
-                id: $"disposable:{EnvelopeId.NewId()}"
+                id: EnvelopeId.NewId()
                 );
 
             return ProcessCommandAsync(requestCommand, cancellationToken);
