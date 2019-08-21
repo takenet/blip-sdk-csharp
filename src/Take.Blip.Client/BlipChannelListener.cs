@@ -224,7 +224,7 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
-                using (LogContext.PushProperty(nameof(Message.Type), message.Type))
+                using (LogContext.PushProperty(nameof(Message.Type), message?.Type))
                 {
                     LogException(message, ex);
                 }
