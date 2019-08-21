@@ -229,7 +229,8 @@ namespace Take.Blip.Client
                     LogException(message, ex);
                 }
 
-                if (shouldNotify)
+                // Always notify failures
+                if (!string.IsNullOrWhiteSpace(message?.Id))
                 {
                     Reason reason;
                     if (ex is LimeException limeException)
