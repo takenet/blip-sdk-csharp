@@ -31,7 +31,6 @@ using Take.Blip.Client;
 using Take.Blip.Client.Extensions;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Elephant;
-using Take.Elephant.Sql;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -106,16 +105,7 @@ namespace Take.Blip.Builder.Hosting
         private static Container RegisterBuilderStorage(this Container container)
         {
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
-            container.RegisterSingleton<IOwnerCallerNameDocumentMap, Storage.Specialized.OwnerCallerNameDocumentMap>();
-            container.RegisterSingleton<ISourceOwnerCallerNameDocumentMap, Storage.Sql.OwnerCallerNameDocumentMap>();
-            container.RegisterSingleton<ICacheOwnerCallerNameDocumentMap, Storage.Redis.OwnerCallerNameDocumentMap>();
             container.RegisterSingleton<IOwnerCallerContactMap, Storage.Redis.OwnerCallerContactMap>();
-            container.RegisterSingleton<IDatabaseDriver>(() =>
-            {
-                var configuration = container.GetInstance<IConfiguration>();
-                var driverType = Type.GetType(configuration.SqlStorageDriverTypeName) ?? typeof(SqlDatabaseDriver);
-                return (IDatabaseDriver)container.GetInstance(driverType);
-            });
             container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
             container.RegisterSingleton<ISerializer<Contact>, JsonSerializer<Contact>>();
             container.RegisterSingleton<IConnectionMultiplexer>(() =>
