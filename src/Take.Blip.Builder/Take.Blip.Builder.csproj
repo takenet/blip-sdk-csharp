@@ -13,9 +13,6 @@
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.9.0" />
     <PackageReference Include="Take.Elephant.Redis" Version="0.6.221" />
-    <PackageReference Include="Take.Elephant.Specialized" Version="0.6.221" />
-    <PackageReference Include="Take.Elephant.Sql" Version="0.6.221" />
-    
   </ItemGroup>
 
   <ItemGroup>

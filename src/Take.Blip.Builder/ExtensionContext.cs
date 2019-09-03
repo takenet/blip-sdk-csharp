@@ -23,8 +23,7 @@ namespace Take.Blip.Builder
             LazyInput input,
             Flow flow,
             IEnumerable<IVariableProvider> variableProviders,
-            IContextExtension contextExtension
-            )
+            IContextExtension contextExtension)
             : base (user, application, input, flow, variableProviders)
         {
             _contextExtension = contextExtension;
