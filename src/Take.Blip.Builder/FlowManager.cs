@@ -358,6 +358,8 @@ namespace Take.Blip.Builder
                     }
                     catch (Exception ex)
                     {
+                        _logger.Error(ex, "Action '{ActionType}' failed with settings {@Settings}", stateAction.Type, stateAction.Settings);
+
                         if (actionTrace != null)
                         {
                             actionTrace.Error = ex.ToString();
@@ -414,6 +416,8 @@ namespace Take.Blip.Builder
                     }
                     catch (Exception ex)
                     {
+                        _logger.Error(ex, "Output condition failed with conditions {@Conditions}", output.Conditions);
+
                         if (outputTrace != null)
                         {
                             outputTrace.Error = ex.ToString();
