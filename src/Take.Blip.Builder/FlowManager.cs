@@ -224,7 +224,7 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    throw new BuilderException("Max state transitions reached");
+                                    throw new BuilderException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
                                 }
                             }
                             catch (Exception ex)
@@ -268,8 +268,15 @@ namespace Take.Blip.Builder
                 {
                     inputTrace.Error = ex.ToString();
                 }
-                
-                throw new BuilderException($"Error processing input '{message.Content}' for user '{userIdentity}' in state '{state?.Id}'", ex);
+
+                var builderException = ex is BuilderException be ? be :
+                    new BuilderException($"Error processing input '{message.Content}' for user '{userIdentity}' in state '{state?.Id}'", ex);
+
+                builderException.StateId = state.Id;
+                builderException.UserId = userIdentity;
+                builderException.MessageId = message.Id;
+
+                throw builderException;
             }
             finally
             {
@@ -427,7 +434,7 @@ namespace Take.Blip.Builder
 
                         throw new OutputProcessingException($"Failed to process output condition to state '{output.StateId}'", ex)
                         {
-                            StateId = output.StateId,
+                            OutputStateId = output.StateId,
                             OutputConditions = output.Conditions
                         };
                     }

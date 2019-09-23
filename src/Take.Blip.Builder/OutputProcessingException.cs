@@ -29,7 +29,7 @@ namespace Take.Blip.Builder
         {
         }
 
-        public string StateId { get; set; }
+        public string OutputStateId { get; set; }
 
         public Condition[] OutputConditions { get; set; }
     }
