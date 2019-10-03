@@ -27,5 +27,11 @@ namespace Take.Blip.Builder
         protected BuilderException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
+
+        public string MessageId { get; set; }
+
+        public string UserId { get; set; }
+
+        public string StateId { get; set; }
     }
 }
