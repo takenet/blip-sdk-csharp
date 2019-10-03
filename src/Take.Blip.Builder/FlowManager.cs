@@ -127,7 +127,8 @@ namespace Take.Blip.Builder
                 : null;
 
             var ownerContext = OwnerContext.Create(ownerIdentity);
-            
+
+            State state = default;
             try
             {
                 // Create a cancellation token
@@ -147,7 +148,7 @@ namespace Take.Blip.Builder
                         
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
-                        var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+                        state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // Calculate the number of state transitions
                         var transitions = 0;
@@ -164,90 +165,87 @@ namespace Take.Blip.Builder
                         var stateWaitForInput = true;
                         do
                         {
-                            using (LogContext.PushProperty($"{nameof(State)}{nameof(State.Id)}", state.Id))
+                            try
                             {
-                                try
+                                linkedCts.Token.ThrowIfCancellationRequested();
+
+                                // Validate the input for the current state
+                                if (stateWaitForInput &&
+                                    state.Input?.Validation != null &&
+                                    !ValidateDocument(lazyInput, state.Input.Validation))
                                 {
-                                    linkedCts.Token.ThrowIfCancellationRequested();
-
-                                    // Validate the input for the current state
-                                    if (stateWaitForInput &&
-                                        state.Input?.Validation != null &&
-                                        !ValidateDocument(lazyInput, state.Input.Validation))
+                                    if (state.Input.Validation.Error != null)
                                     {
-                                        if (state.Input.Validation.Error != null)
-                                        {
-                                            // Send the validation error message
-                                            await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
-                                        }
-
-                                        break;
+                                        // Send the validation error message
+                                        await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
                                     }
 
-                                    // Set the input in the context
-                                    if (!string.IsNullOrEmpty(state.Input?.Variable))
-                                    {
-                                        await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
-                                            linkedCts.Token);
-                                    }
+                                    break;
+                                }
 
-                                    // Prepare to leave the current state executing the output actions
-                                    if (state.OutputActions != null)
-                                    {
-                                        await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
-                                    }
+                                // Set the input in the context
+                                if (!string.IsNullOrEmpty(state.Input?.Variable))
+                                {
+                                    await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
+                                        linkedCts.Token);
+                                }
 
-                                    var previousStateId = state.Id;
-                                    // Determine the next state
-                                    state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
-                                    // Store the previous state
-                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
+                                // Prepare to leave the current state executing the output actions
+                                if (state.OutputActions != null)
+                                {
+                                    await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
+                                }
 
-                                    // Create trace instances, if required
+                                var previousStateId = state.Id;
+                                // Determine the next state
+                                state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
+                                // Store the previous state
+                                await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
+
+                                // Create trace instances, if required
+                                (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
+
+                                // Store the next state
+                                if (state != null)
+                                {
+                                    await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
+                                }
+                                else
+                                {
+                                    await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
+                                }
+
+                                // Process the next state input actions
+                                if (state?.InputActions != null)
+                                {
+                                    await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, linkedCts.Token);
+                                }
+
+                                // Check if the state transition limit has reached (to avoid loops in the flow)
+                                if (transitions++ >= _configuration.MaxTransitionsByInput)
+                                {
+                                    throw new BuilderException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                if (stateTrace != null)
+                                {
+                                    stateTrace.Error = ex.ToString();
+                                }
+                                throw;
+                            }
+                            finally
+                            {
+                                // Continue processing if the next state do not expect the user input
+                                var inputConditionIsValid = state?.Input?.Conditions == null ||
+                                                            await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
+                                stateWaitForInput = state == null ||
+                                                    (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
+                                if (stateWaitForInput)
+                                {
+                                    // Create a new trace if the next state waits for an input     
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
-
-                                    // Store the next state
-                                    if (state != null)
-                                    {
-                                        await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
-                                    }
-                                    else
-                                    {
-                                        await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
-                                    }
-
-                                    // Process the next state input actions
-                                    if (state?.InputActions != null)
-                                    {
-                                        await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, linkedCts.Token);
-                                    }
-
-                                    // Check if the state transition limit has reached (to avoid loops in the flow)
-                                    if (transitions++ >= _configuration.MaxTransitionsByInput)
-                                    {
-                                        throw new BuilderException("Max state transitions reached");
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    if (stateTrace != null)
-                                    {
-                                        stateTrace.Error = ex.ToString();
-                                    }
-                                    throw;
-                                }
-                                finally
-                                {
-                                    // Continue processing if the next state do not expect the user input
-                                    var inputConditionIsValid = state?.Input?.Conditions == null ||
-                                                                await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
-                                    stateWaitForInput = state == null ||
-                                                        (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
-                                    if (stateWaitForInput)
-                                    {
-                                        // Create a new trace if the next state waits for an input     
-                                        (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
-                                    }
                                 }
                             }
                         } while (!stateWaitForInput);
@@ -266,14 +264,19 @@ namespace Take.Blip.Builder
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error processing input '{Input}' for user '{User}'", message.Content, userIdentity);
-
                 if (inputTrace != null)
                 {
                     inputTrace.Error = ex.ToString();
                 }
-                
-                throw;
+
+                var builderException = ex is BuilderException be ? be :
+                    new BuilderException($"Error processing input '{message.Content}' for user '{userIdentity}' in state '{state?.Id}'", ex);
+
+                builderException.StateId = state?.Id;
+                builderException.UserId = userIdentity;
+                builderException.MessageId = message.Id;
+
+                throw builderException;
             }
             finally
             {
@@ -358,20 +361,28 @@ namespace Take.Blip.Builder
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error(ex, "Action '{ActionType}' failed with settings {@Settings}", stateAction.Type, stateAction.Settings);
-
                         if (actionTrace != null)
                         {
                             actionTrace.Error = ex.ToString();
                         }
 
-                        if (!stateAction.ContinueOnError)
+                        var message = ex is OperationCanceledException && cts.IsCancellationRequested
+                            ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
+                            : $"The processing of the action '{stateAction.Type}' has failed";
+
+                        var actionProcessingException = new ActionProcessingException(message, ex)
                         {
-                            var message = ex is OperationCanceledException && cts.IsCancellationRequested
-                                ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
-                                : $"The processing of the action '{stateAction.Type}' has failed: {ex.Message}";
-                                
-                            throw new ActionProcessingException(message, ex);
+                            ActionType = stateAction.Type,
+                            ActionSettings = stateAction.Settings.ToObject<IDictionary<string, object>>()
+                        };
+
+                        if (stateAction.ContinueOnError)
+                        {
+                            _logger.Warning(actionProcessingException, "Action '{ActionType}' has failed but was forgotten", stateAction.Type);
+                        }
+                        else
+                        {
+                            throw actionProcessingException;
                         }
                     }
                     finally
@@ -416,13 +427,16 @@ namespace Take.Blip.Builder
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error(ex, "Output condition failed with conditions {@Conditions}", output.Conditions);
-
                         if (outputTrace != null)
                         {
                             outputTrace.Error = ex.ToString();
                         }
-                        throw;
+
+                        throw new OutputProcessingException($"Failed to process output condition to state '{output.StateId}'", ex)
+                        {
+                            OutputStateId = output.StateId,
+                            OutputConditions = output.Conditions
+                        };
                     }
                     finally
                     {

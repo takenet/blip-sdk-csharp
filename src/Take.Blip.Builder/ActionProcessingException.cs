@@ -27,5 +27,9 @@ namespace Take.Blip.Builder
         protected ActionProcessingException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
+
+        public string ActionType { get; set; }
+
+        public object ActionSettings { get; set; }
     }
 }
