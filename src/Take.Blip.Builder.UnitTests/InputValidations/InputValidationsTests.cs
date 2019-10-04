@@ -22,6 +22,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var input = new PlainText() { Text = "hi" };
+            Message.Content = input;
             
             var messageType = "text/plain";
             var messageContent = "Hi for you to!";
@@ -74,7 +75,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
@@ -85,7 +86,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -96,6 +97,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var input = new PlainText() { Text = "hi" };
+            Message.Content = input;
 
             var messageType = "text/plain";
             var messageContent = "Hi for you to!";
@@ -148,7 +150,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(0).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
@@ -159,7 +161,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
@@ -170,6 +172,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var input = new PlainText() { Text = "18" };
+            Message.Content = input;
 
             var messageType = "text/plain";
             var messageContent = "Thanks!";
@@ -221,7 +224,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
@@ -232,7 +235,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -243,6 +246,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var input = new PlainText() { Text = "some text" };
+            Message.Content = input;
 
             var messageType = "text/plain";
             var messageContent = "Thanks!";
@@ -294,7 +298,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, Arg.Any<CancellationToken>());
+            await target.ProcessInputAsync(Message, flow, Arg.Any<CancellationToken>());
 
             // Assert
             StateManager.Received(0).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
@@ -305,7 +309,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
@@ -316,7 +320,13 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
-            var invalidInput = new MediaLink();
+            Message.Content = input;
+            var invalidInputMessage = new Message()
+            {
+                From = UserIdentity.ToNode(),
+                To = ApplicationIdentity.ToNode(),
+                Content = new MediaLink()
+            };
             var messageType = "text/plain";
             var messageContent = "Pong!";
             var validationMessageContent = "Invalid message type";
@@ -368,8 +378,8 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(invalidInput, User, Application, flow, CancellationToken);
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(invalidInputMessage, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -379,7 +389,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
@@ -388,7 +398,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -399,7 +409,13 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
-            var invalidInput = new MediaLink();
+            Message.Content = input;
+            var invalidInputMessage = new Message()
+            {
+                From = UserIdentity.ToNode(),
+                To = ApplicationIdentity.ToNode(),
+                Content = new MediaLink()
+            };
             var messageType = "text/plain";
             var messageContent = "Pong!";
             var validationMessageContent = "Invalid message type";
@@ -451,8 +467,8 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(invalidInput, User, Application, flow, CancellationToken);
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(invalidInputMessage, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -462,7 +478,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());
@@ -471,7 +487,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -482,6 +498,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var input = new PlainText() { Text = "2017-11-20T17:13:00Z" };
+            Message.Content = input;
             var messageType = "text/plain";
             var messageContent = "Pong!";
             var validationMessageContent = "Invalid message content";
@@ -532,7 +549,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -543,7 +560,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
@@ -554,6 +571,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var input = new PlainText() { Text = "some text different of date" };
+            Message.Content = input;
             var invalidInput = new MediaLink();
             var messageType = "text/plain";
             var messageContent = "Pong!";
@@ -605,7 +623,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(0).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -616,7 +634,7 @@ namespace Take.Blip.Builder.UnitTests
                 .SendMessageAsync(
                     Arg.Is<Message>(m =>
                         m.Id != null
-                        && m.To.ToIdentity().Equals(User)
+                        && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == validationMessageContent),
                     Arg.Any<CancellationToken>());

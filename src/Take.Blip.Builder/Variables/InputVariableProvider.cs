@@ -12,6 +12,7 @@ namespace Take.Blip.Builder.Variables
     public class InputVariableProvider : IVariableProvider
     {
         private readonly IDocumentSerializer _documentSerializer;
+        
         public VariableSource Source => VariableSource.Input;
 
         public InputVariableProvider(IDocumentSerializer documentSerializer)
@@ -56,6 +57,11 @@ namespace Take.Blip.Builder.Variables
 
                 return await GetEntityVariableAsync(input, entityNameAndProperty[1], entityNameAndProperty[2]);
             }
+            
+            if (nameToLower.StartsWith("message."))
+            {
+                return GetMessageProperty(input.Message, nameToLower.Split('.')[1]);
+            }
 
             return null;
         }
@@ -63,7 +69,9 @@ namespace Take.Blip.Builder.Variables
         private async Task<string> GetAnalyzedContentAsync(LazyInput input)
         {
             var analyzedContent = await input.AnalyzedContent;
-            return analyzedContent != default(AnalysisResponse) ? _documentSerializer.Serialize(analyzedContent) : default(string);
+            return analyzedContent != default(AnalysisResponse) 
+                ? _documentSerializer.Serialize(analyzedContent) 
+                : default;
         }
 
         private async Task<string> GetIntentVariableAsync(LazyInput input, string intentProperty)
@@ -109,6 +117,36 @@ namespace Take.Blip.Builder.Variables
             }
 
             return null;
+        }
+
+        private string GetMessageProperty(Message message, string name)
+        {
+            switch (name)
+            {
+                case "id":
+                    return message.Id;
+                
+                case "from":
+                    return message.From;
+                
+                case "fromidentity":
+                    return message.From?.ToIdentity();
+
+                case "to":
+                    return message.To;
+                
+                case "toidentity":
+                    return message.To?.ToIdentity();
+
+                case "pp":
+                    return message.Pp;
+                
+                case "ppidentity":
+                    return message.Pp?.ToIdentity();
+                
+                default:
+                    return null;
+            }
         }
     }
 }

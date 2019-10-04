@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Server;
@@ -48,7 +49,19 @@ namespace Take.Blip.Client.Activation
         /// The domain.
         /// </value>
         public string Domain { get; set; }
+        
+        /// <summary>
+        /// Gets the application identity combining the <see cref="Instance"/> and <see cref="Domain"/>.
+        /// </summary>
+        [IgnoreDataMember]
+        public Identity Identity => new Identity(Identifier, Domain ?? Constants.DEFAULT_DOMAIN);
 
+        /// <summary>
+        /// Gets the application node combining the <see cref="Instance"/> and <see cref="Domain"/> and <see cref="Instance"/>.
+        /// </summary>
+        [IgnoreDataMember]
+        public Node Node => new Node(Identifier, Domain ?? Constants.DEFAULT_DOMAIN, Instance);
+        
         /// <summary>
         /// Gets or sets the Uri scheme.
         /// </summary>

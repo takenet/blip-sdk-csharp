@@ -35,7 +35,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 {"key1", "value1"}
             };
 
-            Context.User.Returns(identity);
+            Context.UserIdentity.Returns(identity);
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
             var settings = new JObject
             {
@@ -75,7 +75,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 {"key1", "value1"}
             };
 
-            Context.User.Returns(identity);
+            Context.UserIdentity.Returns(identity);
             EnvelopeReceiverContext<Message>.Create(new Message { Id = messageId });
 
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
@@ -119,7 +119,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 {"key1", "value1"}
             };
 
-            Context.User.Returns(identity);
+            Context.UserIdentity.Returns(identity);
             EnvelopeReceiverContext<Message>.Create(new Message { Id = messageId });
 
             var eventTrackAction = new TrackEventAction(EventTrackExtension);

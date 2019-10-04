@@ -1,5 +1,4 @@
 ﻿using System;
-using Take.Elephant.Sql;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -21,13 +20,7 @@ namespace Take.Blip.Builder.Hosting
 
         public virtual string RedisKeyPrefix => "builder";
 
-        public virtual TimeSpan OnDemandCacheExpiration => TimeSpan.FromMinutes(5);
-
-        public virtual string SqlStorageConnectionString => @"Server=(localdb)\MSSQLLocalDB;Database=Builder;Integrated Security=true";
-
-        public virtual string SqlStorageDriverTypeName => typeof(SqlDatabaseDriver).FullName;
-
-        public virtual string ContextType => nameof(ExtensionContext);
+        public bool ContactCacheEnabled => true;
 
         public virtual TimeSpan ContactCacheExpiration => TimeSpan.FromMinutes(30);
 

@@ -8,6 +8,6 @@ namespace Builder.Console
 {
     public class BuilderConfiguration : ConventionsConfiguration
     {
-        public override string ContextType => nameof(StorageContext);
+        
     }
 }

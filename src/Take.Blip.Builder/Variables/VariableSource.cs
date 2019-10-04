@@ -41,5 +41,20 @@
         /// Get values from the current state.
         /// </summary>
         State,
+        
+        /// <summary>
+        /// Gets values from current tunnel, if applicable.
+        /// </summary>
+        Tunnel,
+        
+        /// <summary>
+        /// Gets values from the SDK Application
+        /// </summary>
+        Application,
+        
+        /// <summary>
+        /// Get values from the current help desk ticket, if there is one.
+        /// </summary>
+        Ticket,
     }
 }

@@ -54,7 +54,7 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                 var message = new Message(EnvelopeId.NewId())
                 {
                     Id = EnvelopeId.NewId(),
-                    To = context.User.ToNode(),
+                    To = context.Input.Message.From,
                     Content = _documentSerializer.Deserialize(body, settings.MediaType)
                 };
 

@@ -1,0 +1,17 @@
+[
+    {
+        "Name": "Avocado",
+        "Uri": "https://cdn.pixabay.com/photo/2018/03/09/08/04/avocado-3210885_960_720.jpg",
+        "PreviewUri": "https://cdn.pixabay.com/photo/2018/03/09/08/04/avocado-3210885_960_720.jpg"
+    },
+    {
+        "Name": "Banana",
+        "Uri": "https://cdn.pixabay.com/photo/2015/11/05/23/08/banana-1025109_960_720.jpg",
+        "PreviewUri": "https://cdn.pixabay.com/photo/2015/11/05/23/08/banana-1025109_960_720.jpg"
+    },
+    {
+        "Name": "Strawberry",
+        "Uri": "https://cdn.pixabay.com/photo/2018/05/22/20/21/ripe-strawberries-3422349_960_720.jpg",
+        "PreviewUri": "https://cdn.pixabay.com/photo/2018/05/22/20/21/ripe-strawberries-3422349_960_720.jpg"
+    }
+]

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
@@ -19,25 +20,53 @@ namespace Take.Blip.Builder.UnitTests.Variables
 {
     public class InputVariableProviderTests : CancellationTokenTestsBase
     {
+        public InputVariableProviderTests()
+        {
+            BuilderConfiguration = new BuilderConfiguration();
+            DocumentSerializer = new DocumentSerializer(new DocumentTypeResolver().WithMessagingDocuments());
+            ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+            ArtificialIntelligenceExtension.AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == NoIntentInputText), Arg.Any<CancellationToken>()).Returns(NoIntentResponse);
+            ArtificialIntelligenceExtension.AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == IntentsAndEntitiesText), Arg.Any<CancellationToken>()).Returns(IntentsAndEntitiesResponse);
+            ArtificialIntelligenceExtension.AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == MultipleIntentsAndEntitiesText), Arg.Any<CancellationToken>()).Returns(MultipleIntentsAndEntitiesResponse);
+        }
+        
+        public BuilderConfiguration BuilderConfiguration { get;  }
+        
         public static string NoIntentInputText = "Test run";
 
         public static string IntentsAndEntitiesText = "I would like to buy a mussarela pizza";
 
         public static string MultipleIntentsAndEntitiesText = "I have a plane and a toy car";
 
-        public PlainText NoIntentMessage = new PlainText
+        public static string MessagId = "Message-Id";
+
+        public Identity UserIdentiy = new Identity("user", "domain");
+
+        public Message NoIntentMessage = new Message()
         {
-            Text = NoIntentInputText
+            Id = MessagId,
+            Content = new PlainText
+            {
+                Text = NoIntentInputText
+            }
         };
 
-        public PlainText IntentsAndEntitiesMessage = new PlainText
+        public Message IntentsAndEntitiesMessage = new Message()
         {
-            Text = IntentsAndEntitiesText
+            Id = MessagId,
+            Content = new PlainText
+            {
+                Text = IntentsAndEntitiesText
+            }
         };
 
-        public PlainText MultipleIntentsAndEntitiesMessage = new PlainText
+        public Message MultipleIntentsAndEntitiesMessage = new Message() 
         {
-            Text = MultipleIntentsAndEntitiesText
+            Id = MessagId,
+            Content = new PlainText
+            {
+                Text = MultipleIntentsAndEntitiesText
+            }
         };
 
         public AnalysisResponse NoIntentResponse = new AnalysisResponse();
@@ -95,14 +124,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension;
 
-        public InputVariableProviderTests()
-        {
-            DocumentSerializer = new DocumentSerializer(new DocumentTypeResolver().WithMessagingDocuments());
-            ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
-            ArtificialIntelligenceExtension.AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == NoIntentInputText), Arg.Any<CancellationToken>()).Returns(NoIntentResponse);
-            ArtificialIntelligenceExtension.AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == IntentsAndEntitiesText), Arg.Any<CancellationToken>()).Returns(IntentsAndEntitiesResponse);
-            ArtificialIntelligenceExtension.AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == MultipleIntentsAndEntitiesText), Arg.Any<CancellationToken>()).Returns(MultipleIntentsAndEntitiesResponse);
-        }
+
 
         public InputVariableProvider GetTarget()
         {
@@ -113,7 +135,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public async Task CheckIfOneIntentVariableIsValid()
         {
             // Arrange
-            LazyInput = new LazyInput(NoIntentMessage, null, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
+            LazyInput = new LazyInput(NoIntentMessage, UserIdentiy, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
             Context = new ExtensionContext("me", "app", LazyInput, new Builder.Models.Flow(), new List<InputVariableProvider>(), null);
             var target = GetTarget();
 
@@ -128,7 +150,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public async Task CheckIfMultipleIntentsVariableIsValid()
         {
             // Arrange
-            LazyInput = new LazyInput(IntentsAndEntitiesMessage, null, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
+            LazyInput = new LazyInput(IntentsAndEntitiesMessage, UserIdentiy, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
             Context = new ExtensionContext("me", "app", LazyInput, new Builder.Models.Flow(), new List<InputVariableProvider>(), null);
             var target = GetTarget();
 
@@ -143,7 +165,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public async Task CheckIfMultipleIntentsAndEntitiesVariableIsValid()
         {
             // Arrange
-            LazyInput = new LazyInput(MultipleIntentsAndEntitiesMessage, null, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
+            LazyInput = new LazyInput(MultipleIntentsAndEntitiesMessage, UserIdentiy, BuilderConfiguration, DocumentSerializer, null, ArtificialIntelligenceExtension, CancellationToken);
             Context = new ExtensionContext("me", "app", LazyInput, new Builder.Models.Flow(), new List<InputVariableProvider>(), null);
             var target = GetTarget();
 

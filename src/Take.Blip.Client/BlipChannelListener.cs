@@ -224,12 +224,13 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
-                using (LogContext.PushProperty(nameof(Message.Type), message.Type))
+                using (LogContext.PushProperty(nameof(Message.Type), message?.Type))
                 {
                     LogException(message, ex);
                 }
 
-                if (shouldNotify)
+                // Always notify failures
+                if (!string.IsNullOrWhiteSpace(message?.Id))
                 {
                     Reason reason;
                     if (ex is LimeException limeException)

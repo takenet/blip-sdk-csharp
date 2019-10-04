@@ -12,11 +12,6 @@ namespace Take.Blip.Client.Extensions.HelpDesk
     public interface IHelpDeskExtension
     {
         /// <summary>
-        ///  Desk application domain
-        /// </summary>
-        string DESK_DOMAIN { get; }
-
-        /// <summary>
         /// Forward a message to active HelpDesk application.
         /// </summary>
         /// <param name="message">The message to be forwarded to BLIP HelpDesk agents</param>
@@ -36,6 +31,14 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         Task<Ticket> CreateTicketAsync(Identity customerIdentity, Document context, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Create a ticket.
+        /// </summary>
+        /// <param name="ticket"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Ticket> CreateTicketAsync(Ticket ticket, CancellationToken cancellationToken);
+        
+        /// <summary>
         /// Close ticket as a user
         /// </summary>
         /// <param name="ticketId">The Ticket ID to be closed</param>
@@ -45,6 +48,15 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         /// Get user open ticket if any
         /// </summary>
         /// <param name="customerIdentity">The customer identity</param>
+        [Obsolete("Use 'GetCustomerTicketAsync' instead")]
         Task<Ticket> GetUserOpenTicketsAsync(Identity customerIdentity, CancellationToken cancellationToken);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerIdentity"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Ticket> GetCustomerActiveTicketAsync(Identity customerIdentity, CancellationToken cancellationToken);
     }
 }

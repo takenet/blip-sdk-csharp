@@ -23,7 +23,7 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
         {
             var message = new Message(null)
             {
-                To = context.User.ToNode(),
+                To = context.Input.Message.From,
                 Content = _documentSerializer.Deserialize(settings.RawContent, settings.MediaType),
                 Metadata = settings.Metadata
             };

@@ -36,13 +36,16 @@ namespace Take.Blip.Builder.UnitTests
             container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
             container.RegisterSingleton(ContactExtension);
+            container.RegisterSingleton(HelpDeskExtension);
+            container.RegisterSingleton(TunnelExtension);
             container.RegisterSingleton(ContextExtension);
             container.RegisterSingleton(Sender);
-            container.RegisterSingleton(CacheOwnerCallerContactMap);
+            container.RegisterSingleton(OwnerCallerContactMap);
+            container.RegisterSingleton(Application);
 
             return new ExtensionContext(
                 User,
-                Application,
+                ApplicationIdentity,
                 Input,
                 Flow,
                 container.GetAllInstances<IVariableProvider>(),

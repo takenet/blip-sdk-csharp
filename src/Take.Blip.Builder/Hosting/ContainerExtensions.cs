@@ -6,6 +6,8 @@ using SimpleInjector;
 using StackExchange.Redis;
 using System;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.CreateTicket;
+using Take.Blip.Builder.Actions.DeleteVariable;
 using Take.Blip.Builder.Actions.ExecuteScript;
 using Take.Blip.Builder.Actions.ForwardMessageToDesk;
 using Take.Blip.Builder.Actions.ManageList;
@@ -29,7 +31,6 @@ using Take.Blip.Client;
 using Take.Blip.Client.Extensions;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Elephant;
-using Take.Elephant.Sql;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -53,6 +54,8 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IFlowManager, FlowManager>();
             container.RegisterSingleton<IStateManager, StateManager>();
             container.RegisterSingleton<IContextProvider, ContextProvider>();
+            container.RegisterDecorator<ISender, OwnerSenderDecorator>(Lifestyle.Singleton);
+            container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
 
             return container;
         }
@@ -77,6 +80,8 @@ namespace Take.Blip.Builder.Hosting
                     typeof(SetBucketAction),
                     typeof(RedirectAction),
                     typeof(ForwardMessageToDeskAction),
+                    typeof(CreateTicketAction),
+                    typeof(DeleteVariableAction),
                 });
 
             return container;
@@ -100,16 +105,7 @@ namespace Take.Blip.Builder.Hosting
         private static Container RegisterBuilderStorage(this Container container)
         {
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
-            container.RegisterSingleton<IOwnerCallerNameDocumentMap, Storage.Specialized.OwnerCallerNameDocumentMap>();
-            container.RegisterSingleton<ISourceOwnerCallerNameDocumentMap, Storage.Sql.OwnerCallerNameDocumentMap>();
-            container.RegisterSingleton<ICacheOwnerCallerNameDocumentMap, Storage.Redis.OwnerCallerNameDocumentMap>();
-            container.RegisterSingleton<ICacheOwnerCallerContactMap, Storage.Redis.CacheOwnerCallerContactMap>();
-            container.RegisterSingleton<IDatabaseDriver>(() =>
-            {
-                var configuration = container.GetInstance<IConfiguration>();
-                var driverType = Type.GetType(configuration.SqlStorageDriverTypeName) ?? typeof(SqlDatabaseDriver);
-                return (IDatabaseDriver)container.GetInstance(driverType);
-            });
+            container.RegisterSingleton<IOwnerCallerContactMap, Storage.Redis.OwnerCallerContactMap>();
             container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
             container.RegisterSingleton<ISerializer<Contact>, JsonSerializer<Contact>>();
             container.RegisterSingleton<IConnectionMultiplexer>(() =>
@@ -135,13 +131,16 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterCollection<IVariableProvider>(
                 new[]
                 {
+                    typeof(ApplicationVariableProvider),
                     typeof(BucketVariableProvider),
                     typeof(CalendarVariableProvider),
+                    typeof(ConfigurationVariableProvider),
                     typeof(ContactVariableProvider),
-                    typeof(RandomVariableProvider),
-                    typeof(FlowConfigurationVariableProvider),
                     typeof(InputVariableProvider),
+                    typeof(RandomVariableProvider),
                     typeof(StateVariableProvider),
+                    typeof(TunnelVariableProvider),
+                    typeof(TicketVariableProvider),
                 });
 
             return container;

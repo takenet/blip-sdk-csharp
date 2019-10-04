@@ -20,14 +20,8 @@ namespace Take.Blip.Builder.Hosting
 
         TimeSpan TraceTimeout { get; }
 
-        TimeSpan OnDemandCacheExpiration { get; }
-
-        string SqlStorageConnectionString { get; }
-
-        string SqlStorageDriverTypeName { get; }
-
-        string ContextType { get; }
-
+        bool ContactCacheEnabled { get; }
+        
         TimeSpan ContactCacheExpiration { get; }
         
         TimeSpan DefaultActionExecutionTimeout { get; }
