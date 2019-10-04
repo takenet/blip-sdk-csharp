@@ -5,14 +5,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using Take.Blip.Builder.Utils;
-using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
 {
     public sealed class ProcessHttpAction : ActionBase<ProcessHttpSettings>, IDisposable
     {
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
-        
+
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
 
@@ -92,7 +91,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             if (ShouldAddHeader("processHttpAddUserToRequestHeader", context))
             {
-                httpRequestMessage.Headers.Add(Constants.BLIP_USER_HEADER, context.User);
+                httpRequestMessage.Headers.Add("X-Blip-User", context.UserIdentity);
             }
         }
 
@@ -106,7 +105,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             if (ShouldAddHeader("processHttpAddBotIdentityToRequestHeader", context))
             {
-                httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.Application);
+                httpRequestMessage.Headers.Add("X-Blip-Bot", context.OwnerIdentity);
             }
         }
 
