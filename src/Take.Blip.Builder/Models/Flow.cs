@@ -22,12 +22,22 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         [Required(ErrorMessage = "The flow id is required")]
         public string Id { get; set; }
-
+        
+        /// <summary>
+        /// Determine the global actions that should be executed before processing the input. Optional.
+        /// </summary>
+        public Action[] InputActions { get; set; }
+        
         /// <summary>
         /// The flow states. Required.
         /// </summary>
         [Required(ErrorMessage = "The flow must have at least one state")]
         public State[] States { get; set; }
+
+        /// <summary>
+        /// Determine the global actions that should be executed after processing the input. Optional.
+        /// </summary>
+        public Action[] OutputActions { get; set; }
 
         /// <summary>
         /// The flow configuration.
@@ -42,10 +52,16 @@ namespace Take.Blip.Builder.Models
         {
             get
             {
-                if (_builderConfiguration == null &&
-                    Configuration != null)
+                if (_builderConfiguration == null)
                 {
-                    _builderConfiguration = BuilderConfiguration.FromDictionary(Configuration);
+                    if (Configuration != null)
+                    {
+                        _builderConfiguration = BuilderConfiguration.FromDictionary(Configuration);
+                    }
+                    else
+                    {
+                        _builderConfiguration = new BuilderConfiguration();
+                    }
                 }
 
                 return _builderConfiguration;
@@ -79,6 +95,15 @@ namespace Take.Blip.Builder.Models
             if (rootState.Input.Conditions?.Any() == true)
             {
                 throw new ValidationException("The root state must not have any conditions");
+            }
+            
+            
+            if (InputActions != null)
+            {
+                foreach (var inputAction in InputActions)
+                {
+                    inputAction.Validate();
+                }
             }
 
             foreach (var state in States)
@@ -124,6 +149,14 @@ namespace Take.Blip.Builder.Models
                             }
                         }
                     }
+                }
+            }
+            
+            if (OutputActions != null)
+            {
+                foreach (var outputAction in OutputActions)
+                {
+                    outputAction.Validate();
                 }
             }
 

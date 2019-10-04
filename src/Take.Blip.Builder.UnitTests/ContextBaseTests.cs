@@ -15,8 +15,11 @@ using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client;
+using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Contacts;
+using Take.Blip.Client.Extensions.HelpDesk;
+using Take.Blip.Client.Extensions.Tunnel;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests
@@ -29,9 +32,11 @@ namespace Take.Blip.Builder.UnitTests
 
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             ContactExtension = Substitute.For<IContactExtension>();
+            HelpDeskExtension = Substitute.For<IHelpDeskExtension>();
+            TunnelExtension = Substitute.For<ITunnelExtension>();
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
-            CacheOwnerCallerContactMap = new CacheOwnerCallerContactMap();
+            OwnerCallerContactMap = new OwnerCallerContactMap();
             Sender = Substitute.For<ISender>();
             Flow = new Flow()
             {
@@ -39,12 +44,23 @@ namespace Take.Blip.Builder.UnitTests
                 Configuration = new Dictionary<string, string>()
             };
             User = "user@msging.net";
-            Application = "application@msging.net";
+            Application = new Application()
+            {
+                Identifier = "application",
+                Domain = "msging.net",
+                Instance = "default"
+            };
             Input = new LazyInput(
-                new PlainText()
-                {
-                    Text = "Hello world!"
+                new Message()
+                { 
+                    From = User.ToNode(),
+                    To = ApplicationIdentity.ToNode(),
+                    Content = new PlainText()
+                    {
+                        Text = "Hello world!"
+                    }
                 },
+                User,
                 Flow.BuilderConfiguration,
                 new DocumentSerializer(documentTypeResolver),
                 new EnvelopeSerializer(documentTypeResolver),
@@ -57,17 +73,23 @@ namespace Take.Blip.Builder.UnitTests
 
         public IContactExtension ContactExtension { get; }
 
+        public IHelpDeskExtension HelpDeskExtension { get; }
+        
+        public ITunnelExtension TunnelExtension { get; }
+        
         public ISender Sender { get; set; }
 
         public ILogger Logger { get; }
 
         public IConfiguration Configuration { get; }
 
-        public ICacheOwnerCallerContactMap CacheOwnerCallerContactMap { get; }
+        public IOwnerCallerContactMap OwnerCallerContactMap { get; }
 
         public Identity User { get; set; }
+        
+        public Application Application { get; }
 
-        public Identity Application { get; set; }
+        public Identity ApplicationIdentity => Application.Identity;
 
         public LazyInput Input { get; set; }
 

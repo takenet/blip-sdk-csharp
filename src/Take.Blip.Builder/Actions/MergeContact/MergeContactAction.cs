@@ -25,8 +25,8 @@ namespace Take.Blip.Builder.Actions.MergeContact
 
             var contact = settings.ToObject<Contact>(LimeSerializerContainer.Serializer);
             contact.Identity = contact.Identity;
-            await _contactExtension.MergeAsync(context.User, contact, cancellationToken);
-            context.InputContext.Remove(nameof(contact));
+            await _contactExtension.MergeAsync(context.UserIdentity, contact, cancellationToken);
+            context.RemoveContact();
         }
     }
 }

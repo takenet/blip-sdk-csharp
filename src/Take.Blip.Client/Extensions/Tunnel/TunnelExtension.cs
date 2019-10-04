@@ -2,18 +2,31 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol.Network;
 
 namespace Take.Blip.Client.Extensions.Tunnel
 {
     public class TunnelExtension : ITunnelExtension
     {
         public static readonly Node TunnelAddress = Node.Parse($"postmaster@tunnel.{Constants.DEFAULT_DOMAIN}");
+        
+        public const string TUNNEL_METADATA_KEY_PREFIX = "#tunnel";
+        public const string TUNNEL_OWNER_METADATA_KEY = TUNNEL_METADATA_KEY_PREFIX + ".owner";
+        public const string TUNNEL_ORIGINATOR_METADATA_KEY = TUNNEL_METADATA_KEY_PREFIX + ".originator";
 
         private readonly ISender _sender;
 
         public TunnelExtension(ISender sender)
         {
             _sender = sender;
+        }
+
+        public Task<Takenet.Iris.Messaging.Resources.Tunnel> GetTunnelAsync(Identity tunnelIdentity, CancellationToken cancellationToken)
+        {
+            return _sender.GetResourceAsync<Takenet.Iris.Messaging.Resources.Tunnel>(
+                new LimeUri($"/tunnels/{tunnelIdentity}"),
+                cancellationToken,
+                to: TunnelAddress);
         }
 
         public Task<Node> ForwardMessageAsync(Message message, Identity destination, CancellationToken cancellationToken)

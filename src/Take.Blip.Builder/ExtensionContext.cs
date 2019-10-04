@@ -23,8 +23,7 @@ namespace Take.Blip.Builder
             LazyInput input,
             Flow flow,
             IEnumerable<IVariableProvider> variableProviders,
-            IContextExtension contextExtension
-            )
+            IContextExtension contextExtension)
             : base (user, application, input, flow, variableProviders)
         {
             _contextExtension = contextExtension;
@@ -33,7 +32,7 @@ namespace Take.Blip.Builder
         public override Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
-            return _contextExtension.SetTextVariableAsync(User, name.ToLowerInvariant(), value, cancellationToken, expiration);
+            return _contextExtension.SetTextVariableAsync(UserIdentity, name.ToLowerInvariant(), value, cancellationToken, expiration);
         }
 
         public override async Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
@@ -42,7 +41,7 @@ namespace Take.Blip.Builder
 
             try
             {
-                await _contextExtension.DeleteVariableAsync(User, name.ToLowerInvariant(), cancellationToken);
+                await _contextExtension.DeleteVariableAsync(UserIdentity, name.ToLowerInvariant(), cancellationToken);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND) { }
         }
@@ -51,7 +50,7 @@ namespace Take.Blip.Builder
         {
             try
             {
-                return await _contextExtension.GetTextVariableAsync(User, name, cancellationToken);
+                return await _contextExtension.GetTextVariableAsync(UserIdentity, name, cancellationToken);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {

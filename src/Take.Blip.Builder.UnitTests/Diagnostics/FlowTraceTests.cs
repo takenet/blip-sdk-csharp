@@ -23,6 +23,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
         {
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
@@ -79,7 +80,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -88,7 +89,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Http &&
                     e.Settings.Target == traceUrl &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
@@ -102,6 +103,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
         {
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
@@ -158,7 +160,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -167,7 +169,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
@@ -287,7 +289,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
 
             // Act
             var input = new PlainText() { Text = "Ping!" };
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            Message.Content = input;
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -296,7 +299,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
@@ -419,7 +422,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
 
             // Act
             var input = new PlainText() { Text = "Ping!" };
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            Message.Content = input;
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -428,7 +432,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&
@@ -447,16 +451,13 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var traceIdentity = new Identity(Guid.NewGuid().ToString(), "msging.net");
             var mode = "All";
             var targetType = "Lime";
-            EnvelopeReceiverContext<Message>.Create(new Message
+            
+            Message.Metadata = new Dictionary<string, string>
             {
-                Id = Guid.NewGuid().ToString(),
-                Metadata = new Dictionary<string, string>
-                {
-                    { "builder.trace.mode", mode },
-                    { "builder.trace.targetType", targetType },
-                    { "builder.trace.target", traceIdentity },
-                }
-            });
+                { "builder.trace.mode", mode },
+                { "builder.trace.targetType", targetType },
+                { "builder.trace.target", traceIdentity },
+            };
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
@@ -506,7 +507,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
 
             // Act
             var input = new PlainText() { Text = "Ping!" };
-            await target.ProcessInputAsync(input, User, Application, flow, CancellationToken);
+            Message.Content = input;
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             await Task.Delay(100); // The trace is asynchronous
@@ -516,7 +518,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     e.Settings.Mode == TraceMode.All &&
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIdentity &&
-                    e.Trace.User == User.ToString() &&
+                    e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
                     e.Trace.States.ToArray()[0].Id == "root" &&

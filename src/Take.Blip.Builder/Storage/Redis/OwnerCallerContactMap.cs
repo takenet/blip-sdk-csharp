@@ -6,9 +6,9 @@ using Take.Elephant.Redis;
 
 namespace Take.Blip.Builder.Storage.Redis
 {
-    public class CacheOwnerCallerContactMap : RedisStringMap<OwnerCaller, Contact>, ICacheOwnerCallerContactMap
+    public class OwnerCallerContactMap : RedisStringMap<OwnerCaller, Contact>, IOwnerCallerContactMap
     {
-        public CacheOwnerCallerContactMap(
+        public OwnerCallerContactMap(
             ISerializer<Contact> serializer,
             IConfiguration configuration,
             IConnectionMultiplexer connectionMultiplexer)

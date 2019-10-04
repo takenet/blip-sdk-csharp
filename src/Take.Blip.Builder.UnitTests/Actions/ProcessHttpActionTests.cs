@@ -121,7 +121,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             const string userIdentity = "user@domain.local";
             const string userToRequestHeaderVariableName = "processHttpAddUserToRequestHeader";        
             Context.Flow.Configuration.Add(userToRequestHeaderVariableName, "true");
-            Context.User.Returns(Identity.Parse(userIdentity));
+            Context.UserIdentity.Returns(Identity.Parse(userIdentity));
 
             var settings = new ProcessHttpSettings
             {
@@ -172,8 +172,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             const string botIdentity = "papagaio@msging.net";
             const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
             Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
-            Context.User.Returns(Identity.Parse(userIdentity));
-            Context.Application.Returns(Identity.Parse(botIdentity));
+            Context.UserIdentity.Returns(Identity.Parse(userIdentity));
+            Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
 
             var settings = new ProcessHttpSettings
             {
@@ -228,8 +228,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             const string botIdentity = "papagaio@msging.net";
             const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
             Context.Flow.Configuration.Add(botIdentifierConfigVariableName, botIdentifierVariableValue);
-            Context.User.Returns(Identity.Parse(userIdentity));
-            Context.Application.Returns(Identity.Parse(botIdentity));
+            Context.UserIdentity.Returns(Identity.Parse(userIdentity));
+            Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
 
             var settings = new ProcessHttpSettings
             {

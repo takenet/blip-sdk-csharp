@@ -9,13 +9,12 @@ using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Variables
 {
-    public class CalendarVariableProviderTests : CancellationTokenTestsBase
+    public class CalendarVariableProviderTests : ContextTestsBase
     {
         public CalendarVariableProviderTests()
         {
             Identity = new Identity("name", "domain.com");
-            Context = Substitute.For<IContext>();
-            Context.User.Returns(Identity);
+            Context.UserIdentity.Returns(Identity);
         }
 
         public CalendarVariableProvider GetTarget()
@@ -24,9 +23,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
         }
 
         public Identity Identity { get; }
-
-        public IContext Context { get; }
-
         [Fact]
         public async Task GetDateShouldReturnTodayDate()
         {
