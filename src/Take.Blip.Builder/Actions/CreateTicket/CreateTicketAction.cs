@@ -1,3 +1,4 @@
+using Lime.Protocol;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Client.Activation;
@@ -11,7 +12,7 @@ namespace Take.Blip.Builder.Actions.CreateTicket
         private readonly IHelpDeskExtension _helpDeskExtension;
         private readonly Application _application;
 
-        public CreateTicketAction(IHelpDeskExtension helpDeskExtension, Application application) 
+        public CreateTicketAction(IHelpDeskExtension helpDeskExtension, Application application)
             : base(nameof(CreateTicket))
         {
             _helpDeskExtension = helpDeskExtension;
@@ -26,13 +27,14 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                 CustomerIdentity = settings.CustomerIdentity,
                 RoutingOwnerIdentity = settings.RoutingOwnerIdentity,
                 RoutingCustomerIdentity = settings.RoutingCustomerIdentity,
+                CustomerInput = settings.CustomerInput,
             };
-            
+
             if (ticket.OwnerIdentity == null)
             {
                 ticket.OwnerIdentity = context.OwnerIdentity;
             }
-            
+
             if (ticket.CustomerIdentity == null)
             {
                 ticket.CustomerIdentity = context.UserIdentity;
@@ -54,6 +56,14 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                         ticket.RoutingCustomerIdentity = fromIdentity;
                     }
                 }
+            }
+
+            if (ticket.CustomerInput == null)
+            {
+                ticket.CustomerInput = new DocumentContainer
+                {
+                    Value = context.Input.Content
+                };
             }
 
             var createdTicket = await _helpDeskExtension.CreateTicketAsync(ticket, cancellationToken);
