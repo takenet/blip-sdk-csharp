@@ -56,5 +56,10 @@
         /// Get values from the current help desk ticket, if there is one.
         /// </summary>
         Ticket,
+
+        /// <summary>
+        /// Get values from resources
+        /// </summary>
+        Resource,
     }
 }
