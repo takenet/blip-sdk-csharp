@@ -25,7 +25,6 @@ namespace Take.Blip.Builder.Variables
         {
             try
             {
-                // We are sending the command directly here because the ResourceExtension uses the BucketExtension and it requires us to known the type.
                 var resourceCommandResult = await ExecuteGetResourceCommandAsync(name, cancellationToken);
 
                 if (resourceCommandResult.Status != CommandStatus.Success)
@@ -48,6 +47,7 @@ namespace Take.Blip.Builder.Variables
 
         private async Task<Command> ExecuteGetResourceCommandAsync(string name, CancellationToken cancellationToken)
         {
+            // We are sending the command directly here because the ResourceExtension use the BucketExtension and it requires us to known the type.
             var getResourceCommand = new Command()
             {
                 Uri = new LimeUri($"/resources/{Uri.EscapeDataString(name)}"),

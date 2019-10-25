@@ -418,5 +418,57 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             actual.ShouldBe("value2");
         }
+        [Fact]
+        public async Task GetResourceTextVariableShouldSucceed()
+        {
+            // Arrange
+            var document = new PlainText()
+            {
+                Text = "my value"
+            };
+            Sender
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals("/resources/id1")), CancellationToken)
+                .Returns(new Command()
+                {
+                    Status = CommandStatus.Success,
+                    Resource = document
+                });
+
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("resource.id1", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(document.Text);
+        }
+
+        [Fact]
+        public async Task GetResourceJsonVariablePropertyShouldSucceed()
+        {
+            // Arrange
+            var document = new JsonDocument()
+            {
+                {"key1", "value1"},
+                {"key2", "value2"}
+            };
+            Sender
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals("/resources/id1")), CancellationToken)
+                .Returns(new Command()
+                {
+                    Status = CommandStatus.Success,
+                    Resource = document
+                });
+
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("resource.id1@key2", CancellationToken);
+
+            // Assert
+            actual.ShouldBe("value2");
+        }
     }
 }
