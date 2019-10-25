@@ -12,18 +12,11 @@ namespace Take.Blip.Builder.Variables
     {
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
-        private readonly string _resourceName;
 
         public BucketVariableProvider(ISender sender, IDocumentSerializer documentSerializer)
-            : this(sender, documentSerializer, "buckets")
-        {
-        }
-
-        protected BucketVariableProvider(ISender sender, IDocumentSerializer documentSerializer, string resourceName)
         {
             _sender = sender;
             _documentSerializer = documentSerializer;
-            _resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
         }
 
         public VariableSource Source => VariableSource.Bucket;
@@ -32,40 +25,23 @@ namespace Take.Blip.Builder.Variables
         {
             try
             {
-                var resourceCommandResult = await ExecuteGetResourceCommandAsync(name, cancellationToken);
+                // We are sending the command directly here because the BucketExtension requires us to known the type.
+                var bucketCommandResult = await _sender.ProcessCommandAsync(
+                    new Command()
+                    {
+                        Uri = new LimeUri($"/buckets/{Uri.EscapeDataString(name)}"),
+                        Method = CommandMethod.Get,
+                    },
+                    cancellationToken);
 
-                if (resourceCommandResult.Status != CommandStatus.Success)
-                {
-                    return null;
-                }
-
-                if (!resourceCommandResult.Resource.GetMediaType().IsJson)
-                {
-                    return resourceCommandResult.Resource.ToString();
-                }
-
-                return _documentSerializer.Serialize(resourceCommandResult.Resource);
+                if (bucketCommandResult.Status != CommandStatus.Success) return null;
+                if (!bucketCommandResult.Resource.GetMediaType().IsJson) return bucketCommandResult.Resource.ToString();
+                return _documentSerializer.Serialize(bucketCommandResult.Resource);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
                 return null;
             }
-        }
-
-        private async Task<Command> ExecuteGetResourceCommandAsync(string name, CancellationToken cancellationToken)
-        {
-            // We are sending the command directly here because the ResourceExtension use the BucketExtension and it requires us to know the type.
-            var getResourceCommand = new Command()
-            {
-                Uri = new LimeUri($"/{_resourceName}/{Uri.EscapeDataString(name)}"),
-                Method = CommandMethod.Get,
-            };
-
-            var resourceCommandResult = await _sender.ProcessCommandAsync(
-                getResourceCommand,
-                cancellationToken);
-
-            return resourceCommandResult;
         }
     }
 }
