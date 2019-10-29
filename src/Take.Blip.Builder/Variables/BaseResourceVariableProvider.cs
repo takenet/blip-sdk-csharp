@@ -10,12 +10,12 @@ using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Variables
 {
-    public class BaseResourceVariableProvider : IVariableProvider
+    public abstract class BaseResourceVariableProvider : IVariableProvider
     {
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
         private readonly string _resourceName;
-        public VariableSource Source => throw new NotImplementedException();
+        public abstract VariableSource Source { get; }
 
         public BaseResourceVariableProvider(ISender sender, IDocumentSerializer documentSerializer, string resourceName)
         {
