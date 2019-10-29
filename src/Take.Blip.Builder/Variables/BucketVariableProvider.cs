@@ -8,7 +8,7 @@ using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Variables
 {
-    public class BucketVariableProvider : BaseResourceVariableProvider, IVariableProvider
+    public class BucketVariableProvider : ResourceVariableProviderBase, IVariableProvider
     {
         public BucketVariableProvider(ISender sender, IDocumentSerializer documentSerializer) : base(sender, documentSerializer, "buckets") { }
 
