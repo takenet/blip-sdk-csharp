@@ -21,7 +21,7 @@ namespace Take.Blip.Builder.Variables
         {
             _sender = sender;
             _documentSerializer = documentSerializer;
-            _resourceName = resourceName;
+            _resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
         }
 
 
