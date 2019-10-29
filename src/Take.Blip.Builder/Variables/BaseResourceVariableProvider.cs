@@ -14,7 +14,7 @@ namespace Take.Blip.Builder.Variables
     {
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
-        protected readonly string _resourceName;
+        private readonly string _resourceName;
         public VariableSource Source => throw new NotImplementedException();
 
         public BaseResourceVariableProvider(ISender sender, IDocumentSerializer documentSerializer, string resourceName)
