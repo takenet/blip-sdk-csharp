@@ -12,6 +12,6 @@ namespace Take.Blip.Builder.Variables
     {
         public BucketVariableProvider(ISender sender, IDocumentSerializer documentSerializer) : base(sender, documentSerializer, "buckets") { }
 
-        public VariableSource Source => VariableSource.Bucket;
+        public override VariableSource Source => VariableSource.Bucket;
     }
 }

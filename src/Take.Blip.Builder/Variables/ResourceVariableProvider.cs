@@ -12,7 +12,7 @@ namespace Take.Blip.Builder.Variables
     {
         public ResourceVariableProvider(ISender sender, IDocumentSerializer documentSerializer) : base(sender, documentSerializer, "resources") { }
 
-        public VariableSource Source => VariableSource.Resource;
+        public override VariableSource Source => VariableSource.Resource;
 
     }
 }
