@@ -374,14 +374,8 @@ namespace Take.Blip.Builder.UnitTests
             {
                 Text = "my value"
             };
-            Sender
-                .ProcessCommandAsync(
-                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals("/buckets/id1")), CancellationToken)
-                .Returns(new Command()
-                {
-                    Status = CommandStatus.Success,
-                    Resource = document
-                });
+
+            SetupGetCommandResult("/buckets/id1", document);
 
             var target = GetTarget();
 
@@ -401,14 +395,8 @@ namespace Take.Blip.Builder.UnitTests
                 {"key1", "value1"},
                 {"key2", "value2"}
             };
-            Sender
-                .ProcessCommandAsync(
-                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals("/buckets/id1")), CancellationToken)
-                .Returns(new Command()
-                {
-                    Status = CommandStatus.Success,
-                    Resource = document
-                });
+
+            SetupGetCommandResult("/buckets/id1", document);
 
             var target = GetTarget();
 
@@ -426,15 +414,9 @@ namespace Take.Blip.Builder.UnitTests
             {
                 Text = "my value"
             };
-            Sender
-                .ProcessCommandAsync(
-                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals("/resources/id1")), CancellationToken)
-                .Returns(new Command()
-                {
-                    Status = CommandStatus.Success,
-                    Resource = document
-                });
-
+            
+            SetupGetCommandResult("/resources/id1", document);
+            
             var target = GetTarget();
 
             // Act
@@ -453,14 +435,8 @@ namespace Take.Blip.Builder.UnitTests
                 {"key1", "value1"},
                 {"key2", "value2"}
             };
-            Sender
-                .ProcessCommandAsync(
-                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals("/resources/id1")), CancellationToken)
-                .Returns(new Command()
-                {
-                    Status = CommandStatus.Success,
-                    Resource = document
-                });
+
+            SetupGetCommandResult("/resources/id1", document);
 
             var target = GetTarget();
 
@@ -469,6 +445,18 @@ namespace Take.Blip.Builder.UnitTests
 
             // Assert
             actual.ShouldBe("value2");
+        }
+
+        private void SetupGetCommandResult(string uri, Document resource)
+        {
+            Sender
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals(uri)), CancellationToken)
+                .Returns(new Command()
+                {
+                    Status = CommandStatus.Success,
+                    Resource = resource
+                });
         }
     }
 }
