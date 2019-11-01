@@ -10,6 +10,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 {
     public sealed class ProcessHttpAction : ActionBase<ProcessHttpSettings>, IDisposable
     {
+        private const string ADD_USER_KEY = "processHttpAddUserToRequestHeader";
+        private const string ADD_BOT_KEY = "processHttpAddBotIdentityToRequestHeader";
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
 
         private readonly IHttpClient _httpClient;
@@ -89,9 +91,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// <param name="context"></param>
         private void AddUserToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
-            if (ShouldAddHeader("processHttpAddUserToRequestHeader", context))
+            if (ShouldAddHeader(ADD_USER_KEY, context))
             {
-                httpRequestMessage.Headers.Add("X-Blip-User", context.UserIdentity);
+                httpRequestMessage.Headers.Add(Constants.BLIP_USER_HEADER, context.UserIdentity);
             }
         }
 
@@ -103,9 +105,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// <param name="context"></param>
         private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
-            if (ShouldAddHeader("processHttpAddBotIdentityToRequestHeader", context))
+            if (ShouldAddHeader(ADD_BOT_KEY, context))
             {
-                httpRequestMessage.Headers.Add("X-Blip-Bot", context.OwnerIdentity);
+                httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.OwnerIdentity);
             }
         }
 
