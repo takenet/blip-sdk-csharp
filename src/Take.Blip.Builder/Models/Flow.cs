@@ -208,14 +208,14 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// Fully checks if a given config header should be added or not
         /// </summary>
-        /// <param name="header">Config header to check for</param>
+        /// <param name="configurationKey">Config key to check for</param>
         /// <returns>Boolean indicating if the configuration is enabled</returns>
-        public bool ConfigurationFlagIsEnabled(string header)
+        public bool ConfigurationFlagIsEnabled(string configurationKey)
         {
             return Configuration != null &&
-                Configuration.TryGetValue(header, out string identifierHeaderValue) &&
-                bool.TryParse(identifierHeaderValue, out bool sendBotIdentifier) &&
-                sendBotIdentifier;
+                Configuration.TryGetValue(configurationKey, out string configValue) &&
+                bool.TryParse(configValue, out bool isEnabled) &&
+                isEnabled;
         }
     }
 }
