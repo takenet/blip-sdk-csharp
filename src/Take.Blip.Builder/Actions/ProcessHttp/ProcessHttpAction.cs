@@ -91,7 +91,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// <param name="context"></param>
         private void AddUserToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
-            if (ShouldAddHeader(ADD_USER_KEY, context))
+            if (context.Flow.IsConfigurationFlagEnabled(ADD_USER_KEY))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_USER_HEADER, context.UserIdentity);
             }
@@ -105,24 +105,10 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// <param name="context"></param>
         private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
-            if (ShouldAddHeader(ADD_BOT_KEY, context))
+            if (context.Flow.IsConfigurationFlagEnabled(ADD_BOT_KEY))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.OwnerIdentity);
             }
-        }
-
-        /// <summary>
-        /// Fully checks if a given config header should be added or not
-        /// </summary>
-        /// <param name="header">Config header to check for</param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        private static bool ShouldAddHeader(string header, IContext context)
-        {
-            return context.Flow.Configuration != null &&
-                context.Flow.Configuration.TryGetValue(header, out string identifierHeaderValue) &&
-                bool.TryParse(identifierHeaderValue, out bool sendBotIdentifier) &&
-                sendBotIdentifier;
         }
 
         public void Dispose()
