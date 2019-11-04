@@ -210,7 +210,7 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         /// <param name="header">Config header to check for</param>
         /// <returns>Boolean indicating if the configuration is enabled</returns>
-        public bool IsConfigurationFlagEnabled(string header)
+        public bool ConfigurationFlagIsEnabled(string header)
         {
             return Configuration != null &&
                 Configuration.TryGetValue(header, out string identifierHeaderValue) &&

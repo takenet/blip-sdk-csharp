@@ -91,7 +91,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// <param name="context"></param>
         private void AddUserToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
-            if (context.Flow.IsConfigurationFlagEnabled(ADD_USER_KEY))
+            if (context.Flow.ConfigurationFlagIsEnabled(ADD_USER_KEY))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_USER_HEADER, context.UserIdentity);
             }
@@ -105,7 +105,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// <param name="context"></param>
         private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
-            if (context.Flow.IsConfigurationFlagEnabled(ADD_BOT_KEY))
+            if (context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.OwnerIdentity);
             }
