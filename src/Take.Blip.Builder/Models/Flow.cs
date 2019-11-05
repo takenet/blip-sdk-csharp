@@ -204,5 +204,18 @@ namespace Take.Blip.Builder.Models
         /// <param name="filePath">The path.</param>
         /// <returns></returns>
         public static Flow ParseFromJsonFile(string filePath) => ParseFromJson(File.ReadAllText(filePath));
+
+        /// <summary>
+        /// Fully checks if a given config header should be added or not
+        /// </summary>
+        /// <param name="configurationKey">Config key to check for</param>
+        /// <returns>Boolean indicating if the configuration is enabled</returns>
+        public bool ConfigurationFlagIsEnabled(string configurationKey)
+        {
+            return Configuration != null &&
+                Configuration.TryGetValue(configurationKey, out string configValue) &&
+                bool.TryParse(configValue, out bool isEnabled) &&
+                isEnabled;
+        }
     }
 }
