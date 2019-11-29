@@ -1,5 +1,6 @@
 ﻿using Lime.Messaging.Resources;
 using Lime.Protocol;
+using Lime.Protocol.Serialization;
 using NSubstitute;
 using Serilog;
 using Shouldly;
@@ -20,6 +21,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
 {
     public class ContactVariableProviderTests : ContextTestsBase
     {
+
         public ContactVariableProviderTests()
         {
             ContactExtension = Substitute.For<IContactExtension>();
@@ -41,6 +43,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             Context.OwnerIdentity.Returns(new Identity("application", "domain.com"));
             Application.Identifier = "application";
             Application.Domain = "domain.com";
+            DocumentSerializer = new DocumentSerializer(new DocumentTypeResolver());
         }
 
         public OwnerCallerContactMap OwnerCallerContactMap { get; }
@@ -59,9 +62,24 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public Contact Contact { get; }
 
+        public IDocumentSerializer DocumentSerializer { get; }
+
         public ContactVariableProvider GetTarget()
         {
-            return new ContactVariableProvider(CacheContactExtensionDecorator);
+            return new ContactVariableProvider(CacheContactExtensionDecorator, DocumentSerializer);
+        }
+
+        [Fact]
+        public async Task GetSerializedContact()
+        {
+            // Arrange
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("serialized", Context, CancellationToken);
+
+            // Asset
+            actual.ShouldBe(DocumentSerializer.Serialize(Contact));
         }
 
         [Fact]
