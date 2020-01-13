@@ -25,7 +25,10 @@ namespace Take.Blip.Builder
         private readonly Lazy<string> _lazySerializedContent;
         private readonly Lazy<bool> _analyzable;
         private readonly Lazy<Task<AnalysisResponse>> _lazyAnalyzedContent;
+        private readonly Lazy<Task<ContentResult>> _lazyGetContentResult;
         private readonly Lazy<string> _lazySerializedMessage;
+        private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
+        private readonly CancellationToken _cancellationToken;
 
         public LazyInput(
             Message message,
@@ -45,40 +48,70 @@ namespace Take.Blip.Builder
                 Message?.Metadata?.TryGetValue("builder.analyzable", out result);
                 return result?.ToLower() == "true";
             });
-            _lazyAnalyzedContent = new Lazy<Task<AnalysisResponse>>(async () =>
-            {
-                // Only analyze the input if the type is plain text or analyzable metadata is true.
-                if (!_analyzable.Value && Content.GetMediaType() != PlainText.MediaType) return null;
-
-                try
-                {
-                    return await artificialIntelligenceExtension.AnalyzeAsync(
-                        new AnalysisRequest
-                        {
-                            Text = _lazySerializedContent.Value,
-                            Extras = new Dictionary<string, string>
-                            {
-                                ["MessageId"] = Message.Id,
-                                ["UserIdentity"] = userIdentity.ToString()
-                            }
-                        },
-                        cancellationToken);
-                }
-                catch (LimeException)
-                {
-                    return null;
-                }
-            });
-            _lazySerializedMessage = new Lazy<string>(() =>
-            {
-                if (Message != null)
-                {
-                    return envelopeSerializer.Serialize(Message);
-                }
-
-                return null;
-            });
+            _artificialIntelligenceExtension = artificialIntelligenceExtension;
+            _cancellationToken = cancellationToken;
+            _lazyAnalyzedContent = CreateLazyAnalyzedContent(userIdentity);
+            _lazySerializedMessage = CreateLazySerializedMessage(envelopeSerializer);
+            _lazyGetContentResult = CreateLazyGetContentResult();
         }
+
+        private Lazy<Task<AnalysisResponse>> CreateLazyAnalyzedContent(Identity userIdentity) => new Lazy<Task<AnalysisResponse>>(async () =>
+        {
+            // Only analyze the input if the type is plain text or analyzable metadata is true.
+            if (!_analyzable.Value && Content.GetMediaType() != PlainText.MediaType) return null;
+
+            try
+            {
+                return await _artificialIntelligenceExtension.AnalyzeAsync(
+                    new AnalysisRequest
+                    {
+                        Text = _lazySerializedContent.Value,
+                        Extras = new Dictionary<string, string>
+                        {
+                            ["MessageId"] = Message.Id,
+                            ["UserIdentity"] = userIdentity.ToString()
+                        }
+                    },
+                    _cancellationToken);
+            }
+            catch (LimeException)
+            {
+                return null;
+            }
+        });
+
+        private Lazy<string> CreateLazySerializedMessage(IEnvelopeSerializer envelopeSerializer) => new Lazy<string>(() =>
+        {
+            if (Message != null)
+            {
+                return envelopeSerializer.Serialize(Message);
+            }
+            return null;
+        });
+
+        private Lazy<Task<ContentResult>> CreateLazyGetContentResult() => new Lazy<Task<ContentResult>>(async () =>
+        {
+            var intentId = (await GetIntentAsync())?.Id;
+            if (intentId == null) return null;
+            var entityValues = (await AnalyzedContent)?
+                .Entities?
+                .Select(entity => entity.Value)
+                .ToArray();
+            try
+            {
+                return await _artificialIntelligenceExtension.GetContentResultAsync(
+                   new ContentCombination
+                   {
+                       Intent = intentId,
+                       Entities = entityValues
+                   },
+                   _cancellationToken);
+            }
+            catch (LimeException)
+            {
+                return null;
+            }
+        });
 
         public Message Message { get; }
 
@@ -89,6 +122,8 @@ namespace Take.Blip.Builder
         public string SerializedMessage => _lazySerializedMessage.Value;
 
         public Task<AnalysisResponse> AnalyzedContent => _lazyAnalyzedContent.Value;
+
+        public Task<ContentResult> ContentResult => _lazyGetContentResult.Value;
 
         public async Task<IntentionResponse> GetIntentAsync()
         {
