@@ -57,7 +57,12 @@ namespace Take.Blip.Builder.Variables
 
                 return await GetEntityVariableAsync(input, entityNameAndProperty[1], entityNameAndProperty[2]);
             }
-            
+
+            if (nameToLower.StartsWith("assistant."))
+            {
+                return await GetContentVariableAsync(input, nameToLower.Split('.')[1]);
+            }
+
             if (nameToLower.StartsWith("message."))
             {
                 return GetMessageProperty(input.Message, nameToLower.Split('.')[1]);
@@ -114,6 +119,26 @@ namespace Take.Blip.Builder.Variables
 
                 case "value":
                     return entity.Value;
+            }
+
+            return null;
+        }
+
+        private async Task<string> GetContentVariableAsync(LazyInput input, string contentProperty)
+        {
+            var content = await input.ContentResult;
+            if (content == null || content.Id == null) return null;
+
+            switch (contentProperty)
+            {
+                case "id":
+                    return content.Id;
+
+                case "name":
+                    return content.Name;
+
+                case "value":
+                    return content.Result.Content.ToString();
             }
 
             return null;
