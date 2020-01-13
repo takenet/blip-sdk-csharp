@@ -25,6 +25,12 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
                     analysisRequest, UriTemplates.ANALYSIS, ArtificialIntelligenceAddress),
                 cancellationToken);
 
+        public Task<ContentResult> GetContentResultAsync(Document document, CancellationToken cancellationToken = default(CancellationToken))
+            => ProcessCommandAsync<ContentResult>(
+                CreateSetCommandRequest(
+                    document, UriTemplates.CONTENT_ANALYSIS, ArtificialIntelligenceAddress),
+                cancellationToken);
+
         public Task SendFeedbackAsync(string analysisId, AnalysisFeedback analysisFeedback,
             CancellationToken cancellationToken = new CancellationToken())
             => ProcessCommandAsync<AnalysisFeedback>(

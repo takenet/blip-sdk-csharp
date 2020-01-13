@@ -157,6 +157,14 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         Task<AnalysisResponse> AnalyzeAsync(AnalysisRequest analysisRequest, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
+        /// Get content result for the analyzed user input.
+        /// </summary>
+        /// <param name="resource"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ContentResult> GetContentResultAsync(Document resource, CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
         /// Send a feedback to a executed analysis to help improving the model.
         /// </summary>
         /// <param name="analysisId"></param>
