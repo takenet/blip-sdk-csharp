@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Jint.Runtime;
+using Microsoft.ClearScript;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Shouldly;
@@ -14,9 +12,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
 {
     public class ExecuteScriptActionTests : ActionTestsBase
     {
-        private ExecuteScriptAction GetTarget()
+        protected virtual ExecuteScriptActionBase GetTarget()
         {
-            return new ExecuteScriptAction();
+            return new DefaultExecuteScriptAction();
         }
 
         [Fact]
@@ -147,15 +145,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task ExecuteWithJsonReturnValueShouldSucceed()
         {
             // Arrange
-            var result = "{\"id\":1.0,\"valid\":true,\"options\":[1.0,2.0,3.0],\"names\":[\"a\",\"b\",\"c\"],\"others\":[{\"a\":\"value1\"},{\"b\":\"value2\"}],\"content\":{\"uri\":\"https://server.com/image.jpeg\",\"type\":\"image/jpeg\"}}";
+            var result = "{\"id\":1.5,\"valid\":true,\"options\":[1.1,2.1,3.1],\"names\":[\"a\",\"b\",\"c\"],\"others\":[{\"a\":\"value1\"},{\"b\":\"value2\"}],\"content\":{\"uri\":\"https://server.com/image.jpeg\",\"type\":\"image/jpeg\"}}";
             var settings = new ExecuteScriptSettings()
             {
                 Source = @"
                     function run() {
                         return {
-                            id: 1,
+                            id: 1.5,
                             valid: true,
-                            options: [ 1, 2, 3 ],
+                            options: [ 1.1, 2.1, 3.1 ],
                             names: [ 'a', 'b', 'c' ],
                             others: [{ a: 'value1' }, { b: 'value2' }],                        
                             content: {
@@ -181,12 +179,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task ExecuteWithArrayReturnValueShouldSucceed()
         {
             // Arrange
-            var result = "[1.0,2.0,3.0]";
+            var result = "[1.1,2.1,3.1]";
             var settings = new ExecuteScriptSettings()
             {
                 Source = @"
                     function run() {
-                        return [1, 2, 3];
+                        return [1.1, 2.1, 3.1];
                     }
                     ",
                 OutputVariable = nameof(result)
@@ -227,9 +225,51 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
                 throw new Exception("The script was executed");
             }
+            catch (ScriptInterruptedException ex)
+            {
+                ex.Message.ShouldBe("Script execution interrupted by host");
+            }
             catch (StatementsCountOverflowException ex)
             {
                 ex.Message.ShouldBe("The maximum number of statements executed have been reached.");
+            }
+        }
+
+        [Fact]
+        public async Task ExecuteWithALargeNumberOfObjectsShouldFail()
+        {
+            // Arrange
+            var result = "";
+            var settings = new ExecuteScriptSettings()
+            {
+                Source = @"
+                    function run() {
+                        const array = [];
+                        for (let i = 0; i < 1 << 30; i++) {
+                            array.push({
+                                item: JSON.stringify(array)
+                            });
+                        }
+                        return array;
+                    }
+                    ",
+                OutputVariable = nameof(result)
+            };
+            var target = GetTarget();
+
+            // Act            
+            try
+            {
+                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+                throw new Exception("The script was executed");
+            }
+            catch (ScriptEngineException ex)
+            {
+                ex.Message.ShouldBe("The V8 runtime has exceeded its memory limit");
+            }
+            catch (OutOfMemoryException ex)
+            {
+                ex.Message.ShouldContain(nameof(OutOfMemoryException));
             }
         }
 
@@ -261,9 +301,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
                 throw new Exception("The script was executed");
             }
-            catch (JavaScriptException ex)
+            catch (Exception ex)
             {
-                ex.Message.ShouldBe("XMLHttpRequest is not defined");
+                ex.Message.EndsWith("XMLHttpRequest is not defined");
             }
         }
     }

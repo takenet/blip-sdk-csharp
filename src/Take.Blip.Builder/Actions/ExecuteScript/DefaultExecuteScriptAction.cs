@@ -2,40 +2,21 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Jint;
-using Jint.Native;
 using Jint.Runtime;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
-    public class ExecuteScriptAction : ActionBase<ExecuteScriptSettings>
+    public class DefaultExecuteScriptAction : ExecuteScriptActionBase
     {
-        private const string DEFAULT_FUNCTION = "run";
-
-        public ExecuteScriptAction() 
-            : base(nameof(ExecuteScript))
-        {
-        }
-
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
-            // Retrive the input variables
-            object[] arguments = null;
-            if (settings.InputVariables != null && settings.InputVariables.Length > 0)
-            {
-                arguments = new object[settings.InputVariables.Length];
-                for (int i = 0; i < arguments.Length; i++)
-                {
-                    arguments[i] =
-                        await context.GetVariableAsync(settings.InputVariables[i], cancellationToken);
-                }
-            }
+            var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
 
             var engine = new Engine(options => options
                     .LimitRecursion(50)
                     .MaxStatements(1000)
-                    .TimeoutInterval(TimeSpan.FromSeconds(5)))
+                    .TimeoutInterval(TimeoutInterval))
                 .Execute(settings.Source);
 
             var result = arguments != null
