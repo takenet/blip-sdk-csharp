@@ -11,7 +11,7 @@
     <PackageReference Include="SimpleInjector" Version="3.3.2" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.9.0" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.10.0" />
     <PackageReference Include="Take.Elephant.Redis" Version="0.6.221" />
   </ItemGroup>
 
