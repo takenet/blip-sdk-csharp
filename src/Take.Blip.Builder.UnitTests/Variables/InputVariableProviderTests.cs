@@ -353,7 +353,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actualId = await target.GetVariableAsync("assistant.id", Context, CancellationToken);
+            var actualId = await target.GetVariableAsync("contentAssistant.id", Context, CancellationToken);
 
             // Assert
             actualId.ShouldBe(NoContentResult.Id);
@@ -368,8 +368,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actualValue = await target.GetVariableAsync("assistant.value", Context, CancellationToken);
-            var actualId = await target.GetVariableAsync("assistant.id", Context, CancellationToken);
+            var actualValue = await target.GetVariableAsync("contentAssistant.result", Context, CancellationToken);
+            var actualId = await target.GetVariableAsync("contentAssistant.id", Context, CancellationToken);
 
             // Assert
             actualValue.ShouldBe(ContentResultWithIntent.Result.Content.ToString());
@@ -385,8 +385,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actualValue = await target.GetVariableAsync("assistant.value", Context, CancellationToken);
-            var actualId = await target.GetVariableAsync("assistant.id", Context, CancellationToken);
+            var actualValue = await target.GetVariableAsync("contentAssistant.result", Context, CancellationToken);
+            var actualId = await target.GetVariableAsync("contentAssistant.id", Context, CancellationToken);
 
             // Assert
             actualValue.ShouldBe(ContentResultWithIntentAndEntity.Result.Content.ToString());
@@ -402,8 +402,8 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actualValue = await target.GetVariableAsync("assistant.value", Context, CancellationToken);
-            var actualId = await target.GetVariableAsync("assistant.id", Context, CancellationToken);
+            var actualValue = await target.GetVariableAsync("contentAssistant.result", Context, CancellationToken);
+            var actualId = await target.GetVariableAsync("contentAssistant.id", Context, CancellationToken);
 
             // Assert
             actualValue.ShouldBe(ContentResultWithIntentAndMultipleEntities.Result.Content.ToString());
