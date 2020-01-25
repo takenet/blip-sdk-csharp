@@ -12,7 +12,7 @@ namespace Take.Blip.Builder.Models
         /// <param name="s">The first of the two strings.</param>
         /// <param name="t">The second of the two strings.</param>
         /// <returns>The Levenshtein cost.</returns>
-        /// Source: http://rosettacode.org/wiki/Levenshtein_distance#C.23 - memory optimized
+        /// Adapted from: http://rosettacode.org/wiki/Levenshtein_distance#C.23
         public static int CalculateLevenshteinDistance(this string s, string t)
         {
             var n = s.Length;
