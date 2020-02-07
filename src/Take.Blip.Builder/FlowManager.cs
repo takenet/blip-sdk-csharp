@@ -1,11 +1,9 @@
 ﻿using Lime.Messaging.Contents;
-using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Content;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -21,7 +20,9 @@ using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
+using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
+using Take.Blip.Client.Extensions.Scheduler;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -37,12 +38,13 @@ namespace Take.Blip.Builder
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
+        private readonly ISchedulerExtension _schedulerExtension;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly Identity _applicationIdentity;
-        
+
         public FlowManager(
             IConfiguration configuration,
             IStateManager stateManager,
@@ -53,6 +55,7 @@ namespace Take.Blip.Builder
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
+            ISchedulerExtension schedulerExtension,
             IVariableReplacer variableReplacer,
             ILogger logger,
             ITraceManager traceManager,
@@ -68,6 +71,7 @@ namespace Take.Blip.Builder
             _documentSerializer = documentSerializer;
             _envelopeSerializer = envelopeSerializer;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
+            _schedulerExtension = schedulerExtension;
             _variableReplacer = variableReplacer;
             _logger = logger;
             _traceManager = traceManager;
@@ -90,6 +94,17 @@ namespace Take.Blip.Builder
             if (flow == null)
             {
                 throw new ArgumentNullException(nameof(flow));
+            }
+
+            if (message.Content is InputExpirationTimeDocument)
+            {
+
+                message = new Message(message.Id)
+                {
+                    To = message.To,
+                    From = (message.Content as InputExpirationTimeDocument).Identity.ToNode(),
+                    Content = PlainText.Parse("")
+                };
             }
 
             flow.Validate();
@@ -139,6 +154,7 @@ namespace Take.Blip.Builder
                     var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
+
                         // Create the input evaluator
                         var lazyInput = new LazyInput(message, userIdentity,  flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
@@ -149,6 +165,13 @@ namespace Take.Blip.Builder
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
+                        // Cancel Schedule expiration time if input is configured
+                        if (state.Input != null &&
+                            state.Input?.IsExpirationTimeEnabled() == true)
+                        {
+                            await _schedulerExtension.CancelScheduledMessageAsync(message.GetInputExirationTimeIdMessage(), linkedCts.Token);
+                        }
 
                         // Calculate the number of state transitions
                         var transitions = 0;
@@ -170,9 +193,9 @@ namespace Take.Blip.Builder
                                 linkedCts.Token.ThrowIfCancellationRequested();
 
                                 // Validate the input for the current state
-                                if (stateWaitForInput &&
-                                    state.Input?.Validation != null &&
-                                    !ValidateDocument(lazyInput, state.Input.Validation))
+                                if ( stateWaitForInput &&
+                                     state.Input?.Validation != null &&
+                                     !ValidateDocument(lazyInput, state.Input.Validation))
                                 {
                                     if (state.Input.Validation.Error != null)
                                     {
@@ -255,10 +278,17 @@ namespace Take.Blip.Builder
                         {
                             await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, linkedCts.Token);
                         }
+
+                        // Schedule expiration time if input is configured
+                        if (state.Input != null && 
+                            state.Input.IsExpirationTimeEnabled())
+                        {
+                            await _schedulerExtension.ScheduleMessageAsync(message.CreateInputExirationTimeMessage(), DateTimeOffset.UtcNow.AddMinutes(state.Input.WaitInputExpirationTimeMinutes.Value), linkedCts.Token);
+                        }
                     }
                     finally
                     {
-                        await handle.DisposeAsync();
+                        await handle?.DisposeAsync();
                     }
                 }
             }

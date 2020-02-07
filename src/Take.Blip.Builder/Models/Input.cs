@@ -27,6 +27,11 @@ namespace Take.Blip.Builder.Models
         public InputValidation Validation { get; set; }
 
         /// <summary>
+        /// Defines time of wait user input. Valid only if bypass is false.
+        /// </summary>
+        public double? WaitInputExpirationTimeMinutes { get; set; }
+
+        /// <summary>
         /// The context variable name to store the input after validation.
         /// </summary>
         public string Variable { get; set; }
@@ -59,5 +64,9 @@ namespace Take.Blip.Builder.Models
                 throw new ValidationException("The input variable name should be composed only by letters, numbers and dots");
             }
         }
+
+        public bool IsExpirationTimeEnabled() => !Bypass
+            && WaitInputExpirationTimeMinutes != null
+            && WaitInputExpirationTimeMinutes > 0;
     }
 }
