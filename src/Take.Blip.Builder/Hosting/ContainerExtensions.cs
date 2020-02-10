@@ -66,7 +66,8 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterCollection<IAction>(
                 new[]
                 {
-                    typeof(ExecuteScriptAction),
+                    typeof(DefaultExecuteScriptAction),
+                    typeof(ExecuteScriptV8Action),
                     typeof(SendMessageAction),
                     typeof(SendMessageFromHttpAction),
                     typeof(SendRawMessageAction),
