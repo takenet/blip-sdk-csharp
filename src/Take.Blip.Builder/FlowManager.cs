@@ -98,6 +98,10 @@ namespace Take.Blip.Builder
 
             if (message.Content is InputExpirationTimeDocument)
             {
+                if ((message.Content as InputExpirationTimeDocument).Identity == null)
+                {
+                    throw new ArgumentException("Message content 'Identity' must be present", nameof(InputExpirationTimeDocument));
+                }
 
                 message = new Message(message.Id)
                 {
@@ -280,7 +284,7 @@ namespace Take.Blip.Builder
                         }
 
                         // Schedule expiration time if input is configured
-                        if (state.Input != null && 
+                        if (state?.Input != null && 
                             state.Input.IsExpirationTimeEnabled())
                         {
                             await _schedulerExtension.ScheduleMessageAsync(message.CreateInputExirationTimeMessage(), DateTimeOffset.UtcNow.AddMinutes(state.Input.WaitInputExpirationTimeMinutes.Value), linkedCts.Token);
