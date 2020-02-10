@@ -98,7 +98,7 @@ namespace Take.Blip.Builder
 
             if (message.Content is InputExpirationTimeDocument)
             {
-                if ((message.Content as InputExpirationTimeDocument).Identity == null)
+                if (string.IsNullOrWhiteSpace((message.Content as InputExpirationTimeDocument)?.Identity?.ToString()))
                 {
                     throw new ArgumentException("Message content 'Identity' must be present", nameof(InputExpirationTimeDocument));
                 }
