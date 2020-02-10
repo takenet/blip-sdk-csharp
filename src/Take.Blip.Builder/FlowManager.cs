@@ -171,8 +171,7 @@ namespace Take.Blip.Builder
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // Cancel Schedule expiration time if input is configured
-                        if (state.Input != null &&
-                            state.Input?.IsExpirationTimeEnabled() == true)
+                        if (state.IsNotNullAndInputExpirationTimeEnabled())
                         {
                             await _schedulerExtension.CancelScheduledMessageAsync(message.GetInputExirationTimeIdMessage(), linkedCts.Token);
                         }
@@ -284,8 +283,7 @@ namespace Take.Blip.Builder
                         }
 
                         // Schedule expiration time if input is configured
-                        if (state?.Input != null && 
-                            state.Input.IsExpirationTimeEnabled())
+                        if (state.IsNotNullAndInputExpirationTimeEnabled())
                         {
                             await _schedulerExtension.ScheduleMessageAsync(message.CreateInputExirationTimeMessage(), DateTimeOffset.UtcNow.AddMinutes(state.Input.WaitInputExpirationTimeMinutes.Value), linkedCts.Token);
                         }
