@@ -96,9 +96,9 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            if (message.Content is InputExpirationTimeDocument)
+            if (message.Content is InputExpirationTimeDocument inputExpirationTimeDocument)
             {
-                if (string.IsNullOrWhiteSpace((message.Content as InputExpirationTimeDocument)?.Identity?.ToString()))
+                if (string.IsNullOrWhiteSpace(inputExpirationTimeDocument?.Identity?.ToString()))
                 {
                     throw new ArgumentException("Message content 'Identity' must be present", nameof(InputExpirationTimeDocument));
                 }
@@ -106,7 +106,7 @@ namespace Take.Blip.Builder
                 message = new Message(message.Id)
                 {
                     To = message.To,
-                    From = (message.Content as InputExpirationTimeDocument).Identity.ToNode(),
+                    From = inputExpirationTimeDocument.Identity.ToNode(),
                     Content = PlainText.Parse("")
                 };
             }
