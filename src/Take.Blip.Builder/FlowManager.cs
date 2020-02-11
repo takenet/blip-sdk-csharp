@@ -59,7 +59,7 @@ namespace Take.Blip.Builder
             IVariableReplacer variableReplacer,
             ILogger logger,
             ITraceManager traceManager,
-            IUserOwnerResolver userOwnerResolver, 
+            IUserOwnerResolver userOwnerResolver,
             Application application)
         {
             _configuration = configuration;
@@ -96,30 +96,30 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            if (message.Content is InputExpirationTimeDocument inputExpirationTimeDocument)
+            if (message.Content is InputExpirationTimeMarker inputExpirationTimeMarker)
             {
-                if (string.IsNullOrWhiteSpace(inputExpirationTimeDocument?.Identity?.ToString()))
+                if (string.IsNullOrWhiteSpace(inputExpirationTimeMarker?.Identity?.ToString()))
                 {
-                    throw new ArgumentException("Message content 'Identity' must be present", nameof(InputExpirationTimeDocument));
+                    throw new ArgumentException("Message content 'Identity' must be present", nameof(InputExpirationTimeMarker));
                 }
 
                 message = new Message(message.Id)
                 {
                     To = message.To,
-                    From = inputExpirationTimeDocument.Identity.ToNode(),
+                    From = inputExpirationTimeMarker.Identity.ToNode(),
                     Content = PlainText.Parse("")
                 };
             }
 
             flow.Validate();
-            
+
             // Determine the user / owner pair
             var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
             TraceSettings traceSettings;
-            
+
             if (message.Metadata != null &&
                 message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
             {
@@ -160,18 +160,18 @@ namespace Take.Blip.Builder
                     {
 
                         // Create the input evaluator
-                        var lazyInput = new LazyInput(message, userIdentity,  flow.BuilderConfiguration, _documentSerializer,
+                        var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context
                         var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
-                        
+
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // Cancel Schedule expiration time if input is configured
-                        if (state.IsNotNullAndInputExpirationTimeEnabled())
+                        if (state.InputExpirationTimeEnabled())
                         {
                             await _schedulerExtension.CancelScheduledMessageAsync(message.GetInputExirationTimeIdMessage(), linkedCts.Token);
                         }
@@ -181,7 +181,7 @@ namespace Take.Blip.Builder
 
                         // Create trace instances, if required
                         var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
-                        
+
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
@@ -196,9 +196,9 @@ namespace Take.Blip.Builder
                                 linkedCts.Token.ThrowIfCancellationRequested();
 
                                 // Validate the input for the current state
-                                if ( stateWaitForInput &&
-                                     state.Input?.Validation != null &&
-                                     !ValidateDocument(lazyInput, state.Input.Validation))
+                                if (stateWaitForInput &&
+                                    state.Input?.Validation != null &&
+                                    !ValidateDocument(lazyInput, state.Input.Validation))
                                 {
                                     if (state.Input.Validation.Error != null)
                                     {
@@ -275,7 +275,7 @@ namespace Take.Blip.Builder
                                 }
                             }
                         } while (!stateWaitForInput);
-                        
+
                         // Process the global output actions
                         if (flow.OutputActions != null)
                         {
@@ -283,7 +283,7 @@ namespace Take.Blip.Builder
                         }
 
                         // Schedule expiration time if input is configured
-                        if (state.IsNotNullAndInputExpirationTimeEnabled())
+                        if (state.InputExpirationTimeEnabled())
                         {
                             await _schedulerExtension.ScheduleMessageAsync(message.CreateInputExirationTimeMessage(), DateTimeOffset.UtcNow.AddMinutes(state.Input.WaitInputExpirationTimeMinutes.Value), linkedCts.Token);
                         }
@@ -370,7 +370,7 @@ namespace Take.Blip.Builder
                 var executionTimeout = executionTimeoutInSeconds.HasValue
                     ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
                     : _configuration.DefaultActionExecutionTimeout;
-                        
+
                 using (var cts = new CancellationTokenSource(executionTimeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
@@ -388,7 +388,7 @@ namespace Take.Blip.Builder
                         {
                             actionTrace.ParsedSettings = settings;
                         }
-                        
+
                         await action.ExecuteAsync(context, settings, linkedCts.Token);
                     }
                     catch (Exception ex)

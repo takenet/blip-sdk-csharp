@@ -12,7 +12,7 @@ namespace Take.Blip.Builder.Content
             return new Message(idMessage)
             {
                 To = message.To,
-                Content = new InputExpirationTimeDocument()
+                Content = new InputExpirationTimeMarker()
                 { 
                     Identity = message.From
                 }

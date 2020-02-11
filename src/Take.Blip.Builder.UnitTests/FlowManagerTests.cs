@@ -1417,8 +1417,8 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
             Message.Content = input;
-            var messageType = InputExpirationTimeDocument.MIME_TYPE;
-            var messageContent = new InputExpirationTimeDocument() { Identity = UserIdentity };
+            var messageType = InputExpirationTimeMarker.MIME_TYPE;
+            var messageContent = new InputExpirationTimeMarker() { Identity = UserIdentity };
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
@@ -1462,8 +1462,8 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(ApplicationIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content is InputExpirationTimeDocument
-                        && UserIdentity.Equals((m.Content as InputExpirationTimeDocument).Identity)),
+                        && m.Content is InputExpirationTimeMarker
+                        && UserIdentity.Equals((m.Content as InputExpirationTimeMarker).Identity)),
                     Arg.Any<DateTimeOffset>(),
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
         }
@@ -1473,7 +1473,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithTemporaryInputWithEmptyContentShouldThrowsAException()
         {
             // Arrange
-            var input = new InputExpirationTimeDocument() { Identity = null };
+            var input = new InputExpirationTimeMarker() { Identity = null };
             Message.Content = input;
             var flow = new Flow()
             {
@@ -1519,8 +1519,8 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var input = new PlainText() { Text = "Ping!" };
             Message.Content = input;
-            var messageType = InputExpirationTimeDocument.MIME_TYPE;
-            var messageContent = new InputExpirationTimeDocument() { Identity = UserIdentity };
+            var messageType = InputExpirationTimeMarker.MIME_TYPE;
+            var messageContent = new InputExpirationTimeMarker() { Identity = UserIdentity };
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
@@ -1579,8 +1579,8 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id.Equals($"{UserIdentity}-inputexpirationtime")
                         && m.To.ToIdentity().Equals(ApplicationIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content is InputExpirationTimeDocument
-                        && UserIdentity.Equals((m.Content as InputExpirationTimeDocument).Identity)),
+                        && m.Content is InputExpirationTimeMarker
+                        && UserIdentity.Equals((m.Content as InputExpirationTimeMarker).Identity)),
                     Arg.Any<DateTimeOffset>(),
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
             SchedulerExtension

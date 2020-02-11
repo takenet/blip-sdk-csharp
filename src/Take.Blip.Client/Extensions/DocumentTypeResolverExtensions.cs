@@ -19,7 +19,7 @@ namespace Take.Blip.Client.Extensions
             documentTypeResolver.RegisterAssemblyDocuments(typeof(Attendant).Assembly);
             documentTypeResolver.RegisterAssemblyDocuments(typeof(DetailMedia).Assembly);
             documentTypeResolver.RegisterAssemblyDocuments(typeof(Application).Assembly);
-            documentTypeResolver.RegisterAssemblyDocuments(typeof(InputExpirationTimeDocument).Assembly);
+            documentTypeResolver.RegisterAssemblyDocuments(typeof(InputExpirationTimeMarker).Assembly);
             documentTypeResolver.RegisterAssemblyDocuments(typeof(DocumentTypeResolverExtensions).Assembly);
             return documentTypeResolver;
         }
