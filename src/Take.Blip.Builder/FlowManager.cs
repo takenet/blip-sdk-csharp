@@ -29,6 +29,9 @@ namespace Take.Blip.Builder
 {
     public class FlowManager : IFlowManager
     {
+        private const string EMPTY_STRING = "";
+        private readonly Document EMPTY_CONTENT = new PlainText() { Text = EMPTY_STRING };
+
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
         private readonly IContextProvider _contextProvider;
@@ -96,18 +99,27 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            if (message.Content is InputExpirationTimeMarker inputExpirationTimeMarker)
+            string stateIdInputExipiration = null;
+
+            if (message.Content is InputExpiration inputExpiration)
             {
-                if (string.IsNullOrWhiteSpace(inputExpirationTimeMarker?.Identity?.ToString()))
+                if (string.IsNullOrWhiteSpace(inputExpiration?.Identity?.ToString()))
                 {
-                    throw new ArgumentException("Message content 'Identity' must be present", nameof(InputExpirationTimeMarker));
+                    throw new ArgumentException("Message content 'Identity' must be present", nameof(message));
                 }
+
+                if (string.IsNullOrWhiteSpace(inputExpiration?.StateId))
+                {
+                    throw new ArgumentException("Message content 'StateId' must be present", nameof(message));
+                }
+
+                stateIdInputExipiration = inputExpiration.StateId;
 
                 message = new Message(message.Id)
                 {
                     To = message.To,
-                    From = inputExpirationTimeMarker.Identity.ToNode(),
-                    Content = PlainText.Parse("")
+                    From = inputExpiration.Identity.ToNode(),
+                    Content = EMPTY_CONTENT
                 };
             }
 
@@ -146,6 +158,7 @@ namespace Take.Blip.Builder
                 : null;
 
             var ownerContext = OwnerContext.Create(ownerIdentity);
+            var noOwnerScheduleExtension = new NoOwnerScheduleDecorator(_schedulerExtension, ownerContext, ownerIdentity);
 
             State state = default;
             try
@@ -170,10 +183,17 @@ namespace Take.Blip.Builder
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
-                        // Cancel Schedule expiration time if input is configured
-                        if (state.InputExpirationTimeEnabled())
+                        // If current stateId of user is different of inputExpiration stop processing
+                        if (!string.IsNullOrWhiteSpace(stateIdInputExipiration) &&
+                            stateId != stateIdInputExipiration)
                         {
-                            await _schedulerExtension.CancelScheduledMessageAsync(message.GetInputExirationTimeIdMessage(), linkedCts.Token);
+                            return;
+                        }
+
+                        // Cancel Schedule expiration time if input is configured
+                        if (state.HasInputExpiration())
+                        {
+                            await noOwnerScheduleExtension.CancelScheduledMessageAsync(message.GetInputExirationTimeIdMessage(), linkedCts.Token);
                         }
 
                         // Calculate the number of state transitions
@@ -283,9 +303,9 @@ namespace Take.Blip.Builder
                         }
 
                         // Schedule expiration time if input is configured
-                        if (state.InputExpirationTimeEnabled())
+                        if (state.HasInputExpiration())
                         {
-                            await _schedulerExtension.ScheduleMessageAsync(message.CreateInputExirationTimeMessage(), DateTimeOffset.UtcNow.AddMinutes(state.Input.WaitInputExpirationTimeMinutes.Value), linkedCts.Token);
+                            await noOwnerScheduleExtension.ScheduleMessageAsync(message.CreateInputExirationTimeMessage(state.Id), DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes), linkedCts.Token);
                         }
                     }
                     finally

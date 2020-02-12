@@ -151,7 +151,7 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<IDocumentTypeResolver>( () => {
                 var documentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
-                documentTypeResolver.RegisterDocument<InputExpirationTimeMarker>();
+                documentTypeResolver.RegisterDocument<InputExpiration>();
                 return documentTypeResolver;
                 });
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();

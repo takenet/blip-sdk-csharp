@@ -5,16 +5,17 @@ namespace Take.Blip.Builder.Content
 {
     public static class MessageExtension
     {
-        public static Message CreateInputExirationTimeMessage(this Message message) 
+        public static Message CreateInputExirationTimeMessage(this Message message, string stateId) 
         {
             var idMessage = GetInputExirationTimeIdMessage(message);
 
             return new Message(idMessage)
             {
                 To = message.To,
-                Content = new InputExpirationTimeMarker()
+                Content = new InputExpiration()
                 { 
-                    Identity = message.From
+                    Identity = message.From,
+                    StateId = stateId
                 }
             };
         }

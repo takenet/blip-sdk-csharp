@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Lime.Messaging.Contents;
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
-using Lime.Messaging.Contents;
 
 namespace Take.Blip.Builder.Models
 {
@@ -29,7 +30,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// Defines time of wait user input. Valid only if bypass is false.
         /// </summary>
-        public double? WaitInputExpirationTimeMinutes { get; set; }
+        public TimeSpan? Expiration { get; set; }
 
         /// <summary>
         /// The context variable name to store the input after validation.
@@ -65,8 +66,8 @@ namespace Take.Blip.Builder.Models
             }
         }
 
-        public bool IsExpirationTimeEnabled() => !Bypass
-            && WaitInputExpirationTimeMinutes != null
-            && WaitInputExpirationTimeMinutes > 0;
+        public bool HasExpiration() => !Bypass
+            && Expiration != null
+            && Expiration.Value.Ticks > 0;
     }
 }

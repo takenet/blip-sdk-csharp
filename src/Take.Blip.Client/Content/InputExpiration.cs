@@ -7,7 +7,7 @@ namespace Take.Blip.Client.Content
     /// Represents an expired input with an user's <see cref="Identity"/> to make a fake input
     /// </summary>
     [DataContract]
-    public class InputExpirationTimeMarker : Document
+    public class InputExpiration : Document
     {
         public const string MIME_TYPE = "application/vnd.blip-client.inputexpirationtime+json";
 
@@ -17,7 +17,13 @@ namespace Take.Blip.Client.Content
         [DataMember(Name = "identity")]
         public Identity Identity { get; set; }
 
-        public InputExpirationTimeMarker(): base(MediaType.Parse(MIME_TYPE))
+        /// <summary>
+        /// stateId to identify if user change state while message was being sent.
+        /// </summary>
+        [DataMember(Name = "stateId")]
+        public string StateId { get; set; }
+
+        public InputExpiration(): base(MediaType.Parse(MIME_TYPE))
         { }
     }
 }

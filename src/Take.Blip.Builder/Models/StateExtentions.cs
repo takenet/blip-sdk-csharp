@@ -9,9 +9,9 @@ namespace Take.Blip.Builder.Models
     /// </summary>
     public static class StateExtentions
     {
-        public static bool InputExpirationTimeEnabled(this State state)
+        public static bool HasInputExpiration(this State state)
         {
-            return state?.Input != null && state.Input?.IsExpirationTimeEnabled() == true;
+            return state?.Input != null && state.Input?.HasExpiration() == true;
         }
     }
 }
