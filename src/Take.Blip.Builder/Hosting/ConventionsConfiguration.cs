@@ -25,5 +25,13 @@ namespace Take.Blip.Builder.Hosting
         public virtual TimeSpan ContactCacheExpiration => TimeSpan.FromMinutes(30);
 
         public virtual TimeSpan DefaultActionExecutionTimeout => TimeSpan.FromSeconds(30);
+
+        public int ExecuteScriptLimitRecursion => 50;
+
+        public int ExecuteScriptMaxStatements => 1000;
+
+        public long ExecuteScriptLimitMemory => 65536;
+
+        public TimeSpan ExecuteScriptTimeout => TimeSpan.FromSeconds(5);
     }
 }
