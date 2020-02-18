@@ -673,7 +673,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                         Input = new Input{
                             Bypass = true
                         },
-                        OutputActions = new[]
+                        InputActions = new[]
                         {
                             new Action
                             {
