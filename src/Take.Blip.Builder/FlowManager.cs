@@ -244,7 +244,7 @@ namespace Take.Blip.Builder
                                                     (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
                                 if (stateTrace?.Error != null || stateWaitForInput)
                                 {
-                                    // Create a new trace if the next state waits for an input     
+                                    // Create a new trace if the next state waits for an input or the state without an input throws an error     
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
                                 }
                             }
