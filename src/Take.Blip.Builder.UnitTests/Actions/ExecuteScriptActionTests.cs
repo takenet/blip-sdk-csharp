@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Shouldly;
 using Take.Blip.Builder.Actions.ExecuteScript;
+using Take.Blip.Builder.Hosting;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
@@ -16,7 +17,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
     {
         private ExecuteScriptAction GetTarget()
         {
-            return new ExecuteScriptAction();
+            return new ExecuteScriptAction(new ConventionsConfiguration());
         }
 
         [Fact]
