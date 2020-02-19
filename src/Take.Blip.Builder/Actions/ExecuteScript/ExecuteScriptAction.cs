@@ -6,16 +6,19 @@ using Jint.Native;
 using Jint.Runtime;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
     public class ExecuteScriptAction : ActionBase<ExecuteScriptSettings>
     {
         private const string DEFAULT_FUNCTION = "run";
+        private readonly IConfiguration _configuration;
 
-        public ExecuteScriptAction() 
+        public ExecuteScriptAction(IConfiguration configuration) 
             : base(nameof(ExecuteScript))
         {
+            _configuration = configuration;
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
@@ -33,9 +36,10 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             }
 
             var engine = new Engine(options => options
-                    .LimitRecursion(50)
-                    .MaxStatements(1000)
-                    .TimeoutInterval(TimeSpan.FromSeconds(5)))
+                    .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                    .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                    .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                    .TimeoutInterval(_configuration.ExecuteScriptTimeout))
                 .Execute(settings.Source);
 
             var result = arguments != null
