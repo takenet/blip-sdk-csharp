@@ -298,7 +298,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, Arg.Any<CancellationToken>());
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             StateManager.Received(0).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());

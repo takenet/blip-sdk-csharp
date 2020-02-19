@@ -178,7 +178,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
         }
 
         [Fact]
-        public async Task FlowWithSeveralActionsShouldProcuceTwoTracesWithInputOnSecondState()
+        public async Task FlowWithSeveralActionsShouldProduceTwoTracesWithInputOnSecondState()
         {
             // Arrange
             var messageType = "text/plain";
@@ -451,7 +451,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var traceIdentity = new Identity(Guid.NewGuid().ToString(), "msging.net");
             var mode = "All";
             var targetType = "Lime";
-            
+
             Message.Metadata = new Dictionary<string, string>
             {
                 { "builder.trace.mode", mode },
@@ -510,6 +510,221 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             Message.Content = input;
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
+            // Assert
+            await Task.Delay(100); // The trace is asynchronous
+
+            await TraceProcessor.Received(1).ProcessTraceAsync(
+                Arg.Is<TraceEvent>(e =>
+                    e.Settings.Mode == TraceMode.All &&
+                    e.Settings.TargetType == TraceTargetType.Lime &&
+                    e.Settings.Target == traceIdentity &&
+                    e.Trace.User == UserIdentity.ToString() &&
+                    e.Trace.Input == input &&
+                    e.Trace.States.Count == 2 &&
+                    e.Trace.States.ToArray()[0].Id == "root" &&
+                    e.Trace.States.ToArray()[1].Id == "ping"),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ThreeBlocksWithoutInputShouldResultOnThreeTraces()
+        {
+            // Arrange
+            var traceIdentity = new Identity(Guid.NewGuid().ToString(), "msging.net");
+            var mode = "All";
+            var targetType = "Lime";
+
+            Message.Metadata = new Dictionary<string, string>
+            {
+                { "builder.trace.mode", mode },
+                { "builder.trace.targetType", targetType },
+                { "builder.trace.target", traceIdentity },
+            };
+            var messageType = "text/plain";
+            var pingMessageContent = "Ping!!";
+            var pongMessageContent = "Pong!!";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        Input = new Input{
+                            Bypass = true
+                        },
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", pingMessageContent}
+                                }
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "pong"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "pong",
+                        Input = new Input(),
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", pongMessageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            await Task.Delay(100); // The trace is asynchronous
+
+            await TraceProcessor.Received(1).ProcessTraceAsync(
+                Arg.Is<TraceEvent>(e =>
+                    e.Settings.Mode == TraceMode.All &&
+                    e.Settings.TargetType == TraceTargetType.Lime &&
+                    e.Settings.Target == traceIdentity &&
+                    e.Trace.User == UserIdentity.ToString() &&
+                    e.Trace.Input == input &&
+                    e.Trace.States.Count == 3 &&
+                    e.Trace.States.ToArray()[0].Id == "root" &&
+                    e.Trace.States.ToArray()[1].Id == "ping" &&
+                    e.Trace.States.ToArray()[2].Id == "pong"),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task SecondBlockWithErrorShouldResultOnTwoTraces()
+        {
+            // Arrange
+            var traceIdentity = new Identity(Guid.NewGuid().ToString(), "msging.net");
+            var mode = "All";
+            var targetType = "Lime";
+
+            Message.Metadata = new Dictionary<string, string>
+            {
+                { "builder.trace.mode", mode },
+                { "builder.trace.targetType", targetType },
+                { "builder.trace.target", traceIdentity },
+            };
+            var messageType = "text/plain";
+            var pingMessageContent = "Ping!!";
+            var pongMessageContent = "Pong!!";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        Input = new Input{
+                            Bypass = true
+                        },
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "x",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", pingMessageContent}
+                                }
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "pong"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "pong",
+                        Input = new Input(),
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", pongMessageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+            try
+            {
+                await target.ProcessInputAsync(Message, flow, CancellationToken);
+            }
+            catch
+            {
+
+            }
             // Assert
             await Task.Delay(100); // The trace is asynchronous
 
