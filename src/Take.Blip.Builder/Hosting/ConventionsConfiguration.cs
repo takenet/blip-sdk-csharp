@@ -30,7 +30,9 @@ namespace Take.Blip.Builder.Hosting
 
         public int ExecuteScriptMaxStatements => 1000;
 
-        public long ExecuteScriptLimitMemory => 65536;
+        public long ExecuteScriptLimitMemory => 0x100000; // 1MiB or 1 << 20
+
+        public long ExecuteScriptLimitMemoryWarning => 0x80000; // 512KiB or 1 << 19
 
         public TimeSpan ExecuteScriptTimeout => TimeSpan.FromSeconds(5);
     }

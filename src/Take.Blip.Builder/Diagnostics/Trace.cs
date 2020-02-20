@@ -24,6 +24,9 @@ namespace Take.Blip.Builder.Diagnostics
         [DataMember(Name = "elapsedMilliseconds")]
         public long ElapsedMilliseconds { get; set; }
 
+        [DataMember(Name = "warning")]
+        public string Warning { get; set; }
+
         [DataMember(Name = "error")]
         public string Error { get; set; }
     }

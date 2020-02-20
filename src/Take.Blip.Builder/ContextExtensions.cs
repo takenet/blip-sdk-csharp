@@ -1,7 +1,5 @@
 ﻿using Lime.Messaging.Resources;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Take.Blip.Builder.Diagnostics;
 using Takenet.Iris.Messaging.Resources;
 
 namespace Take.Blip.Builder
@@ -10,6 +8,7 @@ namespace Take.Blip.Builder
     {
         public const string CONTACT_KEY = "contact";
         public const string TICKET_KEY = "ticket";
+        public const string CURRENT_ACTION_TRACE_KEY = "current-action-trace";
 
         public static Contact GetContact(this IContext context) 
             => GetValue<Contact>(context, CONTACT_KEY);
@@ -25,6 +24,12 @@ namespace Take.Blip.Builder
 
         public static void SetTicket(this IContext context, Ticket contact) 
             => SetValue(context, TICKET_KEY, contact);
+
+        public static ActionTrace GetCurrentActionTrace(this IContext context)
+            => GetValue<ActionTrace>(context, CURRENT_ACTION_TRACE_KEY);
+
+        public static void SetCurrentActionTrace(this IContext context, ActionTrace actionTrace)
+            => SetValue(context, CURRENT_ACTION_TRACE_KEY, actionTrace);
 
         public static void RemoveTicket(this IContext context)
             => RemoveValue(context, TICKET_KEY);        
