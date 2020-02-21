@@ -79,16 +79,18 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             }
         }
 
-        private StepMode CheckMemoryUsage(IContext context, DebugInformation debugInformation)
+        private void CheckMemoryUsage(IContext context, DebugInformation debugInformation)
         {
             if (debugInformation.CurrentMemoryUsage >= _configuration.ExecuteScriptLimitMemoryWarning)
             {
                 var currentActionTrace = context.GetCurrentActionTrace();
-                currentActionTrace.Warning = $"Script is using so much memory allocation({debugInformation.CurrentMemoryUsage})." +
-                    $"In the future scripts using more than '{_configuration.ExecuteScriptLimitMemoryWarning}' will not work.";
-            }
 
-            return StepMode.Into;
+                if (currentActionTrace != null)
+                {
+                    currentActionTrace.Warning =
+                        $"The script memory usage is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning} bytes({debugInformation.CurrentMemoryUsage})";
+                }
+            }
         }
     }
 }
