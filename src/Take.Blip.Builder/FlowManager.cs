@@ -329,7 +329,10 @@ namespace Take.Blip.Builder
                     ? (stateAction.ToTrace(), Stopwatch.StartNew())
                     : (null, null);
 
-                context.SetCurrentActionTrace(actionTrace);
+                if (actionTrace != null)
+                {
+                    context.SetCurrentActionTrace(actionTrace);
+                }
 
                 // Configure the action timeout, that can be defined in action or flow level
                 var executionTimeoutInSeconds =
