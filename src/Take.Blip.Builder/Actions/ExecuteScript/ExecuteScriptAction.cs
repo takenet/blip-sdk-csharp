@@ -88,7 +88,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 if (currentActionTrace != null)
                 {
                     currentActionTrace.Warning =
-                        $"The script memory usage is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning} bytes({debugInformation.CurrentMemoryUsage})";
+                        $"The script memory usage ({debugInformation.CurrentMemoryUsage} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning} bytes";
                 }
             }
         }
