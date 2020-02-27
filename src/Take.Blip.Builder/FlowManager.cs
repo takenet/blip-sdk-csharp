@@ -41,7 +41,6 @@ namespace Take.Blip.Builder
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
-        private readonly Identity _applicationIdentity;
 
         public FlowManager(
             IConfiguration configuration,
@@ -72,7 +71,6 @@ namespace Take.Blip.Builder
             _logger = logger;
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
-            _applicationIdentity = application.Identity;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -330,6 +328,11 @@ namespace Take.Blip.Builder
                 var (actionTrace, actionStopwatch) = actionTraces != null
                     ? (stateAction.ToTrace(), Stopwatch.StartNew())
                     : (null, null);
+
+                if (actionTrace != null)
+                {
+                    context.SetCurrentActionTrace(actionTrace);
+                }
 
                 // Configure the action timeout, that can be defined in action or flow level
                 var executionTimeoutInSeconds =
