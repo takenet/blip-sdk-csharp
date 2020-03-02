@@ -1465,6 +1465,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content is InputExpiration
                         && UserIdentity.Equals((m.Content as InputExpiration).Identity)),
                     Arg.Any<DateTimeOffset>(),
+                    Arg.Any<Node>(),
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
         }
 
@@ -1582,11 +1583,13 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content is InputExpiration
                         && UserIdentity.Equals((m.Content as InputExpiration).Identity)),
                     Arg.Any<DateTimeOffset>(),
+                    Arg.Any<Node>(),
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
             SchedulerExtension
                 .Received(1)
                 .CancelScheduledMessageAsync(
                     Arg.Is<string>(s => s.Equals($"{UserIdentity}-inputexpirationtime")),
+                    Arg.Any<Node>(),
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
 
             StateManager = Substitute.For<IStateManager>();

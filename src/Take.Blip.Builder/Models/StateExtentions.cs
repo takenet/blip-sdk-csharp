@@ -11,7 +11,7 @@ namespace Take.Blip.Builder.Models
     {
         public static bool HasInputExpiration(this State state)
         {
-            return state?.Input != null && state.Input?.HasExpiration() == true;
+            return state?.Input?.HasExpiration() == true;
         }
     }
 }

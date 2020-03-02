@@ -56,6 +56,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IContextProvider, ContextProvider>();
             container.RegisterDecorator<ISender, OwnerSenderDecorator>(Lifestyle.Singleton);
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
+            container.RegisterSingleton<IInputExpirationHandler, InputExpirationHandler>();
 
             return container;
         }

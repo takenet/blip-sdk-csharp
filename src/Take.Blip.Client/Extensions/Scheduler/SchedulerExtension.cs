@@ -17,6 +17,7 @@ namespace Take.Blip.Client.Extensions.Scheduler
         }
 
         public Task ScheduleMessageAsync(Message message, DateTimeOffset when,
+            Node from = null,
             CancellationToken cancellationToken = new CancellationToken())
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
@@ -28,29 +29,33 @@ namespace Take.Blip.Client.Extensions.Scheduler
                         When = when
                     },
                     SCHEDULE_URI,
-                    SchedulerAddress),
+                    SchedulerAddress, from: from),
                 cancellationToken);
         }
 
-        public Task<Schedule> GetScheduledMessageAsync(string messageId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Schedule> GetScheduledMessageAsync(string messageId,
+            Node from = null,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             if (messageId == null) throw new ArgumentNullException(nameof(messageId));
 
             var scheduledMessage = $"{SCHEDULE_URI}/{messageId}";
 
             return ProcessCommandAsync<Schedule>(
-                CreateGetCommandRequest(scheduledMessage, SchedulerAddress),
+                CreateGetCommandRequest(scheduledMessage, SchedulerAddress, from: from),
                 cancellationToken);
         }
 
-        public Task CancelScheduledMessageAsync(string messageId, CancellationToken cancellationToken = new CancellationToken())
+        public Task CancelScheduledMessageAsync(string messageId,
+            Node from = null,
+            CancellationToken cancellationToken = new CancellationToken())
         {
             if (messageId == null) throw new ArgumentNullException(nameof(messageId));
 
             var scheduledMessage = $"{SCHEDULE_URI}/{messageId}";
 
             return ProcessCommandAsync(
-                CreateDeleteCommandRequest(scheduledMessage, SchedulerAddress),
+                CreateDeleteCommandRequest(scheduledMessage, SchedulerAddress, from: from),
                 cancellationToken);
         }
     }

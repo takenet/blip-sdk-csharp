@@ -29,9 +29,6 @@ namespace Take.Blip.Builder
 {
     public class FlowManager : IFlowManager
     {
-        private const string EMPTY_STRING = "";
-        private readonly Document EMPTY_CONTENT = new PlainText() { Text = EMPTY_STRING };
-
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
         private readonly IContextProvider _contextProvider;
@@ -46,7 +43,9 @@ namespace Take.Blip.Builder
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
+        private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Identity _applicationIdentity;
+        private readonly Node _applicationNode;
 
         public FlowManager(
             IConfiguration configuration,
@@ -63,6 +62,7 @@ namespace Take.Blip.Builder
             ILogger logger,
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
+            IInputExpirationHandler inputExpirationHandler,
             Application application)
         {
             _configuration = configuration;
@@ -79,7 +79,9 @@ namespace Take.Blip.Builder
             _logger = logger;
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
+            _inputExpirationHandler = inputExpirationHandler;
             _applicationIdentity = application.Identity;
+            _applicationNode = application.Node;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -99,29 +101,7 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            string stateIdInputExipiration = null;
-
-            if (message.Content is InputExpiration inputExpiration)
-            {
-                if (string.IsNullOrWhiteSpace(inputExpiration?.Identity?.ToString()))
-                {
-                    throw new ArgumentException("Message content 'Identity' must be present", nameof(message));
-                }
-
-                if (string.IsNullOrWhiteSpace(inputExpiration?.StateId))
-                {
-                    throw new ArgumentException("Message content 'StateId' must be present", nameof(message));
-                }
-
-                stateIdInputExipiration = inputExpiration.StateId;
-
-                message = new Message(message.Id)
-                {
-                    To = message.To,
-                    From = inputExpiration.Identity.ToNode(),
-                    Content = EMPTY_CONTENT
-                };
-            }
+            message = _inputExpirationHandler.ValidadeMessage(message);
 
             flow.Validate();
 
@@ -158,7 +138,6 @@ namespace Take.Blip.Builder
                 : null;
 
             var ownerContext = OwnerContext.Create(ownerIdentity);
-            var noOwnerScheduleExtension = new NoOwnerScheduleDecorator(_schedulerExtension, ownerContext, ownerIdentity);
 
             State state = default;
             try
@@ -184,17 +163,13 @@ namespace Take.Blip.Builder
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // If current stateId of user is different of inputExpiration stop processing
-                        if (!string.IsNullOrWhiteSpace(stateIdInputExipiration) &&
-                            stateId != stateIdInputExipiration)
+                        if (!_inputExpirationHandler.ValidadeState(state))
                         {
                             return;
                         }
 
-                        // Cancel Schedule expiration time if input is configured
-                        if (state.HasInputExpiration())
-                        {
-                            await noOwnerScheduleExtension.CancelScheduledMessageAsync(message.GetInputExirationTimeIdMessage(), linkedCts.Token);
-                        }
+
+                        await _inputExpirationHandler.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
 
                         // Calculate the number of state transitions
                         var transitions = 0;
@@ -302,11 +277,7 @@ namespace Take.Blip.Builder
                             await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, linkedCts.Token);
                         }
 
-                        // Schedule expiration time if input is configured
-                        if (state.HasInputExpiration())
-                        {
-                            await noOwnerScheduleExtension.ScheduleMessageAsync(message.CreateInputExirationTimeMessage(state.Id), DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes), linkedCts.Token);
-                        }
+                        await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
                     }
                     finally
                     {

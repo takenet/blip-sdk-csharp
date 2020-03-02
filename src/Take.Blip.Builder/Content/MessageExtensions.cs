@@ -3,7 +3,7 @@ using Take.Blip.Client.Content;
 
 namespace Take.Blip.Builder.Content
 {
-    public static class MessageExtension
+    public static class MessageExtensions
     {
         public static Message CreateInputExirationTimeMessage(this Message message, string stateId) 
         {
@@ -22,7 +22,7 @@ namespace Take.Blip.Builder.Content
 
         public static string GetInputExirationTimeIdMessage(this Message message)
         { 
-            return $"{message.From.ToIdentity().ToString()}-inputexpirationtime";
+            return $"{message.From.ToIdentity()}-inputexpirationtime";
         }
 
 
