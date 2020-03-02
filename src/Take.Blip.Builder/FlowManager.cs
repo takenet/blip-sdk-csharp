@@ -57,7 +57,6 @@ namespace Take.Blip.Builder
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
-            ISchedulerExtension schedulerExtension,
             IVariableReplacer variableReplacer,
             ILogger logger,
             ITraceManager traceManager,
@@ -74,7 +73,6 @@ namespace Take.Blip.Builder
             _documentSerializer = documentSerializer;
             _envelopeSerializer = envelopeSerializer;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
-            _schedulerExtension = schedulerExtension;
             _variableReplacer = variableReplacer;
             _logger = logger;
             _traceManager = traceManager;
@@ -150,7 +148,6 @@ namespace Take.Blip.Builder
                     var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
-
                         // Create the input evaluator
                         var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
@@ -167,7 +164,6 @@ namespace Take.Blip.Builder
                         {
                             return;
                         }
-
 
                         await _inputExpirationHandler.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
 
@@ -263,9 +259,9 @@ namespace Take.Blip.Builder
                                                             await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
                                 stateWaitForInput = state == null ||
                                                     (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
-                                if (stateWaitForInput)
+                                if (stateTrace?.Error != null || stateWaitForInput)
                                 {
-                                    // Create a new trace if the next state waits for an input     
+                                    // Create a new trace if the next state waits for an input or the state without an input throws an error     
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
                                 }
                             }
@@ -353,6 +349,11 @@ namespace Take.Blip.Builder
                 var (actionTrace, actionStopwatch) = actionTraces != null
                     ? (stateAction.ToTrace(), Stopwatch.StartNew())
                     : (null, null);
+
+                if (actionTrace != null)
+                {
+                    context.SetCurrentActionTrace(actionTrace);
+                }
 
                 // Configure the action timeout, that can be defined in action or flow level
                 var executionTimeoutInSeconds =
