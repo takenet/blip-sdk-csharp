@@ -28,7 +28,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                     .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
                     .MaxStatements(_configuration.ExecuteScriptMaxStatements)
                     .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                    .TimeoutInterval(_configuration.ExecuteScriptTimeout));
+                    .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                    .DebugMode());
 
             engine.Step += (sender, e) =>
             {
