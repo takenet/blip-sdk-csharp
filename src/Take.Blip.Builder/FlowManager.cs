@@ -41,8 +41,7 @@ namespace Take.Blip.Builder
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
-        private readonly Identity _applicationIdentity;
-        
+
         public FlowManager(
             IConfiguration configuration,
             IStateManager stateManager,
@@ -56,7 +55,7 @@ namespace Take.Blip.Builder
             IVariableReplacer variableReplacer,
             ILogger logger,
             ITraceManager traceManager,
-            IUserOwnerResolver userOwnerResolver, 
+            IUserOwnerResolver userOwnerResolver,
             Application application)
         {
             _configuration = configuration;
@@ -72,7 +71,6 @@ namespace Take.Blip.Builder
             _logger = logger;
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
-            _applicationIdentity = application.Identity;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -93,14 +91,14 @@ namespace Take.Blip.Builder
             }
 
             flow.Validate();
-            
+
             // Determine the user / owner pair
             var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
             TraceSettings traceSettings;
-            
+
             if (message.Metadata != null &&
                 message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
             {
@@ -140,12 +138,12 @@ namespace Take.Blip.Builder
                     try
                     {
                         // Create the input evaluator
-                        var lazyInput = new LazyInput(message, userIdentity,  flow.BuilderConfiguration, _documentSerializer,
+                        var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context
                         var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
-                        
+
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
@@ -155,7 +153,7 @@ namespace Take.Blip.Builder
 
                         // Create trace instances, if required
                         var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
-                        
+
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
@@ -242,14 +240,14 @@ namespace Take.Blip.Builder
                                                             await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
                                 stateWaitForInput = state == null ||
                                                     (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
-                                if (stateWaitForInput)
+                                if (stateTrace?.Error != null || stateWaitForInput)
                                 {
-                                    // Create a new trace if the next state waits for an input     
+                                    // Create a new trace if the next state waits for an input or the state without an input throws an error     
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
                                 }
                             }
                         } while (!stateWaitForInput);
-                        
+
                         // Process the global output actions
                         if (flow.OutputActions != null)
                         {
@@ -331,6 +329,11 @@ namespace Take.Blip.Builder
                     ? (stateAction.ToTrace(), Stopwatch.StartNew())
                     : (null, null);
 
+                if (actionTrace != null)
+                {
+                    context.SetCurrentActionTrace(actionTrace);
+                }
+
                 // Configure the action timeout, that can be defined in action or flow level
                 var executionTimeoutInSeconds =
                     stateAction.Timeout ?? context.Flow?.BuilderConfiguration?.ActionExecutionTimeout;
@@ -338,7 +341,7 @@ namespace Take.Blip.Builder
                 var executionTimeout = executionTimeoutInSeconds.HasValue
                     ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
                     : _configuration.DefaultActionExecutionTimeout;
-                        
+
                 using (var cts = new CancellationTokenSource(executionTimeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
@@ -356,7 +359,7 @@ namespace Take.Blip.Builder
                         {
                             actionTrace.ParsedSettings = settings;
                         }
-                        
+
                         await action.ExecuteAsync(context, settings, linkedCts.Token);
                     }
                     catch (Exception ex)

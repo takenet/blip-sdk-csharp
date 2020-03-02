@@ -1,26 +1,53 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Jint;
 using Jint.Native;
 using Jint.Runtime;
+using Jint.Runtime.Debugger;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
     public class ExecuteScriptAction : ActionBase<ExecuteScriptSettings>
     {
         private const string DEFAULT_FUNCTION = "run";
+        private readonly IConfiguration _configuration;
 
-        public ExecuteScriptAction() 
+        public ExecuteScriptAction(IConfiguration configuration) 
             : base(nameof(ExecuteScript))
         {
+            _configuration = configuration;
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
-            // Retrive the input variables
+            var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
+
+            var engine = new Engine(options => options
+                    .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                    .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                    .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                    .TimeoutInterval(_configuration.ExecuteScriptTimeout));
+
+            engine.Step += (sender, e) =>
+            {
+                CheckMemoryUsage(context, e);
+                return StepMode.Into;
+            };
+
+            engine = engine.Execute(settings.Source);
+
+            var result = arguments != null
+                ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
+                : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
+
+            await SetScriptResultAsync(context, settings, result, cancellationToken);
+        }
+
+        protected async Task<object[]> GetScriptArgumentsAsync(
+            IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
+        {
             object[] arguments = null;
             if (settings.InputVariables != null && settings.InputVariables.Length > 0)
             {
@@ -32,16 +59,12 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 }
             }
 
-            var engine = new Engine(options => options
-                    .LimitRecursion(50)
-                    .MaxStatements(1000)
-                    .TimeoutInterval(TimeSpan.FromSeconds(5)))
-                .Execute(settings.Source);
+            return arguments;
+        }
 
-            var result = arguments != null
-                ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
-                : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
-
+        private async Task SetScriptResultAsync(
+            IContext context, ExecuteScriptSettings settings, JsValue result, CancellationToken cancellationToken)
+        {
             if (result != null && !result.IsNull())
             {
                 var value = result.Type == Types.Object
@@ -53,6 +76,20 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             else
             {
                 await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
+            }
+        }
+
+        private void CheckMemoryUsage(IContext context, DebugInformation debugInformation)
+        {
+            if (debugInformation.CurrentMemoryUsage >= _configuration.ExecuteScriptLimitMemoryWarning)
+            {
+                var currentActionTrace = context.GetCurrentActionTrace();
+
+                if (currentActionTrace != null)
+                {
+                    currentActionTrace.Warning =
+                        $"The script memory usage ({debugInformation.CurrentMemoryUsage} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning} bytes";
+                }
             }
         }
     }

@@ -688,7 +688,7 @@ namespace Take.Blip.Builder.UnitTests
                 .DidNotReceive()
                 .SendMessageAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
 
-            Context.Received(1).SetVariableAsync("InputIsValid", "True", Arg.Any<CancellationToken>());
+            Context.Received(1).SetVariableAsync("InputIsValid", "true", Arg.Any<CancellationToken>());
             Context.Received(1).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
         }
 
@@ -871,7 +871,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == nokMessageContent),
                     Arg.Any<CancellationToken>());
-            Context.Received(1).SetVariableAsync("InputIsValid", "False", Arg.Any<CancellationToken>());
+            Context.Received(1).SetVariableAsync("InputIsValid", "false", Arg.Any<CancellationToken>());
             Context.Received(3).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
         }
 
