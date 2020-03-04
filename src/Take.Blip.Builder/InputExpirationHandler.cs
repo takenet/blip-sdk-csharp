@@ -15,7 +15,7 @@ namespace Take.Blip.Builder
     /// </summary>
     public class InputExpirationHandler : IInputExpirationHandler
     {
-        private const string STATEID = "inputExpiration.stateId";
+        private const string STATE_ID = "inputExpiration.stateId";
         private const string IDENTITY = "inputExpiration.identity";
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
@@ -42,7 +42,8 @@ namespace Take.Blip.Builder
             // Cancel Schedule expiration time if input is configured
             if (state.HasInputExpiration())
             {
-                await _schedulerExtension.CancelScheduledMessageAsync(GetInputExirationTimeIdMessage(message), from, cancellationToken);
+                var messageId = GetInputExirationIdMessage(message);
+                await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
             }
         }
 
@@ -59,7 +60,9 @@ namespace Take.Blip.Builder
             // Schedule expiration time if input is configured
             if (state.HasInputExpiration())
             {
-                await _schedulerExtension.ScheduleMessageAsync(CreateInputExirationTimeMessage(message, state.Id), DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes), from, cancellationToken);
+                var scheduleMessage = CreateInputExirationMessage(message, state.Id);
+                var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes);
+                await _schedulerExtension.ScheduleMessageAsync(scheduleMessage,  scheduleTime, from, cancellationToken);
             }
         }
 
@@ -89,7 +92,7 @@ namespace Take.Blip.Builder
                     Content = _emptyContent,
                     Metadata = new Dictionary<string,string>()
                     {
-                        { STATEID, inputExpiration.StateId },
+                        { STATE_ID, inputExpiration.StateId },
                         { IDENTITY, inputExpiration.Identity },
                     }
                 };
@@ -108,15 +111,14 @@ namespace Take.Blip.Builder
         {
             string stateToGo = string.Empty;
 
-            message?.Metadata?.TryGetValue(STATEID, out stateToGo);
-
-            return string.IsNullOrEmpty(stateToGo) ||
+            return message?.Metadata?.TryGetValue(STATE_ID, out stateToGo) != true ||
+                            string.IsNullOrEmpty(stateToGo) ||
                             state?.Id == stateToGo;
         }
 
-        private Message CreateInputExirationTimeMessage(Message message, string stateId)
+        private Message CreateInputExirationMessage(Message message, string stateId)
         {
-            var idMessage = GetInputExirationTimeIdMessage(message);
+            var idMessage = GetInputExirationIdMessage(message);
 
             return new Message(idMessage)
             {
@@ -129,7 +131,7 @@ namespace Take.Blip.Builder
             };
         }
 
-        private string GetInputExirationTimeIdMessage(Message message)
+        private string GetInputExirationIdMessage(Message message)
         {
             return $"{message.From.ToIdentity()}-inputexpirationtime";
         }
