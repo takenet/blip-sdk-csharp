@@ -1,6 +1,7 @@
 ﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Content;
@@ -12,9 +13,10 @@ namespace Take.Blip.Builder
 {
     public class InputExpirationHandler : IInputExpirationHandler
     {
+        private const string STATEID = "inputExpiration.stateId";
+        private const string IDENTITY = "inputExpiration.identity";
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
-        private string _stateIdInputExipiration = null;
 
         public InputExpirationHandler(ISchedulerExtension schedulerExtension)
         {
@@ -39,10 +41,8 @@ namespace Take.Blip.Builder
             }
         }
 
-        public Message ValidadeMessage(Message message)
+        public Message ValidateMessage(Message message)
         {
-            _stateIdInputExipiration = null;
-
             if (message.Content is InputExpiration inputExpiration)
             {
                 if (string.IsNullOrWhiteSpace(inputExpiration?.Identity?.ToString()))
@@ -55,23 +55,30 @@ namespace Take.Blip.Builder
                     throw new ArgumentException("Message content 'StateId' must be present", nameof(InputExpiration.StateId));
                 }
 
-                _stateIdInputExipiration = inputExpiration.StateId;
-
                 return new Message(message.Id)
                 {
                     To = message.To,
                     From = inputExpiration.Identity.ToNode(),
-                    Content = _emptyContent
+                    Content = _emptyContent,
+                    Metadata = new Dictionary<string,string>()
+                    {
+                        { STATEID, inputExpiration.StateId },
+                        { IDENTITY, inputExpiration.Identity },
+                    }
                 };
             }
 
             return message;
         }
 
-        public bool ValidadeState(State state)
+        public bool ValidateState(State state, Message message)
         {
-            return string.IsNullOrWhiteSpace(_stateIdInputExipiration) ||
-                            state?.Id == _stateIdInputExipiration;
+            string stateToGo = string.Empty;
+
+            message?.Metadata?.TryGetValue(STATEID, out stateToGo);
+
+            return string.IsNullOrEmpty(stateToGo) ||
+                            state?.Id == stateToGo;
         }
     }
 }

@@ -99,7 +99,7 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            message = _inputExpirationHandler.ValidadeMessage(message);
+            message = _inputExpirationHandler.ValidateMessage(message);
 
             flow.Validate();
 
@@ -160,7 +160,7 @@ namespace Take.Blip.Builder
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // If current stateId of user is different of inputExpiration stop processing
-                        if (!_inputExpirationHandler.ValidadeState(state))
+                        if (!_inputExpirationHandler.ValidateState(state, message))
                         {
                             return;
                         }
