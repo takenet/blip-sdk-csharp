@@ -91,7 +91,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 var warningMessage =
                     $"The script memory allocation ({debugInformation.CurrentMemoryUsage:N0} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning:N0} bytes";
                 
-                using (LogContext.PushProperty(nameof(DebugInformation), debugInformation))
+                using (LogContext.PushProperty(nameof(DebugInformation), debugInformation, true))
                     _logger.Warning(warningMessage);
 
                 var currentActionTrace = context.GetCurrentActionTrace();
