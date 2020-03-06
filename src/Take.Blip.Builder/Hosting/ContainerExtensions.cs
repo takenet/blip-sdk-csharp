@@ -4,7 +4,6 @@ using Lime.Protocol.Serialization.Newtonsoft;
 using Serilog;
 using SimpleInjector;
 using StackExchange.Redis;
-using System;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.CreateTicket;
 using Take.Blip.Builder.Actions.DeleteVariable;
@@ -28,6 +27,7 @@ using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
+using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Elephant;
@@ -56,6 +56,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IContextProvider, ContextProvider>();
             container.RegisterDecorator<ISender, OwnerSenderDecorator>(Lifestyle.Singleton);
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
+            container.RegisterSingleton<IInputExpirationHandler, InputExpirationHandler>();
 
             return container;
         }
@@ -149,9 +150,13 @@ namespace Take.Blip.Builder.Hosting
 
         private static Container RegisterExternal(this Container container)
         {
+            container.RegisterSingleton<IDocumentTypeResolver>( () => {
+                var documentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
+                documentTypeResolver.RegisterDocument<InputExpiration>();
+                return documentTypeResolver;
+                });
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
-            container.RegisterSingleton<IDocumentTypeResolver>(new DocumentTypeResolver().WithBlipDocuments());
             container.RegisterSingleton<ILogger>(LoggerProvider.Logger);
 
             return container;

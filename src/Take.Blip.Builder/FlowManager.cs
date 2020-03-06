@@ -1,11 +1,9 @@
 ﻿using Lime.Messaging.Contents;
-using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,6 +20,7 @@ using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
+using Take.Blip.Client.Extensions.Scheduler;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -37,10 +36,14 @@ namespace Take.Blip.Builder
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
+        private readonly ISchedulerExtension _schedulerExtension;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
+        private readonly IInputExpirationHandler _inputExpirationHandler;
+        private readonly Identity _applicationIdentity;
+        private readonly Node _applicationNode;
 
         public FlowManager(
             IConfiguration configuration,
@@ -56,6 +59,7 @@ namespace Take.Blip.Builder
             ILogger logger,
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
+            IInputExpirationHandler inputExpirationHandler,
             Application application)
         {
             _configuration = configuration;
@@ -71,6 +75,9 @@ namespace Take.Blip.Builder
             _logger = logger;
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
+            _inputExpirationHandler = inputExpirationHandler;
+            _applicationIdentity = application.Identity;
+            _applicationNode = application.Node;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -89,6 +96,8 @@ namespace Take.Blip.Builder
             {
                 throw new ArgumentNullException(nameof(flow));
             }
+
+            message = _inputExpirationHandler.ValidateMessage(message);
 
             flow.Validate();
 
@@ -147,6 +156,14 @@ namespace Take.Blip.Builder
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
+                        // If current stateId of user is different of inputExpiration stop processing
+                        if (!_inputExpirationHandler.IsValidateState(state, message))
+                        {
+                            return;
+                        }
+
+                        await _inputExpirationHandler.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
 
                         // Calculate the number of state transitions
                         var transitions = 0;
@@ -253,10 +270,12 @@ namespace Take.Blip.Builder
                         {
                             await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, linkedCts.Token);
                         }
+
+                        await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
                     }
                     finally
                     {
-                        await handle.DisposeAsync();
+                        await handle?.DisposeAsync();
                     }
                 }
             }

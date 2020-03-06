@@ -19,6 +19,7 @@ using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.EventTracker;
 using Take.Blip.Client.Extensions.HelpDesk;
+using Take.Blip.Client.Extensions.Scheduler;
 using Take.Blip.Client.Extensions.Tunnel;
 
 #pragma warning disable 4014
@@ -29,6 +30,7 @@ namespace Take.Blip.Builder.UnitTests
     {
         public FlowManagerTestsBase()
         {
+            SchedulerExtension = Substitute.For<ISchedulerExtension>();
             BucketExtension = Substitute.For<IBucketExtension>();
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
@@ -84,7 +86,9 @@ namespace Take.Blip.Builder.UnitTests
         public Message Message { get; set; }
 
         public LazyInput Input { get; set; }
-        
+
+        public ISchedulerExtension SchedulerExtension { get; set; }
+
         public IBucketExtension BucketExtension { get; set; }
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; set; }
@@ -122,6 +126,7 @@ namespace Take.Blip.Builder.UnitTests
             container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
             container.RegisterSingleton(Application);
+            container.RegisterSingleton(SchedulerExtension);
             container.RegisterSingleton(BucketExtension);
             container.RegisterSingleton(ArtificialIntelligenceExtension);
             container.RegisterSingleton(EventTrackExtension);

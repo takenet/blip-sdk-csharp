@@ -19,24 +19,27 @@ namespace Take.Blip.Client.Extensions.Scheduler
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="when">The when.</param>
+        /// <param name="from">From of command</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task ScheduleMessageAsync(Message message, DateTimeOffset when, CancellationToken cancellationToken = default(CancellationToken));
+        Task ScheduleMessageAsync(Message message, DateTimeOffset when, Node from = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Get scheduled message details, including status.
         /// </summary>
         /// <param name="messageId">Id of the scheduled message</param>
+        /// <param name="from">From of command</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<Schedule> GetScheduledMessageAsync(string messageId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Schedule> GetScheduledMessageAsync(string messageId, Node from = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Cancels a scheduled message.
         /// </summary>
         /// <param name="messageId">Id of the scheduled message</param>
+        /// <param name="from">From of command</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task CancelScheduledMessageAsync(string messageId, CancellationToken cancellationToken = default(CancellationToken));
+        Task CancelScheduledMessageAsync(string messageId, Node from = null, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

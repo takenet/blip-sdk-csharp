@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Lime.Messaging.Contents;
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
-using Lime.Messaging.Contents;
 
 namespace Take.Blip.Builder.Models
 {
@@ -25,6 +26,11 @@ namespace Take.Blip.Builder.Models
         /// Defines the validation rules for the input.
         /// </summary>
         public InputValidation Validation { get; set; }
+
+        /// <summary>
+        /// Defines time of wait user input. Valid only if bypass is false.
+        /// </summary>
+        public TimeSpan? Expiration { get; set; }
 
         /// <summary>
         /// The context variable name to store the input after validation.
@@ -59,5 +65,9 @@ namespace Take.Blip.Builder.Models
                 throw new ValidationException("The input variable name should be composed only by letters, numbers and dots");
             }
         }
+
+        public bool HasExpiration() => !Bypass
+            && Expiration != null
+            && Expiration.Value.Ticks > 0;
     }
 }
