@@ -107,7 +107,7 @@ namespace Take.Blip.Builder
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public bool ValidateState(State state, Message message)
+        public bool IsValidateState(State state, Message message)
         {
             string stateToGo = string.Empty;
 
