@@ -79,10 +79,29 @@ namespace Take.Blip.Builder
 
         private static string GetJsonProperty(string variableValue, string property)
         {
+            // If there's a propertyName, attempts to parse the value as JSON and retrieve the value from it.
+            var propertyNames = property.Split('.');
+
+#if NETSTANDARD2_1
             try
             {
-                // If there's a propertyName, attempts to parse the value as JSON and retrieve the value from it.
-                var propertyNames = property.Split('.');
+                var json = System.Text.Json.JsonDocument.Parse(variableValue);
+                var currentElement = json.RootElement;
+
+                if (propertyNames.Any(s => !currentElement.TryGetProperty(s, out currentElement)))
+                {
+                    return null;
+                }
+
+                return currentElement.GetRawText().Trim('"');
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                return null;
+            }
+#else
+            try
+            {
                 JToken json = JObject.Parse(variableValue);
                 foreach (var s in propertyNames)
                 {
@@ -96,6 +115,7 @@ namespace Take.Blip.Builder
             {
                 return null;
             }
+#endif
         }
 
         private struct VariableName

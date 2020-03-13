@@ -219,6 +219,21 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
+        public async Task GetJsonVariableWithJsonPropertyWithTwoLevelsShouldSucceed()
+        {
+            // Arrange
+            var variableName = "variableName1";
+            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": {\"street\": \"Rua X\", \"number\": \"42\"}}}");
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("variableName1@details.address", CancellationToken);
+
+            // Assert
+            actual.ShouldBe("{\"street\": \"Rua X\", \"number\": \"42\"}");
+        }
+
+        [Fact]
         public async Task GetVariableWithJsonInvalidPropertyWithTwoLevelsShouldReturnNull()
         {
             // Arrange
