@@ -4,12 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Messaging.Contents;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using Lime.Protocol.Serialization;
 using System.Globalization;
 using System.Runtime.Serialization;
+using System.Text.Json;
 using Take.Blip.Client.Session;
 using Take.Blip.Client.Activation;
 using Lime.Messaging;
@@ -51,7 +50,7 @@ namespace Take.Blip.Client.Receivers
             // Configure for the next receiver
             if (_settings.Validation != null)
             {
-                var validationJson = JsonConvert.SerializeObject(_settings, Application.SerializerSettings);
+                var validationJson = JsonSerializer.Serialize(_settings, Application.JsonSerializerOptions);
                 await _sessionManager.AddVariableAsync(envelope.From, INPUT_SETTINGS_KEY, validationJson, cancellationToken);
             }
 
@@ -71,7 +70,7 @@ namespace Take.Blip.Client.Receivers
             var settingsJson = await _sessionManager.GetVariableAsync(envelope.From, INPUT_SETTINGS_KEY, cancellationToken);
             if (settingsJson == null) return true;
 
-            var inputSettings = JsonConvert.DeserializeObject<InputSettings>(settingsJson, Application.SerializerSettings);
+            var inputSettings = JsonSerializer.Deserialize<InputSettings>(settingsJson, Application.JsonSerializerOptions);
             if (ValidateRule(envelope.Content, inputSettings.Validation))
             {
                 // Save the value in the session
@@ -120,8 +119,6 @@ namespace Take.Blip.Client.Receivers
 
     public class InputSettings
     {
-        private static JsonSerializer Serializer = JsonSerializer.Create(Application.SerializerSettings);
-
         public DocumentDefinition Label { get; set; }
 
         public InputValidationSettings Validation { get; set; }
@@ -131,7 +128,10 @@ namespace Take.Blip.Client.Receivers
         public string SuccessOutState { get; set; }
 
         public static InputSettings Parse(IDictionary<string, object> dictionary)
-            => JObject.FromObject(dictionary).ToObject<InputSettings>(Serializer);
+        {
+            var json = JsonSerializer.Serialize(dictionary);
+            return JsonSerializer.Deserialize<InputSettings>(json);
+        }
 
         public void Validate()
         {

@@ -1,7 +1,7 @@
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Newtonsoft.Json;
 using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Builder.Variables
@@ -43,7 +43,7 @@ namespace Take.Blip.Builder.Variables
                 
                 case "settings":
                     return _application.Settings != null
-                        ? JsonConvert.SerializeObject(_application.Settings, Application.SerializerSettings)
+                        ? JsonSerializer.Serialize(_application.Settings, Application.JsonSerializerOptions)
                         : null;
                 
                 default:

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Server;
-using Newtonsoft.Json;
 using Serilog;
 using Take.Blip.Client.Extensions;
 using Take.Blip.Client.Extensions.Bucket;
@@ -207,8 +207,8 @@ namespace Take.Blip.Client.Activation
                 var settingsType = typeResolver.Resolve(settingsContainer.SettingsType);
                 if (settingsType != null)
                 {
-                    var settingsJson = JsonConvert.SerializeObject(settingsDictionary, Application.SerializerSettings);
-                    var settings = JsonConvert.DeserializeObject(settingsJson, settingsType, Application.SerializerSettings);
+                    var settingsJson = JsonSerializer.Serialize(settingsDictionary, Application.JsonSerializerOptions);
+                    var settings = JsonSerializer.Deserialize(settingsJson, settingsType, Application.JsonSerializerOptions);
                     serviceContainer.RegisterService(settingsType, settings);
                 }
             }

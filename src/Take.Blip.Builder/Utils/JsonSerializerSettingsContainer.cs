@@ -1,26 +1,18 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
+﻿using System.Text.Json;
 
 namespace Take.Blip.Builder.Utils
 {
-    public static class JsonSerializerSettingsContainer
+    public static class JsonSerializerOptionsContainer
     {
-        public static JsonSerializerSettings Settings { get; }
+        public static JsonSerializerOptions Settings { get; }
 
-        static JsonSerializerSettingsContainer()
+        static JsonSerializerOptionsContainer()
         {
-            Settings = new JsonSerializerSettings
+            Settings = new JsonSerializerOptions
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                NullValueHandling = NullValueHandling.Ignore
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                IgnoreNullValues = true
             };
-            Settings.Converters.Add(
-                new StringEnumConverter
-                {
-                    CamelCaseText = true,
-                    AllowIntegerValues = true
-                });
         }
     }
 }

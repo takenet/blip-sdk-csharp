@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text.Json;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Server;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using Take.Blip.Client.Session;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Take.Blip.Client.Activation
 {
@@ -17,19 +16,24 @@ namespace Take.Blip.Client.Activation
     /// </summary>
     public class Application : SettingsContainer
     {
-        public static JsonSerializerSettings SerializerSettings { get; }
+        //public static JsonSerializerSettings SerializerSettings { get; }
+        public static JsonSerializerOptions JsonSerializerOptions { get; }
 
         static Application()
         {
-            SerializerSettings = new JsonSerializerSettings
+            JsonSerializerOptions = new JsonSerializerOptions
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
-            SerializerSettings.Converters.Add(new StringEnumConverter
-            {
-                CamelCaseText = true,
-                AllowIntegerValues = true
-            });
+            //SerializerSettings = new JsonSerializerSettings
+            //{
+            //    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            //};
+            //SerializerSettings.Converters.Add(new StringEnumConverter
+            //{
+            //    CamelCaseText = true,
+            //    AllowIntegerValues = true
+            //});
         }
 
         /// <summary>
@@ -218,7 +222,7 @@ namespace Take.Blip.Client.Activation
         public static Application ParseFromJson(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
-            return JsonConvert.DeserializeObject<Application>(json, SerializerSettings);
+            return JsonSerializer.Deserialize<Application>(json, JsonSerializerOptions);
         }
 
         /// <summary>

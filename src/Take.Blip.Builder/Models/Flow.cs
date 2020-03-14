@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Utils;
 
@@ -195,7 +196,7 @@ namespace Take.Blip.Builder.Models
         public static Flow ParseFromJson(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
-            return JsonConvert.DeserializeObject<Flow>(json, JsonSerializerSettingsContainer.Settings);
+            return JsonSerializer.Deserialize<Flow>(json, JsonSerializerOptionsContainer.Settings);
         }
 
         /// <summary>

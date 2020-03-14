@@ -24,7 +24,6 @@ namespace Take.Blip.Builder.Actions.MergeContact
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             var contact = settings.ToObject<Contact>(LimeSerializerContainer.Serializer);
-            contact.Identity = contact.Identity;
             await _contactExtension.MergeAsync(context.UserIdentity, contact, cancellationToken);
             context.RemoveContact();
         }

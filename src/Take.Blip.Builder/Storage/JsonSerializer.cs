@@ -2,8 +2,6 @@
 using Lime.Protocol.Serialization.Newtonsoft;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Take.Elephant;
 
 namespace Take.Blip.Builder.Storage
