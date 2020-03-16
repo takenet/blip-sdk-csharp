@@ -87,7 +87,7 @@ namespace Take.Blip.Builder
                     throw new ArgumentException("Message content 'StateId' must be present", nameof(InputExpiration.StateId));
                 }
 
-                var messageMetaData = new Dictionary<string, string>()
+                var messageMetadata = new Dictionary<string, string>()
                     {
                         { STATE_ID, inputExpiration.StateId },
                         { IDENTITY, inputExpiration.Identity },
@@ -97,7 +97,7 @@ namespace Take.Blip.Builder
 
                 if( traceSettings != null )
                 {
-                    messageMetaData.Concat(traceSettings.GetDictionary());
+                    messageMetadata.Concat(traceSettings.GetDictionary());
                 }
 
                 return new Message(message.Id)
@@ -105,7 +105,7 @@ namespace Take.Blip.Builder
                     To = message.To,
                     From = inputExpiration.Identity.ToNode(),
                     Content = _emptyContent,
-                    Metadata = messageMetaData
+                    Metadata = messageMetadata
                 };
             }
 
