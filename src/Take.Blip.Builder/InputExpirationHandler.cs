@@ -2,13 +2,13 @@
 using Lime.Protocol;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.Scheduler;
-using System.Linq;
 
 namespace Take.Blip.Builder
 {
@@ -95,7 +95,7 @@ namespace Take.Blip.Builder
 
                 TraceSettings traceSettings = GetTraceSettings(message);
 
-                if( traceSettings != null )
+                if (traceSettings != null)
                 {
                     messageMetadata.Concat(traceSettings.GetDictionary());
                 }
