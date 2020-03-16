@@ -5,6 +5,8 @@ using Jint.Native;
 using Jint.Runtime;
 using Jint.Runtime.Debugger;
 using Newtonsoft.Json;
+using Serilog;
+using Serilog.Context;
 using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
@@ -13,11 +15,13 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
     {
         private const string DEFAULT_FUNCTION = "run";
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
 
-        public ExecuteScriptAction(IConfiguration configuration) 
+        public ExecuteScriptAction(IConfiguration configuration, ILogger logger) 
             : base(nameof(ExecuteScript))
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
@@ -28,7 +32,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                     .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
                     .MaxStatements(_configuration.ExecuteScriptMaxStatements)
                     .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                    .TimeoutInterval(_configuration.ExecuteScriptTimeout));
+                    .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                    .DebugMode());
 
             engine.Step += (sender, e) =>
             {
@@ -83,12 +88,16 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         {
             if (debugInformation.CurrentMemoryUsage >= _configuration.ExecuteScriptLimitMemoryWarning)
             {
-                var currentActionTrace = context.GetCurrentActionTrace();
+                var warningMessage =
+                    $"The script memory allocation ({debugInformation.CurrentMemoryUsage:N0} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning:N0} bytes";
+                
+                using (LogContext.PushProperty(nameof(DebugInformation), debugInformation, true))
+                    _logger.Warning(warningMessage);
 
+                var currentActionTrace = context.GetCurrentActionTrace();
                 if (currentActionTrace != null)
                 {
-                    currentActionTrace.Warning =
-                        $"The script memory usage ({debugInformation.CurrentMemoryUsage} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning} bytes";
+                    currentActionTrace.Warning = warningMessage;
                 }
             }
         }

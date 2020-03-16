@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Jint.Runtime;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Serilog;
 using Shouldly;
 using Take.Blip.Builder.Actions.ExecuteScript;
 using Take.Blip.Builder.Hosting;
@@ -17,7 +18,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
     {
         private ExecuteScriptAction GetTarget()
         {
-            return new ExecuteScriptAction(new ConventionsConfiguration());
+            return new ExecuteScriptAction(new ConventionsConfiguration(), Substitute.For<ILogger>());
         }
 
         [Fact]
