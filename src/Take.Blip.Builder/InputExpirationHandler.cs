@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.Scheduler;
+using System.Linq;
 
 namespace Take.Blip.Builder
 {
@@ -85,16 +87,25 @@ namespace Take.Blip.Builder
                     throw new ArgumentException("Message content 'StateId' must be present", nameof(InputExpiration.StateId));
                 }
 
+                var messageMetaData = new Dictionary<string, string>()
+                    {
+                        { STATE_ID, inputExpiration.StateId },
+                        { IDENTITY, inputExpiration.Identity },
+                    };
+
+                TraceSettings traceSettings = GetTraceSettings(message);
+
+                if( traceSettings != null )
+                {
+                    messageMetaData.Concat(traceSettings.GetDictionary());
+                }
+
                 return new Message(message.Id)
                 {
                     To = message.To,
                     From = inputExpiration.Identity.ToNode(),
                     Content = _emptyContent,
-                    Metadata = new Dictionary<string,string>()
-                    {
-                        { STATE_ID, inputExpiration.StateId },
-                        { IDENTITY, inputExpiration.Identity },
-                    }
+                    Metadata = messageMetaData
                 };
             }
 
@@ -120,6 +131,8 @@ namespace Take.Blip.Builder
         {
             var idMessage = GetInputExirationIdMessage(message);
 
+            TraceSettings traceSettings = GetTraceSettings(message);
+
             return new Message(idMessage)
             {
                 To = message.To,
@@ -127,8 +140,20 @@ namespace Take.Blip.Builder
                 {
                     Identity = message.From,
                     StateId = stateId
-                }
+                },
+                Metadata = traceSettings?.GetDictionary()
             };
+        }
+
+        private static TraceSettings GetTraceSettings(Message message)
+        {
+            if (message.Metadata != null &&
+                message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
+            {
+                return new TraceSettings(message.Metadata);
+            }
+
+            return null;
         }
 
         private string GetInputExirationIdMessage(Message message)
