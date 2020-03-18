@@ -42,7 +42,7 @@ namespace Take.Blip.Builder
         public async Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken)
         {
             // Cancel Schedule expiration time if input is configured
-            if (state.HasInputExpiration())
+            if (state.HasInputExpiration() && !IsMessageFromExpiration(message))
             {
                 var messageId = GetInputExirationIdMessage(message);
                 await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
@@ -87,18 +87,9 @@ namespace Take.Blip.Builder
                     throw new ArgumentException("Message content 'StateId' must be present", nameof(InputExpiration.StateId));
                 }
 
-                var messageMetadata = new Dictionary<string, string>()
-                    {
-                        { STATE_ID, inputExpiration.StateId },
-                        { IDENTITY, inputExpiration.Identity },
-                    };
-
-                TraceSettings traceSettings = GetTraceSettings(message);
-
-                if (traceSettings != null)
-                {
-                    messageMetadata.Concat(traceSettings.GetDictionary());
-                }
+                var messageMetadata = GetTraceSettings(message)?.GetDictionary() ?? new Dictionary<string, string>();
+                messageMetadata.Add(STATE_ID, inputExpiration.StateId);
+                messageMetadata.Add(IDENTITY, inputExpiration.Identity);
 
                 return new Message(message.Id)
                 {
@@ -110,6 +101,11 @@ namespace Take.Blip.Builder
             }
 
             return message;
+        }
+
+        private bool IsMessageFromExpiration(Message message)
+        {
+            return message.Metadata.ContainsKey(STATE_ID);
         }
 
         /// <summary>
