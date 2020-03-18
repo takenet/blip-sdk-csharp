@@ -105,7 +105,7 @@ namespace Take.Blip.Builder
 
         private bool IsMessageFromExpiration(Message message)
         {
-            return message.Metadata.ContainsKey(STATE_ID);
+            return message.Metadata?.ContainsKey(STATE_ID) ?? false;
         }
 
         /// <summary>
