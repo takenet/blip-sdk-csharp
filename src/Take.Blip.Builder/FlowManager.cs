@@ -1,20 +1,21 @@
 ﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Serialization;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
@@ -361,63 +362,58 @@ namespace Take.Blip.Builder
                     ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
                     : _configuration.DefaultActionExecutionTimeout;
 
-                using (var cts = new CancellationTokenSource(executionTimeout))
-                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+                using var cts = new CancellationTokenSource(executionTimeout);
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
+
+                object settings = null;
+
+                try
                 {
-                    try
+                    settings = await GetParsedActionSettingsAsync(stateAction, action, context, cancellationToken);
+
+                    if (actionTrace != null)
                     {
-                        var settings = stateAction.Settings;
-                        if (settings != null)
-                        {
-                            var settingsJson = settings.ToString(Formatting.None);
-                            settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
-                            settings = JObject.Parse(settingsJson);
-                        }
-
-                        if (actionTrace != null)
-                        {
-                            actionTrace.ParsedSettings = settings;
-                        }
-
-                        await action.ExecuteAsync(context, settings, linkedCts.Token);
+                        actionTrace.ParsedSettings = settings;
                     }
-                    catch (Exception ex)
+
+                    await action.ExecuteAsync(context, settings, linkedCts.Token);
+                }
+                catch (Exception ex)
+                {
+                    if (actionTrace != null)
                     {
-                        if (actionTrace != null)
-                        {
-                            actionTrace.Error = ex.ToString();
-                        }
-
-                        var message = ex is OperationCanceledException && cts.IsCancellationRequested
-                            ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
-                            : $"The processing of the action '{stateAction.Type}' has failed";
-
-                        var actionProcessingException = new ActionProcessingException(message, ex)
-                        {
-                            ActionType = stateAction.Type,
-                            ActionSettings = stateAction.Settings.ToObject<IDictionary<string, object>>()
-                        };
-
-                        if (stateAction.ContinueOnError)
-                        {
-                            _logger.Warning(actionProcessingException, "Action '{ActionType}' has failed but was forgotten", stateAction.Type);
-                        }
-                        else
-                        {
-                            throw actionProcessingException;
-                        }
+                        actionTrace.Error = ex.ToString();
                     }
-                    finally
-                    {
-                        actionStopwatch?.Stop();
 
-                        if (actionTrace != null &&
-                            actionTraces != null &&
-                            actionStopwatch != null)
-                        {
-                            actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
-                            actionTraces.Add(actionTrace);
-                        }
+                    var message = ex is OperationCanceledException && cts.IsCancellationRequested
+                        ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
+                        : $"The processing of the action '{stateAction.Type}' has failed";
+
+                    var actionProcessingException = new ActionProcessingException(message, ex)
+                    {
+                        ActionType = stateAction.Type,
+                        ActionSettings = settings ?? stateAction.Settings
+                    };
+
+                    if (stateAction.ContinueOnError)
+                    {
+                        _logger.Warning(actionProcessingException, "Action '{ActionType}' has failed but was forgotten", stateAction.Type);
+                    }
+                    else
+                    {
+                        throw actionProcessingException;
+                    }
+                }
+                finally
+                {
+                    actionStopwatch?.Stop();
+
+                    if (actionTrace != null &&
+                        actionTraces != null &&
+                        actionStopwatch != null)
+                    {
+                        actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
+                        actionTraces.Add(actionTrace);
                     }
                 }
             }
@@ -476,6 +472,30 @@ namespace Take.Blip.Builder
             }
 
             return state;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private async Task<object> GetParsedActionSettingsAsync(Action stateAction, IAction action, IContext context, CancellationToken cancellationToken)
+        {
+            if (stateAction.Settings == null)
+                return null;
+
+            if (!(stateAction.Settings is string settingsJson))
+            {
+                if (stateAction.Settings is JObject jObjectSettings)
+                {
+                    settingsJson = jObjectSettings.ToString();
+                }
+                else
+                {
+                    settingsJson = System.Text.Json.JsonSerializer.Serialize(stateAction.Settings, JsonSerializerOptionsContainer.Settings);
+                }
+            }
+
+            settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
+
+            return System.Text.Json.JsonSerializer.Deserialize(settingsJson, action.SettingsType, JsonSerializerOptionsContainer.Settings);
+
         }
     }
 }

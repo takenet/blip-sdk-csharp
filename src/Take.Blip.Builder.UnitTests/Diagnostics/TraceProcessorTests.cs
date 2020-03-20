@@ -58,10 +58,10 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                 new ActionTrace
                                 {
                                     Type = "ProcessHttp",
-                                    ParsedSettings = new JObject
+                                    ParsedSettings = new
                                     {
-                                        { "property1", "value1" },
-                                        { "property2", 2 }
+                                        Property1 = "value1",
+                                        Property2 = 2
                                     },
                                     ElapsedMilliseconds = 150
                                 }
@@ -85,11 +85,11 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                 new ActionTrace
                                 {
                                     Type = "SendMessage",
-                                    ParsedSettings = new JObject
+                                    ParsedSettings = new
                                     {
-                                        { "to", "user@domain.com" },
-                                        { "type", "text/plain" },
-                                        { "content", "Hi there!" }
+                                        To = "user@domain.com",
+                                        Type = "text/plain",
+                                        Content = "Hi there!"
                                     },
                                     ElapsedMilliseconds = 150
                                 }

@@ -1,32 +1,36 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.SendCommand
 {
-    public class SendCommandAction : IAction
+    public class SendCommandAction : ActionBase<JsonElement>
     {
         private readonly ISender _sender;
 
-        public SendCommandAction(ISender sender)
+        public SendCommandAction(ISender sender) : base(nameof(SendCommand))
         {
             _sender = sender;
         }
 
-        public string Type => nameof(SendCommand);
-
-        public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override Task ExecuteAsync(IContext context, JsonElement settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendCommandAction)}' action");
 
-            var command = settings.ToObject<Command>(LimeSerializerContainer.Serializer);
+            var command = GetCommandFromJsonDocument(settings);
             command.Id = EnvelopeId.NewId();
 
             return _sender.SendCommandAsync(command, cancellationToken);
+        }
+
+        private static Command GetCommandFromJsonDocument(JsonElement settings)
+        {
+            var rawText = settings.GetRawText();
+            return JsonConvert.DeserializeObject<Command>(rawText);
         }
     }
 }

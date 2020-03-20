@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Diagnostics;
 
 namespace Take.Blip.Builder.Models
@@ -45,7 +44,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The action settings for the specified type. Optional.
         /// </summary>
-        public JObject Settings { get; set; }
+        public object Settings { get; set; }
 
         public void Validate()
         {

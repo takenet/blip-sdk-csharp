@@ -44,7 +44,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
+                    {"Content-ActionName", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
                 ResponseBodyVariable = "httpResultBody",
@@ -63,7 +63,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>()).Returns(httpResponseMessage);
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await HttpClient.Received(1).SendAsync(
@@ -84,7 +84,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
+                    {"Content-ActionName", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
             };
@@ -102,7 +102,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Act
             try
             {
-                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+                await target.ExecuteAsync(Context, (object)settings, CancellationToken);
                 throw new Exception();
             }
             catch (ValidationException exception)
@@ -130,7 +130,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
+                    {"Content-ActionName", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
                 ResponseBodyVariable = "httpResultBody",
@@ -152,7 +152,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeTrue();
@@ -182,7 +182,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
+                    {"Content-ActionName", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
                 ResponseBodyVariable = "httpResultBody",
@@ -204,7 +204,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
@@ -238,7 +238,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
+                    {"Content-ActionName", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
                 ResponseBodyVariable = "httpResultBody",
@@ -260,7 +260,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBe(expectedResult);

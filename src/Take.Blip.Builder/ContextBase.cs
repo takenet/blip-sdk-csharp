@@ -81,7 +81,7 @@ namespace Take.Blip.Builder
 
             try
             {
-                var json = System.Text.Json.JsonDocument.Parse(variableValue);
+                using var json = System.Text.Json.JsonDocument.Parse(variableValue);
                 var currentElement = json.RootElement;
 
                 if (propertyNames.Any(s => !currentElement.TryGetProperty(s, out currentElement)))

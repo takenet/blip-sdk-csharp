@@ -1,29 +1,33 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.Redirect
 {
-    public class RedirectAction : IAction
+    public class RedirectAction : ActionBase<JsonElement>
     {
         private readonly ISender _sender;
 
-        public RedirectAction(ISender sender)
+        public RedirectAction(ISender sender) : base(nameof(Redirect))
         {
             _sender = sender;
         }
 
-        public string Type => nameof(Redirect);
-
-        public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override Task ExecuteAsync(IContext context, JsonElement settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
 
-            var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
+            var redirect = GetRedirectFromJsonDocument(settings);
             return _sender.SendMessageAsync(redirect, context.Input.Message.From, cancellationToken);
+        }
+
+        private static Lime.Messaging.Contents.Redirect GetRedirectFromJsonDocument(JsonElement settings)
+        {
+            var rawText = settings.GetRawText();
+            return JsonConvert.DeserializeObject<Lime.Messaging.Contents.Redirect>(rawText);
         }
     }
 }

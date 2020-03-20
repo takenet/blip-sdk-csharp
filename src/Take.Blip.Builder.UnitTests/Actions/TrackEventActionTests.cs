@@ -37,15 +37,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             Context.UserIdentity.Returns(identity);
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
-            var settings = new JObject
+            var settings = new TrackEventSettings
             {
-                ["category"] = category,
-                ["action"] = action,
-                ["extras"] = JObject.FromObject(extras)
+                Category = category,
+                Action = action,
+                Extras = extras
             };
 
             // Act
-            await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
+            await eventTrackAction.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await EventTrackExtension.Received(1).AddAsync(
@@ -79,17 +79,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             EnvelopeReceiverContext<Message>.Create(new Message { Id = messageId });
 
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
-            var settings = new JObject
+            var settings = new TrackEventSettings
             {
-                ["category"] = category,
-                ["action"] = action,
-                ["label"] = label,
-                ["value"] = value,
-                ["extras"] = JObject.FromObject(extras)
+                Category = category,
+                Action = action,
+                Label = label,
+                Value = value.ToString(),
+                Extras = extras
             };
 
             // Act
-            await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
+            await eventTrackAction.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await EventTrackExtension.Received(1).AddAsync(
@@ -123,17 +123,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             EnvelopeReceiverContext<Message>.Create(new Message { Id = messageId });
 
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
-            var settings = new JObject
+            var settings = new TrackEventSettings
             {
-                ["category"] = category,
-                ["action"] = action,
-                ["label"] = label,
-                ["value"] = value,
-                ["extras"] = JObject.FromObject(extras)
+                Category = category,
+                Action = action,
+                Label = label,
+                Value = value,
+                Extras = extras
             };
 
             // Act
-            await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
+            await eventTrackAction.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await EventTrackExtension.Received(1).AddAsync(
@@ -163,19 +163,18 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
 
             var eventTrackAction = new TrackEventAction(EventTrackExtension);
-            var settings = new JObject
+            var settings = new TrackEventSettings
             {
-                ["category"] = category,
-                ["action"] = action,
-                ["identity"] = identity,
-                ["extras"] = JObject.FromObject(extras)
+                Category = category,
+                Action = action,
+                Extras = extras
             };
 
 
             // Act
             try
             {
-                await eventTrackAction.ExecuteAsync(Context, settings, CancellationToken);
+                await eventTrackAction.ExecuteAsync(Context, (object)settings, CancellationToken);
                 throw new Exception("The expected exception was not thrown");
             }
             catch (ArgumentException ex)

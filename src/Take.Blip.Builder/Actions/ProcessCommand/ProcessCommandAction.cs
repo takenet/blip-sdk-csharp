@@ -1,39 +1,38 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.ProcessCommand
 {
-    public class ProcessCommandAction : IAction
+    public class ProcessCommandAction : ActionBase<JsonElement>
     {
         private readonly ISender _sender;
         private readonly IEnvelopeSerializer _envelopeSerializer;
 
-        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer)
+        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer) : base(nameof(ProcessCommand))
         {
             _sender = sender;
             _envelopeSerializer = envelopeSerializer;
         }
 
-        public string Type => nameof(ProcessCommand);
-
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(IContext context, JsonElement settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(ProcessCommandAction)}' action");
 
             string variable = null;
 
-            if (settings.TryGetValue(nameof(variable), out var variableToken))
+            if (settings.TryGetProperty(nameof(variable), out var variableToken))
             {
-                variable = variableToken.ToString().Trim('"');
+                variable = variableToken.GetString().Trim('"');
             }
 
-            var command = settings.ToObject<Command>(LimeSerializerContainer.Serializer);
+            var command = GetCommandFromJsonDocument(settings);
             command.Id = EnvelopeId.NewId();
 
             var resultCommand = await _sender.ProcessCommandAsync(command, cancellationToken);
@@ -42,6 +41,12 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
             var resultCommandJson = _envelopeSerializer.Serialize(resultCommand);
             await context.SetVariableAsync(variable, resultCommandJson, cancellationToken);
+        }
+
+        private static Command GetCommandFromJsonDocument(JsonElement settings)
+        {
+            var rawText = settings.GetRawText();
+            return JsonConvert.DeserializeObject<Command>(rawText);
         }
     }
 }

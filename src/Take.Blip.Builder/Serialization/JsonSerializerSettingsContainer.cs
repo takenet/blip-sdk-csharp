@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Take.Blip.Builder.Utils
+namespace Take.Blip.Builder.Serialization
 {
     public static class JsonSerializerOptionsContainer
     {

@@ -16,7 +16,6 @@ namespace Take.Blip.Client.Activation
     /// </summary>
     public class Application : SettingsContainer
     {
-        //public static JsonSerializerSettings SerializerSettings { get; }
         public static JsonSerializerOptions JsonSerializerOptions { get; }
 
         static Application()
@@ -25,15 +24,6 @@ namespace Take.Blip.Client.Activation
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
-            //SerializerSettings = new JsonSerializerSettings
-            //{
-            //    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            //};
-            //SerializerSettings.Converters.Add(new StringEnumConverter
-            //{
-            //    CamelCaseText = true,
-            //    AllowIntegerValues = true
-            //});
         }
 
         /// <summary>

@@ -467,10 +467,10 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
+                                Settings = new
                                 {
-                                    {"type", messageType},
-                                    {"content", pongMessageContent}
+                                    Type = messageType,
+                                    Content = pongMessageContent
                                 }
                             }
                         }
@@ -483,10 +483,10 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
+                                Settings = new
                                 {
-                                    {"type", messageType},
-                                    {"content", poloMessageContent}
+                                    Type = messageType,
+                                    Content = poloMessageContent
                                 }
                             }
                         }
@@ -759,11 +759,11 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "ExecuteScript",
-                                Settings = new JObject()
+                                Settings = new
                                 {
-                                    { "function", "run" },
-                                    { "source", "function run(content) { return false; }" }, // Not satisfying Input condition above
-                                    { "outputVariable", "InputIsValid" }
+                                    Function = "run",
+                                    Source = "function run(content) { return false; }", // Not satisfying Input condition above
+                                    OutputVariable = "InputIsValid"
                                 }
                             }
                         },
@@ -809,10 +809,10 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
+                                Settings = new
                                 {
-                                    {"type", messageType},
-                                    {"content", okMessageContent }
+                                    Type = messageType,
+                                    Content = okMessageContent
                                 }
                             }
                         }
@@ -825,10 +825,10 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
+                                Settings = new
                                 {
-                                    {"type", messageType},
-                                    {"content", nokMessageContent }
+                                    Type = messageType,
+                                    Content = nokMessageContent
                                 }
                             }
                         }
@@ -841,10 +841,10 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
+                                Settings = new
                                 {
-                                    {"type", messageType},
-                                    {"content", "failed to set variable" }
+                                    Type = messageType,
+                                    Content = "failed to set variable"
                                 }
                             }
                         }
