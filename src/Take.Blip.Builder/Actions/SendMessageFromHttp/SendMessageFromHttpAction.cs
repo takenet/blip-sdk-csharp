@@ -31,7 +31,7 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
 
         public override async Task ExecuteAsync(IContext context, SendMessageFromHttpSettings settings, CancellationToken cancellationToken)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, settings.Uri);
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, settings.Uri);
             if (settings.Headers != null)
             {
                 foreach (var header in settings.Headers)
@@ -44,22 +44,21 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                 httpRequestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(settings.Type));
             }
 
-            using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
-            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
-            using (var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, linkedCts.Token).ConfigureAwait(false))
+            using var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout);
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token);
+            using var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, linkedCts.Token).ConfigureAwait(false);
+
+            httpResponseMessage.EnsureSuccessStatusCode();
+
+            var body = await httpResponseMessage.Content.ReadAsStringAsync();
+            var message = new Message(EnvelopeId.NewId())
             {
-                httpResponseMessage.EnsureSuccessStatusCode();
+                Id = EnvelopeId.NewId(),
+                To = context.Input.Message.From,
+                Content = _documentSerializer.Deserialize(body, settings.MediaType)
+            };
 
-                var body = await httpResponseMessage.Content.ReadAsStringAsync();
-                var message = new Message(EnvelopeId.NewId())
-                {
-                    Id = EnvelopeId.NewId(),
-                    To = context.Input.Message.From,
-                    Content = _documentSerializer.Deserialize(body, settings.MediaType)
-                };
-
-                await _sender.SendMessageAsync(message, cancellationToken);
-            }
+            await _sender.SendMessageAsync(message, cancellationToken);
         }
     }
 }
