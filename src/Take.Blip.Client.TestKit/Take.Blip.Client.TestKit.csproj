@@ -9,6 +9,7 @@
     <Description>A testing host for applications using BLiP SDK to ease integration testing. This host fakes the server incoming and outgoing message transport so you can control the delivery of messages to your chatbot and inspect which messages are produced by it.</Description>
     <PackageTags>blip messagingHub</PackageTags>
     <Copyright>Copyright © 2017 Curupira S/A</Copyright>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
