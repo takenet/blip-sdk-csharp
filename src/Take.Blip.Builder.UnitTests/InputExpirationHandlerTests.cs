@@ -127,6 +127,33 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Any<Node>(),
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
         }
+
+        [Fact]
+        public async Task WhenUserSendMessageCancelInputExpirationScheduled()
+        {
+            // Arrange
+            Message.Content = new PlainText() { Text = "Teste" };
+
+            var state = new State
+            {
+                Id = "ping",
+                Input = new Builder.Models.Input()
+                {
+                    Expiration = TimeSpan.FromMinutes(1)
+                }
+            };
+
+            // Act
+            await InputHandler.OnFlowPreProcessingAsync(state, Message, null, default(CancellationToken));
+
+            // Assert
+            Scheduler
+                .Received(1)
+                .CancelScheduledMessageAsync(
+                    Arg.Is<string>(s => s.Equals($"{UserIdentity}-inputexpirationtime")),
+                    Arg.Any<Node>(),
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+        }
     }
 }
 
