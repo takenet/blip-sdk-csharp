@@ -111,6 +111,37 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
+        public async Task ExecuteUsingLetAndConstVariablesShouldHaveScopeAndSucceed()
+        {
+            // Arrange
+            var result = string.Empty;
+
+            var settings = new ExecuteScriptSettings()
+            {
+                InputVariables = Array.Empty<string>(),
+                Source = @"
+                    function scopedFunc() {
+                        let x = 1;
+                        const y = 'my value';
+                        return { x: x, y: y };
+                    }
+
+                    function run() {
+                        var scopedReturn = scopedFunc();
+                        return typeof x === 'undefined' && typeof y === 'undefined' && scopedReturn.x === 1 && scopedReturn.y === 'my value';
+                    }",
+                OutputVariable = nameof(result)
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(nameof(result), bool.TrueString.ToLowerInvariant(), CancellationToken);
+        }
+
+        [Fact]
         public async Task ExecuteWithCustomFunctionNameAndArgumentsShouldSucceed()
         {
             // Arrange
