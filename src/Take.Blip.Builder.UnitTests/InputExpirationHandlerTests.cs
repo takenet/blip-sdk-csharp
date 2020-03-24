@@ -16,6 +16,14 @@ namespace Take.Blip.Builder.UnitTests
 {
     public class InputExpirationHandlerTests
     {
+        public Identity UserIdentity { get; }
+        public Identity ApplicationIdentity { get; }
+        public Application Application { get; }
+        public Message Message { get; }
+        public InputExpirationHandler InputHandler { get; }
+
+        private readonly ISchedulerExtension Scheduler;
+
         public InputExpirationHandlerTests()
         {
             UserIdentity = new Identity("user", "domain");
@@ -35,15 +43,6 @@ namespace Take.Blip.Builder.UnitTests
 
             InputHandler = new InputExpirationHandler(Scheduler);
         }
-
-        public Identity UserIdentity { get; }
-        public Identity ApplicationIdentity { get; }
-        public Application Application { get; }
-        public Message Message { get; }
-
-        private ISchedulerExtension Scheduler;
-
-        public InputExpirationHandler InputHandler { get; }
 
         [Fact]
         public async Task ValidateMessageDontChangeTraceMetadata()
