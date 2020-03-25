@@ -70,10 +70,10 @@ namespace Take.Blip.Builder.UnitTests
             Assert.True(returnMessage.Metadata.ContainsKey(TraceSettings.BUILDER_TRACE_TARGET));
             Assert.True(returnMessage.Metadata.ContainsKey(TraceSettings.BUILDER_TRACE_TARGET_TYPE));
             Assert.True(returnMessage.Metadata.ContainsKey(TraceSettings.BUILDER_TRACE_MODE));
-            Assert.True(returnMessage.Metadata.ContainsKey("inputExpiration.stateId"));
-            Assert.True(returnMessage.Metadata.ContainsKey("inputExpiration.identity"));
-            Assert.False(Message.Metadata.ContainsKey("inputExpiration.identity"));
-            Assert.False(Message.Metadata.ContainsKey("inputExpiration.stateId"));
+            Assert.True(returnMessage.Metadata.ContainsKey(InputExpirationHandler.STATE_ID));
+            Assert.True(returnMessage.Metadata.ContainsKey(InputExpirationHandler.IDENTITY));
+            Assert.False(Message.Metadata.ContainsKey(InputExpirationHandler.IDENTITY));
+            Assert.False(Message.Metadata.ContainsKey(InputExpirationHandler.STATE_ID));
         }
 
         [Fact]
