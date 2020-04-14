@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Version>0.1.2-beta</Version>
     <Authors>takenet</Authors>
     <Company>take</Company>

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 
 namespace Take.Blip.Client.Activation
 {
@@ -40,14 +41,10 @@ namespace Take.Blip.Client.Activation
 
         private static Assembly LoadAssembly(string assemblyPath)
         {
-#if NET461
-            return Assembly.LoadFrom(assemblyPath);
-#elif NETSTANDARD2_0
             var fileName = Path.GetFileNameWithoutExtension(assemblyPath);
             var runtimeLibrary = Microsoft.Extensions.DependencyModel.DependencyContext.Default.RuntimeLibraries.FirstOrDefault(l => l.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
             if (runtimeLibrary != null) return Assembly.Load(new AssemblyName(runtimeLibrary.Name));
-            return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
-#endif
+            return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
         }
     }
 }
