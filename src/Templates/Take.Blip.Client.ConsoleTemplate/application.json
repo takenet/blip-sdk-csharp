@@ -2,6 +2,7 @@
   /* TODO: Put your chatbot identifier and accessKey bellow. */
   "identifier": "",
   "accessKey": "",
+  "hostName": "tcp.msging.net",
   "messageReceivers": [
     {
       "type": "PlainTextMessageReceiver",
