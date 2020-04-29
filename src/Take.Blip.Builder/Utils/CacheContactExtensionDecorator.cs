@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
+using Newtonsoft.Json;
 using Serilog;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Storage;
@@ -39,14 +40,25 @@ namespace Take.Blip.Builder.Utils
             }
             
             var key = CreateKey(identity);
-            var contact = await _contactMap.GetValueOrDefaultAsync(key, cancellationToken);
+            
+            Contact contact = null;
+
+            try
+            {
+                 contact = await _contactMap.GetValueOrDefaultAsync(key, cancellationToken);
+            }
+            catch (JsonSerializationException e) {}
 
             if (contact == null)
             {
-                contact = await _contactExtension.GetAsync(identity, cancellationToken);
-                await AddToCacheAsync(contact, key, cancellationToken);
-            }
+                contact =  await _contactExtension.GetAsync(identity, cancellationToken);
 
+                if (contact != null)
+                {
+                    await AddToCacheAsync(contact, key, cancellationToken);
+                }
+            }
+            
             return contact;
         }
 
@@ -61,7 +73,11 @@ namespace Take.Blip.Builder.Utils
             await _contactExtension.SetAsync(identity, contact, cancellationToken);
 
             var key = CreateKey(identity);
-            await AddToCacheAsync(contact, key, cancellationToken);
+
+            if (contact != null)
+            {
+                await AddToCacheAsync(contact, key, cancellationToken);   
+            }
         }
 
         public async Task DeleteAsync(Identity identity, CancellationToken cancellationToken)
