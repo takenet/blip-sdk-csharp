@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
+using Take.Blip.Client.Content;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
@@ -688,7 +689,7 @@ namespace Take.Blip.Builder.UnitTests
                 .DidNotReceive()
                 .SendMessageAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
 
-            Context.Received(1).SetVariableAsync("InputIsValid", "True", Arg.Any<CancellationToken>());
+            Context.Received(1).SetVariableAsync("InputIsValid", "true", Arg.Any<CancellationToken>());
             Context.Received(1).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
         }
 
@@ -871,7 +872,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Type.ToString().Equals(messageType)
                         && m.Content.ToString() == nokMessageContent),
                     Arg.Any<CancellationToken>());
-            Context.Received(1).SetVariableAsync("InputIsValid", "False", Arg.Any<CancellationToken>());
+            Context.Received(1).SetVariableAsync("InputIsValid", "false", Arg.Any<CancellationToken>());
             Context.Received(3).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
         }
 
@@ -1406,8 +1407,194 @@ namespace Take.Blip.Builder.UnitTests
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
-        }                
-        
+        }
+
+        #region TemporaryInput
+        [Fact]
+        public async Task FlowWithTemporaryInputShouldScheduleAInputExpirationTimeMessage()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+            var messageType = InputExpiration.MIME_TYPE;
+            var messageContent = new InputExpiration() { Identity = UserIdentity };
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        Input = new Input()
+                        {
+                            Expiration = TimeSpan.FromMinutes(1)
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            SchedulerExtension
+                .Received(1)
+                .ScheduleMessageAsync(
+                    Arg.Is<Message>(m => 
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(ApplicationIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content is InputExpiration
+                        && UserIdentity.Equals((m.Content as InputExpiration).Identity)),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<Node>(),
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+        }
+
+        //When content input temporary is null or empty
+        [Fact]
+        public async Task FlowWithTemporaryInputWithEmptyContentShouldThrowsAException()
+        {
+            // Arrange
+            var input = new InputExpiration() { Identity = null };
+            Message.Content = input;
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        Input = new Input()
+                        {
+                            Expiration = TimeSpan.FromMinutes(1)
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            Func<Task> processInputAsync = async () =>  await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            processInputAsync.ShouldThrow<ArgumentException>();
+        }
+
+        //When user send other input after one temporary input
+        [Fact]
+        public async Task FlowWithTemporaryInputShouldCancelScheduleWhenUserSendOtherInput()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+            var messageType = InputExpiration.MIME_TYPE;
+            var messageContent = new InputExpiration() { Identity = UserIdentity };
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        Input = new Input()
+                        {
+                            Expiration = TimeSpan.FromMinutes(1)
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping2"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping2",
+                        Input = new Input()
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns("ping");
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            ContextProvider.Received(2).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "ping2", Arg.Any<CancellationToken>());
+            SchedulerExtension
+                .Received(1)
+                .ScheduleMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id.Equals($"{UserIdentity}-inputexpirationtime")
+                        && m.To.ToIdentity().Equals(ApplicationIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content is InputExpiration
+                        && UserIdentity.Equals((m.Content as InputExpiration).Identity)),
+                    Arg.Any<DateTimeOffset>(),
+                    Arg.Any<Node>(),
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+            SchedulerExtension
+                .Received(1)
+                .CancelScheduledMessageAsync(
+                    Arg.Is<string>(s => s.Equals($"{UserIdentity}-inputexpirationtime")),
+                    Arg.Any<Node>(),
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+
+            StateManager = Substitute.For<IStateManager>();
+        }
+        #endregion
+
         public void Dispose()
         {
             CancellationTokenSource.Dispose();

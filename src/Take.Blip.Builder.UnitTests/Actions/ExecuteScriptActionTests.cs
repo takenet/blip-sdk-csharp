@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using Jint.Runtime;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Serilog;
 using Shouldly;
 using Take.Blip.Builder.Actions.ExecuteScript;
+using Take.Blip.Builder.Hosting;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
@@ -16,7 +18,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
     {
         private ExecuteScriptAction GetTarget()
         {
-            return new ExecuteScriptAction();
+            return new ExecuteScriptAction(new ConventionsConfiguration(), Substitute.For<ILogger>());
         }
 
         [Fact]
@@ -106,6 +108,37 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
             await Context.Received(1).SetVariableAsync(nameof(result), "500", CancellationToken, default(TimeSpan));
+        }
+
+        [Fact]
+        public async Task ExecuteUsingLetAndConstVariablesShouldHaveScopeAndSucceed()
+        {
+            // Arrange
+            var result = string.Empty;
+
+            var settings = new ExecuteScriptSettings()
+            {
+                InputVariables = Array.Empty<string>(),
+                Source = @"
+                    function scopedFunc() {
+                        let x = 1;
+                        const y = 'my value';
+                        return { x: x, y: y };
+                    }
+
+                    function run() {
+                        var scopedReturn = scopedFunc();
+                        return typeof x === 'undefined' && typeof y === 'undefined' && scopedReturn.x === 1 && scopedReturn.y === 'my value';
+                    }",
+                OutputVariable = nameof(result)
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(nameof(result), bool.TrueString.ToLowerInvariant(), CancellationToken);
         }
 
         [Fact]

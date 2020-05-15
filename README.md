@@ -1,11 +1,11 @@
 
 The **BLiP C# SDK** is a set of Nuget packages that allow the creation of [BLiP](https://blip.ai/) chatbots.
 
-<a href="https://www.nuget.org/packages/Take.Blip.Client/" rel="Take.Blip.Client">![NuGet](https://img.shields.io/nuget/v/Take.Blip.Client.svg)</a> [![Build status](https://ci.appveyor.com/api/projects/status/xj8p4kqk2d5nw17h?svg=true)](https://ci.appveyor.com/project/Take/blip-sdk-csharp)
+<a href="https://www.nuget.org/packages/Take.Blip.Client/" rel="Take.Blip.Client">![NuGet](https://img.shields.io/nuget/v/Take.Blip.Client.svg)</a> 
 
 ## Requirements
 
-- .NET Core 2.0 or above (download the SDK [here](https://dot.net/core))
+- .NET Core 3.0 or above (download the SDK [here](https://dotnet.microsoft.com/download))
 
 ## Getting Started
 

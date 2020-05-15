@@ -253,6 +253,11 @@ namespace Take.Blip.Client.Extensions
         public const string ANALYSIS = "/analysis";
 
         /// <summary>
+        /// Template for an AI content analysis.
+        /// </summary>
+        public const string CONTENT_ANALYSIS = "/content/analysis";
+
+        /// <summary>
         /// Template for an AI models.
         /// </summary>
         public const string MODELS = "/models";

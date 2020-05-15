@@ -49,6 +49,23 @@ namespace Take.Blip.Builder.Diagnostics
 
         public int? SlowThreshold { get; set; }
 
+        public IDictionary<string,string> GetDictionary()
+        {
+            var returnDictionary = new Dictionary<string, string>()
+            {
+                { BUILDER_TRACE_MODE, Mode.ToString() },
+                { BUILDER_TRACE_TARGET, Target },
+                { BUILDER_TRACE_TARGET_TYPE, TargetType.ToString() }
+            };
+
+            if (SlowThreshold != null)
+            {
+                returnDictionary.Add(BUILDER_TRACE_SLOW_THRESHOLD, SlowThreshold.ToString());
+            }
+
+            return returnDictionary;
+        }
+
         public void Validate()
         {
             if (Mode == TraceMode.Disabled) return;

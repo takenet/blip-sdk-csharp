@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Version>0.1.2-beta</Version>
     <Authors>takenet</Authors>
     <Company>take</Company>
@@ -13,29 +13,25 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lime.Messaging" Version="0.8.107" />
-    <PackageReference Include="Lime.Protocol" Version="0.8.111-beta" />
+    <PackageReference Include="Lime.Messaging" Version="0.8.111" />
+    <PackageReference Include="Lime.Protocol" Version="0.9.11-beta" />
     <PackageReference Include="Lime.Transport.Tcp" Version="0.8.107" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SmartFormat.NET" Version="2.1.0.2" />
-    <PackageReference Include="Takenet.Iris.Messaging" Version="19.43.1297" />
-    <PackageReference Include="Takenet.Iris.Messaging.ArtificialIntelligence" Version="19.32.702" />
-    <PackageReference Include="Takenet.Iris.Messaging.Desk" Version="19.32.702" />
-    <PackageReference Include="Takenet.Iris.Messaging.Media" Version="19.32.702" />
-    <PackageReference Include="Takenet.Iris.Messaging.Portal" Version="19.32.702" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Takenet.Iris.Messaging" Version="20.12.3406" />
+    <PackageReference Include="Takenet.Iris.Messaging.ArtificialIntelligence" Version="20.12.3406" />
+    <PackageReference Include="Takenet.Iris.Messaging.Desk" Version="20.12.3406" />
+    <PackageReference Include="Takenet.Iris.Messaging.Media" Version="20.12.3406" />
+    <PackageReference Include="Takenet.Iris.Messaging.Portal" Version="20.12.3406" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
-
-
+  
 </Project>
