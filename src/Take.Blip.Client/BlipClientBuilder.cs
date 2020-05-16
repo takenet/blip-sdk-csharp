@@ -239,8 +239,6 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder WithEnvelopeBufferSize(int envelopeBufferSize)
         {
-            if (envelopeBufferSize < -1) throw new ArgumentOutOfRangeException(nameof(envelopeBufferSize));
-
             EnvelopeBufferSize = envelopeBufferSize;
             return this;
         }
