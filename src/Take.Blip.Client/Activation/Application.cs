@@ -210,6 +210,8 @@ namespace Take.Blip.Client.Activation
         /// </summary>
         public bool RegisterTunnelReceivers { get; set; }
 
+        public int? EnvelopeBufferSize { get; set; }
+
         /// <summary>
         /// Creates an instance of <see cref="Application"/> from a JSON input.
         /// </summary>
