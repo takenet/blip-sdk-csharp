@@ -103,7 +103,7 @@ namespace Take.Blip.Builder.Utils
             {
                 _logger.Error(
                     ex, 
-                    "Error adding contact {{identity}} for owner {{application}} on CacheOwnerCallerContactMap",
+                    "Error adding contact {Identity} for owner {Application} on CacheOwnerCallerContactMap",
                     contact.Identity,
                     OwnerContext.Owner);
             }
