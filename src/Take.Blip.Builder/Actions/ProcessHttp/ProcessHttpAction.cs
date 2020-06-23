@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
+using Serilog.Context;
 using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
@@ -66,7 +67,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"An exception occurred while processing HTTP action: {ex.Message}");
+                _logger.Warning(ex, $"An exception occurred while processing HTTP action");
             }
 
             // Set the responses variables
