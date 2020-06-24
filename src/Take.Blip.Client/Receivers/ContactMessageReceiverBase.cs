@@ -8,6 +8,7 @@ using Lime.Protocol.Network;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Directory;
 using Microsoft.Extensions.Caching.Memory;
+using Serilog;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -20,6 +21,7 @@ namespace Take.Blip.Client.Receivers
         private readonly IDirectoryExtension _directoryExtension;
         private readonly bool _cacheLocally;
         private readonly TimeSpan _cacheExpiration;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ContactMessageReceiverBase"/> class.
@@ -31,12 +33,14 @@ namespace Take.Blip.Client.Receivers
         protected ContactMessageReceiverBase(
             IContactExtension contactExtension,
             IDirectoryExtension directoryExtension,
+            ILogger logger,
             bool cacheLocally = true,
             TimeSpan cacheExpiration = default)
         {
             _directoryExtension = directoryExtension;
             _contactExtension = contactExtension;
             _cacheLocally = cacheLocally;
+            _logger = logger;
             _cacheExpiration = cacheExpiration == default ? TimeSpan.FromMinutes(30) : cacheExpiration;
             ContactCache = new MemoryCache(new MemoryCacheOptions());
         }
@@ -67,13 +71,21 @@ namespace Take.Blip.Client.Receivers
                 try
                 {
                     // Second, try from the roster.
-                    contact = await _contactExtension.GetFromContactsOrDirectoryAsync(_directoryExtension, identity, cancellationToken);
+                    contact = await _contactExtension.GetFromContactsOrDirectoryAsync(_directoryExtension, identity,
+                        cancellationToken);
                 }
-                catch (LimeException ex) when (
-                    ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND ||
-                    ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED)
+                catch (LimeException ex)
                 {
-                    contact = null;
+                    if (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND ||
+                        ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED)
+                    {
+                        contact = null;
+                        _logger.Warning(ex, "The contact was not found in directory");
+                    }
+                    else
+                    {
+                        _logger.Error(ex, "Unexpected error while trying to get account from directory");
+                    }
                 }
             }
             

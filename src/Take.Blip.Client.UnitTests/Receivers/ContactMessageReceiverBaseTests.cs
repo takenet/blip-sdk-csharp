@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using NSubstitute;
+using Serilog;
 using Shouldly;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Directory;
@@ -35,6 +36,7 @@ namespace Take.Blip.Client.UnitTests.Receivers
             return new TestContactMessageReceiver(
                 ContactExtension,
                 DirectoryExtension,
+                Substitute.For<ILogger>(),
                 CacheLocally,
                 CacheExpiration
                 );
@@ -183,9 +185,11 @@ namespace Take.Blip.Client.UnitTests.Receivers
         public TestContactMessageReceiver(
             IContactExtension contactExtension,
             IDirectoryExtension directoryExtension,
+            ILogger logger,
             bool cacheLocally = true,
             TimeSpan cacheExpiration = default) : base(contactExtension,
             directoryExtension,
+            logger,
             cacheLocally,
             cacheExpiration)
         {
