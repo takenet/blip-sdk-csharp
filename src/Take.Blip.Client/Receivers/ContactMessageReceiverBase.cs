@@ -85,6 +85,7 @@ namespace Take.Blip.Client.Receivers
                     else
                     {
                         _logger.Error(ex, "Unexpected error while trying to get account from directory");
+                        throw;
                     }
                 }
             }
