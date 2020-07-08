@@ -106,7 +106,6 @@ namespace Take.Blip.Builder.Hosting
         private static Container RegisterBuilderStorage(this Container container)
         {
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
-            container.RegisterSingleton<IOwnerCallerContactMap, Storage.Redis.OwnerCallerContactMap>();
             container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
             container.RegisterSingleton<ISerializer<Contact>, JsonSerializer<Contact>>();
             container.RegisterSingleton<IConnectionMultiplexer>(() =>
@@ -122,7 +121,6 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
             container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
-            container.RegisterDecorator<IContactExtension, CacheContactExtensionDecorator>();
 
             return container;
         }

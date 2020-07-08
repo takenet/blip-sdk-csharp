@@ -28,8 +28,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
             Application = Substitute.For<Application>();
-            OwnerCallerContactMap = new OwnerCallerContactMap();
-            CacheContactExtensionDecorator = new CacheContactExtensionDecorator(ContactExtension, OwnerCallerContactMap, Logger, Configuration);
             InputContext = new Dictionary<string, object>();
             Context.InputContext.Returns(InputContext);
             Contact = new Contact()
@@ -46,11 +44,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             DocumentSerializer = new DocumentSerializer(new DocumentTypeResolver());
         }
 
-        public OwnerCallerContactMap OwnerCallerContactMap { get; }
-
         public IContactExtension ContactExtension { get; }
-        
-        public IContactExtension CacheContactExtensionDecorator { get; }
         
         public ILogger Logger { get; }
         
@@ -66,7 +60,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public ContactVariableProvider GetTarget()
         {
-            return new ContactVariableProvider(CacheContactExtensionDecorator, DocumentSerializer);
+            return new ContactVariableProvider(ContactExtension, DocumentSerializer);
         }
 
         [Fact]
@@ -126,33 +120,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
             // Asset
             actual.ShouldBeNull();
-        }
-
-        [Fact]
-        public async Task GetNameTwiceWhenContactExistsShouldUseCachedValue()
-        {
-            // Arrange
-            using (OwnerContext.Create(Application.Identity))
-            {
-                Configuration.ContactCacheEnabled.Returns(true);
-                Configuration.ContactCacheExpiration.Returns(TimeSpan.FromMinutes(5));
-                var target = GetTarget();
-
-                // Act
-                var actualName = await target.GetVariableAsync("name", Context, CancellationToken);
-                var actualAddress = await target.GetVariableAsync("address", Context, CancellationToken);
-
-                // Asset
-                actualName.ShouldBe(Contact.Name);
-                actualAddress.ShouldBe(Contact.Address);
-                ContactExtension.Received(1).GetAsync(Arg.Any<Identity>(), Arg.Any<CancellationToken>());
-                
-                var cachedContact =
-                    await OwnerCallerContactMap.GetValueOrDefaultAsync(OwnerCaller.Create(Application.Identity,
-                        Contact.Identity));
-                
-                cachedContact.ShouldNotBeNull();
-            }
         }
     }
 }
