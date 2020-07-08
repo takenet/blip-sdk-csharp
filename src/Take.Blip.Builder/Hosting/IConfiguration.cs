@@ -19,10 +19,6 @@ namespace Take.Blip.Builder.Hosting
         int TraceQueueMaxDegreeOfParallelism { get; }
 
         TimeSpan TraceTimeout { get; }
-
-        bool ContactCacheEnabled { get; }
-        
-        TimeSpan ContactCacheExpiration { get; }
         
         TimeSpan DefaultActionExecutionTimeout { get; }
 

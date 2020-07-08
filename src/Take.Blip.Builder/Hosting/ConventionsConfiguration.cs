@@ -20,10 +20,6 @@ namespace Take.Blip.Builder.Hosting
 
         public virtual string RedisKeyPrefix => "builder";
 
-        public bool ContactCacheEnabled => true;
-
-        public virtual TimeSpan ContactCacheExpiration => TimeSpan.FromMinutes(30);
-
         public virtual TimeSpan DefaultActionExecutionTimeout => TimeSpan.FromSeconds(30);
 
         public int ExecuteScriptLimitRecursion => 50;
