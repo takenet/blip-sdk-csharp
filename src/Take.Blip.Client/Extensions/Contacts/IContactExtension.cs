@@ -76,14 +76,8 @@ namespace Take.Blip.Client.Extensions.Contacts
                 
                 contact = new Contact
                 {
-                    Identity = identity,
-                    Name = account.FullName
+                    Identity = identity, Name = account.FullName
                 };
-
-                if (account.Source != string.Empty)
-                {
-                    contact.Source = account.Source;
-                }
                 
                 foreach (var property in typeof(ContactDocument).GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
