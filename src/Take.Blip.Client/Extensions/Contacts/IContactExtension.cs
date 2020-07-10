@@ -80,7 +80,7 @@ namespace Take.Blip.Client.Extensions.Contacts
                     Name = account.FullName
                 };
 
-                if (account.Source != String.Empty)
+                if (account.Source != string.Empty)
                 {
                     contact.Source = account.Source;
                 }
