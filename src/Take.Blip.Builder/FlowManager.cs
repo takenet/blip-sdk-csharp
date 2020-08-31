@@ -362,6 +362,8 @@ namespace Take.Blip.Builder
                     ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
                     : _configuration.DefaultActionExecutionTimeout;
 
+                var settingsDictionary = stateAction.Settings.ToObject<IDictionary<string, object>>();
+
                 using (var cts = new CancellationTokenSource(executionTimeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
@@ -381,7 +383,7 @@ namespace Take.Blip.Builder
                         }
 
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
-                        using (LogContext.PushProperty(nameof(Action.Settings), settings, true))
+                        using (LogContext.PushProperty(nameof(Action.Settings), settingsDictionary, true))
                             await action.ExecuteAsync(context, settings, linkedCts.Token);
                     }
                     catch (Exception ex)
@@ -398,7 +400,7 @@ namespace Take.Blip.Builder
                         var actionProcessingException = new ActionProcessingException(message, ex)
                         {
                             ActionType = stateAction.Type,
-                            ActionSettings = stateAction.Settings.ToObject<IDictionary<string, object>>()
+                            ActionSettings = settingsDictionary
                         };
 
                         if (stateAction.ContinueOnError)
