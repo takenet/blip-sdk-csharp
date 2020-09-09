@@ -13,6 +13,7 @@ using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client.Content;
+using Takenet.Iris.Messaging.Resources;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
@@ -1560,6 +1561,15 @@ namespace Take.Blip.Builder.UnitTests
                 }
             };
             var target = GetTarget();
+            SchedulerExtension
+               .GetScheduledMessageAsync(Arg.Any<string>(), Arg.Any<Node>(), Arg.Any<CancellationToken>())
+               .Returns(new Schedule
+               {
+                   Name = $"{UserIdentity}-inputexpirationtime",
+                   Message = Message,
+                   Status = ScheduleStatus.Scheduled,
+                   When = DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(1))
+               });
 
             // Act
             await target.ProcessInputAsync(Message, flow, CancellationToken);

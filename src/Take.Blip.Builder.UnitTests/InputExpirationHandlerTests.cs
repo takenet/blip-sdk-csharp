@@ -1,6 +1,7 @@
 ﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
 using NSubstitute;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -10,6 +11,7 @@ using Take.Blip.Builder.Models;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.Scheduler;
+using Takenet.Iris.Messaging.Resources;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests
@@ -23,6 +25,7 @@ namespace Take.Blip.Builder.UnitTests
         public InputExpirationHandler InputHandler { get; }
 
         private readonly ISchedulerExtension Scheduler;
+        private readonly ILogger Logger;
 
         public InputExpirationHandlerTests()
         {
@@ -40,8 +43,9 @@ namespace Take.Blip.Builder.UnitTests
             };
 
             Scheduler = Substitute.For<ISchedulerExtension>();
+            Logger = Substitute.For<ILogger>();
 
-            InputHandler = new InputExpirationHandler(Scheduler);
+            InputHandler = new InputExpirationHandler(Scheduler, Logger);
         }
 
         [Fact]
@@ -142,11 +146,21 @@ namespace Take.Blip.Builder.UnitTests
                 }
             };
 
+            Scheduler
+                .GetScheduledMessageAsync(Arg.Any<string>(), Arg.Any<Node>(), Arg.Any<CancellationToken>())
+                .Returns(new Schedule
+                {
+                    Name = $"{UserIdentity}-inputexpirationtime",
+                    Message = Message,
+                    Status = ScheduleStatus.Scheduled,
+                    When = DateTimeOffset.Now.Add(state.Input.Expiration ?? TimeSpan.Zero)
+                });
+
             // Act
             await InputHandler.OnFlowPreProcessingAsync(state, Message, null, default(CancellationToken));
 
             // Assert
-            Scheduler
+            await Scheduler
                 .Received(1)
                 .CancelScheduledMessageAsync(
                     Arg.Is<string>(s => s.Equals($"{UserIdentity}-inputexpirationtime")),
