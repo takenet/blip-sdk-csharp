@@ -1,5 +1,6 @@
 ﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.Scheduler;
+using Takenet.Iris.Messaging.Resources;
 
 namespace Take.Blip.Builder
 {
@@ -21,14 +23,16 @@ namespace Take.Blip.Builder
         public const string IDENTITY = "inputExpiration.identity";
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="schedulerExtension"></param>
-        public InputExpirationHandler(ISchedulerExtension schedulerExtension)
+        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger)
         {
             _schedulerExtension = schedulerExtension;
+            _logger = logger;
         }
 
         /// <summary>
@@ -45,7 +49,22 @@ namespace Take.Blip.Builder
             if (state.HasInputExpiration() && !IsMessageFromExpiration(message))
             {
                 var messageId = GetInputExirationIdMessage(message);
-                await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
+
+                Schedule scheduledMessage = null;
+
+                try
+                {
+                    scheduledMessage = await _schedulerExtension.GetScheduledMessageAsync(messageId, from, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warning(ex, "Scheduled message with id '{MessageId}' not scheduled", messageId);
+                }
+
+                if (scheduledMessage != null)
+                {
+                    await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
+                }
             }
         }
 
@@ -64,7 +83,7 @@ namespace Take.Blip.Builder
             {
                 var scheduleMessage = CreateInputExirationMessage(message, state.Id);
                 var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes);
-                await _schedulerExtension.ScheduleMessageAsync(scheduleMessage,  scheduleTime, from, cancellationToken);
+                await _schedulerExtension.ScheduleMessageAsync(scheduleMessage, scheduleTime, from, cancellationToken);
             }
         }
 
