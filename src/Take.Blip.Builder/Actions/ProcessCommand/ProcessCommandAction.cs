@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Lime.Protocol;
+﻿using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.ProcessCommand
@@ -12,6 +12,10 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
     {
         private readonly ISender _sender;
         private readonly IEnvelopeSerializer _envelopeSerializer;
+
+        private const string RESOURCE_KEY = "resource";
+        private const string RESOURCE_TYPE_KEY = "type";
+        private const string SERIALIZABLE_TYPE = "json";
 
         public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer)
         {
@@ -33,7 +37,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                 variable = variableToken.ToString().Trim('"');
             }
 
-            var command = settings.ToObject<Command>(LimeSerializerContainer.Serializer);
+            var command = ConvertToCommand(settings);
             command.Id = EnvelopeId.NewId();
 
             var resultCommand = await _sender.ProcessCommandAsync(command, cancellationToken);
@@ -42,6 +46,17 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
             var resultCommandJson = _envelopeSerializer.Serialize(resultCommand);
             await context.SetVariableAsync(variable, resultCommandJson, cancellationToken);
+        }
+
+        private Command ConvertToCommand(JObject settings)
+        {
+            if (settings.TryGetValue(RESOURCE_TYPE_KEY, out var type)
+                && type.ToString().Contains(SERIALIZABLE_TYPE, StringComparison.OrdinalIgnoreCase)
+                && settings.TryGetValue(RESOURCE_KEY, out var resource))
+            {
+                settings.Property(RESOURCE_KEY).Value = JObject.Parse(resource.ToString());
+            }
+            return settings.ToObject<Command>(LimeSerializerContainer.Serializer);
         }
     }
 }
