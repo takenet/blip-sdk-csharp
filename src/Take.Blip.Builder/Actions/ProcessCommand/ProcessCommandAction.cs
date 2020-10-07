@@ -2,6 +2,7 @@
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Client;
@@ -13,9 +14,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
         private readonly ISender _sender;
         private readonly IEnvelopeSerializer _envelopeSerializer;
 
-        private const string RESOURCE_KEY = "resource";
-        private const string RESOURCE_TYPE_KEY = "type";
-        private const string SERIALIZABLE_TYPE = "json";
+        private const string SERIALIZABLE_PATTERN = @".+[/|\+]json";
 
         public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer)
         {
@@ -50,11 +49,11 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         private Command ConvertToCommand(JObject settings)
         {
-            if (settings.TryGetValue(RESOURCE_TYPE_KEY, out var type)
-                && type.ToString().Contains(SERIALIZABLE_TYPE, StringComparison.OrdinalIgnoreCase)
-                && settings.TryGetValue(RESOURCE_KEY, out var resource))
+            if (settings.TryGetValue(Command.TYPE_KEY, out var type)
+                && Regex.IsMatch(type.ToString(), SERIALIZABLE_PATTERN)
+                && settings.TryGetValue(Command.RESOURCE_KEY, out var resource))
             {
-                settings.Property(RESOURCE_KEY).Value = JObject.Parse(resource.ToString());
+                settings.Property(Command.RESOURCE_KEY).Value = JObject.Parse(resource.ToString());
             }
             return settings.ToObject<Command>(LimeSerializerContainer.Serializer);
         }
