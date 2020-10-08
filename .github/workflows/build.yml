@@ -24,4 +24,4 @@ jobs:
       run: dotnet build src/Take.Blip.Client.sln --configuration Release --no-restore
 
     - name: Test
-      run: dotnet test src/Take.Blip.Client.sln --no-restore --verbosity normal
+      run: sudo dotnet test src/Take.Blip.Client.sln --no-restore --verbosity normal
