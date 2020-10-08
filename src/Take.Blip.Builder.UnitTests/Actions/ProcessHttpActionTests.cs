@@ -84,7 +84,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-ActionName", "application/json"},
+                    {"Content-Type", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
             };
@@ -130,7 +130,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-ActionName", "application/json"},
+                    {"Content-Type", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
                 ResponseBodyVariable = "httpResultBody",
@@ -182,7 +182,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-ActionName", "application/json"},
+                    {"Content-Type", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
                 ResponseBodyVariable = "httpResultBody",
@@ -238,7 +238,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-ActionName", "application/json"},
+                    {"Content-Type", "application/json"},
                     {"Authorization", "Key askçjdhaklsdghasklgdasd="}
                 },
                 ResponseBodyVariable = "httpResultBody",
