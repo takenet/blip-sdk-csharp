@@ -40,7 +40,6 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(TunnelExtension);
             container.RegisterSingleton(ContextExtension);
             container.RegisterSingleton(Sender);
-            container.RegisterSingleton(OwnerCallerContactMap);
             container.RegisterSingleton(Application);
 
             return new ExtensionContext(

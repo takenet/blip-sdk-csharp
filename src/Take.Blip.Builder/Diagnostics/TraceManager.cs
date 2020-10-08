@@ -93,7 +93,7 @@ namespace Take.Blip.Builder.Diagnostics
             }
             catch (Exception ex)
             {
-                _logger.Error(
+                _logger.Warning(
                     ex,
                     "Error tracing trace event for user '{User}' and input '{Input}'",
                     traceEvent?.Trace?.User,

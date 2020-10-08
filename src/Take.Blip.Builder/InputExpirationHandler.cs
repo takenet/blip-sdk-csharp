@@ -1,12 +1,16 @@
 ﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.Scheduler;
+using Takenet.Iris.Messaging.Resources;
 
 namespace Take.Blip.Builder
 {
@@ -15,18 +19,20 @@ namespace Take.Blip.Builder
     /// </summary>
     public class InputExpirationHandler : IInputExpirationHandler
     {
-        private const string STATE_ID = "inputExpiration.stateId";
-        private const string IDENTITY = "inputExpiration.identity";
+        public const string STATE_ID = "inputExpiration.stateId";
+        public const string IDENTITY = "inputExpiration.identity";
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="schedulerExtension"></param>
-        public InputExpirationHandler(ISchedulerExtension schedulerExtension)
+        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger)
         {
             _schedulerExtension = schedulerExtension;
+            _logger = logger;
         }
 
         /// <summary>
@@ -40,10 +46,25 @@ namespace Take.Blip.Builder
         public async Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken)
         {
             // Cancel Schedule expiration time if input is configured
-            if (state.HasInputExpiration())
+            if (state.HasInputExpiration() && !IsMessageFromExpiration(message))
             {
                 var messageId = GetInputExirationIdMessage(message);
-                await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
+
+                Schedule scheduledMessage = null;
+
+                try
+                {
+                    scheduledMessage = await _schedulerExtension.GetScheduledMessageAsync(messageId, from, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warning(ex, "Scheduled message with id '{MessageId}' not scheduled", messageId);
+                }
+
+                if (scheduledMessage != null)
+                {
+                    await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
+                }
             }
         }
 
@@ -62,7 +83,7 @@ namespace Take.Blip.Builder
             {
                 var scheduleMessage = CreateInputExirationMessage(message, state.Id);
                 var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes);
-                await _schedulerExtension.ScheduleMessageAsync(scheduleMessage,  scheduleTime, from, cancellationToken);
+                await _schedulerExtension.ScheduleMessageAsync(scheduleMessage, scheduleTime, from, cancellationToken);
             }
         }
 
@@ -85,20 +106,25 @@ namespace Take.Blip.Builder
                     throw new ArgumentException("Message content 'StateId' must be present", nameof(InputExpiration.StateId));
                 }
 
+                var messageMetadata = GetTraceSettings(message)?.GetDictionary() ?? new Dictionary<string, string>();
+                messageMetadata.Add(STATE_ID, inputExpiration.StateId);
+                messageMetadata.Add(IDENTITY, inputExpiration.Identity);
+
                 return new Message(message.Id)
                 {
                     To = message.To,
                     From = inputExpiration.Identity.ToNode(),
                     Content = _emptyContent,
-                    Metadata = new Dictionary<string,string>()
-                    {
-                        { STATE_ID, inputExpiration.StateId },
-                        { IDENTITY, inputExpiration.Identity },
-                    }
+                    Metadata = messageMetadata
                 };
             }
 
             return message;
+        }
+
+        private bool IsMessageFromExpiration(Message message)
+        {
+            return message.Metadata?.ContainsKey(STATE_ID) ?? false;
         }
 
         /// <summary>
@@ -120,6 +146,8 @@ namespace Take.Blip.Builder
         {
             var idMessage = GetInputExirationIdMessage(message);
 
+            TraceSettings traceSettings = GetTraceSettings(message);
+
             return new Message(idMessage)
             {
                 To = message.To,
@@ -127,8 +155,20 @@ namespace Take.Blip.Builder
                 {
                     Identity = message.From,
                     StateId = stateId
-                }
+                },
+                Metadata = traceSettings?.GetDictionary()
             };
+        }
+
+        private static TraceSettings GetTraceSettings(Message message)
+        {
+            if (message.Metadata != null &&
+                message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
+            {
+                return new TraceSettings(message.Metadata);
+            }
+
+            return null;
         }
 
         private string GetInputExirationIdMessage(Message message)

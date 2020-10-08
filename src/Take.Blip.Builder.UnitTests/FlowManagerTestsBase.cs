@@ -70,7 +70,6 @@ namespace Take.Blip.Builder.UnitTests
             Context.Input.Returns(Input);
 
             TraceProcessor = Substitute.For<ITraceProcessor>();
-            OwnerCallerContactMap = new OwnerCallerContactMap();
             UserOwnerResolver = Substitute.For<IUserOwnerResolver>();
             UserOwnerResolver
                 .GetUserOwnerIdentitiesAsync(Arg.Any<Message>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
@@ -103,8 +102,6 @@ namespace Take.Blip.Builder.UnitTests
 
         public ITunnelExtension TunnelExtension { get; set; }
 
-        public IOwnerCallerContactMap OwnerCallerContactMap { get; set; }
-
         public ISender Sender { get; set; }
 
         public IStateManager StateManager { get; set; }
@@ -134,7 +131,6 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(ContactExtension);
             container.RegisterSingleton(HelpDeskExtension);
             container.RegisterSingleton(TunnelExtension);
-            container.RegisterSingleton(OwnerCallerContactMap);
             container.RegisterSingleton(ContextProvider);
             container.RegisterSingleton(Sender);
             container.RegisterSingleton(StateManager);

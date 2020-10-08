@@ -36,7 +36,6 @@ namespace Take.Blip.Builder.UnitTests
             TunnelExtension = Substitute.For<ITunnelExtension>();
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
-            OwnerCallerContactMap = new OwnerCallerContactMap();
             Sender = Substitute.For<ISender>();
             Flow = new Flow()
             {
@@ -66,7 +65,6 @@ namespace Take.Blip.Builder.UnitTests
                 new EnvelopeSerializer(documentTypeResolver),
                 ArtificialIntelligenceExtension,
                 CancellationToken);
-            Configuration.ContactCacheExpiration.Returns(TimeSpan.FromMinutes(5));
         }
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; }
@@ -82,8 +80,6 @@ namespace Take.Blip.Builder.UnitTests
         public ILogger Logger { get; }
 
         public IConfiguration Configuration { get; }
-
-        public IOwnerCallerContactMap OwnerCallerContactMap { get; }
 
         public Identity User { get; set; }
         

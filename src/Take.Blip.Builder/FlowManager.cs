@@ -2,6 +2,7 @@
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Serilog;
+using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -376,7 +377,9 @@ namespace Take.Blip.Builder
                         actionTrace.ParsedSettings = settings;
                     }
 
-                    await action.ExecuteAsync(context, settings, linkedCts.Token);
+                    using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
+                    using (LogContext.PushProperty(nameof(Action.Settings), settings, true))
+                        await action.ExecuteAsync(context, settings, linkedCts.Token);
                 }
                 catch (Exception ex)
                 {
