@@ -45,7 +45,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     if (!string.IsNullOrWhiteSpace(settings.Body))
                     {
                         string contentType = null;
-                        settings.Headers?.TryGetValue("Content-ActionName", out contentType);
+                        settings.Headers?.TryGetValue("Content-Type", out contentType);
                         httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
                             contentType ?? "application/json");
                     }
