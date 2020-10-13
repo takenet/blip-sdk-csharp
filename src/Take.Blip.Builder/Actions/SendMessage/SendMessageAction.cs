@@ -1,50 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using Take.Blip.Client;
+using JsonDocument = Lime.Protocol.JsonDocument;
 
 namespace Take.Blip.Builder.Actions.SendMessage
 {
-    public class SendMessageAction : IAction
+    public class SendMessageAction : ActionBase<JsonElement>
     {
         private readonly ISender _sender;
 
-        public SendMessageAction(ISender sender)
+        public SendMessageAction(ISender sender) : base(nameof(SendMessage))
         {
             _sender = sender;
         }
 
-        public string Type => nameof(SendMessage);
-
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(IContext context, JsonElement settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendMessageAction)}' action");
 
             var message = new Message(null)
             {
                 To = context.Input.Message.From
-            };            
+            };
 
-            var mediaType = MediaType.Parse((string)settings[Message.TYPE_KEY]);
-            var rawContent = settings[Message.CONTENT_KEY];
+            var mediaType = MediaType.Parse(settings.GetProperty(Message.TYPE_KEY).GetString());
+            var content = settings.GetProperty(Message.CONTENT_KEY);
 
             if (mediaType.IsJson)
             {
-                message.Content = new JsonDocument(rawContent.ToObject<Dictionary<string, object>>(), mediaType);
+                message.Content = new JsonDocument(content.ToObject<Dictionary<string, object>>(), mediaType);
             }
             else
             {
-                message.Content = new PlainDocument(rawContent.ToString(), mediaType);
+                message.Content = new PlainDocument(content.GetString(), mediaType);
             }
 
-            if (settings.TryGetValue(Envelope.METADATA_KEY, out var metadata))
+            if (settings.TryGetProperty(Envelope.METADATA_KEY, out var metadata))
             {
-                message.Metadata = ((JObject) metadata).ToObject<Dictionary<string, string>>();
+                message.Metadata = metadata.ToObject<Dictionary<string, string>>();
             }
 
             var isChatState = mediaType == ChatState.MediaType;
@@ -58,7 +57,7 @@ namespace Take.Blip.Builder.Actions.SendMessage
             // Await the interval if it is a chatstate message
             if (isChatState)
             {
-                var chatState = rawContent.ToObject<ChatState>(LimeSerializerContainer.Serializer);
+                var chatState = JsonConvert.DeserializeObject<ChatState>(content.GetRawText());
                 if (chatState.Interval != null)
                 {
                     await Task.Delay(chatState.Interval.Value, cancellationToken);

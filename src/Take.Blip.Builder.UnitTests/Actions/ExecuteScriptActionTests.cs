@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Jint.Runtime;
-using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Serilog;
 using Shouldly;
@@ -35,7 +31,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
@@ -69,7 +65,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
@@ -103,7 +99,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
@@ -169,7 +165,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
@@ -203,7 +199,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
@@ -227,7 +223,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
@@ -257,7 +253,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Act            
             try
             {
-                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+                await target.ExecuteAsync(Context, (object)settings, CancellationToken);
                 throw new Exception("The script was executed");
             }
             catch (StatementsCountOverflowException ex)
@@ -291,7 +287,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Act
             try
             {
-                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+                await target.ExecuteAsync(Context, (object)settings, CancellationToken);
                 throw new Exception("The script was executed");
             }
             catch (JavaScriptException ex)

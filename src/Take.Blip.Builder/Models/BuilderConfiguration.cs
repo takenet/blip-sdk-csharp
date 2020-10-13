@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.ComponentModel;
 using System.Linq;
 using Lime.Protocol;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Models
 {
@@ -45,15 +42,24 @@ namespace Take.Blip.Builder.Models
         public static BuilderConfiguration FromDictionary(IDictionary<string, string> configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-            
-            var builderConfiguration = configuration
-                .Where(kv => kv.Key.StartsWith(CONFIGURATION_KEY_PREFIX))
-                .Select(kv => new KeyValuePair<string, string>(kv.Key.Replace(CONFIGURATION_KEY_PREFIX, ""), kv.Value))
-                .ToDictionary(kv => kv.Key, kv => kv.Value);
-            
-            var jObject = JObject.FromObject(builderConfiguration, JsonSerializer.Create(JsonSerializerSettingsContainer.Settings));
 
-            return jObject.ToObject<BuilderConfiguration>();
+            var builderConfiguration = new BuilderConfiguration();
+            var builderConfigurationType = typeof(BuilderConfiguration);
+
+            configuration
+                .Where(kv => kv.Key.StartsWith(CONFIGURATION_KEY_PREFIX))
+                .ForEach(kv =>
+                {
+                    var (key, value) = kv;
+
+                    var propertyName = key.Replace(CONFIGURATION_KEY_PREFIX, string.Empty).ToTitleCase();
+                    var property = builderConfigurationType.GetProperty(propertyName);
+
+                    var typeConverter = TypeDescriptor.GetConverter(property.PropertyType);
+                    property?.SetValue(builderConfiguration, typeConverter.ConvertFromString(value));
+                });
+
+            return builderConfiguration;
         }
     }
 }

@@ -67,7 +67,6 @@ namespace Take.Blip.Client.Console
                     stopabble = await StartAsync(applicationJsonPath, cts.Token).ConfigureAwait(false);
                 }
 
-#if !NET461
                 //is non-interactive mode?
                 if (options.NonInteractive)
                 {
@@ -87,10 +86,6 @@ namespace Take.Blip.Client.Console
                     WriteLine("Application started. Press any key to stop.", HIGHLIGHT_COLOR);
                     System.Console.Read();
                 }
-#else
-                WriteLine("Application started. Press any key to stop.", HIGHLIGHT_COLOR);
-                    System.Console.Read();
-#endif
 
 
                 WriteLine("Stopping application...", HIGHLIGHT_COLOR);

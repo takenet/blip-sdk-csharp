@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Lime.Messaging;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;

@@ -69,7 +69,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await Sender.Received(1).SendMessageAsync(Arg.Is<Message>(m =>
@@ -119,7 +119,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await target.ExecuteAsync(Context, (object)settings, CancellationToken);
 
             // Assert
             await Sender.Received(1).SendMessageAsync(

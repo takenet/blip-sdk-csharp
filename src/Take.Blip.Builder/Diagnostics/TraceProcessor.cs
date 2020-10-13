@@ -1,10 +1,11 @@
 ﻿using Lime.Protocol;
-using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Serialization;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 
@@ -43,7 +44,7 @@ namespace Take.Blip.Builder.Diagnostics
         {
             using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri))
             {
-                var json = JsonConvert.SerializeObject(trace, JsonSerializerSettingsContainer.Settings);
+                var json = JsonSerializer.Serialize(trace, JsonSerializerOptionsContainer.Settings);
 
                 httpRequestMessage.Content = new StringContent(
                     json,

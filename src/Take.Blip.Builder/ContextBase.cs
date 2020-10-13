@@ -5,10 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 
 namespace Take.Blip.Builder
@@ -79,20 +76,22 @@ namespace Take.Blip.Builder
 
         private static string GetJsonProperty(string variableValue, string property)
         {
+            // If there's a propertyName, attempts to parse the value as JSON and retrieve the value from it.
+            var propertyNames = property.Split('.');
+
             try
             {
-                // If there's a propertyName, attempts to parse the value as JSON and retrieve the value from it.
-                var propertyNames = property.Split('.');
-                JToken json = JObject.Parse(variableValue);
-                foreach (var s in propertyNames)
+                using var json = System.Text.Json.JsonDocument.Parse(variableValue);
+                var currentElement = json.RootElement;
+
+                if (propertyNames.Any(s => !currentElement.TryGetProperty(s, out currentElement)))
                 {
-                    json = json[s];
-                    if (json == null) return null;
+                    return null;
                 }
 
-                return json.ToString(Formatting.None).Trim('"');
+                return currentElement.GetRawText().Trim('"');
             }
-            catch (JsonException)
+            catch (System.Text.Json.JsonException)
             {
                 return null;
             }

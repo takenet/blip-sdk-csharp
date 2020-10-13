@@ -25,6 +25,7 @@
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SmartFormat.NET" Version="2.1.0.2" />
+    <PackageReference Include="System.Text.Json" Version="4.7.1" />
     <PackageReference Include="Takenet.Iris.Messaging" Version="20.12.3406" />
     <PackageReference Include="Takenet.Iris.Messaging.ArtificialIntelligence" Version="20.12.3406" />
     <PackageReference Include="Takenet.Iris.Messaging.Desk" Version="20.12.3406" />
