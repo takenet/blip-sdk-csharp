@@ -14,7 +14,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
         private readonly ISender _sender;
         private readonly IEnvelopeSerializer _envelopeSerializer;
 
-        private const string SERIALIZABLE_PATTERN = @".+[/|\+]json";
+        private const string SERIALIZABLE_PATTERN = @".+[/|\+]json$";
 
         public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer)
         {
