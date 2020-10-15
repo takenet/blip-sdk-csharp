@@ -5,8 +5,9 @@
     "identity": "Take.Blip.Client.ConsoleTemplate",
     "shortName": "blip-console",
     "tags": {
-        "language": "C#"
-    },
+        "language": "C#",
+        "type": "project"
+      },
     "sourceName": "Take.Blip.Client.ConsoleTemplate",
     "preferNameDirectory": true
 }
