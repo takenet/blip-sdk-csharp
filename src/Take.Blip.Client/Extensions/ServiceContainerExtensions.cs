@@ -38,7 +38,6 @@ namespace Take.Blip.Client.Extensions
             serviceContainer.RegisterService(typeof(IBucketExtension), bucketExtensionFactory);
             serviceContainer.RegisterService(typeof(IAttendanceExtension), () => new AttendanceExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IHelpDeskExtension), () => new HelpDeskExtension(senderFactory()));
-            serviceContainer.RegisterService(typeof(ITalkServiceExtension), () => new TalkServiceExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IThreadExtension), () => new ThreadExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IResourceExtension), () => new ResourceExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(ITunnelExtension), () => new TunnelExtension(senderFactory()));
