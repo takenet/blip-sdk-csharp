@@ -5,7 +5,8 @@
   "identity": "Take.Blip.Client.WebTemplate",
   "shortName": "blip-web",
   "tags": {
-    "language": "C#"
+    "language": "C#",
+    "type":"project"
   },
   "sourceName": "Take.Blip.Client.WebTemplate",
   "preferNameDirectory": true
