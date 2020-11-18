@@ -70,7 +70,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Arg.Is<HttpRequestMessage>(
                     h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
 
-            await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int) HttpStatusCode.Accepted).ToString(),                 Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int)HttpStatusCode.Accepted).ToString(), Arg.Any<CancellationToken>());
             await Context.Received(1).SetVariableAsync(settings.ResponseBodyVariable, "Some result", Arg.Any<CancellationToken>());
         }
 
@@ -119,7 +119,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             // Arrange
             const string userIdentity = "user@domain.local";
-            const string userToRequestHeaderVariableName = "processHttpAddUserToRequestHeader";        
+            const string userToRequestHeaderVariableName = "processHttpAddUserToRequestHeader";
             Context.Flow.Configuration.Add(userToRequestHeaderVariableName, "true");
             Context.UserIdentity.Returns(Identity.Parse(userIdentity));
 
@@ -237,24 +237,19 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             var target = GetTarget();
 
-            var httpResponseMessage = new HttpResponseMessage()
-            {
-                StatusCode = HttpStatusCode.InternalServerError,
-                Content = new StringContent("A task was canceled")
-            };
-
-            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>()).Returns(httpResponseMessage);
+            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(async x =>
+                {
+                    await Task.Delay(20001, x.Arg<CancellationToken>());
+                    return Substitute.For<HttpResponseMessage>();
+                });
 
             // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+                await target.ExecuteAsync(Context, JObject.FromObject(settings), cts.Token);
 
-            // Assert
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
-
-            await Context.DidNotReceive().SetVariableAsync(settings.ResponseStatusVariable, ((int)HttpStatusCode.Accepted).ToString(), Arg.Any<CancellationToken>());
-            await Context.DidNotReceive().SetVariableAsync(settings.ResponseBodyVariable, "A task was canceled", Arg.Any<CancellationToken>());
+            //Assert
+            await Context.DidNotReceive().SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         }
 
         [Theory]
