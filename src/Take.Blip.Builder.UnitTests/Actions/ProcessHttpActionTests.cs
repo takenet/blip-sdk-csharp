@@ -216,6 +216,47 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
         }
 
+        [Fact]
+        public async Task ProcessActionTimeoutShouldSucceed()
+        {
+            // Arrange
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri("https://blip.ai"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Content = new StringContent("A task was canceled")
+            };
+
+            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>()).Returns(httpResponseMessage);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await HttpClient.Received(1).SendAsync(
+                Arg.Is<HttpRequestMessage>(
+                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+
+            await Context.DidNotReceive().SetVariableAsync(settings.ResponseStatusVariable, ((int)HttpStatusCode.Accepted).ToString(), Arg.Any<CancellationToken>());
+            await Context.DidNotReceive().SetVariableAsync(settings.ResponseBodyVariable, "A task was canceled", Arg.Any<CancellationToken>());
+        }
+
         [Theory]
         [InlineData("potato", false)]
         [InlineData("false", false)]

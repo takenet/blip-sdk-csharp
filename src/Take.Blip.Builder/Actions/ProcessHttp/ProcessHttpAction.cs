@@ -64,24 +64,25 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                         }
                     }
                 }
+
+            //Set the responses variables
+            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
+                {
+                    await context.SetVariableAsync(settings.ResponseStatusVariable,
+                        responseStatus.ToString(), cancellationToken);
+                }
+
+                if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable) &&
+                    !string.IsNullOrWhiteSpace(responseBody))
+                {
+                    await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
                 _logger.Warning(ex, $"An exception occurred while processing HTTP action");
             }
 
-            // Set the responses variables
-            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
-            {
-                await context.SetVariableAsync(settings.ResponseStatusVariable,
-                    responseStatus.ToString(), cancellationToken);
-            }
-
-            if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable) &&
-                !string.IsNullOrWhiteSpace(responseBody))
-            {
-                await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
-            }
         }
 
         /// <summary>
