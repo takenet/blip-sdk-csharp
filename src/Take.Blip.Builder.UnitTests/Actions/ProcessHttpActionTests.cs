@@ -240,7 +240,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(async token =>
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(20), token.Arg<CancellationToken>());
+                    await Task.Delay(TimeSpan.FromMilliseconds(20), token.Arg<CancellationToken>());
                     return Substitute.For<HttpResponseMessage>();
                 });
 
