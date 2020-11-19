@@ -238,14 +238,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
 
             HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                .Returns(async x =>
+                .Returns(async token =>
                 {
-                    await Task.Delay(20001, x.Arg<CancellationToken>());
+                    await Task.Delay(TimeSpan.FromSeconds(20), token.Arg<CancellationToken>());
                     return Substitute.For<HttpResponseMessage>();
                 });
 
             // Act
-            using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+            using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(10)))
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), cts.Token);
 
             //Assert
