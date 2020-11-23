@@ -83,7 +83,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 _logger.Warning(ex, $"An exception occurred while processing HTTP action");
                 if (ex is TaskCanceledException)
                 {
-                    CheckActionTimeout(context);
+                    PushTimeoutWarning(context);
                 }
             }
 
