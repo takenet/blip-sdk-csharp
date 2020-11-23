@@ -89,7 +89,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         }
 
-        private void CheckActionTimeout(IContext context)
+        private void PushTimeoutWarning(IContext context)
         {
             var warningMessage =
                 $"The process http command action has timed out.";
