@@ -81,8 +81,24 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             catch (Exception ex)
             {
                 _logger.Warning(ex, $"An exception occurred while processing HTTP action");
+                if (ex is TaskCanceledException)
+                {
+                    PushTimeoutWarning(context);
+                }
             }
 
+        }
+
+        private void PushTimeoutWarning(IContext context)
+        {
+            var warningMessage =
+                $"The process http command action has timed out.";
+
+            var currentActionTrace = context.GetCurrentActionTrace();
+            if (currentActionTrace != null)
+            {
+                currentActionTrace.Warning = warningMessage;
+            }
         }
 
         /// <summary>
