@@ -31,6 +31,7 @@ using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Elephant;
+using Take.Blip.Builder.Actions.SkillRedirect;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -83,6 +84,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(ForwardMessageToDeskAction),
                     typeof(CreateTicketAction),
                     typeof(DeleteVariableAction),
+                    typeof(SkillRedirectAction),
                 });
 
             return container;
