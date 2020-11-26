@@ -2,17 +2,16 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.Redirect
 {
     public class RedirectAction : IAction
     {
-        private readonly ISender _sender;
+        private readonly IRedirectManager _redirectManager;
 
-        public RedirectAction(ISender sender)
+        public RedirectAction(IRedirectManager redirectManager)
         {
-            _sender = sender;
+            _redirectManager = redirectManager;
         }
 
         public string Type => nameof(Redirect);
@@ -23,7 +22,7 @@ namespace Take.Blip.Builder.Actions.Redirect
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
-            return _sender.SendMessageAsync(redirect, context.Input.Message.From, cancellationToken);
+            return _redirectManager.RedirectUserAsync(context, redirect, cancellationToken);
         }
     }
 }
