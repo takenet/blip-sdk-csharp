@@ -9,5 +9,20 @@
     "type":"project"
   },
   "sourceName": "Take.Blip.Client.WebTemplate",
-  "preferNameDirectory": true
+  "preferNameDirectory": true,
+  "symbols": {
+    "Framework": {
+      "type": "parameter",
+      "description": "The target framework for the project.",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "netcoreapp2.0",
+          "description": "Target netcoreapp2.0"
+        }
+      ],
+      "replaces": "netcoreapp2.0",
+      "defaultValue": "netcoreapp2.0"
+    }
+  }
 }
