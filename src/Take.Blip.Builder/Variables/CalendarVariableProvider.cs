@@ -19,6 +19,8 @@ namespace Take.Blip.Builder.Variables
 
         private string GetVariable(string name)
         {
+            AppDomain.CurrentDomain.SetData("REGEX_DEFAULT_MATCH_TIMEOUT", TimeSpan.FromMinutes(2));
+
             var dateTime = DateTimeOffset.UtcNow;
 
             var names = name.ToLowerInvariant().Split('.').ToList();
@@ -44,15 +46,20 @@ namespace Take.Blip.Builder.Variables
 
             if (names.Count > 1)
             {
-                var match = DateOperationRegex.Match(names[0]);
-                if (match.Success)
+                try
                 {
-                    var operation = match.Groups["operation"].Value;
-                    var period = match.Groups["period"].Value;
-                    var value = int.Parse(match.Groups["value"].Value);
+                    var match = DateOperationRegex.Match(names[0]);
+                    if (match.Success)
+                    {
+                        var operation = match.Groups["operation"].Value;
+                        var period = match.Groups["period"].Value;
+                        var value = int.Parse(match.Groups["value"].Value);
 
-                    dateTime = GetDateFromOperationVariable(dateTime, operation, period, value);
-                    names.Remove(match.Value);
+                        dateTime = GetDateFromOperationVariable(dateTime, operation, period, value);
+                        names.Remove(match.Value);
+                    }
+                } catch (RegexMatchTimeoutException ex) {
+                    throw new TimeoutException($"Regex Timeout for {ex.Pattern} after {ex.Message} elapsed. Tried pattern {ex.MatchTimeout}");
                 }
             }
 

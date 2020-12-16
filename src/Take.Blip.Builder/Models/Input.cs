@@ -39,6 +39,8 @@ namespace Take.Blip.Builder.Models
 
         public void Validate()
         {
+            AppDomain.CurrentDomain.SetData("REGEX_DEFAULT_MATCH_TIMEOUT", TimeSpan.FromMinutes(2));
+
             if (Validation != null)
             {
                 if (Validation.Rule == InputValidationRule.Regex 
@@ -59,10 +61,15 @@ namespace Take.Blip.Builder.Models
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(Variable) 
-                && !VariableValidationRegex.IsMatch(Variable))
+            try
             {
-                throw new ValidationException("The input variable name should be composed only by letters, numbers and dots");
+                if (!string.IsNullOrWhiteSpace(Variable)
+                    && !VariableValidationRegex.IsMatch(Variable))
+                {
+                    throw new ValidationException("The input variable name should be composed only by letters, numbers and dots");
+                }
+            } catch (RegexMatchTimeoutException ex) {
+                throw new TimeoutException($"Regex Timeout for {ex.Pattern} after {ex.Message} elapsed. Tried pattern {ex.MatchTimeout}");
             }
         }
 

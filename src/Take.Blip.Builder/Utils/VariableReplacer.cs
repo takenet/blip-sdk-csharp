@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -12,21 +13,28 @@ namespace Take.Blip.Builder.Utils
 
         public async Task<string> ReplaceAsync(string value, IContext context, CancellationToken cancellationToken)
         {
-            var variableValues = new Dictionary<string, string>();
-            foreach (Match match in TextVariablesRegex.Matches(value))
-            {
-                var variableName = match.Groups[1].Value;
-                if (variableValues.ContainsKey(variableName)) continue;
-                var variableValue = await context.GetVariableAsync(variableName, cancellationToken);
-                variableValues.Add(variableName, EscapeString(variableValue));
-            }
-            
-            if (variableValues.Count > 0)
-            {
-                value = TextVariablesRegex.Replace(value, match => variableValues[match.Groups[1].Value]);
-            }
+            AppDomain.CurrentDomain.SetData("REGEX_DEFAULT_MATCH_TIMEOUT", TimeSpan.FromMinutes(2));
 
-            return value;
+            try
+            {
+                var variableValues = new Dictionary<string, string>();
+                foreach (Match match in TextVariablesRegex.Matches(value))
+                {
+                    var variableName = match.Groups[1].Value;
+                    if (variableValues.ContainsKey(variableName)) continue;
+                    var variableValue = await context.GetVariableAsync(variableName, cancellationToken);
+                    variableValues.Add(variableName, EscapeString(variableValue));
+                }
+
+                if (variableValues.Count > 0)
+                {
+                    value = TextVariablesRegex.Replace(value, match => variableValues[match.Groups[1].Value]);
+                }
+
+                return value;
+            } catch (RegexMatchTimeoutException ex) {
+                throw new TimeoutException($"Regex Timeout for {ex.Pattern} after {ex.Message} elapsed. Tried pattern {ex.MatchTimeout}");
+            }
         }
 
         /// <summary>

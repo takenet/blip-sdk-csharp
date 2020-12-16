@@ -100,6 +100,7 @@ namespace Take.Blip.Builder
 
         private struct VariableName
         {
+
             private static readonly Regex VariableNameRegex = new Regex("^(?<sourceOrName>[\\w\\d]+)(\\.(?<name>[\\w\\d\\.]+))?(@(?<property>([\\w\\d\\.](\\[(?<index>\\d+|\\$n)\\])?)+))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             private VariableName(VariableSource source, string name, string property)
@@ -125,33 +126,41 @@ namespace Take.Blip.Builder
             {
                 if (s == null) throw new ArgumentNullException(nameof(s));
 
-                var match = VariableNameRegex.Match(s);
-
-                if (!match.Success) throw new ArgumentException($"Invalid variable name '{s}'", nameof(s));
-
-                VariableSource source;
-                string name;
-
-                var sourceOrName = match.Groups["sourceOrName"].Value;
-                var nameGroup = match.Groups["name"];
-                if (nameGroup.Success)
+                try
                 {
-                    if (!Enum.TryParse(sourceOrName, true, out source))
+                    AppDomain.CurrentDomain.SetData("REGEX_DEFAULT_MATCH_TIMEOUT", TimeSpan.FromMinutes(2));
+
+                    var match = VariableNameRegex.Match(s);
+
+                    if (!match.Success) throw new ArgumentException($"Invalid variable name '{s}'", nameof(s));
+
+                    VariableSource source;
+                    string name;
+
+                    var sourceOrName = match.Groups["sourceOrName"].Value;
+                    var nameGroup = match.Groups["name"];
+                    if (nameGroup.Success)
                     {
-                        throw new ArgumentException($"Invalid source '{sourceOrName}'");
+                        if (!Enum.TryParse(sourceOrName, true, out source))
+                        {
+                            throw new ArgumentException($"Invalid source '{sourceOrName}'");
+                        }
+                        name = nameGroup.Value;
                     }
-                    name = nameGroup.Value;
-                }
-                else
-                {
-                    source = VariableSource.Context;
-                    name = sourceOrName;
-                }
+                    else
+                    {
+                        source = VariableSource.Context;
+                        name = sourceOrName;
+                    }
 
-                var propertyGroup = match.Groups["property"];
-                var property = propertyGroup.Success ? propertyGroup.Value : null;
+                    var propertyGroup = match.Groups["property"];
+                    var property = propertyGroup.Success ? propertyGroup.Value : null;
+                    
+                    return new VariableName(source, name, property);
 
-                return new VariableName(source, name, property);
+                } catch (RegexMatchTimeoutException ex) {
+                    throw new TimeoutException($"Regex Timeout for {ex.Pattern} after {ex.Message} elapsed. Tried pattern {ex.MatchTimeout}");
+                } 
             }
         }
     }
