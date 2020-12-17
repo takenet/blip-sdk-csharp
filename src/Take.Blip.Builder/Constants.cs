@@ -1,4 +1,6 @@
-﻿namespace Take.Blip.Builder
+﻿using System;
+
+namespace Take.Blip.Builder
 {
     public class Constants
     {
@@ -11,5 +13,10 @@
         /// Default header containing the bot's Identity
         /// </summary>
         public const string BLIP_BOT_HEADER = "X-Blip-Bot";
+
+        /// <summary>
+        /// Default timeout for regex
+        /// </summary>
+        public static TimeSpan REGEX_TIMEOUT = TimeSpan.FromMinutes(2);
     }
 }

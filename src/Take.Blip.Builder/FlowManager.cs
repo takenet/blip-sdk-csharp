@@ -321,7 +321,8 @@ namespace Take.Blip.Builder
                     return DateTime.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Regex:
-                    return Regex.IsMatch(lazyInput.SerializedContent, inputValidation.Regex);
+                    var regex = new Regex(inputValidation.Regex, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+                    return regex.IsMatch(lazyInput.SerializedContent);
 
                 case InputValidationRule.Type:
                     return lazyInput.Content.GetMediaType() == inputValidation.Type;

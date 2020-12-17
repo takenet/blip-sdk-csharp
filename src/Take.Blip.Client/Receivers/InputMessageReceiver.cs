@@ -106,7 +106,7 @@ namespace Take.Blip.Client.Receivers
 
                 case InputValidationRule.Regex:
                     contentString = content.ToString();
-                    var regex = new Regex(inputValidation.Regex);
+                    var regex = new Regex(inputValidation.Regex, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
                     return regex.IsMatch(contentString);
 
                 case InputValidationRule.Type:
