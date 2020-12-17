@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ProcessCommand;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
 using Xunit;
 
@@ -21,13 +22,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             BlipClient = Substitute.For<ISender>();
             Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
+            Configuration = Substitute.For<IConfiguration>();
         }
 
         public ISender BlipClient { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         private ProcessCommandAction GetTarget()
         {
-            return new ProcessCommandAction(BlipClient, LimeSerializerContainer.EnvelopeSerializer);
+            return new ProcessCommandAction(BlipClient, LimeSerializerContainer.EnvelopeSerializer, Configuration);
         }
 
         [Fact]

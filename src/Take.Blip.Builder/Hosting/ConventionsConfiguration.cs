@@ -6,6 +6,8 @@ namespace Take.Blip.Builder.Hosting
     {
         public virtual TimeSpan InputProcessingTimeout => TimeSpan.FromMinutes(1);
 
+        public virtual TimeSpan RegexTimeout => TimeSpan.FromMinutes(2);
+
         public virtual string RedisStorageConfiguration => "localhost";
 
         public virtual int RedisDatabase => 0;

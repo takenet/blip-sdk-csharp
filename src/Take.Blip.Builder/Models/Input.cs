@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder.Models
 {
@@ -10,7 +11,16 @@ namespace Take.Blip.Builder.Models
     /// </summary>
     public class Input : IValidable
     {
-        private static readonly Regex VariableValidationRegex = new Regex("^([a-zA-Z0-9\\.]+)$", RegexOptions.Compiled);
+        private Regex _variableValidationRegex;
+        private readonly IConfiguration _configuration;
+
+        public Input(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            _variableValidationRegex = new Regex("(?<operation>plus|minus)(?<value>\\d+)(?<period>millisecond(s)?|second(s)?|minute(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)", RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMinutes(2));
+        }
+
+        //private static readonly Regex VariableValidationRegex = new Regex("^([a-zA-Z0-9\\.]+)$", RegexOptions.Compiled, TimeSpan.FromMinutes(2));
 
         /// <summary>
         /// Indicates that the state input should be skipped.
@@ -39,7 +49,6 @@ namespace Take.Blip.Builder.Models
 
         public void Validate()
         {
-            AppDomain.CurrentDomain.SetData("REGEX_DEFAULT_MATCH_TIMEOUT", TimeSpan.FromMinutes(2));
 
             if (Validation != null)
             {
@@ -60,16 +69,11 @@ namespace Take.Blip.Builder.Models
                     throw new ValidationException("The media type should be provided when using the 'type' validation rule");
                 }
             }
-
-            try
+             
+            if (!string.IsNullOrWhiteSpace(Variable)
+                && !_variableValidationRegex.IsMatch(Variable))
             {
-                if (!string.IsNullOrWhiteSpace(Variable)
-                    && !VariableValidationRegex.IsMatch(Variable))
-                {
-                    throw new ValidationException("The input variable name should be composed only by letters, numbers and dots");
-                }
-            } catch (RegexMatchTimeoutException ex) {
-                throw new TimeoutException($"Regex Timeout for {ex.Pattern} after {ex.Message} elapsed. Tried pattern {ex.MatchTimeout}");
+                throw new ValidationException("The input variable name should be composed only by letters, numbers and dots");
             }
         }
 

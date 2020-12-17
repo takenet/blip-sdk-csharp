@@ -5,6 +5,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.ProcessCommand
@@ -15,11 +16,13 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
         private readonly IEnvelopeSerializer _envelopeSerializer;
 
         private const string SERIALIZABLE_PATTERN = @".+[/|\+]json$";
+        private TimeSpan _regexTimeSpan;
 
-        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer)
+        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer, IConfiguration configuration)
         {
             _sender = sender;
             _envelopeSerializer = envelopeSerializer;
+            _regexTimeSpan = configuration.RegexTimeout;
         }
 
         public string Type => nameof(ProcessCommand);
@@ -49,8 +52,10 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         private Command ConvertToCommand(JObject settings)
         {
+            var regex = new Regex(SERIALIZABLE_PATTERN, RegexOptions.Compiled | RegexOptions.IgnoreCase, _regexTimeSpan);
+
             if (settings.TryGetValue(Command.TYPE_KEY, out var type)
-                && Regex.IsMatch(type.ToString(), SERIALIZABLE_PATTERN)
+                && regex.IsMatch(type.ToString())
                 && settings.TryGetValue(Command.RESOURCE_KEY, out var resource))
             {
                 settings.Property(Command.RESOURCE_KEY).Value = JObject.Parse(resource.ToString());

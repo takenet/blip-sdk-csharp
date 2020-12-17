@@ -45,6 +45,7 @@ namespace Take.Blip.Builder
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Identity _applicationIdentity;
         private readonly Node _applicationNode;
+        private TimeSpan _regexTimeSpan;
 
         public FlowManager(
             IConfiguration configuration,
@@ -79,6 +80,7 @@ namespace Take.Blip.Builder
             _inputExpirationHandler = inputExpirationHandler;
             _applicationIdentity = application.Identity;
             _applicationNode = application.Node;
+            _regexTimeSpan = configuration.RegexTimeout;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -188,7 +190,7 @@ namespace Take.Blip.Builder
                                 // Validate the input for the current state
                                 if (stateWaitForInput &&
                                     state.Input?.Validation != null &&
-                                    !ValidateDocument(lazyInput, state.Input.Validation))
+                                    !ValidateDocument(lazyInput, state.Input.Validation, _regexTimeSpan))
                                 {
                                     if (state.Input.Validation.Error != null)
                                     {
@@ -307,8 +309,10 @@ namespace Take.Blip.Builder
             }
         }
 
-        private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
+        private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation, TimeSpan regexTimeSpan)
         {
+            var regex = new Regex(inputValidation.Regex, RegexOptions.Compiled | RegexOptions.IgnoreCase, regexTimeSpan);
+
             switch (inputValidation.Rule)
             {
                 case InputValidationRule.Text:
@@ -321,7 +325,7 @@ namespace Take.Blip.Builder
                     return DateTime.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Regex:
-                    return Regex.IsMatch(lazyInput.SerializedContent, inputValidation.Regex);
+                    return regex.IsMatch(lazyInput.SerializedContent);
 
                 case InputValidationRule.Type:
                     return lazyInput.Content.GetMediaType() == inputValidation.Type;

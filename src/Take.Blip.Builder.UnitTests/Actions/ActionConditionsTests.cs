@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
@@ -17,7 +18,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public ActionConditionsTests()
         {
             ActionProvider = Substitute.For<IActionProvider>();
+            Configuration = Substitute.For<IConfiguration>();
         }
+
+        public IConfiguration Configuration { get; set; }
 
         public override Container CreateContainer()
         {
@@ -39,7 +43,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -69,7 +73,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     new State
                     {
                         Id = firstStateId,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -88,7 +92,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                     new State
                     {
                         Id = secondStateId,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output

@@ -5,12 +5,18 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
+using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder.Variables
 {
     public class CalendarVariableProvider : IVariableProvider
     {
-        private static Regex DateOperationRegex = new Regex("(?<operation>plus|minus)(?<value>\\d+)(?<period>millisecond(s)?|second(s)?|minute(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private Regex _dateOperationRegex;
+
+        public CalendarVariableProvider(IConfiguration configuration) {
+            _dateOperationRegex = new Regex("(?<operation>plus|minus)(?<value>\\d+)(?<period>millisecond(s)?|second(s)?|minute(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)", RegexOptions.IgnoreCase | RegexOptions.Compiled, configuration.RegexTimeout);
+        }
 
         public VariableSource Source => VariableSource.Calendar;
 
@@ -19,8 +25,6 @@ namespace Take.Blip.Builder.Variables
 
         private string GetVariable(string name)
         {
-            AppDomain.CurrentDomain.SetData("REGEX_DEFAULT_MATCH_TIMEOUT", TimeSpan.FromMinutes(2));
-
             var dateTime = DateTimeOffset.UtcNow;
 
             var names = name.ToLowerInvariant().Split('.').ToList();
@@ -46,20 +50,16 @@ namespace Take.Blip.Builder.Variables
 
             if (names.Count > 1)
             {
-                try
-                {
-                    var match = DateOperationRegex.Match(names[0]);
-                    if (match.Success)
-                    {
-                        var operation = match.Groups["operation"].Value;
-                        var period = match.Groups["period"].Value;
-                        var value = int.Parse(match.Groups["value"].Value);
 
-                        dateTime = GetDateFromOperationVariable(dateTime, operation, period, value);
-                        names.Remove(match.Value);
-                    }
-                } catch (RegexMatchTimeoutException ex) {
-                    throw new TimeoutException($"Regex Timeout for {ex.Pattern} after {ex.Message} elapsed. Tried pattern {ex.MatchTimeout}");
+                var match = _dateOperationRegex.Match(names[0]);
+                if (match.Success)
+                {
+                    var operation = match.Groups["operation"].Value;
+                    var period = match.Groups["period"].Value;
+                    var value = int.Parse(match.Groups["value"].Value);
+
+                    dateTime = GetDateFromOperationVariable(dateTime, operation, period, value);
+                    names.Remove(match.Value);
                 }
             }
 

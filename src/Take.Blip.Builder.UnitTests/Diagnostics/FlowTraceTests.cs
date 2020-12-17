@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client;
 using Xunit;
@@ -18,6 +19,14 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
 {
     public class FlowTraceTests : FlowManagerTestsBase
     {
+
+        public FlowTraceTests()
+        {
+            Configuration = Substitute.For<IConfiguration>();
+        }
+
+        public IConfiguration Configuration { get; set; }
+
         [Fact]
         public async Task FlowWithHttpTraceSettingsShouldCallHttpTraceProcessor()
         {
@@ -43,7 +52,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -55,7 +64,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     new State
                     {
                         Id = "ping",
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         InputActions = new[]
                         {
                             new Action
@@ -123,7 +132,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -135,7 +144,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     new State
                     {
                         Id = "ping",
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         InputActions = new[]
                         {
                             new Action
@@ -200,7 +209,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -242,7 +251,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     new State
                     {
                         Id = "ping",
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         InputActions = new[]
                         {
                             new Action
@@ -334,7 +343,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -475,7 +484,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -487,7 +496,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     new State
                     {
                         Id = "ping",
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         InputActions = new[]
                         {
                             new Action
@@ -553,7 +562,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -565,8 +574,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     new State
                     {
                         Id = "ping",
-                        Input = new Input{
-                            Bypass = true
+                        Input = new Input(Configuration){
+                            Bypass = true,
                         },
                         InputActions = new[]
                         {
@@ -591,7 +600,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     new State
                     {
                         Id = "pong",
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         InputActions = new[]
                         {
                             new Action
@@ -658,7 +667,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -670,7 +679,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     new State
                     {
                         Id = "ping",
-                        Input = new Input{
+                        Input = new Input(Configuration){
                             Bypass = true
                         },
                         InputActions = new[]
@@ -696,7 +705,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     new State
                     {
                         Id = "pong",
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         InputActions = new[]
                         {
                             new Action

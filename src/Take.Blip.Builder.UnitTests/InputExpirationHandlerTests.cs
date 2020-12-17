@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Content;
@@ -18,6 +19,7 @@ namespace Take.Blip.Builder.UnitTests
 {
     public class InputExpirationHandlerTests
     {
+
         public Identity UserIdentity { get; }
         public Identity ApplicationIdentity { get; }
         public Application Application { get; }
@@ -26,6 +28,7 @@ namespace Take.Blip.Builder.UnitTests
 
         private readonly ISchedulerExtension Scheduler;
         private readonly ILogger Logger;
+        private readonly IConfiguration Configuration;
 
         public InputExpirationHandlerTests()
         {
@@ -44,7 +47,7 @@ namespace Take.Blip.Builder.UnitTests
 
             Scheduler = Substitute.For<ISchedulerExtension>();
             Logger = Substitute.For<ILogger>();
-
+            Configuration = Substitute.For<IConfiguration>();
             InputHandler = new InputExpirationHandler(Scheduler, Logger);
         }
 
@@ -102,7 +105,7 @@ namespace Take.Blip.Builder.UnitTests
             var state = new State
             {
                 Id = "ping",
-                Input = new Builder.Models.Input()
+                Input = new Builder.Models.Input(Configuration)
                 {
                     Expiration = TimeSpan.FromMinutes(1)
                 }
@@ -140,7 +143,7 @@ namespace Take.Blip.Builder.UnitTests
             var state = new State
             {
                 Id = "ping",
-                Input = new Builder.Models.Input()
+                Input = new Builder.Models.Input(Configuration)
                 {
                     Expiration = TimeSpan.FromMinutes(1)
                 }

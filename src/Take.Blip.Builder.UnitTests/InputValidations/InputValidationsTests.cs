@@ -5,6 +5,7 @@ using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
@@ -16,7 +17,14 @@ namespace Take.Blip.Builder.UnitTests
 {
     public class InputValidationsTests : FlowManagerTestsBase
     {
-     
+
+        public InputValidationsTests()
+        {
+            Configuration = Substitute.For<IConfiguration>();
+        }
+
+        public IConfiguration Configuration { get; set; }
+
         [Fact]
         public async Task FlowWithRegexInputValidationShouldChangeStateProperly()
         {
@@ -37,7 +45,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Validation = new InputValidation
                             {
@@ -112,7 +120,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Validation = new InputValidation
                             {
@@ -187,7 +195,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Validation = new InputValidation
                             {
@@ -261,7 +269,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Validation = new InputValidation
                             {
@@ -340,7 +348,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Validation = new InputValidation
                             {
@@ -429,7 +437,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Validation = new InputValidation
                             {
@@ -512,7 +520,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Validation = new InputValidation
                             {
@@ -586,7 +594,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Validation = new InputValidation
                             {

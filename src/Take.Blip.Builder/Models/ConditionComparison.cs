@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder.Models
 {
@@ -93,6 +94,7 @@ namespace Take.Blip.Builder.Models
 
     public static class ConditionComparisonExtensions
     {
+
         public static ComparisonType GetComparisonType(this ConditionComparison conditionComparison)
         {
             switch (conditionComparison)
@@ -146,6 +148,10 @@ namespace Take.Blip.Builder.Models
                     throw new ArgumentOutOfRangeException(nameof(conditionComparison));
             }
         }
+        private static bool RegexIsMatch(string v1, string v2) {
+            var regex = new Regex(v2, RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMinutes(2));
+            return regex.IsMatch(v1);
+        }
 
         public static Func<string, string, bool> ToBinaryDelegate(this ConditionComparison conditionComparison)
         {
@@ -167,7 +173,7 @@ namespace Take.Blip.Builder.Models
                     return (v1, v2) => v1 != null && v2 != null && v1.EndsWith(v2, StringComparison.OrdinalIgnoreCase);
 
                 case ConditionComparison.Matches:
-                    return (v1, v2) => v1 != null && v2 != null && Regex.IsMatch(v1, v2);
+                    return (v1, v2) => v1 != null && v2 != null && RegexIsMatch(v1, v2);
 
                 case ConditionComparison.ApproximateTo:
                     // Allows the difference of 25% of the string.

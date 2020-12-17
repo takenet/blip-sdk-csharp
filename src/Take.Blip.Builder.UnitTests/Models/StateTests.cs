@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using NSubstitute;
 using Shouldly;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Xunit;
 
@@ -8,6 +10,13 @@ namespace Take.Blip.Builder.UnitTests.Models
 {
     public class StateTests
     {
+        public StateTests()
+        {
+            Configuration = Substitute.For<IConfiguration>();
+        }
+
+        public IConfiguration Configuration { get; set; }
+
         [Fact]
         public void ValidateValidStateShouldSucceed()
         {
@@ -28,7 +37,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             var state = new State
             {
                 Root = true,
-                Input = new Input()
+                Input = new Input(Configuration)
             };
 
             // Act

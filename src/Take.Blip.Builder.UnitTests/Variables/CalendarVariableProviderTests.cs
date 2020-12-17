@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using NSubstitute;
 using Shouldly;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Variables;
 using Xunit;
 
@@ -15,11 +16,14 @@ namespace Take.Blip.Builder.UnitTests.Variables
         {
             Identity = new Identity("name", "domain.com");
             Context.UserIdentity.Returns(Identity);
+            Configuration = Substitute.For<IConfiguration>();
         }
+
+        public IConfiguration Configuration { get; set; }
 
         public CalendarVariableProvider GetTarget()
         {
-            return new CalendarVariableProvider();
+            return new CalendarVariableProvider(Configuration);
         }
 
         public Identity Identity { get; }

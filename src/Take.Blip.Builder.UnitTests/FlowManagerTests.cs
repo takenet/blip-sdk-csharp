@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
@@ -26,6 +27,13 @@ namespace Take.Blip.Builder.UnitTests
 {
     public class FlowManagerTests : FlowManagerTestsBase, IDisposable
     {
+
+        public FlowManagerTests()
+        {
+            Configuration = Substitute.For<IConfiguration>();
+        }
+        public IConfiguration Configuration { get; set; }
+
         [Fact]
         public async Task FlowWithoutConditionsShouldChangeStateAndSendMessage()
         {
@@ -43,7 +51,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -113,7 +121,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -183,7 +191,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -249,7 +257,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -312,7 +320,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Variable = variableName
                         }
@@ -352,7 +360,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -424,7 +432,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input()
+                        Input = new Input(Configuration)
                         {
                             Variable = "Word"
                         },
@@ -551,7 +559,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -563,7 +571,7 @@ namespace Take.Blip.Builder.UnitTests
                     new State
                     {
                         Id = "Start",
-                        Input = new Input()
+                        Input = new Input(Configuration)
                         {
                             Conditions = new []
                             {
@@ -729,7 +737,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -741,7 +749,7 @@ namespace Take.Blip.Builder.UnitTests
                     new State
                     {
                         Id = "Start",
-                        Input = new Input()
+                        Input = new Input(Configuration)
                         {
                             Conditions = new []
                             {
@@ -918,7 +926,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1026,7 +1034,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1144,7 +1152,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1264,7 +1272,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1317,7 +1325,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1369,7 +1377,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1426,7 +1434,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1438,7 +1446,7 @@ namespace Take.Blip.Builder.UnitTests
                     new State
                     {
                         Id = "ping",
-                        Input = new Input()
+                        Input = new Input(Configuration)
                         {
                             Expiration = TimeSpan.FromMinutes(1)
                         }
@@ -1483,7 +1491,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1495,7 +1503,7 @@ namespace Take.Blip.Builder.UnitTests
                     new State
                     {
                         Id = "ping",
-                        Input = new Input()
+                        Input = new Input(Configuration)
                         {
                             Expiration = TimeSpan.FromMinutes(1)
                         }
@@ -1529,7 +1537,7 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -1541,7 +1549,7 @@ namespace Take.Blip.Builder.UnitTests
                     new State
                     {
                         Id = "ping",
-                        Input = new Input()
+                        Input = new Input(Configuration)
                         {
                             Expiration = TimeSpan.FromMinutes(1)
                         },
@@ -1556,7 +1564,7 @@ namespace Take.Blip.Builder.UnitTests
                     new State
                     {
                         Id = "ping2",
-                        Input = new Input()
+                        Input = new Input(Configuration)
                     }
                 }
             };

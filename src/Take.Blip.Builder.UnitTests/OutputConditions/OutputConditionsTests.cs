@@ -5,6 +5,7 @@ using NSubstitute;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
@@ -14,6 +15,13 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
 {
     public class OutputConditionsTests : FlowManagerTestsBase
     {
+        public OutputConditionsTests()
+        {
+            Configuration = Substitute.For<IConfiguration>();
+        }
+
+        public IConfiguration Configuration { get; set; }
+
         [Fact]
         public async Task FlowWithOutputConditionsShouldChangeStateAndSendMessage()
         {
@@ -32,7 +40,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -131,7 +139,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new[]
                         {
                             new Output
@@ -230,7 +238,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Variable = variableName
                         },
@@ -306,7 +314,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Variable = variableName
                         },
@@ -359,7 +367,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Variable = variableName
                         },

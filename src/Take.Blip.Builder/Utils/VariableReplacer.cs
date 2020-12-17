@@ -4,37 +4,36 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder.Utils
 {
     public class VariableReplacer : IVariableReplacer
     {
-        private static readonly Regex TextVariablesRegex = new Regex(@"{{([a-zA-Z0-9\.@_-]+)}}", RegexOptions.Compiled);
+        private Regex _textVariablesRegex;
+
+        public VariableReplacer(IConfiguration configuration)
+        {
+            _textVariablesRegex = new Regex("(?<operation>plus|minus)(?<value>\\d+)(?<period>millisecond(s)?|second(s)?|minute(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)", RegexOptions.IgnoreCase | RegexOptions.Compiled, configuration.RegexTimeout);
+        }
 
         public async Task<string> ReplaceAsync(string value, IContext context, CancellationToken cancellationToken)
         {
-            AppDomain.CurrentDomain.SetData("REGEX_DEFAULT_MATCH_TIMEOUT", TimeSpan.FromMinutes(2));
-
-            try
+            var variableValues = new Dictionary<string, string>();
+            foreach (Match match in _textVariablesRegex.Matches(value))
             {
-                var variableValues = new Dictionary<string, string>();
-                foreach (Match match in TextVariablesRegex.Matches(value))
-                {
-                    var variableName = match.Groups[1].Value;
-                    if (variableValues.ContainsKey(variableName)) continue;
-                    var variableValue = await context.GetVariableAsync(variableName, cancellationToken);
-                    variableValues.Add(variableName, EscapeString(variableValue));
-                }
-
-                if (variableValues.Count > 0)
-                {
-                    value = TextVariablesRegex.Replace(value, match => variableValues[match.Groups[1].Value]);
-                }
-
-                return value;
-            } catch (RegexMatchTimeoutException ex) {
-                throw new TimeoutException($"Regex Timeout for {ex.Pattern} after {ex.Message} elapsed. Tried pattern {ex.MatchTimeout}");
+                var variableName = match.Groups[1].Value;
+                if (variableValues.ContainsKey(variableName)) continue;
+                var variableValue = await context.GetVariableAsync(variableName, cancellationToken);
+                variableValues.Add(variableName, EscapeString(variableValue));
             }
+
+            if (variableValues.Count > 0)
+            {
+                value = _textVariablesRegex.Replace(value, match => variableValues[match.Groups[1].Value]);
+            }
+
+            return value;
         }
 
         /// <summary>

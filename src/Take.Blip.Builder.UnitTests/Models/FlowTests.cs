@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using NSubstitute;
 using Shouldly;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Xunit;
 
@@ -10,6 +12,13 @@ namespace Take.Blip.Builder.UnitTests.Models
 {
     public class FlowTests
     {
+        public FlowTests()
+        {
+            Configuration = Substitute.For<IConfiguration>();
+        }
+
+        public IConfiguration Configuration { get; set; }
+
         [Fact]
         public void ValidateSingleStateValidFlowShouldSucceed()
         {
@@ -23,7 +32,7 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
+                        Input = new Input(Configuration)
                         {
                             Variable = "Any"
                         }
@@ -124,13 +133,13 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "0",
                         Root = true,
-                        Input = new Input()
+                        Input = new Input(Configuration)
                     },
                     new State
                     {
                         Id = "1",
                         Root = true,
-                        Input = new Input()
+                        Input = new Input(Configuration)
                     }
                 }
             };
@@ -160,17 +169,17 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "0",
                         Root = true,
-                        Input = new Input()
+                        Input = new Input(Configuration)
                     },
                     new State
                     {
                         Id = "1",
-                        Input = new Input()
+                        Input = new Input(Configuration)
                     },
                     new State
                     {
                         Id = "1",
-                        Input = new Input()
+                        Input = new Input(Configuration)
                     }
                 }
             };
@@ -200,7 +209,7 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "0",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new []
                         {
                             new Output
@@ -248,7 +257,7 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "0",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new []
                         {
                             new Output
@@ -307,7 +316,7 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "0",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new []
                         {
                             new Output
@@ -388,7 +397,7 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "onboarding",
                         Root = true,
-                        Input = new Input(),
+                        Input = new Input(Configuration),
                         Outputs = new []
                         {
                             new Output { StateId = "1" },
