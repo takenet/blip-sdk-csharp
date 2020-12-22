@@ -49,8 +49,9 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         private Command ConvertToCommand(JObject settings)
         {
+            
             if (settings.TryGetValue(Command.TYPE_KEY, out var type)
-                && Regex.IsMatch(type.ToString(), SERIALIZABLE_PATTERN)
+                && Regex.IsMatch(type.ToString(), SERIALIZABLE_PATTERN, default, Constants.REGEX_TIMEOUT)
                 && settings.TryGetValue(Command.RESOURCE_KEY, out var resource))
             {
                 settings.Property(Command.RESOURCE_KEY).Value = JObject.Parse(resource.ToString());
