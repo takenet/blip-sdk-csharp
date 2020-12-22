@@ -17,10 +17,5 @@ namespace Take.Blip.Client
         public const string POSTMASTER = "postmaster";
 
         public const string DEFAULT_STATE = "default";
-
-        /// <summary>
-        /// Default timeout for regex
-        /// </summary>
-        public static TimeSpan REGEX_TIMEOUT = TimeSpan.FromMinutes(2);
     }
 }

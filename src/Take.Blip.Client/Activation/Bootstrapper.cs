@@ -177,7 +177,7 @@ namespace Take.Blip.Client.Activation
             serviceContainer.RegisterService(typeof(ISessionManager), () => new SessionManager(serviceContainer.GetService<IBucketExtension>()));
 
             if (logger != null) serviceContainer.RegisterService(typeof(ILogger), logger);
-            
+
             var client = builder();
             serviceContainer.RegisterService(typeof(ISender), client);
             serviceOverrides?.Invoke(serviceContainer);
@@ -382,14 +382,14 @@ namespace Take.Blip.Client.Activation
                     if (applicationReceiver.MediaType != null)
                     {
                         var currentMessagePredicate = messagePredicate;
-                        var mediaTypeRegex = new Regex(applicationReceiver.MediaType, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+                        var mediaTypeRegex = new Regex(applicationReceiver.MediaType, RegexOptions.Compiled | RegexOptions.IgnoreCase);
                         messagePredicate = async (m) => await currentMessagePredicate(m) && mediaTypeRegex.IsMatch(m.Type.ToString());
                     }
 
                     if (applicationReceiver.Content != null)
                     {
                         var currentMessagePredicate = messagePredicate;
-                        var contentRegex = new Regex(applicationReceiver.Content, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+                        var contentRegex = new Regex(applicationReceiver.Content, RegexOptions.Compiled | RegexOptions.IgnoreCase);
                         messagePredicate = async (m) => await currentMessagePredicate(m) && contentRegex.IsMatch(m.Content.ToString());
                     }
 
@@ -425,14 +425,14 @@ namespace Take.Blip.Client.Activation
 
                 if (commandReceiver.Uri != null)
                 {
-                    var limeUriRegex = new Regex(commandReceiver.Uri, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+                    var limeUriRegex = new Regex(commandReceiver.Uri, RegexOptions.Compiled | RegexOptions.IgnoreCase);
                     var currentPredicate = predicate;
                     predicate = async (c) => await currentPredicate(c) && limeUriRegex.IsMatch(c.Uri.ToString());
                 }
 
                 if (commandReceiver.ResourceUri != null)
                 {
-                    var resourceUriRegex = new Regex(commandReceiver.ResourceUri, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+                    var resourceUriRegex = new Regex(commandReceiver.ResourceUri, RegexOptions.Compiled | RegexOptions.IgnoreCase);
                     var currentPredicate = predicate;
                     predicate = async (c) => await currentPredicate(c) && resourceUriRegex.IsMatch(c.GetResourceUri().ToString());
                 }
@@ -440,7 +440,7 @@ namespace Take.Blip.Client.Activation
                 if (commandReceiver.MediaType != null)
                 {
                     var currentPredicate = predicate;
-                    var mediaTypeRegex = new Regex(commandReceiver.MediaType, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+                    var mediaTypeRegex = new Regex(commandReceiver.MediaType, RegexOptions.Compiled | RegexOptions.IgnoreCase);
                     predicate = async (c) => await currentPredicate(c) && mediaTypeRegex.IsMatch(c.Type.ToString());
                 }
 
@@ -458,14 +458,14 @@ namespace Take.Blip.Client.Activation
             if (applicationReceiver.Sender != null)
             {
                 var currentPredicate = predicate;
-                var senderRegex = new Regex(applicationReceiver.Sender, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+                var senderRegex = new Regex(applicationReceiver.Sender, RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 predicate = async (m) => await currentPredicate(m) && senderRegex.IsMatch(m.From.ToString());
             }
 
             if (applicationReceiver.Destination != null)
             {
                 var currentPredicate = predicate;
-                var destinationRegex = new Regex(applicationReceiver.Destination, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+                var destinationRegex = new Regex(applicationReceiver.Destination, RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 predicate = async (m) => await currentPredicate(m) && destinationRegex.IsMatch(m.To.ToString());
             }
 
@@ -486,7 +486,7 @@ namespace Take.Blip.Client.Activation
             return predicate;
         }
 
-        
+
         public static Task<T> CreateAsync<T>(string typeName, IServiceProvider serviceProvider, IDictionary<string, object> settings, ITypeResolver typeResolver) where T : class
         {
             if (typeName == null) throw new ArgumentNullException(nameof(typeName));

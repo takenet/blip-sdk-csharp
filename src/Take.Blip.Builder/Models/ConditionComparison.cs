@@ -147,11 +147,6 @@ namespace Take.Blip.Builder.Models
             }
         }
 
-        private static bool IsMatch(string v1, string v2) {
-            var regex = new Regex(v2, RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
-            return regex.IsMatch(v1);
-        }
-
         public static Func<string, string, bool> ToBinaryDelegate(this ConditionComparison conditionComparison)
         {
             switch (conditionComparison)
@@ -172,7 +167,7 @@ namespace Take.Blip.Builder.Models
                     return (v1, v2) => v1 != null && v2 != null && v1.EndsWith(v2, StringComparison.OrdinalIgnoreCase);
 
                 case ConditionComparison.Matches:
-                    return (v1, v2) => v1 != null && v2 != null && IsMatch(v1, v2);
+                    return (v1, v2) => v1 != null && v2 != null && Regex.IsMatch(v1, v2, default, Constants.REGEX_TIMEOUT);
 
                 case ConditionComparison.ApproximateTo:
                     // Allows the difference of 25% of the string.
