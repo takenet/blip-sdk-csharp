@@ -22,27 +22,12 @@ using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
-using Take.Blip.Client.Extensions.Scheduler;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
 {
     public class FlowManager : IFlowManager
     {
-        private static readonly string[] _dateFormats = new[]{
-            "dd/MM/yyyy",
-            "MM/dd/yyyy",
-            "dd-MM-yyyy",
-            "MM-dd-yyyy",
-            "dd-MM",
-            "dd/MM",
-            "MM-dd",
-            "MM-dd-yy",
-            "dd-MM-yy",
-            "yyyy-MM-ddTHH:mm:ssK",
-            "yyyy-dd-MMTHH:mm:ssK"
-        };
-
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
         private readonly IContextProvider _contextProvider;
@@ -52,13 +37,11 @@ namespace Take.Blip.Builder
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
-        private readonly ISchedulerExtension _schedulerExtension;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
-        private readonly Identity _applicationIdentity;
         private readonly Node _applicationNode;
 
         public FlowManager(
@@ -92,7 +75,6 @@ namespace Take.Blip.Builder
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
             _inputExpirationHandler = inputExpirationHandler;
-            _applicationIdentity = application.Identity;
             _applicationNode = application.Node;
         }
 
@@ -333,7 +315,7 @@ namespace Take.Blip.Builder
                     return decimal.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Date:
-                    return DateTime.TryParseExact(lazyInput.SerializedContent, _dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out _);
+                    return DateTime.TryParseExact(lazyInput.SerializedContent, Constants.DateValidationFormats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out _);
 
                 case InputValidationRule.Regex:
                     return Regex.IsMatch(lazyInput.SerializedContent, inputValidation.Regex, default, Constants.REGEX_TIMEOUT);

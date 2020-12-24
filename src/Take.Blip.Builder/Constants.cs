@@ -17,6 +17,23 @@ namespace Take.Blip.Builder
         /// <summary>
         /// Default timeout for regex
         /// </summary>
-        public static TimeSpan REGEX_TIMEOUT = TimeSpan.FromMinutes(2);
+        public readonly static TimeSpan REGEX_TIMEOUT = TimeSpan.FromMinutes(2);
+
+        /// <summary>
+        /// Supported date formats for validations
+        /// </summary>
+        public readonly static string[] DateValidationFormats = new[] {
+            "dd/MM/yyyy",
+            "MM/dd/yyyy",
+            "dd-MM-yyyy",
+            "MM-dd-yyyy",
+            "dd-MM",
+            "dd/MM",
+            "MM-dd",
+            "MM-dd-yy",
+            "dd-MM-yy",
+            "yyyy-MM-ddTHH:mm:ssK",
+            "yyyy-dd-MMTHH:mm:ssK"
+        };
     }
 }
