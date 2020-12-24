@@ -29,7 +29,6 @@ using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions;
-using Take.Blip.Client.Extensions.Contacts;
 using Take.Elephant;
 
 namespace Take.Blip.Builder.Hosting
@@ -53,6 +52,7 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<IFlowManager, FlowManager>();
             container.RegisterSingleton<IStateManager, StateManager>();
+            container.RegisterSingleton<IRedirectManager, RedirectManager>();
             container.RegisterSingleton<IContextProvider, ContextProvider>();
             container.RegisterDecorator<ISender, OwnerSenderDecorator>(Lifestyle.Singleton);
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
@@ -82,7 +82,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(RedirectAction),
                     typeof(ForwardMessageToDeskAction),
                     typeof(CreateTicketAction),
-                    typeof(DeleteVariableAction),
+                    typeof(DeleteVariableAction)
                 });
 
             return container;

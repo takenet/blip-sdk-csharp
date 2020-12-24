@@ -10,7 +10,7 @@ namespace Take.Blip.Builder.Models
     /// </summary>
     public class Input : IValidable
     {
-        private static readonly Regex VariableValidationRegex = new Regex("^([a-zA-Z0-9\\.]+)$", RegexOptions.Compiled);
+        private static readonly Regex VariableValidationRegex = new Regex("^([a-zA-Z0-9\\.]+)$", RegexOptions.Compiled, Constants.REGEX_TIMEOUT);
 
         /// <summary>
         /// Indicates that the state input should be skipped.

@@ -64,23 +64,40 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                         }
                     }
                 }
+
+            //Set the responses variables
+            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
+                {
+                    await context.SetVariableAsync(settings.ResponseStatusVariable,
+                        responseStatus.ToString(), cancellationToken);
+                }
+
+                if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable) &&
+                    !string.IsNullOrWhiteSpace(responseBody))
+                {
+                    await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
+                }
             }
             catch (Exception ex)
             {
                 _logger.Warning(ex, $"An exception occurred while processing HTTP action");
+                if (ex is TaskCanceledException)
+                {
+                    PushTimeoutWarning(context);
+                }
             }
 
-            // Set the responses variables
-            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
-            {
-                await context.SetVariableAsync(settings.ResponseStatusVariable,
-                    responseStatus.ToString(), cancellationToken);
-            }
+        }
 
-            if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable) &&
-                !string.IsNullOrWhiteSpace(responseBody))
+        private void PushTimeoutWarning(IContext context)
+        {
+            var warningMessage =
+                $"The process http command action has timed out.";
+
+            var currentActionTrace = context.GetCurrentActionTrace();
+            if (currentActionTrace != null)
             {
-                await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
+                currentActionTrace.Warning = warningMessage;
             }
         }
 
