@@ -567,6 +567,738 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
+        public async Task FlowWithDateValidationShouldChangeStateProperlyYYYYDDMM()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "2017-20-11T17:13:00Z" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+
+        public async Task FlowWithDateValidationShouldChangeUsingDDMMYYYYFormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "15/12/2020" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithDateValidationShouldChangeUsingMMDDYYYYFormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "12/15/2020" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithDateValidationShouldChangeUsingDDMMYYYYHFormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "15-12-2020" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithDateValidationShouldChangeUsingMMDDYYYYHFormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "12-15-2020" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithDateValidationShouldChangeUsingDDMMHFormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "15-12" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithDateValidationShouldChangeUsingDDMMHormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "15/12" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithDateValidationShouldChangeUsingMMDDHHormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "12-15" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithDateValidationShouldChangeUsingMMDDHYYHormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "12-15-20" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithDateValidationShouldChangeUsingDDMMYYHormatStateProperly()
+        {
+            // Arrange
+            var input = new PlainText() { Text = "15-12-20" };
+            Message.Content = input;
+            var messageType = "text/plain";
+            var messageContent = "Pong!";
+            var validationMessageContent = "Invalid message content";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Validation = new InputValidation
+                            {
+                                Rule = InputValidationRule.Date,
+                                Error = validationMessageContent
+                            }
+                        },
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "ping"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "ping",
+                        InputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JObject()
+                                {
+                                    {"type", messageType},
+                                    {"content", messageContent}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
+
+            Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id != null
+                        && m.To.ToIdentity().Equals(UserIdentity)
+                        && m.Type.ToString().Equals(messageType)
+                        && m.Content.ToString() == messageContent),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         public async Task FlowWithInvalidDateValidationShouldFailAndNotChangeStateProperly()
         {
             // Arrange

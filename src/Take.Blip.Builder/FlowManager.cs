@@ -8,6 +8,7 @@ using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -28,6 +29,20 @@ namespace Take.Blip.Builder
 {
     public class FlowManager : IFlowManager
     {
+        private static readonly string[] _dateFormats = new[]{
+            "dd/MM/yyyy",
+            "MM/dd/yyyy",
+            "dd-MM-yyyy",
+            "MM-dd-yyyy",
+            "dd-MM",
+            "dd/MM",
+            "MM-dd",
+            "MM-dd-yy",
+            "dd-MM-yy",
+            "yyyy-MM-ddTHH:mm:ssK",
+            "yyyy-dd-MMTHH:mm:ssK"
+        };
+
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
         private readonly IContextProvider _contextProvider;
@@ -318,7 +333,7 @@ namespace Take.Blip.Builder
                     return decimal.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Date:
-                    return DateTime.TryParse(lazyInput.SerializedContent, out _);
+                    return DateTime.TryParseExact(lazyInput.SerializedContent, _dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out _);
 
                 case InputValidationRule.Regex:
                     return Regex.IsMatch(lazyInput.SerializedContent, inputValidation.Regex);
