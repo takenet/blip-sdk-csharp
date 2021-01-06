@@ -493,11 +493,22 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Any<CancellationToken>());
         }
 
-        [Fact]
-        public async Task FlowWithDateValidationShouldChangeStateProperly()
+        [Theory]
+        [InlineData("2017-20-11T17:13:00Z")]
+        [InlineData("2017-11-20T17:13:00Z")]
+        [InlineData("15/12/2020")]
+        [InlineData("12/15/2020")]
+        [InlineData("15-12-2020")]
+        [InlineData("12-15-2020")]
+        [InlineData("15-12")]
+        [InlineData("15/12")]
+        [InlineData("12-15")]
+        [InlineData("12-15-20")]
+        [InlineData("15-12-20")]
+        public async Task FlowWithDateValidationShouldChangeStateProperly(string format)
         {
             // Arrange
-            var input = new PlainText() { Text = "2017-11-20T17:13:00Z" };
+            var input = new PlainText() { Text = format };
             Message.Content = input;
             var messageType = "text/plain";
             var messageContent = "Pong!";
@@ -554,7 +565,7 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
-            
+
             Sender
                 .Received(1)
                 .SendMessageAsync(

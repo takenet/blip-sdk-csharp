@@ -8,6 +8,7 @@ using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -21,7 +22,6 @@ using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
-using Take.Blip.Client.Extensions.Scheduler;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -37,13 +37,11 @@ namespace Take.Blip.Builder
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
-        private readonly ISchedulerExtension _schedulerExtension;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
-        private readonly Identity _applicationIdentity;
         private readonly Node _applicationNode;
 
         public FlowManager(
@@ -77,7 +75,6 @@ namespace Take.Blip.Builder
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
             _inputExpirationHandler = inputExpirationHandler;
-            _applicationIdentity = application.Identity;
             _applicationNode = application.Node;
         }
 
@@ -318,7 +315,7 @@ namespace Take.Blip.Builder
                     return decimal.TryParse(lazyInput.SerializedContent, out _);
 
                 case InputValidationRule.Date:
-                    return DateTime.TryParse(lazyInput.SerializedContent, out _);
+                    return DateTime.TryParseExact(lazyInput.SerializedContent, Constants.DateValidationFormats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out _);
 
                 case InputValidationRule.Regex:
                     return Regex.IsMatch(lazyInput.SerializedContent, inputValidation.Regex, default, Constants.REGEX_TIMEOUT);
