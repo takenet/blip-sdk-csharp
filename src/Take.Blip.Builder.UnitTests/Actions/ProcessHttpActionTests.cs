@@ -70,7 +70,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Arg.Is<HttpRequestMessage>(
                     h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
 
-            await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int) HttpStatusCode.Accepted).ToString(),                 Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int)HttpStatusCode.Accepted).ToString(), Arg.Any<CancellationToken>());
             await Context.Received(1).SetVariableAsync(settings.ResponseBodyVariable, "Some result", Arg.Any<CancellationToken>());
         }
 
@@ -119,7 +119,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             // Arrange
             const string userIdentity = "user@domain.local";
-            const string userToRequestHeaderVariableName = "processHttpAddUserToRequestHeader";        
+            const string userToRequestHeaderVariableName = "processHttpAddUserToRequestHeader";
             Context.Flow.Configuration.Add(userToRequestHeaderVariableName, "true");
             Context.UserIdentity.Returns(Identity.Parse(userIdentity));
 
@@ -214,6 +214,42 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(
                     h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessActionTimeoutShouldSucceed()
+        {
+            // Arrange
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri("https://blip.ai"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(async token =>
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(20), token.Arg<CancellationToken>());
+                    return Substitute.For<HttpResponseMessage>();
+                });
+
+            // Act
+            using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(10)))
+                await target.ExecuteAsync(Context, JObject.FromObject(settings), cts.Token);
+
+            //Assert
+            await Context.DidNotReceive().SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         }
 
         [Theory]

@@ -13,6 +13,7 @@ using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client.Content;
+using Takenet.Iris.Messaging.Resources;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
@@ -380,8 +381,6 @@ namespace Take.Blip.Builder.UnitTests
             };
             var target = GetTarget(container =>
             {
-                OwnerCallerContactMap = Substitute.ForPartsOf<OwnerCallerContactMap>();
-                container.RegisterSingleton(OwnerCallerContactMap);
                 container.RegisterSingleton<IContextProvider, ContextProvider>();
                 container.RegisterSingleton<IServiceProvider>(container);
             });
@@ -390,10 +389,10 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            OwnerCallerContactMap
+            ContactExtension
                 .Received()
-                .GetValueOrDefaultAsync(
-                    Arg.Is<OwnerCaller>(v => v.Owner != null && v.Caller == Message.From.ToIdentity()),
+                .GetAsync(
+                    Arg.Is<Identity>(v => v == Message.From.ToIdentity()),
                     Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
@@ -1562,6 +1561,15 @@ namespace Take.Blip.Builder.UnitTests
                 }
             };
             var target = GetTarget();
+            SchedulerExtension
+               .GetScheduledMessageAsync(Arg.Any<string>(), Arg.Any<Node>(), Arg.Any<CancellationToken>())
+               .Returns(new Schedule
+               {
+                   Name = $"{UserIdentity}-inputexpirationtime",
+                   Message = Message,
+                   Status = ScheduleStatus.Scheduled,
+                   When = DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(1))
+               });
 
             // Act
             await target.ProcessInputAsync(Message, flow, CancellationToken);

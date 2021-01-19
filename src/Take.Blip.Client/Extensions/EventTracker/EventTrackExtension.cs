@@ -92,6 +92,7 @@ namespace Take.Blip.Client.Extensions.EventTracker
                     Value = value,
                     Extras = extras,
                     MessageId = messageId,
+                    StorageDate = DateTimeOffset.Now,
                     Contact = new EventContact
                     {
                         ExternalId = contactExternalId,

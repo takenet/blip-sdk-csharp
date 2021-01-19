@@ -10,7 +10,7 @@ namespace Take.Blip.Builder.Variables
 {
     public class CalendarVariableProvider : IVariableProvider
     {
-        private static Regex DateOperationRegex = new Regex("(?<operation>plus|minus)(?<value>\\d+)(?<period>millisecond(s)?|second(s)?|minute(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static Regex DateOperationRegex = new Regex("(?<operation>plus|minus)(?<value>\\d+)(?<period>millisecond(s)?|second(s)?|minute(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)", RegexOptions.IgnoreCase | RegexOptions.Compiled, Constants.REGEX_TIMEOUT);
 
         public VariableSource Source => VariableSource.Calendar;
 

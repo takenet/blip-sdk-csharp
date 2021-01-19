@@ -5,6 +5,7 @@ using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
+using Serilog;
 using Take.Blip.Builder;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
@@ -39,8 +40,9 @@ namespace Builder.Console
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
             IContextProvider contextProvider, 
-            IUserOwnerResolver userOwnerResolver)
-            : base(contactExtension, directoryExtension)
+            IUserOwnerResolver userOwnerResolver,
+            ILogger logger)
+            : base(contactExtension, directoryExtension, logger)
         {
             _flowManager = flowManager;
             _settings = settings;

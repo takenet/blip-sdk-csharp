@@ -89,6 +89,8 @@ namespace Take.Blip.Client.Activation
             }
             if (application.PresenceStatus.HasValue) builder = builder.WithPresenceStatus(application.PresenceStatus.Value);
 
+            if (application.EnvelopeBufferSize.HasValue) builder = builder.WithEnvelopeBufferSize(application.EnvelopeBufferSize.Value);
+
             if (typeResolver == null) typeResolver = new TypeResolver();
             var localServiceProvider = BuildServiceProvider(application, typeResolver);
 
@@ -175,7 +177,7 @@ namespace Take.Blip.Client.Activation
             serviceContainer.RegisterService(typeof(ISessionManager), () => new SessionManager(serviceContainer.GetService<IBucketExtension>()));
 
             if (logger != null) serviceContainer.RegisterService(typeof(ILogger), logger);
-            
+
             var client = builder();
             serviceContainer.RegisterService(typeof(ISender), client);
             serviceOverrides?.Invoke(serviceContainer);
@@ -484,7 +486,7 @@ namespace Take.Blip.Client.Activation
             return predicate;
         }
 
-        
+
         public static Task<T> CreateAsync<T>(string typeName, IServiceProvider serviceProvider, IDictionary<string, object> settings, ITypeResolver typeResolver) where T : class
         {
             if (typeName == null) throw new ArgumentNullException(nameof(typeName));

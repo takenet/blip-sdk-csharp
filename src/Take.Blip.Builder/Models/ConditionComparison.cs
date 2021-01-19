@@ -167,7 +167,7 @@ namespace Take.Blip.Builder.Models
                     return (v1, v2) => v1 != null && v2 != null && v1.EndsWith(v2, StringComparison.OrdinalIgnoreCase);
 
                 case ConditionComparison.Matches:
-                    return (v1, v2) => v1 != null && v2 != null && Regex.IsMatch(v1, v2);
+                    return (v1, v2) => v1 != null && v2 != null && Regex.IsMatch(v1, v2, default, Constants.REGEX_TIMEOUT);
 
                 case ConditionComparison.ApproximateTo:
                     // Allows the difference of 25% of the string.

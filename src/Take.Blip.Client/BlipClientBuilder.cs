@@ -1,14 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Lime.Messaging.Resources;
+﻿using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Client;
 using Lime.Protocol.Network;
 using Lime.Protocol.Network.Modules;
 using Lime.Protocol.Security;
 using Serilog;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Take.Blip.Client
 {
@@ -43,8 +42,9 @@ namespace Take.Blip.Client
             RoundRobin = true;
             AutoNotify = true;
             ChannelCount = 1;
-            ReceiptEvents = new[] {Event.Accepted, Event.Dispatched, Event.Received, Event.Consumed, Event.Failed};
+            ReceiptEvents = new[] { Event.Accepted, Event.Dispatched, Event.Received, Event.Consumed, Event.Failed };
             PresenceStatus = PresenceStatus.Available;
+            EnvelopeBufferSize = 100;
         }
 
         public string Identifier { get; private set; }
@@ -92,6 +92,7 @@ namespace Take.Blip.Client
         public Event[] ReceiptEvents { get; private set; }
 
         public PresenceStatus PresenceStatus { get; private set; }
+        public int EnvelopeBufferSize { get; private set; }
 
         public BlipClientBuilder UsingPassword(string identifier, string password)
         {
@@ -236,6 +237,12 @@ namespace Take.Blip.Client
             return this;
         }
 
+        public BlipClientBuilder WithEnvelopeBufferSize(int envelopeBufferSize)
+        {
+            EnvelopeBufferSize = envelopeBufferSize;
+            return this;
+        }
+
         /// <summary>
         /// Builds an <see cref="IBlipClient" /> with the configured parameters
         /// </summary>
@@ -244,7 +251,7 @@ namespace Take.Blip.Client
             var channelBuilder = ClientChannelBuilder
                 .Create(() => _transportFactory.Create(EndPoint), EndPoint)
                 .WithSendTimeout(SendTimeout)
-                .WithEnvelopeBufferSize(100)
+                .WithEnvelopeBufferSize(EnvelopeBufferSize)
                 .AddCommandModule(c => new ReplyPingChannelModule(c))
                 .AddBuiltHandler((c, t) =>
                 {
@@ -294,12 +301,12 @@ namespace Take.Blip.Client
 
             if (AccessKey != null)
             {
-                result = new KeyAuthentication {Key = AccessKey};
+                result = new KeyAuthentication { Key = AccessKey };
             }
 
             if (Token != null && Issuer != null)
             {
-                result = new ExternalAuthentication {Token = Token, Issuer = Issuer};
+                result = new ExternalAuthentication { Token = Token, Issuer = Issuer };
             }
 
             if (result == null)
@@ -341,7 +348,7 @@ namespace Take.Blip.Client
 
             await clientChannel.SetResourceAsync(
                     LimeUri.Parse(UriTemplates.RECEIPT),
-                    new Receipt {Events = ReceiptEvents},
+                    new Receipt { Events = ReceiptEvents },
                     cancellationToken)
                 .ConfigureAwait(false);
         }
