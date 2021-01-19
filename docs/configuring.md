@@ -45,6 +45,7 @@ All possible properties of the `application.json` file:
 | disableNotify | Disable automatic notification for messages received and consumed by chatbot | false | false |
 | channelCount | Conections count between chatbot and server | 1 | 5 | 
 | receiptEvents | Define the events type that the server will foward to the chatbot | [ Accepted, Dispatched, Received, Consumed, Failed ] | [ Received ] |
+| envelopeBufferSize | Define the size of envelope receiving buffer. It can have a fixed maximum limit or be unbounded (-1) | -1 | 100 |
 
 Each **message receiver** can have the follow properties:
 
