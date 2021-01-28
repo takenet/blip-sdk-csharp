@@ -197,7 +197,8 @@ namespace Take.Blip.Builder
                                 }
 
                                 // Set the input in the context
-                                if (!string.IsNullOrEmpty(state.Input?.Variable))
+                                if (stateWaitForInput && 
+                                    !string.IsNullOrEmpty(state.Input?.Variable))
                                 {
                                     await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
                                         linkedCts.Token);
