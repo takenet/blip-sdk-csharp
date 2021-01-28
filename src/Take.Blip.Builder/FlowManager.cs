@@ -182,25 +182,27 @@ namespace Take.Blip.Builder
                             {
                                 linkedCts.Token.ThrowIfCancellationRequested();
 
-                                // Validate the input for the current state
-                                if (stateWaitForInput &&
-                                    state.Input?.Validation != null &&
-                                    !ValidateDocument(lazyInput, state.Input.Validation))
+                                if (stateWaitForInput)
                                 {
-                                    if (state.Input.Validation.Error != null)
+                                    // Validate the input for the current state
+                                    if (state.Input?.Validation != null && 
+                                        !ValidateDocument(lazyInput, state.Input.Validation))
                                     {
-                                        // Send the validation error message
-                                        await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
+                                        if (state.Input.Validation.Error != null)
+                                        {
+                                            // Send the validation error message
+                                            await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
+                                        }
+
+                                        break;
                                     }
 
-                                    break;
-                                }
-
-                                // Set the input in the context
-                                if (!string.IsNullOrEmpty(state.Input?.Variable))
-                                {
-                                    await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
-                                        linkedCts.Token);
+                                    // Set the input in the context
+                                    if (!string.IsNullOrEmpty(state.Input?.Variable))
+                                    {
+                                        await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
+                                            linkedCts.Token);
+                                    }
                                 }
 
                                 // Prepare to leave the current state executing the output actions

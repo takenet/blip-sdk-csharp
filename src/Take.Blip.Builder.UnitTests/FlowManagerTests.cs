@@ -331,6 +331,52 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
+        public async Task FlowWithoutInputVariableShouldNotSaveInContext()
+        {
+            // Arrange
+            Message.Content = new PlainText() { Text = "Ping!" };
+            var variableName = "MyVariable";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new Output[]
+                        {
+                            new Output
+                            {
+                                StateId = "first"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "first",
+                        Input = new Input
+                        {
+                            Bypass = true,
+                            Variable = variableName
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == Message.Content), flow);
+            Context.Received(0).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         [Trait("Category", "Integration")]
         public async Task FlowWithContactVariableReplacementShouldGetContact()
         {
@@ -518,8 +564,8 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInputContextConditionsSatisfiedShouldKeepStateAndWaitNextInput()
         {
             // Arrange
-            var inputOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "OK!" }};
-            var inputNOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" }};
+            var inputOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "OK!" } };
+            var inputNOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" } };
             var messageType = "text/plain";
             var okMessageContent = "OK";
             var nokMessageContent = "NOK";
@@ -696,8 +742,8 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInputContextConditionsNotSatisfiedShouldChangeStateAndSendMessage()
         {
             // Arrange
-            var inputOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "OK!" }};
-            var inputNOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" }};
+            var inputOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "OK!" } };
+            var inputNOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" } };
             var messageType = "text/plain";
             var okMessageContent = "OK";
             var nokMessageContent = "NOK";
@@ -879,7 +925,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithConditionsAndMultipleInputsShouldChangeStatesAndSendMessages()
         {
             // Arrange
-            var input1 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Ping!" }};
+            var input1 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Ping!" } };
             var context1 = Substitute.For<IContext>();
             var lazyInput1 = new LazyInput(input1,
                 UserIdentity,
@@ -889,7 +935,7 @@ namespace Take.Blip.Builder.UnitTests
                 ArtificialIntelligenceExtension,
                 CancellationToken);
             context1.Input.Returns(lazyInput1);
-            var input2 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Marco!" }};
+            var input2 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Marco!" } };
             var context2 = Substitute.For<IContext>();
             var lazyInput2 = new LazyInput(input2,
                 UserIdentity,
@@ -901,11 +947,11 @@ namespace Take.Blip.Builder.UnitTests
             context2.Input.Returns(lazyInput2);
             ContextProvider
                 .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), lazyInput1, Arg.Any<Flow>())
-                .Returns(context1);            
+                .Returns(context1);
             ContextProvider
                 .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), lazyInput2, Arg.Any<Flow>())
-                .Returns(context2);            
-            
+                .Returns(context2);
+
             var messageType = "text/plain";
             var pongMessageContent = "Pong!";
             var poloMessageContent = "Polo!";
@@ -1242,7 +1288,7 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content.ToString() == messageContent),
                     Arg.Any<CancellationToken>());
         }
-                       
+
         [Fact]
         public async Task TimeoutOnActionShouldOverrideDefaultConfiguration()
         {
@@ -1251,10 +1297,10 @@ namespace Take.Blip.Builder.UnitTests
             Message.Content = input;
             var messageType = "text/plain";
             var messageContent = "Pong!";
-            
-            var timeout =  TimeSpan.FromMilliseconds(256);
-            var fakeSender = new FakeSender(timeout + timeout);            
-            Sender = fakeSender;                                 
+
+            var timeout = TimeSpan.FromMilliseconds(256);
+            var fakeSender = new FakeSender(timeout + timeout);
+            Sender = fakeSender;
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
@@ -1299,11 +1345,11 @@ namespace Take.Blip.Builder.UnitTests
             exception.Message.ShouldBe($"The processing of the action 'SendMessage' has timed out after {timeout.TotalMilliseconds} ms");
             fakeSender.SentMessages.ShouldBeEmpty();
         }
-        
+
         [Fact]
         public async Task ActionWithInvalidSettingShouldBreakProcessing()
         {
-              // Arrange
+            // Arrange
             var input = new PlainText() { Text = "Ping!" };
             Message.Content = input;
             var messageType = "application/json";
@@ -1349,9 +1395,9 @@ namespace Take.Blip.Builder.UnitTests
             // Act
             await target
                 .ProcessInputAsync(Message, flow, CancellationToken)
-                .ShouldThrowAsync<ActionProcessingException>();           
-        }        
-        
+                .ShouldThrowAsync<ActionProcessingException>();
+        }
+
         [Fact]
         public async Task ActionWithInvalidSettingShouldNotBreakProcessingWhenContinueOnErrorIsTrue()
         {
@@ -1400,8 +1446,8 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);           
-            
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
@@ -1456,7 +1502,7 @@ namespace Take.Blip.Builder.UnitTests
             SchedulerExtension
                 .Received(1)
                 .ScheduleMessageAsync(
-                    Arg.Is<Message>(m => 
+                    Arg.Is<Message>(m =>
                         m.Id != null
                         && m.To.ToIdentity().Equals(ApplicationIdentity)
                         && m.Type.ToString().Equals(messageType)
@@ -1505,7 +1551,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            Func<Task> processInputAsync = async () =>  await target.ProcessInputAsync(Message, flow, CancellationToken);
+            Func<Task> processInputAsync = async () => await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             processInputAsync.ShouldThrow<ArgumentException>();
@@ -1607,7 +1653,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             CancellationTokenSource.Dispose();
         }
-        
+
         private class FakeSender : ISender
         {
             private readonly TimeSpan _delay;
@@ -1617,15 +1663,15 @@ namespace Take.Blip.Builder.UnitTests
                 _delay = delay;
                 SentMessages = new List<Message>();
             }
-            
+
             public List<Message> SentMessages { get; }
-            
-           
+
+
             public async Task SendMessageAsync(Message message, CancellationToken cancellationToken)
             {
                 await Task.Delay(_delay, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 SentMessages.Add(message);
             }
 
