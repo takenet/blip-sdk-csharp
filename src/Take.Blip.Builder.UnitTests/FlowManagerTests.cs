@@ -334,8 +334,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithoutInputVariableShouldNotSaveInContext()
         {
             // Arrange
-            var input = new PlainText() { Text = "Ping!" };
-            Message.Content = input;
+            Message.Content = new PlainText() { Text = "Ping!" };
             var variableName = "MyVariable";
             var flow = new Flow()
             {
@@ -372,7 +371,7 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == Message.Content), flow);
             Context.Received(0).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
             StateManager.Received(1).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         }
