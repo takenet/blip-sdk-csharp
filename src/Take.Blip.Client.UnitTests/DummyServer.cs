@@ -54,7 +54,7 @@ namespace Take.Blip.Client.UnitTests
 
             ProducerConsumer.CreateAsync(
                 c => _transportListener.AcceptTransportAsync(c),
-                async transport =>
+                async (transport, _) =>
                 {
                     await transport.OpenAsync(null, _cts.Token);
 
@@ -76,10 +76,14 @@ namespace Take.Blip.Client.UnitTests
                             AuthenticationScheme.Transport,
                             AuthenticationScheme.External
                         },
-                        (n, a) =>
+                        (n, a, _) =>
                         {
                             Authentications.Enqueue(a);
-                            return new AuthenticationResult(null, n).AsCompletedTask();
+                            return new AuthenticationResult(DomainRole.RootAuthority, a).AsCompletedTask();
+                        },
+                        (n, s, c) =>
+                        {
+                            return n.AsCompletedTask();
                         }, _cts.Token);
                    
                     var channelListener = new ChannelListener(
