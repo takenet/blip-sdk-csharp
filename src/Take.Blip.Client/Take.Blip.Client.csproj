@@ -17,19 +17,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lime.Messaging" Version="0.8.111" />
-    <PackageReference Include="Lime.Protocol" Version="0.9.11-beta" />
-    <PackageReference Include="Lime.Transport.Tcp" Version="0.8.107" />
+    <PackageReference Include="Lime.Messaging" Version="0.10.54-beta" />
+    <PackageReference Include="Lime.Protocol" Version="0.10.54-beta" />
+    <PackageReference Include="Lime.Transport.Tcp" Version="0.10.54-beta" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SmartFormat.NET" Version="2.1.0.2" />
-    <PackageReference Include="Takenet.Iris.Messaging" Version="20.12.3406" />
-    <PackageReference Include="Takenet.Iris.Messaging.ArtificialIntelligence" Version="20.12.3406" />
-    <PackageReference Include="Takenet.Iris.Messaging.Desk" Version="20.12.3406" />
-    <PackageReference Include="Takenet.Iris.Messaging.Media" Version="20.12.3406" />
-    <PackageReference Include="Takenet.Iris.Messaging.Portal" Version="20.12.3406" />
+    <PackageReference Include="Takenet.Iris.Messaging.Analytics" Version="21.13.5827" />
+    <PackageReference Include="Takenet.Iris.Messaging.ArtificialIntelligence" Version="21.13.5827" />
+    <PackageReference Include="Takenet.Iris.Messaging.Desk" Version="21.13.5827" />
+    <PackageReference Include="Takenet.Iris.Messaging.Media" Version="21.13.5827" />
+    <PackageReference Include="Takenet.Iris.Messaging.Portal" Version="21.13.5827" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>

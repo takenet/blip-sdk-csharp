@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Takenet.Iris.Messaging.Resources;
 using Takenet.Iris.Messaging.Resources.Analytics;
 
 namespace Take.Blip.Client.Extensions.EventTracker
@@ -12,7 +11,6 @@ namespace Take.Blip.Client.Extensions.EventTracker
     public class EventTrackExtension : ExtensionBase, IEventTrackExtension
     {
         private const string EVENTRACK_URI = "/event-track";
-        private const string EVENTRACK_MESSAGE_URI = "/event-track/message";
         
         private readonly Node AnalyticsAddress = Node.Parse("postmaster@analytics.msging.net");
 
