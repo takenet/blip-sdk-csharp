@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Context;
 using Take.Blip.Builder.Hosting;
+using System.Globalization;
+using System;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
@@ -16,6 +18,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         private const string DEFAULT_FUNCTION = "run";
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        const string BRAZIL_TIMEZONE = "E. South America Standard Time";
+        const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
 
         public ExecuteScriptAction(IConfiguration configuration, ILogger logger) 
             : base(nameof(ExecuteScript))
@@ -27,14 +31,32 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
+            TimeZoneInfo timeZoneLocal;
+
+            try
+            {
+                if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR))
+                {
+                    timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
+                } 
+                else
+                {
+                    timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(BRAZIL_TIMEZONE);
+                }
+            }
+            catch (Exception e) 
+            {
+                timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(BRAZIL_TIMEZONE);
+            }
 
             var engine = new Engine(options => options
                     .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
                     .MaxStatements(_configuration.ExecuteScriptMaxStatements)
                     .LimitMemory(_configuration.ExecuteScriptLimitMemory)
                     .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                    .DebugMode());
-
+                    .DebugMode()
+                    .LocalTimeZone(timeZoneLocal));
+            
             engine.Step += (sender, e) =>
             {
                 CheckMemoryUsage(context, e);
