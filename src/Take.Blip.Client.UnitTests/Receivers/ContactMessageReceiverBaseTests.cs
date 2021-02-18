@@ -37,8 +37,7 @@ namespace Take.Blip.Client.UnitTests.Receivers
                 ContactExtension,
                 DirectoryExtension,
                 Substitute.For<ILogger>(),
-                CacheLocally,
-                CacheExpiration
+                CacheLocally
                 );
         }
         
@@ -186,12 +185,10 @@ namespace Take.Blip.Client.UnitTests.Receivers
             IContactExtension contactExtension,
             IDirectoryExtension directoryExtension,
             ILogger logger,
-            bool cacheLocally = true,
-            TimeSpan cacheExpiration = default) : base(contactExtension,
+            bool cacheLocally = true) : base(contactExtension,
             directoryExtension,
             logger,
-            cacheLocally,
-            cacheExpiration)
+            cacheLocally)
         {
             ReceivedItems = new List<(Message, Contact)>();
         }
