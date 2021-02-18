@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Context;
 using Take.Blip.Builder.Hosting;
+using System.Globalization;
+using System;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
@@ -16,6 +18,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         private const string DEFAULT_FUNCTION = "run";
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        const string BRAZIL_TIMEZONE = "E. South America Standard Time";
+        const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
 
         public ExecuteScriptAction(IConfiguration configuration, ILogger logger) 
             : base(nameof(ExecuteScript))
@@ -27,13 +31,42 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
+            TimeZoneInfo timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(BRAZIL_TIMEZONE);
+            var localTimeZoneEnabled = false;
+
+            try
+            {
+                context.Flow.Configuration.TryGetValue("SdkEngineLocalTimeZone", out var local);
+                bool.TryParse(local, out var res);
+                localTimeZoneEnabled = res;
+                
+                if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR))
+                {
+                    timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
+                } 
+            }
+            catch (Exception e) 
+            {
+                _logger.Information(e.Message);
+            }
 
             var engine = new Engine(options => options
-                    .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
-                    .MaxStatements(_configuration.ExecuteScriptMaxStatements)
-                    .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                    .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                    .DebugMode());
+                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                        .DebugMode());
+
+            if (localTimeZoneEnabled)
+            {
+                engine = new Engine(options => options
+                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                        .DebugMode()
+                        .LocalTimeZone(timeZoneLocal));
+            }
 
             engine.Step += (sender, e) =>
             {
