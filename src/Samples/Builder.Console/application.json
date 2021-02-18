@@ -1,0 +1,527 @@
+﻿{
+  "identifier": "desktests",
+  "accessKey": "",
+  "hostName": "hmg-tcp.msging.net",
+  "port": 443,
+  "messageReceivers": [
+    {
+      "type": "BuilderMessageReceiver" 
+    }
+  ],
+  "notificationReceivers": [
+    {
+      "type": "BuilderDeskNotificationReceiver"
+    }
+  ],
+  "serviceProviderType": "BuilderServiceProvider",
+  "settings": {
+    "flow": {
+      "id": "dc23b871-b1d1-42b3-b687-c2b3c12dbf79",
+      "states": [
+        {
+          "id": "onboarding",
+          "root": true,
+          "name": "Start",
+          "inputActions": [],
+          "input": {
+            "bypass": false
+          },
+          "outputActions": [],
+          "outputs": [
+            {
+              "stateId": "welcome",
+              "conditions": [
+                {
+                  "source": "input",
+                  "comparison": "matches",
+                  "values": [
+                    ".*"
+                  ]
+                }
+              ]
+            },
+            {
+              "stateId": "fallback"
+            }
+          ]
+        },
+        {
+          "id": "fallback",
+          "name": "Exceptions",
+          "inputActions": [],
+          "input": {
+            "bypass": true
+          },
+          "outputActions": [],
+          "outputs": [
+            {
+              "stateId": "onboarding"
+            }
+          ]
+        },
+        {
+          "id": "welcome",
+          "name": "Welcome",
+          "inputActions": [
+            {
+              "type": "SendMessage",
+              "settings": {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "type": "application/vnd.lime.chatstate+json",
+                "content": {
+                  "state": "composing",
+                  "interval": 1000
+                },
+                "metadata": {
+                  "#stateName": "{{state.name}}",
+                  "#stateId": "{{state.id}}",
+                  "#messageId": "{{input.message@id}}"
+                }
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "type": "text/plain",
+                "content": "Hi, I'll put in touch with an human.",
+                "metadata": {
+                  "#stateName": "{{state.name}}",
+                  "#stateId": "{{state.id}}",
+                  "#messageId": "{{input.message@id}}"
+                }
+              }
+            }
+          ],
+          "input": {
+            "bypass": true
+          },
+          "outputActions": [],
+          "outputs": [
+            {
+              "stateId": "desk:9e2bce90-a3bf-4a9f-90e2-298ca3d04154",
+              "conditions": [
+                {
+                  "source": "input",
+                  "comparison": "exists",
+                  "values": []
+                }
+              ]
+            },
+            {
+              "stateId": "fallback"
+            }
+          ]
+        },
+        {
+          "id": "7293d179-b772-47b1-bb74-3e1dd0876c1b",
+          "root": false,
+          "name": "Ticket closed",
+          "inputActions": [
+            {
+              "type": "SendMessage",
+              "settings": {
+                "id": "36ff45bc-fc99-4d8a-8cf3-1713713a6ca0",
+                "type": "application/vnd.lime.chatstate+json",
+                "content": {
+                  "state": "composing",
+                  "interval": 1000
+                },
+                "metadata": {
+                  "#stateName": "{{state.name}}",
+                  "#stateId": "{{state.id}}",
+                  "#messageId": "{{input.message@id}}"
+                }
+              }
+            },
+            {
+              "type": "SendMessage",
+              "settings": {
+                "id": "43a88dba-23e4-4e59-8b9a-1216195d8f3b",
+                "type": "text/plain",
+                "content": "Ticket closed.",
+                "metadata": {
+                  "#stateName": "{{state.name}}",
+                  "#stateId": "{{state.id}}",
+                  "#messageId": "{{input.message@id}}"
+                }
+              }
+            }
+          ],
+          "input": {
+            "bypass": true
+          },
+          "outputActions": [],
+          "outputs": [
+            {
+              "stateId": "onboarding"
+            }
+          ]
+        },
+        {
+          "id": "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2",
+          "root": false,
+          "name": "Atendimento humano",
+          "inputActions": [
+            {
+              "type": "ExecuteScript",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "state.previous.id",
+                  "comparison": "notEquals",
+                  "values": [
+                    "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2"
+                  ]
+                }
+              ],
+              "settings": {
+                "function": "run",
+                "source": "function run(identity) {\n return (identity !== undefined) ? encodeURIComponent(identity) : identity;\n}",
+                "inputVariables": [
+                  "input.message.fromidentity"
+                ],
+                "outputVariable": "helpDeskEncodedFromIdentity"
+              }
+            },
+            {
+              "type": "ProcessCommand",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "state.previous.id",
+                  "comparison": "notEquals",
+                  "values": [
+                    "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2"
+                  ]
+                }
+              ],
+              "settings": {
+                "from": "{{application.identifier}}@{{application.domain}}",
+                "to": "postmaster@desk.msging.net",
+                "method": "get",
+                "uri": "/tickets?$filter=customerIdentity%20eq%20%27{{helpDeskEncodedFromIdentity}}%27%20and%20%28status%20eq%20%27Open%27%20or%20status%20eq%20%27Waiting%27%20or%20status%20eq%20%27Assigned%27%29",
+                "metadata": {
+                  "server.shouldStore": true
+                },
+                "variable": "helpDeskGetOpenTicketCommandResponse"
+              }
+            },
+            {
+              "type": "ExecuteScript",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "state.previous.id",
+                  "comparison": "notEquals",
+                  "values": [
+                    "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2"
+                  ]
+                }
+              ],
+              "settings": {
+                "function": "run",
+                "source": "function run(commandResponse) {\n var response = JSON.parse(commandResponse)\n var ticketExists = (response && response.resource && response.resource.items && response.resource.items.length > 0);\n return ticketExists ? \"true\" : \"false\";\n}",
+                "inputVariables": [
+                  "helpDeskGetOpenTicketCommandResponse"
+                ],
+                "outputVariable": "helpDeskHasTicket"
+              }
+            },
+            {
+              "type": "ProcessCommand",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskHasTicket",
+                  "comparison": "notEquals",
+                  "values": [
+                    "true"
+                  ]
+                }
+              ],
+              "settings": {
+                "from": "{{application.identifier}}@{{application.domain}}",
+                "to": "postmaster@desk.msging.net",
+                "method": "set",
+                "uri": "/tickets/{{helpDeskEncodedFromIdentity}}",
+                "variable": "helpDeskOpenTicketCommandResponse",
+                "type": "text/plain",
+                "resource": "{{input.content}}",
+                "metadata": {
+                  "server.shouldStore": true
+                }
+              }
+            },
+            {
+              "type": "ExecuteScript",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskHasTicket",
+                  "comparison": "notEquals",
+                  "values": [
+                    "true"
+                  ]
+                }
+              ],
+              "settings": {
+                "function": "run",
+                "source": "function run(commandResponse) {\n var response = commandResponse ? JSON.parse(commandResponse) : {}\n var ticketExists = response && response.type === \"application/vnd.iris.ticket+json\" && response.resource \n return ticketExists ? \"true\" : \"false\";\n}",
+                "inputVariables": [
+                  "helpDeskOpenTicketCommandResponse"
+                ],
+                "outputVariable": "helpDeskHasTicket"
+              }
+            },
+            {
+              "type": "ForwardMessageToDesk",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskHasTicket",
+                  "comparison": "equals",
+                  "values": [
+                    "true"
+                  ]
+                }
+              ],
+              "settings": {}
+            }
+          ],
+          "input": {
+            "bypass": false,
+            "conditions": [
+              {
+                "source": "context",
+                "variable": "helpDeskHasTicket",
+                "comparison": "equals",
+                "values": [
+                  "true"
+                ]
+              }
+            ]
+          },
+          "outputActions": [
+            {
+              "type": "SetVariable",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedAttendant",
+                    "ClosedClient"
+                  ]
+                }
+              ],
+              "settings": {
+                "variable": "helpDeskHasTicket",
+                "value": "false"
+              }
+            }
+          ],
+          "outputs": [
+            {
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedAttendant"
+                  ]
+                }
+              ],
+              "stateId": "7293d179-b772-47b1-bb74-3e1dd0876c1b"
+            },
+            {
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedClient"
+                  ]
+                }
+              ],
+              "stateId": "7293d179-b772-47b1-bb74-3e1dd0876c1b"
+            },
+            {
+              "stateId": "desk:e1bf1bc8-9620-45e6-80a4-26df4a5f5ec2"
+            }
+          ]
+        },
+        {
+          "id": "desk:9e2bce90-a3bf-4a9f-90e2-298ca3d04154",
+          "root": false,
+          "name": "Customer service",
+          "inputActions": [
+            {
+              "type": "SetVariable",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "state.previous.id",
+                  "comparison": "notEquals",
+                  "values": [
+                    "desk:9e2bce90-a3bf-4a9f-90e2-298ca3d04154"
+                  ]
+                }
+              ],
+              "settings": {
+                "variable": "helpDeskTicketId",
+                "value": "{{ticket.id}}"
+              }
+            },
+            {
+              "type": "CreateTicket",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskTicketId",
+                  "comparison": "notExists"
+                }
+              ],
+              "settings": {
+                "variable": "helpDeskTicketId"
+              }
+            },
+            {
+              "type": "ForwardMessageToDesk",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "helpDeskTicketId",
+                  "comparison": "exists"
+                }
+              ],
+              "settings": {
+                "ticketId": "{{helpDeskTicketId}}"
+              }
+            }
+          ],
+          "input": {
+            "bypass": false,
+            "conditions": [
+              {
+                "source": "context",
+                "variable": "helpDeskTicketId",
+                "comparison": "exists"
+              }
+            ]
+          },
+          "outputActions": [
+            {
+              "type": "DeleteVariable",
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedAttendant",
+                    "ClosedClient"
+                  ]
+                }
+              ],
+              "settings": {
+                "variable": "helpDeskTicketId"
+              }
+            }
+          ],
+          "outputs": [
+            {
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedAttendant"
+                  ]
+                }
+              ],
+              "stateId": "7293d179-b772-47b1-bb74-3e1dd0876c1b"
+            },
+            {
+              "conditions": [
+                {
+                  "source": "context",
+                  "variable": "input.type",
+                  "comparison": "equals",
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
+                },
+                {
+                  "source": "context",
+                  "variable": "input.content@status",
+                  "comparison": "equals",
+                  "values": [
+                    "ClosedClient"
+                  ]
+                }
+              ],
+              "stateId": "7293d179-b772-47b1-bb74-3e1dd0876c1b"
+            },
+            {
+              "stateId": "desk:9e2bce90-a3bf-4a9f-90e2-298ca3d04154"
+            }
+          ]
+        }
+      ],
+      "configuration": {
+        "builder:minimumIntentScore": "0.5",
+        "builder:stateTrack": "false",
+        "builder:processCommandsAsTunnelOwner": "true",
+        "builder:useTunnelOwnerContext": "true"
+      },
+      "inputActions": [],
+      "outputActions": []
+    }
+  },
+  "settingsType": "BuilderSettings"
+}
