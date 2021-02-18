@@ -20,7 +20,6 @@ namespace Take.Blip.Client.Receivers
         private readonly IContactExtension _contactExtension;
         private readonly IDirectoryExtension _directoryExtension;
         private readonly bool _cacheLocally;
-        private readonly bool _engineTimezoneEnabled;
         private readonly TimeSpan _cacheExpiration;
         private readonly ILogger _logger;
 
@@ -36,13 +35,11 @@ namespace Take.Blip.Client.Receivers
             IDirectoryExtension directoryExtension,
             ILogger logger,
             bool cacheLocally = true,
-            bool engineTimezoneEnabled = false,
             TimeSpan cacheExpiration = default)
         {
             _directoryExtension = directoryExtension;
             _contactExtension = contactExtension;
             _cacheLocally = cacheLocally;
-            _engineTimezoneEnabled = engineTimezoneEnabled;
             _logger = logger;
             _cacheExpiration = cacheExpiration == default ? TimeSpan.FromMinutes(30) : cacheExpiration;
             ContactCache = new MemoryCache(new MemoryCacheOptions());
@@ -54,7 +51,7 @@ namespace Take.Blip.Client.Receivers
             var contact = await GetContactAsync(identity, cancellationToken);
             await ReceiveAsync(envelope, contact, cancellationToken);
         }
-        
+
         protected MemoryCache ContactCache { get; }
 
         /// <summary>
@@ -92,7 +89,7 @@ namespace Take.Blip.Client.Receivers
                     }
                 }
             }
-            
+
             // Stores in the cache, if configured.
             if (contact != null && _cacheLocally)
             {
@@ -106,7 +103,7 @@ namespace Take.Blip.Client.Receivers
         /// Receives a message with the contact information.
         /// </summary>
         protected abstract Task ReceiveAsync(Message message, Contact contact, CancellationToken cancellationToken = default(CancellationToken));
-        
+
         private bool _disposed;
 
         protected virtual void Dispose(bool disposing)

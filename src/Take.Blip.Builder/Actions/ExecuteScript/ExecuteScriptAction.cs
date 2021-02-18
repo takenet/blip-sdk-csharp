@@ -39,7 +39,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 context.Flow.Configuration.TryGetValue("SdkEngineLocalTimeZone", out var local);
                 bool.TryParse(local, out var res);
                 localTimeZoneEnabled = res;
-
+                
                 if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR))
                 {
                     timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);

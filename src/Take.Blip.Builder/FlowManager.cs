@@ -78,7 +78,7 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, bool engineLocaltimezoneEnabled = false)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, bool? engineLocaltimezoneEnabled = false)
         {
             if (message == null)
             {
@@ -330,10 +330,9 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken, bool engineLocaltimezoneEnabled = false)
+        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken, bool? engineLocaltimezoneEnabled = false)
         {
-            context.Flow.Configuration.Add("engineLocaltimezoneEnabled", engineLocaltimezoneEnabled.ToString());
-
+            
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
@@ -381,6 +380,8 @@ namespace Take.Blip.Builder
                             actionTrace.ParsedSettings = settings;
                         }
 
+                        context?.Flow?.Configuration?.Add("engineLocaltimezoneEnabled", engineLocaltimezoneEnabled?.ToString());
+                        
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), settings, true))
                             await action.ExecuteAsync(context, settings, linkedCts.Token);
