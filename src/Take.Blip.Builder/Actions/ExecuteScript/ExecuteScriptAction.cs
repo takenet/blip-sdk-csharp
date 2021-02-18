@@ -31,32 +31,43 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-            TimeZoneInfo timeZoneLocal;
+            TimeZoneInfo timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(BRAZIL_TIMEZONE);
+            var localTimeZoneEnabled = false;
 
             try
             {
+                context.Flow.Configuration.TryGetValue("SdkEngineLocalTimeZone", out var local);
+                bool.TryParse(local, out var res);
+                localTimeZoneEnabled = res;
+
                 if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR))
                 {
                     timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
                 } 
-                else
-                {
-                    timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(BRAZIL_TIMEZONE);
-                }
             }
             catch (Exception e) 
             {
-                timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(BRAZIL_TIMEZONE);
+                _logger.Information(e.Message);
             }
 
             var engine = new Engine(options => options
-                    .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
-                    .MaxStatements(_configuration.ExecuteScriptMaxStatements)
-                    .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                    .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                    .DebugMode()
-                    .LocalTimeZone(timeZoneLocal));
-            
+                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                        .DebugMode());
+
+            if (localTimeZoneEnabled)
+            {
+                engine = new Engine(options => options
+                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                        .DebugMode()
+                        .LocalTimeZone(timeZoneLocal));
+            }
+
             engine.Step += (sender, e) =>
             {
                 CheckMemoryUsage(context, e);

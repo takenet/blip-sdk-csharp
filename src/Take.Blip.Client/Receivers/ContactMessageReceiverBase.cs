@@ -20,6 +20,7 @@ namespace Take.Blip.Client.Receivers
         private readonly IContactExtension _contactExtension;
         private readonly IDirectoryExtension _directoryExtension;
         private readonly bool _cacheLocally;
+        private readonly bool _engineTimezoneEnabled;
         private readonly TimeSpan _cacheExpiration;
         private readonly ILogger _logger;
 
@@ -35,11 +36,13 @@ namespace Take.Blip.Client.Receivers
             IDirectoryExtension directoryExtension,
             ILogger logger,
             bool cacheLocally = true,
+            bool engineTimezoneEnabled = false,
             TimeSpan cacheExpiration = default)
         {
             _directoryExtension = directoryExtension;
             _contactExtension = contactExtension;
             _cacheLocally = cacheLocally;
+            _engineTimezoneEnabled = engineTimezoneEnabled;
             _logger = logger;
             _cacheExpiration = cacheExpiration == default ? TimeSpan.FromMinutes(30) : cacheExpiration;
             ContactCache = new MemoryCache(new MemoryCacheOptions());
