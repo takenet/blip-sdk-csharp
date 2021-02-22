@@ -19,6 +19,6 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken">The operation cancellation token.</param>
         /// <returns></returns>
 
-        Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, bool? engineLocaltimezoneEnabled = false);
+        Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken);
     }
 }

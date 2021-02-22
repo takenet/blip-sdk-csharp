@@ -78,7 +78,7 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, bool? engineLocaltimezoneEnabled = false)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -172,7 +172,7 @@ namespace Take.Blip.Builder
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
-                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, linkedCts.Token, engineLocaltimezoneEnabled);
+                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, linkedCts.Token);
                         }
 
                         var stateWaitForInput = true;
@@ -208,7 +208,7 @@ namespace Take.Blip.Builder
                                 // Prepare to leave the current state executing the output actions
                                 if (state.OutputActions != null)
                                 {
-                                    await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token, engineLocaltimezoneEnabled);
+                                    await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
                                 }
 
                                 var previousStateId = state.Id;
@@ -233,7 +233,7 @@ namespace Take.Blip.Builder
                                 // Process the next state input actions
                                 if (state?.InputActions != null)
                                 {
-                                    await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, linkedCts.Token, engineLocaltimezoneEnabled);
+                                    await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, linkedCts.Token);
                                 }
 
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
@@ -268,7 +268,7 @@ namespace Take.Blip.Builder
                         // Process the global output actions
                         if (flow.OutputActions != null)
                         {
-                            await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, linkedCts.Token, engineLocaltimezoneEnabled);
+                            await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, linkedCts.Token);
                         }
 
                         await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
@@ -330,7 +330,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken, bool? engineLocaltimezoneEnabled = false)
+        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
         {
             
             // Execute all state actions
@@ -379,8 +379,6 @@ namespace Take.Blip.Builder
                         {
                             actionTrace.ParsedSettings = settings;
                         }
-
-                        context?.Flow?.Configuration?.Add("engineLocaltimezoneEnabled", engineLocaltimezoneEnabled?.ToString());
                         
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), settings, true))

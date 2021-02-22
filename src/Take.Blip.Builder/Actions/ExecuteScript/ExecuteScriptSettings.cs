@@ -14,6 +14,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 
         public string OutputVariable { get; set; }
 
+        public bool LocalTimeZoneEnabled { get; set; }
+
         public void Validate()
         {
             if (string.IsNullOrEmpty(Source))
