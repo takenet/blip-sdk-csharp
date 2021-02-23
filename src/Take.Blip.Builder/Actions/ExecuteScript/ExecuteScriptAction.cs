@@ -8,8 +8,8 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Context;
 using Take.Blip.Builder.Hosting;
-using System.Globalization;
 using System;
+using TimeZoneConverter;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
@@ -31,11 +31,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-            TimeZoneInfo timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(BRAZIL_TIMEZONE);
+            TimeZoneInfo timeZoneLocal = TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
             Engine engine;
 
             try
-            {        
+            {
                 if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR))
                 {
                     timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
