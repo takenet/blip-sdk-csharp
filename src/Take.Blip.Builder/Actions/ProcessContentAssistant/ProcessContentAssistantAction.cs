@@ -28,11 +28,11 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public override async Task ExecuteAsync(IContext context, ProcessContentAssistantSettings settings, CancellationToken cancellationToken)
-        {
+        {   
             var contentAssistantResource = new AnalysisRequest
             {
                 Text = settings.Text,
-                Score = context.Flow.BuilderConfiguration.MinimumIntentScore ?? default
+                Score = settings.Score.HasValue ? settings.Score.Value : context.Flow.BuilderConfiguration.MinimumIntentScore.Value 
             } as Document;
 
             var contentResult = await _artificialIntelligenceExtension.GetContentResultAsync(

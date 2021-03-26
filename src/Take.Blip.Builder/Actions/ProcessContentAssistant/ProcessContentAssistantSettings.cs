@@ -15,6 +15,11 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         /// </summary>
         public string OutputVariable { get; set; }
 
+        /// <summary>
+        /// Minimum intent score
+        /// </summary>
+        public double? Score { get; set; }
+
         public void Validate()
         {
             if (string.IsNullOrEmpty(Text))
