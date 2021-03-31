@@ -1,6 +1,9 @@
 ﻿using Lime.Protocol;
+using Newtonsoft.Json;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Models;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 
@@ -28,11 +31,11 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public override async Task ExecuteAsync(IContext context, ProcessContentAssistantSettings settings, CancellationToken cancellationToken)
-        {   
+        {
             var contentAssistantResource = new AnalysisRequest
             {
                 Text = settings.Text,
-                Score = settings.Score.HasValue ? settings.Score.Value : context.Flow.BuilderConfiguration.MinimumIntentScore.Value 
+                Score = settings.Score ?? context.Flow.BuilderConfiguration.MinimumIntentScore.Value / Constants.PERCENTAGE_DENOMINATOR
             } as Document;
 
             var contentResult = await _artificialIntelligenceExtension.GetContentResultAsync(
@@ -40,22 +43,22 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                 cancellationToken: cancellationToken);
 
             await SetContentResultAsync(context, settings, contentResult, cancellationToken);
-
         }
 
         private async Task SetContentResultAsync(
           IContext context, ProcessContentAssistantSettings settings, ContentResult contentResult, CancellationToken cancellationToken)
         {
-            if (contentResult?.Result?.Content != null)
-            {
-                var value = contentResult.Result.Content.ToString();
+            var combinationFound = contentResult.Combinations?.FirstOrDefault();
 
-                await context.SetVariableAsync(settings.OutputVariable, value, cancellationToken);
-            }
-            else
+            var value = JsonConvert.SerializeObject(new ContentAssistantActionResponse
             {
-                await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
-            }
+                HasCombination = contentResult?.Result?.Content != null,
+                Value = contentResult?.Result?.Content?.ToString(),
+                Intent = combinationFound?.Intent,
+                Entities = combinationFound?.Entities.ToList()
+            });
+
+            await context.SetVariableAsync(settings.OutputVariable, value, cancellationToken);
         }
 
     }
