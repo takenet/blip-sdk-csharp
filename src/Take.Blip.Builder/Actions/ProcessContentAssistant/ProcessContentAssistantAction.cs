@@ -35,7 +35,7 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
             var contentAssistantResource = new AnalysisRequest
             {
                 Text = settings.Text,
-                Score = settings.Score ?? context.Flow.BuilderConfiguration.MinimumIntentScore.Value / Constants.PERCENTAGE_DENOMINATOR
+                Score = settings.Score.HasValue ? settings.Score.Value/Constants.PERCENTAGE_DENOMINATOR : context.Flow.BuilderConfiguration.MinimumIntentScore.Value
             } as Document;
 
             var contentResult = await _artificialIntelligenceExtension.GetContentResultAsync(
