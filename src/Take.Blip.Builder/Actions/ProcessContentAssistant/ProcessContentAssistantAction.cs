@@ -1,5 +1,6 @@
 ﻿using Lime.Protocol;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,23 +43,23 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                 contentAssistantResource,
                 cancellationToken: cancellationToken);
 
-            await SetContentResultAsync(context, settings, contentResult, cancellationToken);
+            await SetContentResultAsync(context, settings.OutputVariable, contentResult, cancellationToken);
         }
 
         private async Task SetContentResultAsync(
-          IContext context, ProcessContentAssistantSettings settings, ContentResult contentResult, CancellationToken cancellationToken)
+          IContext context, string outputVariable, ContentResult contentResult, CancellationToken cancellationToken)
         {
             var combinationFound = contentResult.Combinations?.FirstOrDefault();
 
             var value = JsonConvert.SerializeObject(new ContentAssistantActionResponse
             {
                 HasCombination = contentResult?.Result?.Content != null,
-                Value = contentResult?.Result?.Content?.ToString(),
-                Intent = combinationFound?.Intent,
-                Entities = combinationFound?.Entities.ToList()
+                Value = contentResult?.Result?.Content?.ToString() ?? string.Empty,
+                Intent = combinationFound?.Intent ?? string.Empty,
+                Entities = combinationFound?.Entities.ToList() ?? new List<string>()
             });
 
-            await context.SetVariableAsync(settings.OutputVariable, value, cancellationToken);
+            await context.SetVariableAsync(outputVariable, value, cancellationToken);
         }
 
     }
