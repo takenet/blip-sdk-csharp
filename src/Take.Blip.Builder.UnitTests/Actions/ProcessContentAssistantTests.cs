@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -134,6 +135,55 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
+        public async Task ValidContentAssistantRequestWithoutCombinationFound_ShouldSuccceedAsync()
+        {
+            var minimumIntentScore = 0.5;
+            Context.Flow.BuilderConfiguration.MinimumIntentScore = minimumIntentScore;
+            var settings = new ProcessContentAssistantSettings
+            {
+                Text = "Test case",
+                OutputVariable = "responseVariable"
+            };
+
+            var contentAssistantResource = new AnalysisRequest
+            {
+                Text = settings.Text,
+                Score = minimumIntentScore
+            };
+
+            var contentAssistantResult = new ContentResult
+            {
+                Combinations = new ContentCombination[]{},
+                Name = string.Empty,
+                Result = new Message
+                {
+                    Content = string.Empty
+                }
+            };
+
+            var contentAssistantActionResponse = JsonConvert.SerializeObject(new ContentAssistantActionResponse
+            {
+                HasCombination = true,
+                Entities = new List<string>(),
+                Intent = string.Empty,
+                Value = string.Empty
+            });
+
+            //act
+            _artificialIntelligenceExtension.GetContentResultAsync(
+                Arg.Is<AnalysisRequest>(
+                    ar=> ar.Score == contentAssistantResource.Score && 
+                    ar.Text == contentAssistantResource.Text), 
+                CancellationToken).
+                Returns(contentAssistantResult);
+
+            await _processContentAssistantAction.ExecuteAsync(Context, settings, CancellationToken);
+
+            //assert
+            await Context.Received(1).SetVariableAsync(settings.OutputVariable, contentAssistantActionResponse, CancellationToken);
+        }
+
+        [Fact]
         public async Task ValidContentAssistantRequestWithoutText_ShouldFailAsync()
         {
             //Arrange
@@ -147,6 +197,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             //Assert
             Assert.Throws<ArgumentException>(functionCall);
         }
+
 
         [Fact]
         public async Task ValidContentAssistantRequestWithoutOutputVariable_ShouldFailAsync()
