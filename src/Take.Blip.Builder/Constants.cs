@@ -35,5 +35,10 @@ namespace Take.Blip.Builder
             "yyyy-MM-ddTHH:mm:ssK",
             "yyyy-dd-MMTHH:mm:ssK"
         };
+
+        /// <summary>
+        /// Denominator percentage
+        /// </summary>
+        public const int PERCENTAGE_DENOMINATOR = 100;
     }
 }

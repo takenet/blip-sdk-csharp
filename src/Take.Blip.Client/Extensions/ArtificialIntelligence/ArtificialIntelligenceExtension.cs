@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Lime.Protocol;
+using SmartFormat;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Lime.Protocol;
-using SmartFormat;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 
 namespace Take.Blip.Client.Extensions.ArtificialIntelligence
@@ -25,11 +23,12 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
                     analysisRequest, UriTemplates.ANALYSIS, ArtificialIntelligenceAddress),
                 cancellationToken);
 
-        public Task<ContentResult> GetContentResultAsync(Document document, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<ContentResult> GetContentResultAsync(Document document, CancellationToken cancellationToken = default)
             => ProcessCommandAsync<ContentResult>(
                 CreateSetCommandRequest(
                     document, UriTemplates.CONTENT_ANALYSIS, ArtificialIntelligenceAddress),
                 cancellationToken);
+
 
         public Task SendFeedbackAsync(string analysisId, AnalysisFeedback analysisFeedback,
             CancellationToken cancellationToken = new CancellationToken())
