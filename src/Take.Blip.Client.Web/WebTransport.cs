@@ -115,8 +115,7 @@ namespace Take.Blip.Client.Web
             {
                 response.EnsureSuccessStatusCode();
 
-                if (response.Content != null
-                    && response.Headers.Contains("Content-Type"))
+                if (response.Content != null)
                 {
                     await _envelopeBuffer.SendAsync(
                         _serializer.Deserialize((await response.Content.ReadAsStringAsync().ConfigureAwait(false))),
