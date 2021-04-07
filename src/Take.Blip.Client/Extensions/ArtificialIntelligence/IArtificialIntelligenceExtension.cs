@@ -172,5 +172,6 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task SendFeedbackAsync(string analysisId, AnalysisFeedback analysisFeedback, CancellationToken cancellationToken = default(CancellationToken));
+
     }
 }

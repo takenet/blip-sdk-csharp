@@ -8,8 +8,8 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Context;
 using Take.Blip.Builder.Hosting;
-using System.Globalization;
 using System;
+using TimeZoneConverter;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
@@ -31,18 +31,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-            TimeZoneInfo timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(BRAZIL_TIMEZONE);
-            var localTimeZoneEnabled = false;
+            TimeZoneInfo timeZoneLocal = TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
+            Engine engine;
 
             try
             {
-                context.Flow.Configuration.TryGetValue("SdkEngineLocalTimeZone", out var local);
-                bool.TryParse(local, out var res);
-                localTimeZoneEnabled = res;
-                
                 if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR))
                 {
-                    timeZoneLocal = TimeZoneInfo.FindSystemTimeZoneById(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
+                    timeZoneLocal = TZConvert.GetTimeZoneInfo(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
                 } 
             }
             catch (Exception e) 
@@ -50,14 +46,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 _logger.Information(e.Message);
             }
 
-            var engine = new Engine(options => options
-                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
-                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
-                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                        .DebugMode());
-
-            if (localTimeZoneEnabled)
+            if (settings.LocalTimeZoneEnabled)
             {
                 engine = new Engine(options => options
                         .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
@@ -66,6 +55,15 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                         .TimeoutInterval(_configuration.ExecuteScriptTimeout)
                         .DebugMode()
                         .LocalTimeZone(timeZoneLocal));
+            }
+            else 
+            {
+                engine = new Engine(options => options
+                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                        .DebugMode());
             }
 
             engine.Step += (sender, e) =>

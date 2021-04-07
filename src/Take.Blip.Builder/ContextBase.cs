@@ -92,7 +92,7 @@ namespace Take.Blip.Builder
 
                 return json.ToString(Formatting.None).Trim('"');
             }
-            catch (JsonException)
+            catch (Exception ex) when (ex is InvalidOperationException || ex is JsonException)
             {
                 return null;
             }
