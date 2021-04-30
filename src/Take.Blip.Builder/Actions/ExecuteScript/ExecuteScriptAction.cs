@@ -16,10 +16,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
     public class ExecuteScriptAction : ActionBase<ExecuteScriptSettings>
     {
         private const string DEFAULT_FUNCTION = "run";
+        private const string BRAZIL_TIMEZONE = "E. South America Standard Time";
+        private const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
+
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
-        const string BRAZIL_TIMEZONE = "E. South America Standard Time";
-        const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
 
         public ExecuteScriptAction(IConfiguration configuration, ILogger logger) 
             : base(nameof(ExecuteScript))
@@ -31,8 +32,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-            TimeZoneInfo timeZoneLocal = TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
-            Engine engine;
+            var timeZoneLocal = TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
 
             try
             {
@@ -46,25 +46,38 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 _logger.Information(e.Message);
             }
 
-            if (settings.LocalTimeZoneEnabled)
+            var engine = new Engine(options =>
             {
-                engine = new Engine(options => options
-                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
-                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
-                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                        .DebugMode()
-                        .LocalTimeZone(timeZoneLocal));
-            }
-            else 
+                options
+                    .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                    .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                    .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                    .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                    .DebugMode();
+
+                if (settings.LocalTimeZoneEnabled)
+                {
+                    options.LocalTimeZone(timeZoneLocal);
+                }
+            });
+
+            var currentActionTrace = context.GetCurrentActionTrace();
+            engine.SetValue("debug_warning", new Action<string>(warningMessage =>
             {
-                engine = new Engine(options => options
-                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
-                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
-                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                        .DebugMode());
-            }
+                if (currentActionTrace != null)
+                {
+                    if (currentActionTrace.Warning == null)
+                    {
+                        currentActionTrace.Warning = string.Empty;
+                    }
+                    else
+                    {
+                        currentActionTrace.Warning += '\n';
+                    }
+
+                    currentActionTrace.Warning += warningMessage;
+                }
+            }));
 
             engine.Step += (sender, e) =>
             {
@@ -101,7 +114,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         private async Task SetScriptResultAsync(
             IContext context, ExecuteScriptSettings settings, JsValue result, CancellationToken cancellationToken)
         {
-            if (result != null && !result.IsNull())
+            if (result?.IsNull() == false)
             {
                 var value = result.Type == Types.Object
                     ? JsonConvert.SerializeObject(result.ToObject())
