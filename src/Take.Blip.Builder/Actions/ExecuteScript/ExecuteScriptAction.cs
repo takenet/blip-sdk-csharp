@@ -10,6 +10,7 @@ using Serilog.Context;
 using Take.Blip.Builder.Hosting;
 using System;
 using TimeZoneConverter;
+using Esprima;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
@@ -71,8 +72,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 CheckMemoryUsage(context, e);
                 return StepMode.Into;
             };
+            
+            var DefaultParserOptions = new ParserOptions()
+            {
+                AdaptRegexp = false,
+                Tolerant = true
+            };
 
-            engine = engine.Execute(settings.Source);
+            engine = engine.Execute(settings.Source, DefaultParserOptions);
 
             var result = arguments != null
                 ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
