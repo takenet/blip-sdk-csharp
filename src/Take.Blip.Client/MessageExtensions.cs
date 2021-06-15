@@ -28,8 +28,19 @@ namespace Take.Blip.Client
             Event = @event,
             Metadata = new Dictionary<string, string>
             {
-                { "#message.to", message.To }
+                { "#message.to", message.To },
+                { "#message.uniqueId", message.GetMetadataKeyValue("#uniqueId")}
             }
         };
+
+        private static string GetMetadataKeyValue(this Envelope envelope, string key)
+        {
+            if (envelope.Metadata == null)
+            { 
+                return null;
+            }
+            envelope.Metadata.TryGetValue(key, out var value);
+            return value;
+        }
     }
 }

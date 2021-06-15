@@ -102,6 +102,14 @@ namespace Take.Blip.Client.UnitTests
             };
         }
 
+        public static Dictionary<string, string> CreateMetadata()
+        {
+            return new Dictionary<string, string>()
+            {
+                { "#uniqueId", Guid.NewGuid().ToString() }
+            };
+        }
+
         public static LimeUri CreateAbsoluteLimeUri()
         {
             return new LimeUri(
@@ -202,7 +210,8 @@ namespace Take.Blip.Client.UnitTests
                 Id = EnvelopeId.NewId(),
                 From = CreateNode(),
                 To = CreateNode(),
-                Content = content
+                Content = content,
+                Metadata = CreateMetadata()
             };
         }
 

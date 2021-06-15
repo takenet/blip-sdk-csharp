@@ -171,5 +171,31 @@ namespace Take.Blip.Client.UnitTests
             textMessageReceiver2.Received(1).ReceiveAsync(textMessage2, Arg.Any<CancellationToken>());
             textMessageReceiver2.DidNotReceive().ReceiveAsync(textMessage1, Arg.Any<CancellationToken>());
         }
+
+        [Fact]
+        public void MessageToNotificationWithInternalIdShouldBeValid()
+        {
+            // Arrange
+            var message = Dummy.CreateMessage();
+            // Act
+            var notification = message.ToReceivedNotification();
+
+            // Assert
+            notification.Metadata.ShouldContainKeyAndValue("#message.uniqueId", message.Metadata["#uniqueId"]);
+        }
+
+        [Fact]
+        public void MessageToNotificationWithNoInternalIdShouldBeNull()
+        {
+            // Arrange
+            var message = Dummy.CreateMessage();
+            message.Metadata.Remove("#uniqueId");
+
+            // Act            
+            var notification = message.ToReceivedNotification();
+
+            // Assert
+            notification.Metadata.ShouldContainKeyAndValue("#message.uniqueId", null);
+        }
     }
 }
