@@ -106,7 +106,7 @@ namespace Take.Blip.Client.UnitTests
         {
             return new Dictionary<string, string>()
             {
-                { "$internalId", Guid.NewGuid().ToString() }
+                { "#uniqueId", Guid.NewGuid().ToString() }
             };
         }
 

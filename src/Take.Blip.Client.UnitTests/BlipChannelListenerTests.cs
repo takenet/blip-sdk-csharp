@@ -181,7 +181,7 @@ namespace Take.Blip.Client.UnitTests
             var notification = message.ToReceivedNotification();
 
             // Assert
-            notification.Metadata.ShouldContainKeyAndValue("#message.uniqueId", message.Metadata["$internalId"]);
+            notification.Metadata.ShouldContainKeyAndValue("#message.uniqueId", message.Metadata["#uniqueId"]);
         }
 
         [Fact]
@@ -189,7 +189,7 @@ namespace Take.Blip.Client.UnitTests
         {
             // Arrange
             var message = Dummy.CreateMessage();
-            message.Metadata.Remove("$internalId");
+            message.Metadata.Remove("#uniqueId");
 
             // Act            
             var notification = message.ToReceivedNotification();
