@@ -29,7 +29,7 @@ namespace Take.Blip.Client
             Metadata = new Dictionary<string, string>
             {
                 { "#message.to", message.To },
-                { "#message.uniqueId", message.GetMetadataKeyValue("$internalId")}
+                { "#message.uniqueId", message.GetMetadataKeyValue("#uniqueId")}
             }
         };
 
