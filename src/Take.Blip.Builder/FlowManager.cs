@@ -193,14 +193,15 @@ namespace Take.Blip.Builder
                                             // Send the validation error message
                                             if (state.Input.Validation.Error.StartsWith("{{") && state.Input.Validation.Error.EndsWith("}}"))
                                             {
-                                                var errorMessage = new Message(null)
+                                                var validationMessage = new Message(null)
                                                 {
                                                     To = context.Input.Message.From
                                                 };
-                                                errorMessage.Metadata = new Dictionary<string, string>
+                                                validationMessage.Metadata = new Dictionary<string, string>
                                                 {  { "#message.spinText", "true"} };
-                                                errorMessage.Content = new PlainDocument(state.Input.Validation.Error, MediaType.TextPlain);
-                                                await _sender.SendMessageAsync(errorMessage, linkedCts.Token);
+
+                                                validationMessage.Content = new PlainDocument(state.Input.Validation.Error, MediaType.TextPlain);
+                                                await _sender.SendMessageAsync(validationMessage, linkedCts.Token);
                                             }
                                             else 
                                             {
