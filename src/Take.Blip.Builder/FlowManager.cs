@@ -78,7 +78,7 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, Flow parentFlow = null)
         {
             if (message == null)
             {
@@ -93,6 +93,11 @@ namespace Take.Blip.Builder
             if (flow == null)
             {
                 throw new ArgumentNullException(nameof(flow));
+            }
+
+            if (parentFlow != null)
+            {
+                parentFlow.Validate();
             }
 
             message = _inputExpirationHandler.ValidateMessage(message);
@@ -153,8 +158,14 @@ namespace Take.Blip.Builder
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
-                        state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
-
+                        if (parentFlow == null)
+                        {
+                            state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+                        }
+                        else
+                        {
+                            state = parentFlow.States.FirstOrDefault(s => s.Id == stateId) ?? parentFlow.States.Single(s => s.Root);
+                        }
                         // If current stateId of user is different of inputExpiration stop processing
                         if (!_inputExpirationHandler.IsValidateState(state, message))
                         {
