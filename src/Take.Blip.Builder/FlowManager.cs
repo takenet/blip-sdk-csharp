@@ -95,11 +95,6 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            if (parentFlow != null)
-            {
-                parentFlow.Validate();
-            }
-
             message = _inputExpirationHandler.ValidateMessage(message);
 
             flow.Validate();
@@ -164,6 +159,7 @@ namespace Take.Blip.Builder
                         }
                         else
                         {
+                            parentFlow.Validate();
                             state = parentFlow.States.FirstOrDefault(s => s.Id == stateId) ?? parentFlow.States.Single(s => s.Root);
                         }
                         // If current stateId of user is different of inputExpiration stop processing
