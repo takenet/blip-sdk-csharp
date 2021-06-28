@@ -81,11 +81,18 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 
             engine = engine.Execute(settings.Source, DefaultParserOptions);
 
-            var result = arguments != null
-                ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
-                : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
+            try
+            {
+                var result = arguments != null
+               ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
+               : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
 
-            await SetScriptResultAsync(context, settings, result, cancellationToken);
+                await SetScriptResultAsync(context, settings, result, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, $"An exception occurred while processing Script.");
+            }
         }
 
         protected async Task<object[]> GetScriptArgumentsAsync(
