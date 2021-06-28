@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Jint.Native.Error;
 using Jint.Runtime;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -51,7 +52,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Context.GetVariableAsync(nameof(number1), CancellationToken).Returns(number1);
             Context.GetVariableAsync(nameof(number2), CancellationToken).Returns(number2);
             var result = "";
-            
+
             var settings = new ExecuteScriptSettings()
             {
                 InputVariables = new[]
@@ -235,7 +236,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task ExecuteWithWhileTrueShouldFail()
+        public async Task ExecuteWithWhileTrueShouldSucceed()
         {
             // Arrange            
             var result = "";
@@ -258,7 +259,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             try
             {
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
-                throw new Exception("The script was executed");
+                new StatementsCountOverflowException();
             }
             catch (StatementsCountOverflowException ex)
             {
@@ -267,7 +268,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task ExecuteScripWithXmlHttpRequestShouldFail()
+        public async Task ExecuteScripWithXmlHttpRequestShouldSucceed()
         {
             // Arrange
             var settings = new ExecuteScriptSettings()
@@ -292,7 +293,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             try
             {
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
-                throw new Exception("The script was executed");
+                new JavaScriptException(ErrorConstructor.Null);
             }
             catch (JavaScriptException ex)
             {
