@@ -22,7 +22,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         const string BRAZIL_TIMEZONE = "E. South America Standard Time";
         const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
 
-        public ExecuteScriptAction(IConfiguration configuration, ILogger logger) 
+        public ExecuteScriptAction(IConfiguration configuration, ILogger logger)
             : base(nameof(ExecuteScript))
         {
             _configuration = configuration;
@@ -34,15 +34,16 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
             TimeZoneInfo timeZoneLocal = TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
             Engine engine;
+            JsValue result = null;
 
             try
             {
                 if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR))
                 {
                     timeZoneLocal = TZConvert.GetTimeZoneInfo(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
-                } 
+                }
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 _logger.Information(e.Message);
             }
@@ -57,7 +58,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                         .DebugMode()
                         .LocalTimeZone(timeZoneLocal));
             }
-            else 
+            else
             {
                 engine = new Engine(options => options
                         .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
@@ -72,7 +73,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 CheckMemoryUsage(context, e);
                 return StepMode.Into;
             };
-            
+
             var DefaultParserOptions = new ParserOptions()
             {
                 AdaptRegexp = false,
@@ -81,9 +82,17 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 
             engine = engine.Execute(settings.Source, DefaultParserOptions);
 
-            var result = arguments != null
-                ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
-                : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
+            try
+            {
+                result = arguments != null
+               ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
+               : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, $"An exception occurred while processing Script.");
+            }
 
             await SetScriptResultAsync(context, settings, result, cancellationToken);
         }
@@ -128,7 +137,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             {
                 var warningMessage =
                     $"The script memory allocation ({debugInformation.CurrentMemoryUsage:N0} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning:N0} bytes";
-                
+
                 using (LogContext.PushProperty(nameof(DebugInformation), debugInformation, true))
                     _logger.Warning(warningMessage);
 
