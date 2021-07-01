@@ -153,15 +153,15 @@ namespace Take.Blip.Builder
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
-                        if (parentFlow == null)
-                        {
-                            state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
-                        }
-                        else
+                        var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
+                        if (parentFlow != null && stateId == null && previousState != null)
                         {
                             parentFlow.Validate();
-                            state = parentFlow.States.FirstOrDefault(s => s.Id == stateId) ?? parentFlow.States.Single(s => s.Root);
+                            flow = parentFlow; 
                         }
+
+                        state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
                         // If current stateId of user is different of inputExpiration stop processing
                         if (!_inputExpirationHandler.IsValidateState(state, message))
                         {
