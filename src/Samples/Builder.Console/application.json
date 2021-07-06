@@ -1,6 +1,6 @@
 ﻿{
-    "identifier": "enginelocaltimezone",
-    "accessKey": "Q2FFZVBlc3l1eVZ4VmplakRVbWY=",
+    "identifier": "testesimples1",
+    "accessKey": "c1BRaWpQcmpaSTl0N25hWTZsVVA=",
     "hostName": "hmg-tcp.msging.net",
     "port": 443,
     "messageReceivers": [
@@ -16,21 +16,17 @@
     "serviceProviderType": "BuilderServiceProvider",
     "settings": {
         "flow": {
-            "id": "b8f3a028-3764-488a-b646-df2fe02821da",
+            "id": "20abda05-6a5c-43b2-a14b-614dd0c9c7b9",
             "states": [
                 {
                     "id": "onboarding",
                     "root": true,
-                    "name": "Start",
-                    "inputActions": [
-
-                    ],
+                    "name": "Início",
+                    "inputActions": [],
                     "input": {
                         "bypass": false
                     },
-                    "outputActions": [
-
-                    ],
+                    "outputActions": [],
                     "outputs": [
                         {
                             "stateId": "welcome",
@@ -51,16 +47,12 @@
                 },
                 {
                     "id": "fallback",
-                    "name": "Exceptions",
-                    "inputActions": [
-
-                    ],
+                    "name": "Exceções",
+                    "inputActions": [],
                     "input": {
                         "bypass": true
                     },
-                    "outputActions": [
-
-                    ],
+                    "outputActions": [],
                     "outputs": [
                         {
                             "stateId": "error",
@@ -81,47 +73,14 @@
                 },
                 {
                     "id": "welcome",
-                    "name": "Welcome",
+                    "name": "Boas vindas",
                     "inputActions": [
-                        {
-                            "type": "ExecuteScript",
-                            "settings": {
-                                "function": "run",
-                                "source": "/**\n            * All input variables needs to be passed as function param;\n            * Objects received as param needs to be parsed. Ex.: JSON.parse(inputVariable1);\n            * Objects returned needs to be stringfied. Ex.: JSON.stringify(inputVariable1);\n            **/\n            function run(datetime) {\n                let date = new Date();\n                return {\n                    \"getHours\": date.getHours(),\n                    \"calendar\": datetime,\n                    \"date\": date\n                };\n            }",
-                                "inputVariables": [
-                                    "calendar.datetime"
-                                ],
-                                "outputVariable": "torta",
-                                "LocalTimeZoneEnabled": true
-                            },
-                            "conditions": [
-
-                            ]
-                        },
-                        {
-                            "type": "SendMessage",
-                            "settings": {
-                                "id": "00000000-0000-0000-0000-000000000000",
-                                "type": "application/vnd.lime.chatstate+json",
-                                "content": {
-                                    "state": "composing",
-                                    "interval": 1000
-                                },
-                                "metadata": {
-                                    "#stateName": "{{state.name}}",
-                                    "#stateId": "{{state.id}}",
-                                    "#messageId": "{{input.message@id}}",
-                                    "#previousStateId": "{{state.previous.id}}",
-                                    "#previousStateName": "{{state.previous.name}}"
-                                }
-                            }
-                        },
                         {
                             "type": "SendMessage",
                             "settings": {
                                 "id": "00000000-0000-0000-0000-000000000001",
                                 "type": "text/plain",
-                                "content": "Olá! {{contact.name}}!\nSeja bem-vindo(a)!",
+                                "content": "Olá! {{contact.name}}!\nSeja bem-vindo(a)!\n\nQual assunto, você deseja trata?",
                                 "metadata": {
                                     "#stateName": "{{state.name}}",
                                     "#stateId": "{{state.id}}",
@@ -133,21 +92,32 @@
                         }
                     ],
                     "input": {
-                        "bypass": false
+                        "bypass": false,
+                        "variable": "assunto"
                     },
                     "outputActions": [
-
+                        {
+                            "type": "ExecuteScript",
+                            "settings": {
+                                "function": "run",
+                                "source": "/**\n            * All input variables needs to be passed as function param;\n            * Objects received as param needs to be parsed. Ex.: JSON.parse(inputVariable1);\n            * Objects returned needs to be stringfied. Ex.: JSON.stringify(inputVariable1);\n            **/\n            function run(assunto) {\n                return JSON.parse(assunto); \n            }",
+                                "inputVariables": [
+                                    "assunto"
+                                ],
+                                "outputVariable": "resultado"
+                            },
+                            "continueOnError": true,
+                            "conditions": []
+                        }
                     ],
                     "outputs": [
                         {
-                            "stateId": "b5b7a00f-7c43-4339-bc23-184ccc546318",
+                            "stateId": "b4d0c77b-8bc9-43c8-988b-0f9c9521d810",
                             "conditions": [
                                 {
                                     "source": "input",
                                     "comparison": "exists",
-                                    "values": [
-
-                                    ]
+                                    "values": []
                                 }
                             ]
                         },
@@ -158,7 +128,7 @@
                 },
                 {
                     "id": "error",
-                    "name": "Default error",
+                    "name": "Erro padrão",
                     "inputActions": [
                         {
                             "type": "SendMessage",
@@ -197,9 +167,7 @@
                     "input": {
                         "bypass": true
                     },
-                    "outputActions": [
-
-                    ],
+                    "outputActions": [],
                     "outputs": [
                         {
                             "stateId": "onboarding"
@@ -207,14 +175,14 @@
                     ]
                 },
                 {
-                    "id": "b5b7a00f-7c43-4339-bc23-184ccc546318",
+                    "id": "b4d0c77b-8bc9-43c8-988b-0f9c9521d810",
                     "root": false,
-                    "name": "New block",
+                    "name": "Existe Variável",
                     "inputActions": [
                         {
                             "type": "SendMessage",
                             "settings": {
-                                "id": "911f09cd-aeaf-448a-95b9-0174e85d773e",
+                                "id": "7a83206a-d15a-48da-8916-15f9450f16bd",
                                 "type": "application/vnd.lime.chatstate+json",
                                 "content": {
                                     "state": "composing",
@@ -232,9 +200,9 @@
                         {
                             "type": "SendMessage",
                             "settings": {
-                                "id": "1e61e15a-7120-4fc2-8800-eece9fd9aae4",
+                                "id": "9156222e-62b8-4f8d-bdb9-9699a493bbc8",
                                 "type": "text/plain",
-                                "content": "{{torta}}",
+                                "content": "Resultado Script: {{resultado}}",
                                 "metadata": {
                                     "#stateName": "{{state.name}}",
                                     "#stateId": "{{state.id}}",
@@ -248,9 +216,7 @@
                     "input": {
                         "bypass": false
                     },
-                    "outputActions": [
-
-                    ],
+                    "outputActions": [],
                     "outputs": [
                         {
                             "stateId": "fallback"
@@ -261,14 +227,10 @@
             "configuration": {
                 "builder:minimumIntentScore": "0.5",
                 "builder:stateTrack": "false",
-                "builder:#localTimeZone": "Hawaiian Standard Time"
+                "builder:#localTimeZone": "E. South America Standard Time"
             },
-            "inputActions": [
-
-            ],
-            "outputActions": [
-
-            ]
+            "inputActions": [],
+            "outputActions": []
         }
     },
     "settingsType": "BuilderSettings"

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Jint.Native.Error;
 using Jint.Runtime;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -236,7 +235,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task ExecuteWithWhileTrueShouldSucceed()
+        public async Task ExecuteWithWhileTrueShouldFail()
         {
             // Arrange            
             var result = "";
@@ -259,7 +258,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             try
             {
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
-                new StatementsCountOverflowException();
+                throw new Exception("The script was executed");
             }
             catch (StatementsCountOverflowException ex)
             {
@@ -268,7 +267,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task ExecuteScripWithXmlHttpRequestShouldSucceed()
+        public async Task ExecuteScripWithXmlHttpRequestShouldFail()
         {
             // Arrange
             var settings = new ExecuteScriptSettings()
@@ -293,7 +292,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             try
             {
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
-                new JavaScriptException(ErrorConstructor.Null);
+                throw new Exception("The script was executed");
             }
             catch (JavaScriptException ex)
             {
