@@ -34,7 +34,6 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
             TimeZoneInfo timeZoneLocal = TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
             Engine engine;
-            JsValue result = null;
 
             try
             {
@@ -82,17 +81,9 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 
             engine = engine.Execute(settings.Source, DefaultParserOptions);
 
-            try
-            {
-                result = arguments != null
+            var result = arguments != null
                ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
                : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.Warning(ex, $"An exception occurred while processing Script.");
-            }
 
             await SetScriptResultAsync(context, settings, result, cancellationToken);
         }
