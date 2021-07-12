@@ -121,6 +121,7 @@ namespace Take.Blip.Builder
             {
                 inputTrace = new InputTrace
                 {
+                    Owner = ownerIdentity,
                     FlowId = flow.Id,
                     User = userIdentity,
                     Input = message.Content.ToString()

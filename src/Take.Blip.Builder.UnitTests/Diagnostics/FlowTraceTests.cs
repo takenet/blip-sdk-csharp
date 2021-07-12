@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Models;
-using Take.Blip.Client;
 using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
 using Input = Take.Blip.Builder.Models.Input;
@@ -89,6 +88,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Http &&
                     e.Settings.Target == traceUrl &&
+                    e.Trace.Owner == ApplicationIdentity &&
                     e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
@@ -169,6 +169,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
+                    e.Trace.Owner == ApplicationIdentity &&
                     e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
@@ -299,6 +300,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
+                    e.Trace.Owner == ApplicationIdentity &&
                     e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
@@ -432,6 +434,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 Arg.Is<TraceEvent>(e =>
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIndentity &&
+                    e.Trace.Owner == ApplicationIdentity &&
                     e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
@@ -518,6 +521,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     e.Settings.Mode == TraceMode.All &&
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIdentity &&
+                    e.Trace.Owner == ApplicationIdentity &&
                     e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
@@ -622,6 +626,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     e.Settings.Mode == TraceMode.All &&
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIdentity &&
+                    e.Trace.Owner == ApplicationIdentity &&
                     e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 3 &&
@@ -733,6 +738,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     e.Settings.Mode == TraceMode.All &&
                     e.Settings.TargetType == TraceTargetType.Lime &&
                     e.Settings.Target == traceIdentity &&
+                    e.Trace.Owner == ApplicationIdentity &&
                     e.Trace.User == UserIdentity.ToString() &&
                     e.Trace.Input == input &&
                     e.Trace.States.Count == 2 &&
