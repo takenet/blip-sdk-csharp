@@ -16,6 +16,9 @@ namespace Take.Blip.Builder.Diagnostics
             OutputActions = new List<ActionTrace>();
         }
 
+        [DataMember(Name = "owner")]
+        public Identity Owner { get; set; }
+
         [DataMember(Name = "flowId")]
         public string FlowId { get; set; }
 
@@ -27,7 +30,7 @@ namespace Take.Blip.Builder.Diagnostics
 
         [DataMember(Name = "states")]
         public ICollection<StateTrace> States { get; set; }
-        
+
         [DataMember(Name = "inputActions")]
         public ICollection<ActionTrace> InputActions { get; set; }
 
