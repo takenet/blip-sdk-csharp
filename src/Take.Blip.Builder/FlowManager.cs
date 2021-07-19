@@ -185,7 +185,7 @@ namespace Take.Blip.Builder
                                 if (stateWaitForInput)
                                 {
                                     // Validate the input for the current state
-                                    if (state.Input?.Validation != null && 
+                                    if (state.Input?.Validation != null && !lazyInput.SerializedContent.IsNullOrEmpty() &&
                                         !ValidateDocument(lazyInput, state.Input.Validation))
                                     {
                                         if (state.Input.Validation.Error != null)
