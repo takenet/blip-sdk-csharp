@@ -134,12 +134,12 @@ namespace Take.Blip.Client.Console
             return applicationJsonPath;
         }
 
-        internal static Task<IStoppable> StartAsync(string applicationFileName, CancellationToken cancellationToken)
+        internal static async Task<IStoppable> StartAsync(string applicationFileName, CancellationToken cancellationToken)
         {
             var application = Application.ParseFromJsonFile(applicationFileName);
             var workingDir = Path.GetDirectoryName(applicationFileName);
             if (string.IsNullOrWhiteSpace(workingDir)) workingDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            return Bootstrapper.StartAsync(cancellationToken, application, typeResolver: new TypeResolver(workingDir));
+            return await Bootstrapper.StartAsync(cancellationToken, application, typeResolver: new TypeResolver(workingDir));
         }
 
         private static void WriteLine(string value = "", ConsoleColor color = ConsoleColor.White)

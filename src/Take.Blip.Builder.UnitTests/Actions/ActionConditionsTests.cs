@@ -22,7 +22,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public override Container CreateContainer()
         {
             var container = base.CreateContainer();
-            container.RegisterSingleton(ActionProvider);
+            container.RegisterSingleton(() => ActionProvider);
             return container;
         }
 

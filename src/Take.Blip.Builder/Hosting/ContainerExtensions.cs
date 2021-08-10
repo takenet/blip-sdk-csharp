@@ -65,7 +65,7 @@ namespace Take.Blip.Builder.Hosting
         private static Container RegisterBuilderActions(this Container container)
         {
             container.RegisterSingleton<IActionProvider, ActionProvider>();
-            container.RegisterCollection<IAction>(
+            container.Collection.Register<IAction>(
                 new[]
                 {
                     typeof(ExecuteScriptAction),
@@ -129,7 +129,7 @@ namespace Take.Blip.Builder.Hosting
 
         private static Container RegisterBuilderVariables(this Container container)
         {
-            container.RegisterCollection<IVariableProvider>(
+            container.Collection.Register<IVariableProvider>(
                 new[]
                 {
                     typeof(ApplicationVariableProvider),
@@ -157,7 +157,7 @@ namespace Take.Blip.Builder.Hosting
                 });
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
-            container.RegisterSingleton<ILogger>(LoggerProvider.Logger);
+            container.RegisterSingleton<ILogger>(() => LoggerProvider.Logger);
 
             return container;
         }

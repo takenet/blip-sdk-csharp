@@ -120,23 +120,25 @@ namespace Take.Blip.Builder.UnitTests
         {
             var container = new Container();
 
+            container.Options.EnableAutoVerification = false;
+            container.Options.SuppressLifestyleMismatchVerification = true;
             container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
-            container.RegisterSingleton(Application);
-            container.RegisterSingleton(SchedulerExtension);
-            container.RegisterSingleton(BucketExtension);
-            container.RegisterSingleton(ArtificialIntelligenceExtension);
-            container.RegisterSingleton(EventTrackExtension);
-            container.RegisterSingleton(BroadcastExtension);
-            container.RegisterSingleton(ContactExtension);
-            container.RegisterSingleton(HelpDeskExtension);
-            container.RegisterSingleton(TunnelExtension);
-            container.RegisterSingleton(ContextProvider);
-            container.RegisterSingleton(Sender);
-            container.RegisterSingleton(StateManager);
-            container.RegisterSingleton(Logger);
-            container.RegisterSingleton(TraceProcessor);
-            container.RegisterSingleton(UserOwnerResolver);
+            container.RegisterSingleton(() => Application);
+            container.RegisterSingleton(() => SchedulerExtension);
+            container.RegisterSingleton(() => BucketExtension);
+            container.RegisterSingleton(() => ArtificialIntelligenceExtension);
+            container.RegisterSingleton(() => EventTrackExtension);
+            container.RegisterSingleton(() => BroadcastExtension);
+            container.RegisterSingleton(() => ContactExtension);
+            container.RegisterSingleton(() => HelpDeskExtension);
+            container.RegisterSingleton(() => TunnelExtension);
+            container.RegisterSingleton(() => ContextProvider);
+            container.RegisterSingleton(() => Sender);
+            container.RegisterSingleton(() => StateManager);
+            container.RegisterSingleton(() => Logger);
+            container.RegisterSingleton(() => TraceProcessor);
+            container.RegisterSingleton(() => UserOwnerResolver);
 
             return container;
         }

@@ -428,7 +428,7 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget(container =>
             {
                 container.RegisterSingleton<IContextProvider, ContextProvider>();
-                container.RegisterSingleton<IServiceProvider>(container);
+                container.RegisterSingleton<IServiceProvider>(() => container);
             });
 
             // Act
