@@ -33,14 +33,17 @@ namespace Take.Blip.Builder.UnitTests
         protected override ContextBase GetTarget()
         {
             var container = new Container();
+
+            container.Options.EnableAutoVerification = false;
+            container.Options.SuppressLifestyleMismatchVerification = true;
             container.Options.AllowOverridingRegistrations = true;
             container.RegisterBuilder();
-            container.RegisterSingleton(ContactExtension);
-            container.RegisterSingleton(HelpDeskExtension);
-            container.RegisterSingleton(TunnelExtension);
-            container.RegisterSingleton(ContextExtension);
-            container.RegisterSingleton(Sender);
-            container.RegisterSingleton(Application);
+            container.RegisterSingleton(() => ContactExtension);
+            container.RegisterSingleton(() => HelpDeskExtension);
+            container.RegisterSingleton(() => TunnelExtension);
+            container.RegisterSingleton(() => ContextExtension);
+            container.RegisterSingleton(() => Sender);
+            container.RegisterSingleton(() => Application);
 
             return new ExtensionContext(
                 User,

@@ -11,13 +11,15 @@ namespace Builder.Console
     {
         public BuilderServiceProvider()
         {
+            Options.EnableAutoVerification = false;
+            Options.SuppressLifestyleMismatchVerification = true;
             Options.AllowOverridingRegistrations = true;
             this.RegisterBuilder();
             RegisterSingleton<IConfiguration, BuilderConfiguration>();
-            RegisterSingleton<ILogger>(new LoggerConfiguration().WriteTo.Trace().CreateLogger());
+            RegisterSingleton<ILogger>(() => new LoggerConfiguration().WriteTo.Trace().CreateLogger());
         }
 
-        public void RegisterService(Type serviceType, object instance) => RegisterSingleton(serviceType, instance);
+        public void RegisterService(Type serviceType, object instance) => RegisterSingleton(serviceType, () => instance);
 
         public void RegisterService(Type serviceType, Func<object> instanceFactory) => RegisterSingleton(serviceType, instanceFactory);
     }
