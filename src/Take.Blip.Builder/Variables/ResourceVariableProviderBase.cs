@@ -15,13 +15,16 @@ namespace Take.Blip.Builder.Variables
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
         private readonly string _resourceName;
+        private readonly string _to;
+
         public abstract VariableSource Source { get; }
 
-        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName)
+        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName, string to = null)
         {
             _sender = sender;
             _documentSerializer = documentSerializer;
             _resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
+            _to = to;
         }
 
 
@@ -56,6 +59,7 @@ namespace Take.Blip.Builder.Variables
             {
                 Uri = new LimeUri($"/{_resourceName}/{Uri.EscapeDataString(name)}"),
                 Method = CommandMethod.Get,
+                To = _to
             };
 
             var resourceCommandResult = await _sender.ProcessCommandAsync(
@@ -64,5 +68,6 @@ namespace Take.Blip.Builder.Variables
 
             return resourceCommandResult;
         }
+
     }
 }
