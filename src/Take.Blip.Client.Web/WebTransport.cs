@@ -22,8 +22,9 @@ namespace Take.Blip.Client.Web
         private readonly Application _application;
         private readonly string _baseUri;
         private readonly HttpClient _client;
+        private ITraceWriter _traceWriter;
 
-        public WebTransport(IEnvelopeBuffer envelopeBuffer, IEnvelopeSerializer serializer, Application application, Uri baseUri)
+        public WebTransport(IEnvelopeBuffer envelopeBuffer, IEnvelopeSerializer serializer, Application application, Uri baseUri, ITraceWriter traceWriter = null)
         {
             _envelopeBuffer = envelopeBuffer;
             _serializer = serializer;
@@ -32,6 +33,7 @@ namespace Take.Blip.Client.Web
             _client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Key", GetAuthCredentials(application));
             _baseUri = baseUri.ToString().TrimEnd('/');
+            _traceWriter = traceWriter;
         }
 
         public override async Task SendAsync(Envelope envelope, CancellationToken cancellationToken)
@@ -56,6 +58,7 @@ namespace Take.Blip.Client.Web
             }
             catch (Exception ex)
             {
+                await TraceAsync($"Send envelope failed. {ex.Message} : {envelope}", DataOperation.Error);
                 var session = CreateSession();
                 session.State = SessionState.Failed;
                 session.Reason = ex.ToReason();
@@ -63,6 +66,7 @@ namespace Take.Blip.Client.Web
                 throw;
             }
 
+            await TraceAsync("The envelope was not sent because it didn't mach any supported type", DataOperation.Error);
             throw new NotSupportedException("Unknown envelope type");
         }
 
@@ -113,6 +117,7 @@ namespace Take.Blip.Client.Web
             using (var content = GetContent(command))
             using (var response = await _client.PostAsync($"{_baseUri}/commands", content, cancellationToken).ConfigureAwait(false))
             {
+                await TraceAsync($"Command response: {response.Content} content: {content} command: {command}", DataOperation.Information);
                 response.EnsureSuccessStatusCode();
 
                 if (response.Content != null)
@@ -154,6 +159,12 @@ namespace Take.Blip.Client.Web
                 From = $"postmaster@{_application.Domain}/fake",
                 To = $"{_application.Identifier}@{_application.Domain}/fake"
             };
+        }
+
+        private Task TraceAsync(string data, DataOperation operation)
+        {
+            if (_traceWriter == null || !_traceWriter.IsEnabled) return Task.CompletedTask;
+            return _traceWriter.TraceAsync(data, operation);
         }
 
         private static string GetAuthCredentials(Application applicationSettings) =>

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
+using Serilog;
+using Serilog.Events;
 using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Client.Web
@@ -28,7 +31,18 @@ namespace Take.Blip.Client.Web
                 throw new NotSupportedException($"Unsupported URI scheme '{endpoint.Scheme}'");
             }
 
-            return new WebTransport(_envelopeBuffer, _envelopeSerializer, _application, endpoint);
+            return new WebTransport(_envelopeBuffer, _envelopeSerializer, _application, endpoint, traceWriter: new TraceWriter());
+        }
+
+        private class TraceWriter : ITraceWriter
+        {
+            public Task TraceAsync(string data, DataOperation operation)
+            {
+                Log.Logger?.Verbose("{Operation}: " + data, operation);
+                return Task.CompletedTask;
+            }
+
+            public bool IsEnabled => Log.Logger != null && Log.Logger.IsEnabled(LogEventLevel.Verbose);
         }
     }
 }
