@@ -227,7 +227,11 @@ namespace Take.Blip.Builder
                                     await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
                                 }
 
-                                var previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
+                                var previousStateId = state.Id;
+                                if (IsContextVariable(state.Id)) {
+                                    previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
+                                }
+
                                 // Determine the next state
                                 state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
                                 // Store the previous state
