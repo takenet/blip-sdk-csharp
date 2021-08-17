@@ -468,8 +468,8 @@ namespace Take.Blip.Builder
                         {
                             var replacedVariable = output.StateId;
                             
-                            if (IsContextVariable(output.StateId)) {
-                                replacedVariable = await _variableReplacer.ReplaceAsync(output.StateId, context, cancellationToken);
+                            if (IsContextVariable(replacedVariable)) {
+                                replacedVariable = await _variableReplacer.ReplaceAsync(replacedVariable, context, cancellationToken);
                                 if(replacedVariable.IsNullOrEmpty()) {
                                     continue;
                                 }
