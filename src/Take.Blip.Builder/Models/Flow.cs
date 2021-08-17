@@ -133,7 +133,7 @@ namespace Take.Blip.Builder.Models
 
                     foreach (var output in state.Outputs)
                     {
-                        if (States.All(s => s.Id != output.StateId))
+                        if (States.All(s => (s.Id != output.StateId) && !(output.StateId.StartsWith("{{") && output.StateId.EndsWith("}}"))))
                         {
                             throw new ValidationException($"The output state id '{output.StateId}' is invalid");
                         }

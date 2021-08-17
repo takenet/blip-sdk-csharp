@@ -192,7 +192,7 @@ namespace Take.Blip.Builder
                                         if (state.Input.Validation.Error != null)
                                         {
                                             // Send the validation error message
-                                            if (state.Input.Validation.Error.StartsWith("{{") && state.Input.Validation.Error.EndsWith("}}"))
+                                            if (IsContextVariable(state.Input.Validation.Error))
                                             {
                                                 var validationMessage = new Message(null)
                                                 {
@@ -228,6 +228,10 @@ namespace Take.Blip.Builder
                                 }
 
                                 var previousStateId = state.Id;
+                                if (IsContextVariable(state.Id)) {
+                                    previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
+                                }
+
                                 // Determine the next state
                                 state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
                                 // Store the previous state
@@ -442,6 +446,10 @@ namespace Take.Blip.Builder
             }
         }
 
+        private Boolean IsContextVariable(string stateId) {
+            return (stateId.StartsWith("{{") && stateId.EndsWith("}}"));
+        }
+
         private async Task<State> ProcessOutputsAsync(LazyInput lazyInput, IContext context, Flow flow, State state, ICollection<OutputTrace> outputTraces, CancellationToken cancellationToken)
         {
             var outputs = state.Outputs;
@@ -462,7 +470,15 @@ namespace Take.Blip.Builder
                         if (output.Conditions == null ||
                             await output.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken))
                         {
-                            state = flow.States.SingleOrDefault(s => s.Id == output.StateId);
+                            var replacedVariable = output.StateId;
+                            
+                            if (IsContextVariable(replacedVariable)) {
+                                replacedVariable = await _variableReplacer.ReplaceAsync(replacedVariable, context, cancellationToken);
+                                if(replacedVariable.IsNullOrEmpty()) {
+                                    continue;
+                                }
+                            }
+                            state = flow.States.SingleOrDefault(s => s.Id == replacedVariable);
                             break;
                         }
                     }
