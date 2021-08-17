@@ -466,9 +466,13 @@ namespace Take.Blip.Builder
                         if (output.Conditions == null ||
                             await output.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken))
                         {
-                            var replacedVariable = await _variableReplacer.ReplaceAsync(output.StateId, context, cancellationToken);
-                            if (IsContextVariable(output.StateId) && replacedVariable.IsNullOrEmpty()) {
-                                continue;
+                            var replacedVariable = output.StateId;
+                            
+                            if (IsContextVariable(output.StateId)) {
+                                replacedVariable = await _variableReplacer.ReplaceAsync(output.StateId, context, cancellationToken);
+                                if(replacedVariable.IsNullOrEmpty()) {
+                                    continue;
+                                }
                             }
                             state = flow.States.SingleOrDefault(s => s.Id == replacedVariable);
                             break;
