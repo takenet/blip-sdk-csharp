@@ -23,6 +23,7 @@ namespace Take.Blip.Builder.Variables
         {
             Source = source;
             _inputContextKey = inputContextKey;
+            _logger = logger;
             _propertyCacheDictionary = new ConcurrentDictionary<string, PropertyInfo>();
         }
 

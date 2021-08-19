@@ -60,7 +60,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public ContactVariableProvider GetTarget()
         {
-            return new ContactVariableProvider(ContactExtension, DocumentSerializer);
+            return new ContactVariableProvider(ContactExtension, DocumentSerializer, Logger);
         }
 
         [Fact]
