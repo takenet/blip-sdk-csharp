@@ -1,6 +1,7 @@
 ﻿using Lime.Protocol;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,12 +16,15 @@ namespace Take.Blip.Builder.Variables
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
         private readonly string _resourceName;
+        private readonly ILogger _logger;
+
         public abstract VariableSource Source { get; }
 
-        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName)
+        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName, ILogger logger)
         {
             _sender = sender;
             _documentSerializer = documentSerializer;
+            _logger = logger;
             _resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
         }
 
@@ -33,6 +37,7 @@ namespace Take.Blip.Builder.Variables
 
                 if (resourceCommandResult.Status != CommandStatus.Success)
                 {
+                    _logger.Warning($"Variable {name} from {_resourceName} not found");
                     return null;
                 }
 
@@ -45,6 +50,7 @@ namespace Take.Blip.Builder.Variables
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
+                _logger.Warning(ex, $"An exception occurred while obtaining variable {name} from {_resourceName}");
                 return null;
             }
         }

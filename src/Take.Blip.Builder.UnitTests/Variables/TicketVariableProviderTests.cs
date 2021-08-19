@@ -4,6 +4,7 @@ using Lime.Protocol;
 using Lime.Protocol.Network;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Serilog;
 using Shouldly;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Extensions.HelpDesk;
@@ -17,13 +18,16 @@ namespace Take.Blip.Builder.UnitTests.Variables
         public TicketVariableProviderTests()
         {
             HelpDeskExtension = Substitute.For<IHelpDeskExtension>();
+            Logger = Substitute.For<ILogger>();
         }
         
         public IHelpDeskExtension HelpDeskExtension { get; }
-        
+
+        public ILogger Logger { get; }
+
         private TicketVariableProvider GetTarget()
         {
-            return new TicketVariableProvider(HelpDeskExtension);
+            return new TicketVariableProvider(HelpDeskExtension, Logger);
         }
 
         [Fact]

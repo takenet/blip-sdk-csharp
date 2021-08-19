@@ -7,6 +7,7 @@ using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
+using Serilog;
 using Take.Blip.Client.Extensions.Contacts;
 
 namespace Take.Blip.Builder.Variables
@@ -19,8 +20,8 @@ namespace Take.Blip.Builder.Variables
         private readonly IContactExtension _contactExtension;
         private readonly IDocumentSerializer _documentSerializer;
 
-        public ContactVariableProvider(IContactExtension contactExtension, IDocumentSerializer documentSerializer)
-            : base(VariableSource.Contact, ContextExtensions.CONTACT_KEY)
+        public ContactVariableProvider(IContactExtension contactExtension, IDocumentSerializer documentSerializer, ILogger logger)
+            : base(VariableSource.Contact, ContextExtensions.CONTACT_KEY, logger)
         {
             _contactExtension = contactExtension;
             _documentSerializer = documentSerializer;
