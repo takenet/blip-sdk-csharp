@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
+using Serilog;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -16,8 +17,9 @@ namespace Take.Blip.Builder.Variables
     {
         private readonly ConcurrentDictionary<string, PropertyInfo> _propertyCacheDictionary;
         private readonly string _inputContextKey;
+        private readonly ILogger _logger;
 
-        protected UserVariableProviderBase(VariableSource source, string inputContextKey)
+        protected UserVariableProviderBase(VariableSource source, string inputContextKey, ILogger logger)
         {
             Source = source;
             _inputContextKey = inputContextKey;
@@ -45,6 +47,7 @@ namespace Take.Blip.Builder.Variables
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
                 context.RemoveValue(_inputContextKey);
+                _logger.Warning(ex, $"An exception occurred while obtaining variable {name} from {_inputContextKey}");
                 return null;
             }
         }
