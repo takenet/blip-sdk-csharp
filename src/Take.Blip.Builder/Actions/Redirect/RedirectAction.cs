@@ -21,6 +21,12 @@ namespace Take.Blip.Builder.Actions.Redirect
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
+            if(context.Input.Message.Metadata.ContainsKey("original_contact")) {
+                context.Input.Message.Metadata.TryGetValue("original_contact", out var contact);
+                settings.SelectToken("context").AddAfterSelf(new JObject("original_contact", contact));
+                //settings.Add("original_contact", contact);
+            }
+
             var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
             return _redirectManager.RedirectUserAsync(context, redirect, cancellationToken);
         }
