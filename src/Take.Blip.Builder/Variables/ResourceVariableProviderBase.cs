@@ -50,7 +50,7 @@ namespace Take.Blip.Builder.Variables
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
-                _logger.Warning(ex, "An exception occurred while obtaining variable {Name} from {ResourceName}", name, _resourceName);
+                _logger.Warning(ex, "An exception occurred while obtaining variable {VariableName} from {ResourceName}", name, _resourceName);
                 return null;
             }
         }

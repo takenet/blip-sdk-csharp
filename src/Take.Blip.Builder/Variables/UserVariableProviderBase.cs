@@ -48,7 +48,7 @@ namespace Take.Blip.Builder.Variables
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
                 context.RemoveValue(_inputContextKey);
-                _logger.Warning(ex, "An exception occurred while obtaining variable {Name} from {InputContextKey}", name, _inputContextKey);
+                _logger.Warning(ex, "An exception occurred while obtaining variable {VariableName} from {InputContextKey}", name, _inputContextKey);
                 return null;
             }
         }
