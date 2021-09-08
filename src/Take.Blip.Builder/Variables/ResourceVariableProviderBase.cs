@@ -37,7 +37,7 @@ namespace Take.Blip.Builder.Variables
 
                 if (resourceCommandResult.Status != CommandStatus.Success)
                 {
-                    _logger.Warning("Variable {Name} from {ResourceName} not found", name, _resourceName);
+                    _logger.Warning("Variable {VariableName} from {ResourceName} not found", name, _resourceName);
                     return null;
                 }
 
