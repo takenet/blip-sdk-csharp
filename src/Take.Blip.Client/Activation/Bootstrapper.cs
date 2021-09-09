@@ -298,7 +298,7 @@ namespace Take.Blip.Client.Activation
                         var content = applicationReceiver.Response.ToDocument();
                         receiver =
                             new LambdaNotificationReceiver(
-                                (notification, c) => sender.SendMessageAsync(content, notification.From, c));
+                                (notification, c) => sender.SendMessageAsync(content, notification.From,  null, c));
                     }
                     else if (!string.IsNullOrWhiteSpace(applicationReceiver.ForwardTo))
                     {
@@ -352,7 +352,7 @@ namespace Take.Blip.Client.Activation
                         var content = applicationReceiver.Response.ToDocument();
                         receiver =
                             new LambdaMessageReceiver(
-                                (message, c) => sender.SendMessageAsync(content, message.From, c));
+                                (message, c) => sender.SendMessageAsync(content, message.From, null, c));
                     }
                     else if (!string.IsNullOrWhiteSpace(applicationReceiver.ForwardTo))
                     {

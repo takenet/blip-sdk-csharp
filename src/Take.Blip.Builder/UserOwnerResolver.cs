@@ -41,7 +41,6 @@ namespace Take.Blip.Builder
 
             if (tunnel != null)
             {
-                envelope.Metadata.TryGetValue("", out var teta);
                 userIdentity = tunnel.Originator;
                 ownerIdentity = tunnel.Owner;
             }

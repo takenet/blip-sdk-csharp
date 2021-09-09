@@ -62,7 +62,7 @@ namespace Take.Blip.Client.Receivers
             }
 
             // Send the label
-            await _sender.SendMessageAsync(_settings.Label.ToDocument(), envelope.From, cancellationToken);
+            await _sender.SendMessageAsync(_settings.Label.ToDocument(), envelope.From, null, cancellationToken);
         }
 
         public async Task<bool> ValidateInputAsync(Message envelope, CancellationToken cancellationToken)
@@ -83,7 +83,7 @@ namespace Take.Blip.Client.Receivers
             // Send a validation error message and resend the previous label
             await _sender.SendMessageAsync(inputSettings.Validation.Error ?? "An validation error has occurred", envelope.From, cancellationToken);
             await Task.Delay(250, cancellationToken);
-            await _sender.SendMessageAsync(inputSettings.Label.ToDocument(), envelope.From, cancellationToken);
+            await _sender.SendMessageAsync(inputSettings.Label.ToDocument(), envelope.From, null, cancellationToken);
             return false;
         }
 

@@ -26,7 +26,7 @@ namespace Take.Blip.Client.Receivers
 
         public virtual Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _sender.SendMessageAsync(_response, envelope.From, cancellationToken);
+            return _sender.SendMessageAsync(_response, envelope.From, null, cancellationToken);
         }
     }
 }
