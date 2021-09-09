@@ -21,7 +21,7 @@ namespace HelpDesk
         {
             // Send messages from agent to customer
             Console.WriteLine($"< Received message from agent [CUSTOMER: {customerIdentiy}]: {message.Content}");
-            await _sender.SendMessageAsync(message.Content, customerIdentiy, cancellationToken);
+            await _sender.SendMessageAsync(message.Content, customerIdentiy, null, cancellationToken);
         }
     }
 }

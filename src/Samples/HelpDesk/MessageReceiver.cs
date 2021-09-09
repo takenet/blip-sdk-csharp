@@ -62,7 +62,7 @@ namespace HelpDesk
             }
             else
             {
-                await _sender.SendMessageAsync(message.Content, message.From, cancellationToken);
+                await _sender.SendMessageAsync(message.Content, message.From, null, cancellationToken);
             }
         }
     }
