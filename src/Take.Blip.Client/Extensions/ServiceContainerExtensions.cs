@@ -1,13 +1,12 @@
-﻿using Lime.Messaging;
+﻿using System;
 using Lime.Protocol.Serialization;
-using System;
-using System.Reflection;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.AttendanceForwarding;
 using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.Contacts;
+using Take.Blip.Client.Extensions.ContactsJourney;
 using Take.Blip.Client.Extensions.Context;
 using Take.Blip.Client.Extensions.Delegation;
 using Take.Blip.Client.Extensions.Directory;
@@ -43,6 +42,7 @@ namespace Take.Blip.Client.Extensions
             serviceContainer.RegisterService(typeof(ITunnelExtension), () => new TunnelExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IArtificialIntelligenceExtension), () => new ArtificialIntelligenceExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IContextExtension), () => new ContextExtension(senderFactory()));
+            serviceContainer.RegisterService(typeof(IContactsJourneyExtension), () => new ContactsJourneyExtension(senderFactory()));
 
             return serviceContainer;
         }

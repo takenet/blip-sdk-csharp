@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using NSubstitute;
@@ -9,14 +8,13 @@ using SimpleInjector;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Storage;
-using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.Contacts;
+using Take.Blip.Client.Extensions.ContactsJourney;
 using Take.Blip.Client.Extensions.EventTracker;
 using Take.Blip.Client.Extensions.HelpDesk;
 using Take.Blip.Client.Extensions.Scheduler;
@@ -34,6 +32,7 @@ namespace Take.Blip.Builder.UnitTests
             BucketExtension = Substitute.For<IBucketExtension>();
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
+            ContactsJourneyExtension = Substitute.For<IContactsJourneyExtension>();
             BroadcastExtension = Substitute.For<IBroadcastExtension>();
             ContactExtension = Substitute.For<IContactExtension>();
             HelpDeskExtension = Substitute.For<IHelpDeskExtension>();
@@ -94,6 +93,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IEventTrackExtension EventTrackExtension { get; set; }
 
+        public IContactsJourneyExtension ContactsJourneyExtension { get; set; }
+
         public IBroadcastExtension BroadcastExtension { get; set; }
 
         public IContactExtension ContactExtension { get; set; }
@@ -129,6 +130,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(() => BucketExtension);
             container.RegisterSingleton(() => ArtificialIntelligenceExtension);
             container.RegisterSingleton(() => EventTrackExtension);
+            container.RegisterSingleton(() => ContactsJourneyExtension);
             container.RegisterSingleton(() => BroadcastExtension);
             container.RegisterSingleton(() => ContactExtension);
             container.RegisterSingleton(() => HelpDeskExtension);
