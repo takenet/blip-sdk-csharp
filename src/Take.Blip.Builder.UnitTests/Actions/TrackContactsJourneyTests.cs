@@ -19,7 +19,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         public IContactsJourneyExtension ContactsJourneyExtension { get; private set; }
 
-
         [Fact]
         public async Task ValidContactsJourneyNodeShouldSucceed()
         {
@@ -138,8 +137,5 @@ namespace Take.Blip.Builder.UnitTests.Actions
             );
             exception.Message.ShouldContain("stateName");
         }
-
-
-
     }
 }

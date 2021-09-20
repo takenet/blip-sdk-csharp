@@ -9,8 +9,9 @@ namespace Take.Blip.Client.Extensions.ContactsJourney
     public class ContactsJourneyExtension : ExtensionBase, IContactsJourneyExtension
     {
         private const string CONTACTS_JOURNEY_URI = "/contacts-journey";
+        private const string DEFAULT_ANALYTICS_DOMAIN = "analytics." + Constants.DEFAULT_DOMAIN;
 
-        private readonly Node AnalyticsAddress = Node.Parse("postmaster@analytics.msging.net");
+        private readonly Node AnalyticsAddress = new Node(Constants.POSTMASTER, DEFAULT_ANALYTICS_DOMAIN, null);
 
         public ContactsJourneyExtension(ISender sender)
             : base(sender)
