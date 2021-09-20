@@ -11,8 +11,9 @@ namespace Take.Blip.Client.Extensions.EventTracker
     public class EventTrackExtension : ExtensionBase, IEventTrackExtension
     {
         private const string EVENTRACK_URI = "/event-track";
-        
-        private readonly Node AnalyticsAddress = Node.Parse("postmaster@analytics.msging.net");
+        private const string DEFAULT_ANALYTICS_DOMAIN = "analytics." + Constants.DEFAULT_DOMAIN;
+
+        private readonly Node AnalyticsAddress = new Node(Constants.POSTMASTER, DEFAULT_ANALYTICS_DOMAIN, null);
 
         public EventTrackExtension(ISender sender)
             : base(sender)
