@@ -18,7 +18,7 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
 
         public async Task<Document> GetDomainAsync(string domain, CancellationToken cancellationToken)
         {
-            if (domain == null) throw new ArgumentNullException(nameof(domain));
+            if (domain.IsNullOrEmpty()) throw new ArgumentNullException(nameof(domain));
             var requestCommand = new Command()
             {
                 Method = CommandMethod.Get,
@@ -29,16 +29,18 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
             return commandResponse.Resource;
         }
 
-        public async Task<JsonDocument> GeyKeyValueAsync(string domain, string key, CancellationToken cancellationToken)
+        public async Task<string> GetKeyValueAsync(string domain, string key, CancellationToken cancellationToken)
         {
-            if (domain == null) throw new ArgumentNullException(nameof(domain));
+            if (domain.IsNullOrEmpty()) throw new ArgumentNullException(nameof(domain));
+            if (key.IsNullOrEmpty()) throw new ArgumentNullException(nameof(key));
+
             var configDomain = (await GetDomainAsync(domain, cancellationToken)) as JsonDocument;
-            return configDomain[key] as JsonDocument;
+            return configDomain[key] as string;
         }
 
         public async Task SetConfigAsync(string domain, string key, object value, CancellationToken cancellationToken)
         {
-            if (domain == null) throw new ArgumentNullException(nameof(domain));
+            if (domain.IsNullOrEmpty()) throw new ArgumentNullException(nameof(domain));
 
             var resource = new JsonDocument(
                 new Dictionary<string, object>()

@@ -24,7 +24,7 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
         /// <param name="key">advanced config key</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<JsonDocument> GeyKeyValueAsync(string domain, string key, CancellationToken cancellationToken);
+        Task<string> GetKeyValueAsync(string domain, string key, CancellationToken cancellationToken);
 
         /// <summary>
         /// Set config 
