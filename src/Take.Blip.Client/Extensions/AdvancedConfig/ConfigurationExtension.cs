@@ -38,23 +38,15 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
             return configDomain[key] as string;
         }
 
-        public async Task SetConfigAsync(string domain, string key, object value, CancellationToken cancellationToken)
+        public async Task SetConfigAsync(string domain, JsonDocument resource, CancellationToken cancellationToken)
         {
             if (domain.IsNullOrEmpty()) throw new ArgumentNullException(nameof(domain));
-
-            var resource = new JsonDocument(
-                new Dictionary<string, object>()
-                {
-                    { key, value}
-                },
-                MediaType.ApplicationJson
-                );
 
             var requestCommand = new Command()
             {
                 Method = CommandMethod.Set,
                 Uri = CreateLimeUri(domain),
-                Resource = resource
+                Resource = resource as JsonDocument
             };
 
             await _sender.ProcessCommandAsync(requestCommand, cancellationToken);

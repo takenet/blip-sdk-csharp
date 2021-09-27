@@ -30,10 +30,9 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
         /// Set config 
         /// </summary>
         /// <param name="domain">config domain</param>
-        /// <param name="key">config key</param>
-        /// <param name="value">advanced config value object</param>
+        /// <param name="resource">advanced config object</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SetConfigAsync(string domain, string key, object value, CancellationToken cancellationToken);
+        Task SetConfigAsync(string domain, JsonDocument resource, CancellationToken cancellationToken);
     }
 }
