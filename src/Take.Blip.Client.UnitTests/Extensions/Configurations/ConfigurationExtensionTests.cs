@@ -101,7 +101,7 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
             var response = await _configurationExtension.GetKeyValueAsync(domain, key, CancellationToken.None);
 
             //Assert
-            Assert.Equal(expectedResponse, response.ToString());
+            Assert.Equal(expectedResponse, response);
         }
 
 

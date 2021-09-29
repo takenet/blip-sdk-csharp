@@ -8,7 +8,7 @@
         /// <summary>
         /// Sales force uri
         /// </summary>
-        public const string SALES_FORCE_URI = "https://take3-dev-ed.my.salesforce.com/services/oauth2/token";
+        public const string SALES_FORCE_URI = "https://take3-dev-ed.my.salesforce.com";
 
         /// <summary>
         /// Advanced config domain
