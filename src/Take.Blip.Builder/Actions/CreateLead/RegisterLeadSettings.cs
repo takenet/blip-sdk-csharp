@@ -11,7 +11,7 @@ namespace Take.Blip.Builder.Actions.CreateLead
         /// <summary>
         /// Crm name
         /// </summary>
-        public string Crm { get; set; }
+        public Crm Crm { get; set; }
 
         /// <summary>
         /// Lead object body

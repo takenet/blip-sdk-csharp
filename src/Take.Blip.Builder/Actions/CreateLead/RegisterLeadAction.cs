@@ -8,31 +8,28 @@ using Take.Blip.Client.Extensions.AdvancedConfig;
 
 namespace Take.Blip.Builder.Actions.CreateLead
 {
-    class RegisterLeadAction : ActionBase<RegisterLeadSettings>
+    public class RegisterLeadAction : ActionBase<RegisterLeadSettings>
     {
         private readonly ICrmContext _crmContext;
         private readonly IConfigurationExtension _configurationExtension;
-        private readonly IMemoryCache _memoryCache;
-        private readonly ILogger _logger;
+        private readonly ISalesForceClient _salesForceClient;
 
         public RegisterLeadAction(
             ICrmContext crmContext,
-            ILogger logger,
             IConfigurationExtension configurationExtension,
-            IMemoryCache memoryCache
+            ISalesForceClient salesForceClient
             ) : base(nameof(RegisterLeadAction))
         {
             _crmContext = crmContext;
-            _logger = logger;
             _configurationExtension = configurationExtension;
-            _memoryCache = memoryCache;
+            _salesForceClient = salesForceClient;
         }
 
         public override async Task ExecuteAsync(IContext context, RegisterLeadSettings settings, CancellationToken cancellationToken)
         {
-            if (settings.Crm == "SalesForce")
+            if (settings.Crm == Crm.SalesForce)
             {
-                _crmContext.SetCrm(new SalesForceProcessor(_logger, _configurationExtension, _memoryCache));
+                _crmContext.SetCrm(new SalesForceProcessor(_configurationExtension, _salesForceClient));
             }
 
             await _crmContext.ExecuteAsync(context, settings, cancellationToken);
