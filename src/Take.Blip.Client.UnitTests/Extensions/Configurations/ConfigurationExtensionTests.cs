@@ -1,9 +1,12 @@
 ﻿using Lime.Protocol;
+using Newtonsoft.Json;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Actions.CreateLead;
+using Take.Blip.Builder.Actions.CreateLead.SalesForce.Models;
 using Take.Blip.Client.Extensions.AdvancedConfig;
 using Xunit;
 
@@ -99,6 +102,41 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
             //Act
             _sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(mockedResponse);
             var response = await _configurationExtension.GetKeyValueAsync(domain, key, CancellationToken.None);
+
+            //Assert
+            Assert.Equal(expectedResponse, response);
+        }
+
+        [Theory]
+        [InlineData("postmaster@portal.blip.ai", "Crm")]
+        [InlineData("postmaster@desk.msging.net", "Desk")]
+        public async Task TestGetTypedKeyValue_ShouldSuccedlAsync(string domain, string key)
+        {
+            //Arrange
+            var expectedResponse = new CrmConfig()
+            {
+                SalesForceConfig = new SalesForceConfig()
+                {
+                    ClientId = "123",
+                    ClientSecret = "321",
+                    RefreshToken = "456"
+                }
+            };
+
+            var mockedResponse = new Command()
+            {
+                Method = CommandMethod.Get,
+                Uri = new LimeUri($"lime://{domain}/configuration"),
+                Resource = new JsonDocument(new Dictionary<string, object>()
+                {
+                    { key, JsonConvert.SerializeObject(expectedResponse) }
+                }, MediaType.ApplicationJson)
+            };
+
+
+            //Act
+            _sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(mockedResponse);
+            var response = await _configurationExtension.GetKeyValueAsync<CrmConfig>(domain, key, CancellationToken.None);
 
             //Assert
             Assert.Equal(expectedResponse, response);
