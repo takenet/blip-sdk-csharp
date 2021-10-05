@@ -18,7 +18,7 @@
         /// <summary>
         /// Advanced config sales force config token key
         /// </summary>
-        public const string CRM_CONFIG_KEY = "crm";
+        public const string CRM_CONFIG_KEY = "Crm";
 
         /// <summary>
         /// Client ID body key

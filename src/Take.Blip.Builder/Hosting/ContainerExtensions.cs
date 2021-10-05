@@ -1,10 +1,13 @@
 ﻿using Lime.Messaging.Resources;
 using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
+using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 using SimpleInjector;
 using StackExchange.Redis;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.CreateLead;
+using Take.Blip.Builder.Actions.CreateLead.SalesForce;
 using Take.Blip.Builder.Actions.CreateTicket;
 using Take.Blip.Builder.Actions.DeleteVariable;
 using Take.Blip.Builder.Actions.ExecuteScript;
@@ -30,6 +33,7 @@ using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions;
+using Take.Blip.Client.Extensions.AdvancedConfig;
 using Take.Elephant;
 
 namespace Take.Blip.Builder.Hosting
@@ -58,6 +62,8 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterDecorator<ISender, OwnerSenderDecorator>(Lifestyle.Singleton);
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
             container.RegisterSingleton<IInputExpirationHandler, InputExpirationHandler>();
+            container.RegisterSingleton<ICrmContext, CrmContext>();
+            container.RegisterSingleton<ISalesForceClient, SalesForceClient>();
 
             return container;
         }
@@ -68,6 +74,7 @@ namespace Take.Blip.Builder.Hosting
             container.Collection.Register<IAction>(
                 new[]
                 {
+                    typeof(RegisterLeadAction),
                     typeof(ExecuteScriptAction),
                     typeof(SendMessageAction),
                     typeof(SendMessageFromHttpAction),

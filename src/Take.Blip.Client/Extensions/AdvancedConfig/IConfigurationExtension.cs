@@ -27,6 +27,16 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
         Task<string> GetKeyValueAsync(string domain, string key, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Get config by domain and key
+        /// </summary>
+        /// <typeparam name="T">Return object type</typeparam>
+        /// <param name="domain">advanced config domain</param>
+        /// <param name="key"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<T> GetKeyValueAsync<T>(string domain, string key, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Set config 
         /// </summary>
         /// <param name="domain">config domain</param>
@@ -34,5 +44,6 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task SetConfigAsync(string domain, JsonDocument resource, CancellationToken cancellationToken);
+
     }
 }

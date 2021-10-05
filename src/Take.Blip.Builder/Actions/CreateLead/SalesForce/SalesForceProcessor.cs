@@ -19,16 +19,16 @@ namespace Take.Blip.Builder.Actions.CreateLead.SalesForce
 
         public async Task RegisterLead(IContext context, RegisterLeadSettings settings, CancellationToken cancellationToken)
         {
-            var stringfiedConfig = await _configurationExtension.GetKeyValueAsync(
+            var crmConfig = await _configurationExtension.GetKeyValueAsync<CrmConfig>(
                 SalesForceConstants.CONFIG_DOMAIN,
                 SalesForceConstants.CRM_CONFIG_KEY,
                 cancellationToken
                 );
 
-            var crmConfig = JsonConvert.DeserializeObject<CrmConfig>(stringfiedConfig);
             var salesForceAuth = await _salesForceClient.GetAuthorizationAsync(
                 crmConfig.SalesForceConfig,
-                context.OwnerIdentity
+                context.OwnerIdentity,
+                cancellationToken
                 );
 
             var leadResponse = await _salesForceClient.CreateLeadAsync(settings, salesForceAuth);

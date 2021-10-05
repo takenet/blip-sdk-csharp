@@ -1,4 +1,5 @@
 ﻿using Lime.Protocol;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -36,6 +37,12 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
 
             var configDomain = (await GetDomainAsync(domain, cancellationToken)) as JsonDocument;
             return configDomain[key] as string;
+        }
+
+        public async Task<T> GetKeyValueAsync<T>(string domain, string key, CancellationToken cancellationToken)
+        {
+            var stringfiedResult = await GetKeyValueAsync(domain, key, cancellationToken);
+            return JsonConvert.DeserializeObject<T>(stringfiedResult);
         }
 
         public async Task SetConfigAsync(string domain, JsonDocument resource, CancellationToken cancellationToken)

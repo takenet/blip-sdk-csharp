@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using NSubstitute;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,9 +38,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Crm = Crm.SalesForce,
                 LeadBody = new Dictionary<string, string>()
                 {
-                    { "FirstName", "Javier" },
-                    { "LastName", "Pablo" },
-                    { "Email", "pjavier@take.net" },
+                    { "FirstName", "Gabriel" },
+                    { "LastName", "Rodrigues" },
+                    { "Email", "jsdpablo@take.net" },
                     { "Company", "Take" },
                     { "cidade__c", "Bh" },
                     { "Suplemento__c", "Whey" }
@@ -59,7 +58,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 }
             };
             var salesForceConfig = configurationResponse.SalesForceConfig;
-            var stringfiedResponse = JsonConvert.SerializeObject(configurationResponse);
 
             var mockedSalesForceAuth = new AuthorizationResponse
             {
@@ -76,13 +74,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
 
             // Act
-            _configurationExtension.GetKeyValueAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(stringfiedResponse);
+            _configurationExtension.GetKeyValueAsync<CrmConfig>(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(configurationResponse);
             _salesForceClient.GetAuthorizationAsync(
                 Arg.Is<SalesForceConfig>(sc =>
                 sc.ClientId == salesForceConfig.ClientId &&
                 sc.ClientSecret == salesForceConfig.ClientSecret &&
                 sc.RefreshToken == salesForceConfig.RefreshToken),
-                Context.OwnerIdentity)
+                Context.OwnerIdentity,
+                Arg.Any<CancellationToken>())
                 .Returns(mockedSalesForceAuth);
 
             _salesForceClient.CreateLeadAsync(

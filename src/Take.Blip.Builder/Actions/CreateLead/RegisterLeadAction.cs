@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Actions.CreateLead
             ICrmContext crmContext,
             IConfigurationExtension configurationExtension,
             ISalesForceClient salesForceClient
-            ) : base(nameof(RegisterLeadAction))
+            ) : base(nameof(CreateLead))
         {
             _crmContext = crmContext;
             _configurationExtension = configurationExtension;

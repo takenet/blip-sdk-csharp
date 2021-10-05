@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Take.Blip.Builder.Actions.CreateLead.SalesForce.Models;
 
 namespace Take.Blip.Builder.Actions.CreateLead.SalesForce
@@ -13,8 +14,9 @@ namespace Take.Blip.Builder.Actions.CreateLead.SalesForce
         /// </summary>
         /// <param name="salesForceConfig">sales force config object</param>
         /// <param name="ownerId">bot id</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<AuthorizationResponse> GetAuthorizationAsync(SalesForceConfig salesForceConfig, string ownerId);
+        public Task<AuthorizationResponse> GetAuthorizationAsync(SalesForceConfig salesForceConfig, string ownerId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Create a lead on sales force
