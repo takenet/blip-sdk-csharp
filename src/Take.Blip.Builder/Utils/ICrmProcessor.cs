@@ -1,7 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Models;
 
-namespace Take.Blip.Builder.Actions.CreateLead
+namespace Take.Blip.Builder.Utils
 {
     /// <summary>
     /// Crm processor
@@ -15,6 +16,6 @@ namespace Take.Blip.Builder.Actions.CreateLead
         /// <param name="settings">register lead action settings</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task RegisterLead(IContext context, RegisterLeadSettings settings, CancellationToken cancellationToken);
+        public Task RegisterLead(IContext context, CrmSettings settings, CancellationToken cancellationToken);
     }
 }

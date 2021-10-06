@@ -7,9 +7,10 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Take.Blip.Builder.Actions.CreateLead.SalesForce.Models;
+using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils.SalesForce.Models;
 
-namespace Take.Blip.Builder.Actions.CreateLead.SalesForce
+namespace Take.Blip.Builder.Utils.SalesForce
 {
     public class SalesForceClient : ISalesForceClient
     {
@@ -51,7 +52,7 @@ namespace Take.Blip.Builder.Actions.CreateLead.SalesForce
             }
         }
 
-        public async Task<LeadResponse> CreateLeadAsync(RegisterLeadSettings registerLeadSettings, AuthorizationResponse authorization)
+        public async Task<LeadResponse> CreateLeadAsync(CrmSettings registerLeadSettings, AuthorizationResponse authorization)
         {
             var response = string.Empty;
             try

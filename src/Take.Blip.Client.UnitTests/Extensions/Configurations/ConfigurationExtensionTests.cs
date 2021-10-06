@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Take.Blip.Builder.Actions.CreateLead;
-using Take.Blip.Builder.Actions.CreateLead.SalesForce.Models;
+using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils.SalesForce.Models;
 using Take.Blip.Client.Extensions.AdvancedConfig;
 using Xunit;
 
@@ -162,18 +162,18 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
 
             //Act
             await _configurationExtension.SetConfigAsync(
-                domain, 
-                resource, 
+                domain,
+                resource,
                 CancellationToken.None
                 );
 
             //Assert
             await _sender.Received(1).ProcessCommandAsync(Arg.Is<Command>(
-                c => 
+                c =>
                 c.Method == mockedRequestCommand.Method &&
                 c.Uri.Path == mockedRequestCommand.Uri.Path &&
                 (c.Resource as JsonDocument)[key] == resource[key]
-                ), 
+                ),
                 Arg.Any<CancellationToken>()
                 );
         }

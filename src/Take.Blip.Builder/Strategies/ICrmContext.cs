@@ -1,7 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils;
 
-namespace Take.Blip.Builder.Actions.CreateLead
+namespace Take.Blip.Builder.Strategies
 {
     /// <summary>
     /// Crm context strategy
@@ -21,6 +23,6 @@ namespace Take.Blip.Builder.Actions.CreateLead
         /// <param name="settings">register lead settings</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task ExecuteAsync(IContext context, RegisterLeadSettings settings, CancellationToken cancellationToken);
+        Task ExecuteAsync(IContext context, CrmSettings settings, CancellationToken cancellationToken);
     }
 }

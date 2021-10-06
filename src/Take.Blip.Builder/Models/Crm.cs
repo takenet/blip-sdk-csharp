@@ -1,4 +1,4 @@
-﻿namespace Take.Blip.Builder.Actions.CreateLead
+﻿namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Crm's lists

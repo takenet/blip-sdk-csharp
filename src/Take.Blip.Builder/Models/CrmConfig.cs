@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
-using Take.Blip.Builder.Actions.CreateLead.SalesForce.Models;
+using Take.Blip.Builder.Utils.SalesForce.Models;
 
-namespace Take.Blip.Builder.Actions.CreateLead
+namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Crm's configuration
@@ -21,7 +21,7 @@ namespace Take.Blip.Builder.Actions.CreateLead
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            if(obj == null || GetType() != obj.GetType())
+            if (obj == null || GetType() != obj.GetType())
             {
                 return false;
             }

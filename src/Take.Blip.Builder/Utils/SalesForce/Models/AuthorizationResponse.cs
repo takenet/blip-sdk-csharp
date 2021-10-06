@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Take.Blip.Builder.Actions.CreateLead.SalesForce.Models
+namespace Take.Blip.Builder.Utils.SalesForce.Models
 {
     /// <summary>
     /// Sales force authorization response

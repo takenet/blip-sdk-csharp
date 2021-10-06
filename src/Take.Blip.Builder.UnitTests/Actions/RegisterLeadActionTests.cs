@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions.CreateLead;
-using Take.Blip.Builder.Actions.CreateLead.SalesForce;
-using Take.Blip.Builder.Actions.CreateLead.SalesForce.Models;
+using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Strategies;
+using Take.Blip.Builder.Utils.SalesForce;
+using Take.Blip.Builder.Utils.SalesForce.Models;
 using Take.Blip.Client.Extensions.AdvancedConfig;
 using Xunit;
 
@@ -33,7 +35,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task TestCreateLeadOnSalesForce_ShouldSuccedAsync()
         {
             // Arrange
-            var settings = new RegisterLeadSettings()
+            var settings = new CrmSettings()
             {
                 Crm = Crm.SalesForce,
                 LeadBody = new Dictionary<string, string>()
@@ -85,7 +87,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 .Returns(mockedSalesForceAuth);
 
             _salesForceClient.CreateLeadAsync(
-                Arg.Is<RegisterLeadSettings>(rl =>
+                Arg.Is<CrmSettings>(rl =>
                 rl.Crm == settings.Crm &&
                 rl.ReturnValue == settings.ReturnValue
                 ),

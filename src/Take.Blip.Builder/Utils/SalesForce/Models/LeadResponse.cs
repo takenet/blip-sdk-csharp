@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Take.Blip.Builder.Actions.CreateLead.SalesForce.Models
+namespace Take.Blip.Builder.Utils.SalesForce.Models
 {
     /// <summary>
     /// Lead creation response object

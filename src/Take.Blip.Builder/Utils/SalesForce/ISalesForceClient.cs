@@ -1,8 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Take.Blip.Builder.Actions.CreateLead.SalesForce.Models;
+using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils.SalesForce.Models;
 
-namespace Take.Blip.Builder.Actions.CreateLead.SalesForce
+namespace Take.Blip.Builder.Utils.SalesForce
 {
     /// <summary>
     /// Sales force client
@@ -24,6 +25,6 @@ namespace Take.Blip.Builder.Actions.CreateLead.SalesForce
         /// <param name="registerLeadSettings">register lead actions params</param>
         /// <param name="authorization">Authorization response object</param>
         /// <returns></returns>
-        Task<LeadResponse> CreateLeadAsync(RegisterLeadSettings registerLeadSettings, AuthorizationResponse authorization);
+        Task<LeadResponse> CreateLeadAsync(CrmSettings registerLeadSettings, AuthorizationResponse authorization);
     }
 }

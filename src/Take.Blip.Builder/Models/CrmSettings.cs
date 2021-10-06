@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Actions.CreateLead;
 
-namespace Take.Blip.Builder.Actions.CreateLead
+namespace Take.Blip.Builder.Models
 {
     /// <summary>
     /// Crm processor settings
     /// </summary>
-    public class RegisterLeadSettings : IValidable
+    public class CrmSettings : IValidable
     {
         /// <summary>
         /// Crm name
