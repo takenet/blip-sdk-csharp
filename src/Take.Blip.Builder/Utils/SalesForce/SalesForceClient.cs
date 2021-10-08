@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -80,6 +81,45 @@ namespace Take.Blip.Builder.Utils.SalesForce
                 _logger.Warning(ex, $"An exception occurred while processing a Sales Force  HTTP request");
                 throw ex;
             }
+        }
+
+        public async Task<Lead> GetLeadAsync(CrmSettings settings, AuthorizationResponse authorization, CancellationToken cancellationToken)
+        {
+            var response = string.Empty;
+            var uri = $"{authorization.InstanceUrl}" +
+                $"{ApplyUriParams(SalesForceRoutes.GET_LEAD, settings.LeadId)}";
+            
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                        authorization.TokenType,
+                        authorization.AccessToken
+                        );
+                    HttpResponseMessage responseMessage = client.GetAsync(
+                        uri,
+                        cancellationToken
+                        ).Result;
+                    response = await responseMessage.Content.ReadAsStringAsync();
+                };
+                return JsonConvert.DeserializeObject<Lead>(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, $"An exception occurred while processing a Sales Force  HTTP request");
+                throw ex;
+            }
+        }
+
+        private string ApplyUriParams(string uri, params string[] @params)
+        {
+            foreach (var param in @params.Select((value, i) => new { i, value }))
+            {
+                uri = uri.Replace($"{{{param.i}}}", param.value);
+            }
+
+            return uri;
         }
     }
 }

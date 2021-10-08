@@ -29,5 +29,10 @@
         /// Get leads
         /// </summary>
         public const string GET_LEADS = "/services/data/v52.0/sobjects/Lead/describe";
+
+        /// <summary>
+        /// Get lead passing lead id route
+        /// </summary>
+        public const string GET_LEAD = "/services/data/v52.0/sobjects/Lead/{0}";
     }
 }

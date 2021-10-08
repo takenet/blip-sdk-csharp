@@ -1,30 +1,24 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Serilog;
-using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Strategies;
 using Take.Blip.Builder.Utils.SalesForce;
 using Take.Blip.Client.Extensions.AdvancedConfig;
 
-namespace Take.Blip.Builder.Actions.CreateLead
+namespace Take.Blip.Builder.Actions.GetLead
 {
-    public class RegisterLeadAction : ActionBase<CrmSettings>
+    public class GetLeadAction : ActionBase<CrmSettings>
     {
+        private readonly ISalesForceClient _salesForceClient;
         private readonly ICrmContext _crmContext;
         private readonly IConfigurationExtension _configurationExtension;
-        private readonly ISalesForceClient _salesForceClient;
 
-        public RegisterLeadAction(
-            ICrmContext crmContext,
-            IConfigurationExtension configurationExtension,
-            ISalesForceClient salesForceClient
-            ) : base(nameof(CreateLead))
+        public GetLeadAction(ISalesForceClient salesForceClient, ICrmContext crmContext, IConfigurationExtension configurationExtension) :
+            base(nameof(GetLead))
         {
+            _salesForceClient = salesForceClient;
             _crmContext = crmContext;
             _configurationExtension = configurationExtension;
-            _salesForceClient = salesForceClient;
         }
 
         public override async Task ExecuteAsync(IContext context, CrmSettings settings, CancellationToken cancellationToken)
@@ -34,7 +28,7 @@ namespace Take.Blip.Builder.Actions.CreateLead
                 _crmContext.SetCrm(new SalesForceProcessor(_configurationExtension, _salesForceClient));
             }
 
-            await _crmContext.ExecuteAsync(context, settings, ActionType.CreateLead, cancellationToken);
+            await _crmContext.ExecuteAsync(context, settings, ActionType.GetLead, cancellationToken);
         }
     }
 }

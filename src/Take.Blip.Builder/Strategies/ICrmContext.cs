@@ -21,8 +21,9 @@ namespace Take.Blip.Builder.Strategies
         /// </summary>
         /// <param name="context">bot context</param>
         /// <param name="settings">register lead settings</param>
+        /// <param name="actionType">crm action type</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task ExecuteAsync(IContext context, CrmSettings settings, CancellationToken cancellationToken);
+        Task ExecuteAsync(IContext context, CrmSettings settings, ActionType actionType, CancellationToken cancellationToken);
     }
 }

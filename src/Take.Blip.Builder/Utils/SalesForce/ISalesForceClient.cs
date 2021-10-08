@@ -26,5 +26,14 @@ namespace Take.Blip.Builder.Utils.SalesForce
         /// <param name="authorization">Authorization response object</param>
         /// <returns></returns>
         Task<LeadResponse> CreateLeadAsync(CrmSettings registerLeadSettings, AuthorizationResponse authorization);
+
+        /// <summary>
+        /// Get a specified lead for a given id
+        /// </summary>
+        /// <param name="settings">crm settings</param>
+        /// <param name="authorization">authorization response object</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Lead> GetLeadAsync(CrmSettings settings, AuthorizationResponse authorization, CancellationToken cancellationToken);
     }
 }

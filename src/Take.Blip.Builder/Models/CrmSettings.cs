@@ -14,6 +14,11 @@ namespace Take.Blip.Builder.Models
         public Crm Crm { get; set; }
 
         /// <summary>
+        /// Lead identifier
+        /// </summary>
+        public string LeadId { get; set; }
+
+        /// <summary>
         /// Lead object body
         /// </summary>
         public object LeadBody { get; set; }

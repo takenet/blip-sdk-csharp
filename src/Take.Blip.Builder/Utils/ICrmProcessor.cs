@@ -13,9 +13,19 @@ namespace Take.Blip.Builder.Utils
         /// Create a lead in  the given crm
         /// </summary>
         /// <param name="context">bot context</param>
-        /// <param name="settings">register lead action settings</param>
+        /// <param name="settings">crm actions settings</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public Task RegisterLead(IContext context, CrmSettings settings, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get a lead 
+        /// </summary>
+        /// <param name="context">bot context</param>
+        /// <param name="settings">crm settings</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task GetLead(IContext context, CrmSettings settings, CancellationToken cancellationToken);
+
     }
 }
