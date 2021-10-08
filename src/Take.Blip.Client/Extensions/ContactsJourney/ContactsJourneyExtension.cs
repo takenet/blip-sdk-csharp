@@ -40,7 +40,8 @@ namespace Take.Blip.Client.Extensions.ContactsJourney
                     CurrentStateName = stateName,
                     PreviousStateId = previousStateId,
                     PreviousStateName = previousStateName,
-                    ContactIdentity = contactIdentity
+                    ContactIdentity = contactIdentity,
+                    StorageDate = DateTimeOffset.Now
                 }
             };
 
