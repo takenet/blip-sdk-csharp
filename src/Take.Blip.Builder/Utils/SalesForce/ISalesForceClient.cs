@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using Newtonsoft.Json.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils.SalesForce.Models;
@@ -34,6 +35,6 @@ namespace Take.Blip.Builder.Utils.SalesForce
         /// <param name="authorization">authorization response object</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Lead> GetLeadAsync(CrmSettings settings, AuthorizationResponse authorization, CancellationToken cancellationToken);
+        Task<JObject> GetLeadAsync(CrmSettings settings, AuthorizationResponse authorization, CancellationToken cancellationToken);
     }
 }

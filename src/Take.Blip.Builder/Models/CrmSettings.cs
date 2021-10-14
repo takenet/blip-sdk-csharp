@@ -33,10 +33,10 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         public void Validate()
         {
-            if (LeadBody.Equals(null))
+            if (Crm.Equals(null))
             {
                 throw new ValidationException(
-                    $"The '{nameof(LeadBody)}' settings value is requied for '{nameof(RegisterLeadAction)}' action");
+                    $"The '{nameof(Crm)}' settings value is requied for 'Crm' action");
             }
         }
     }

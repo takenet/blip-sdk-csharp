@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NSubstitute;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,13 +60,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 TokenType = "Bearer"
             };
 
-            var mockedSalesForceResponse = new Lead
+            var mockedSalesForceResponse = new JObject
             {
-                Id = "1234",
-                Email = "io@take.net",
-                FirstName = "John",
-                LastName = "Doe",
-                Company = "Take"
+                { "Id", "1234" },
+                { "Email", "io@take.net" },
+                { "FirstName", "John" },
+                { "LastName", "Doe" },
+                { "Company", "Take" }
             };
 
             // Act

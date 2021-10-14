@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
     public class SalesForceClient : ISalesForceClient
     {
         private readonly ILogger _logger;
+        private const string LEAD_ATTRIBUTE_KEY = "attributes";
 
         public SalesForceClient(ILogger logger)
         {
@@ -83,7 +85,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
             }
         }
 
-        public async Task<Lead> GetLeadAsync(CrmSettings settings, AuthorizationResponse authorization, CancellationToken cancellationToken)
+        public async Task<JObject> GetLeadAsync(CrmSettings settings, AuthorizationResponse authorization, CancellationToken cancellationToken)
         {
             var response = string.Empty;
             var uri = $"{authorization.InstanceUrl}" +
@@ -103,7 +105,9 @@ namespace Take.Blip.Builder.Utils.SalesForce
                         ).Result;
                     response = await responseMessage.Content.ReadAsStringAsync();
                 };
-                return JsonConvert.DeserializeObject<Lead>(response);
+                var convertedObject = JsonConvert.DeserializeObject<JObject>(response);
+                convertedObject.Remove(LEAD_ATTRIBUTE_KEY);
+                return convertedObject;
             }
             catch (Exception ex)
             {
