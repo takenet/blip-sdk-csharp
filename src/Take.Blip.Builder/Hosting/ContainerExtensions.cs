@@ -24,6 +24,7 @@ using Take.Blip.Builder.Actions.SendRawMessage;
 using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetVariable;
 using Take.Blip.Builder.Actions.TrackEvent;
+using Take.Blip.Builder.Actions.TrackContactsJourney;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
@@ -91,8 +92,9 @@ namespace Take.Blip.Builder.Hosting
                     typeof(ForwardMessageToDeskAction),
                     typeof(CreateTicketAction),
                     typeof(DeleteVariableAction),
+                    typeof(GetLeadAction),
                     typeof(ProcessContentAssistantAction),
-                    typeof(GetLeadAction)
+                    typeof(TrackContactsJourneyAction)
                 });
 
             return container;
