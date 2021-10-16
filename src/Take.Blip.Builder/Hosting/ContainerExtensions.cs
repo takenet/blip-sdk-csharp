@@ -150,14 +150,15 @@ namespace Take.Blip.Builder.Hosting
 
         private static Container RegisterExternal(this Container container)
         {
-            container.RegisterSingleton<IDocumentTypeResolver>( () => {
+            container.RegisterSingleton<IDocumentTypeResolver>(() =>
+            {
                 var documentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
                 documentTypeResolver.RegisterDocument<InputExpiration>();
                 return documentTypeResolver;
-                });
+            });
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
-            container.RegisterSingleton<ILogger>(() => LoggerProvider.Logger);
+            container.RegisterInstance<ILogger>(LoggerProvider.Logger);
 
             return container;
         }

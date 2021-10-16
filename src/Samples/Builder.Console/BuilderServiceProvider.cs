@@ -16,7 +16,7 @@ namespace Builder.Console
             Options.AllowOverridingRegistrations = true;
             this.RegisterBuilder();
             RegisterSingleton<IConfiguration, BuilderConfiguration>();
-            RegisterSingleton<ILogger>(() => new LoggerConfiguration().WriteTo.Trace().CreateLogger());
+            RegisterInstance<ILogger>(new LoggerConfiguration().WriteTo.Trace().CreateLogger());
         }
 
         public void RegisterService(Type serviceType, object instance) => RegisterSingleton(serviceType, () => instance);
