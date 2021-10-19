@@ -34,7 +34,7 @@ namespace Take.Blip.Builder.Actions.CreateLead
                 _crmContext.SetCrm(new SalesForceProcessor(_configurationExtension, _crmClient));
             }
 
-            await _crmContext.ExecuteAsync(context, settings, ActionType.CreateLead, cancellationToken);
+            await _crmContext.ExecuteAsync(context, settings, CrmActionType.CreateLead, cancellationToken);
         }
     }
 }
