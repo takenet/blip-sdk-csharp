@@ -15,8 +15,8 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
     public class ConfigurationExtensionTests : TestsBase
     {
         public ISender _sender = Substitute.For<ISender>();
-
         private readonly ConfigurationExtension _configurationExtension;
+        private const string CONFIGURATION_LIME_URI = "lime://postmaster@portal.blip.ai/configuration";
 
         public ConfigurationExtensionTests()
         {
@@ -31,7 +31,7 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
             var mockedResponse = new Command()
             {
                 Method = CommandMethod.Get,
-                Uri = new LimeUri("lime://postmaster@portal.blip.ai/configuration"),
+                Uri = new LimeUri(CONFIGURATION_LIME_URI),
                 Resource = new JsonDocument(new Dictionary<string, object>()
                 {
                     { "Plugins", "Broadcast" }
@@ -40,7 +40,7 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
             var requestBodyCommand = new Command
             {
                 Method = CommandMethod.Get,
-                Uri = new LimeUri("lime://postmaster@portal.blip.ai/configuration")
+                Uri = new LimeUri(CONFIGURATION_LIME_URI)
             };
 
             //Act
@@ -133,7 +133,6 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
                 }, MediaType.ApplicationJson)
             };
 
-
             //Act
             _sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(mockedResponse);
             var response = await _configurationExtension.GetKeyValueAsync<CrmConfig>(domain, key, CancellationToken.None);
@@ -177,7 +176,5 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
                 Arg.Any<CancellationToken>()
                 );
         }
-
-
     }
 }

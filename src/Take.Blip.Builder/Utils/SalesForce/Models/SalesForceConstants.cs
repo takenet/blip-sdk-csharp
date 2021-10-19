@@ -35,6 +35,14 @@
         /// </summary>
         public const string REFRESH_TOKEN = "refresh_token";
 
+        /// <summary>
+        /// Grant type value
+        /// </summary>
+        public const string GRANT_TYPE = "hybrid_refresh";
 
+        /// <summary>
+        /// Grant type key
+        /// </summary>
+        public const string GRANT_TYPE_KEY = "grant_type";
     }
 }

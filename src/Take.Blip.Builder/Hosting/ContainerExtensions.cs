@@ -64,7 +64,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
             container.RegisterSingleton<IInputExpirationHandler, InputExpirationHandler>();
             container.RegisterSingleton<ICrmContext, CrmContext>();
-            container.RegisterSingleton<ISalesForceClient, SalesForceClient>();
+            container.RegisterSingleton<ICrmClient, SalesForceClient>();
 
             return container;
         }

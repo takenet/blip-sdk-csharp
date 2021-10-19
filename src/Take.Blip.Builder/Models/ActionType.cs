@@ -3,7 +3,7 @@
     /// <summary>
     /// Crm action Type
     /// </summary>
-    public enum ActionType
+    public enum CrmActionType
     {
         /// <summary>
         /// Get lead action

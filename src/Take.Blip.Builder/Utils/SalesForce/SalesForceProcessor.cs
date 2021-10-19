@@ -10,18 +10,17 @@ namespace Take.Blip.Builder.Utils.SalesForce
     public class SalesForceProcessor : ICrmProcessor
     {
         private readonly IConfigurationExtension _configurationExtension;
-        private readonly ISalesForceClient _salesForceClient;
+        private readonly ICrmClient _salesForceClient;
 
-        public SalesForceProcessor(IConfigurationExtension configurationExtension, ISalesForceClient salesForceClient)
+        public SalesForceProcessor(IConfigurationExtension configurationExtension, ICrmClient salesForceClient)
         {
             _configurationExtension = configurationExtension;
             _salesForceClient = salesForceClient;
         }
 
-        public async Task RegisterLead(IContext context, CrmSettings settings, CancellationToken cancellationToken)
+        public async Task RegisterLeadAsync(IContext context, CrmSettings settings, CancellationToken cancellationToken)
         {
             var salesForceAuth = await GetAuthorizationAsync(context.OwnerIdentity, cancellationToken);
-
             var leadResponse = await _salesForceClient.CreateLeadAsync(settings, salesForceAuth);
 
             await context.SetVariableAsync(
@@ -31,10 +30,9 @@ namespace Take.Blip.Builder.Utils.SalesForce
                 );
         }
 
-        public async Task GetLead(IContext context, CrmSettings settings, CancellationToken cancellationToken)
+        public async Task GetLeadAsync(IContext context, CrmSettings settings, CancellationToken cancellationToken)
         {
             var salesForceAuth = await GetAuthorizationAsync(context.OwnerIdentity, cancellationToken);
-
             var leadResponse = await _salesForceClient.GetLeadAsync(settings, salesForceAuth, cancellationToken);
 
             await context.SetVariableAsync(
@@ -54,7 +52,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
         {
             var crmConfig = await GetCrmConfigAsync(cancellationToken);
 
-            return await _salesForceClient.GetAuthorizationAsync(crmConfig.SalesForceConfig, ownerId, cancellationToken);
+            return await _salesForceClient.GetAuthorizationAsync(crmConfig, ownerId, cancellationToken);
         }
     }
 }

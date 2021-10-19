@@ -7,21 +7,21 @@ using Take.Blip.Builder.Utils.SalesForce.Models;
 namespace Take.Blip.Builder.Utils.SalesForce
 {
     /// <summary>
-    /// Sales force client
+    /// Crm client
     /// </summary>
-    public interface ISalesForceClient
+    public interface ICrmClient
     {
         /// <summary>
-        /// Get authorization from refresh token 
+        /// Get crm authorization 
         /// </summary>
-        /// <param name="salesForceConfig">sales force config object</param>
+        /// <param name="crmConfig">sales force config object</param>
         /// <param name="ownerId">bot id</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<AuthorizationResponse> GetAuthorizationAsync(SalesForceConfig salesForceConfig, string ownerId, CancellationToken cancellationToken);
+        public Task<AuthorizationResponse> GetAuthorizationAsync(CrmConfig crmConfig, string ownerId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Create a lead on sales force
+        /// Create a lead on a given crm
         /// </summary>
         /// <param name="registerLeadSettings">register lead actions params</param>
         /// <param name="authorization">Authorization response object</param>

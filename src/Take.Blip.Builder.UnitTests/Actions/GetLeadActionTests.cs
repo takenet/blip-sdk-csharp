@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
     public class GetLeadActionTests : ActionTestsBase
     {
         private readonly IConfigurationExtension _configurationExtension = Substitute.For<IConfigurationExtension>();
-        private readonly ISalesForceClient _salesForceClient = Substitute.For<ISalesForceClient>();
+        private readonly ICrmClient _salesForceClient = Substitute.For<ICrmClient>();
 
         private readonly ICrmContext _crmContext;
         private readonly GetLeadAction _getLeadAction;
@@ -72,10 +72,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Act
             _configurationExtension.GetKeyValueAsync<CrmConfig>(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(configurationResponse);
             _salesForceClient.GetAuthorizationAsync(
-                Arg.Is<SalesForceConfig>(sc =>
-                sc.ClientId == salesForceConfig.ClientId &&
-                sc.ClientSecret == salesForceConfig.ClientSecret &&
-                sc.RefreshToken == salesForceConfig.RefreshToken),
+                Arg.Is<CrmConfig>(sc =>
+                sc.SalesForceConfig.ClientId == salesForceConfig.ClientId &&
+                sc.SalesForceConfig.ClientSecret == salesForceConfig.ClientSecret &&
+                sc.SalesForceConfig.RefreshToken == salesForceConfig.RefreshToken),
                 Context.OwnerIdentity,
                 Arg.Any<CancellationToken>())
                 .Returns(mockedSalesForceAuth);

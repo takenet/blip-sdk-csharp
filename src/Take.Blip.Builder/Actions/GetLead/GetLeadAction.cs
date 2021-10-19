@@ -9,14 +9,14 @@ namespace Take.Blip.Builder.Actions.GetLead
 {
     public class GetLeadAction : ActionBase<CrmSettings>
     {
-        private readonly ISalesForceClient _salesForceClient;
+        private readonly ICrmClient _crmClient;
         private readonly ICrmContext _crmContext;
         private readonly IConfigurationExtension _configurationExtension;
 
-        public GetLeadAction(ISalesForceClient salesForceClient, ICrmContext crmContext, IConfigurationExtension configurationExtension) :
+        public GetLeadAction(ICrmClient crmClient, ICrmContext crmContext, IConfigurationExtension configurationExtension) :
             base(nameof(GetLead))
         {
-            _salesForceClient = salesForceClient;
+            _crmClient = crmClient;
             _crmContext = crmContext;
             _configurationExtension = configurationExtension;
         }
@@ -25,7 +25,7 @@ namespace Take.Blip.Builder.Actions.GetLead
         {
             if (settings.Crm == Crm.SalesForce)
             {
-                _crmContext.SetCrm(new SalesForceProcessor(_configurationExtension, _salesForceClient));
+                _crmContext.SetCrm(new SalesForceProcessor(_configurationExtension, _crmClient));
             }
 
             await _crmContext.ExecuteAsync(context, settings, ActionType.GetLead, cancellationToken);

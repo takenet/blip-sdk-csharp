@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.Utils
         /// <param name="settings">crm actions settings</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task RegisterLead(IContext context, CrmSettings settings, CancellationToken cancellationToken);
+        public Task RegisterLeadAsync(IContext context, CrmSettings settings, CancellationToken cancellationToken);
 
         /// <summary>
         /// Get a lead 
@@ -25,7 +25,7 @@ namespace Take.Blip.Builder.Utils
         /// <param name="settings">crm settings</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task GetLead(IContext context, CrmSettings settings, CancellationToken cancellationToken);
+        Task GetLeadAsync(IContext context, CrmSettings settings, CancellationToken cancellationToken);
 
     }
 }

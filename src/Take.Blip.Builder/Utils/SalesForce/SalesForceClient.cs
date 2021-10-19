@@ -14,7 +14,7 @@ using Take.Blip.Builder.Utils.SalesForce.Models;
 
 namespace Take.Blip.Builder.Utils.SalesForce
 {
-    public class SalesForceClient : ISalesForceClient
+    public class SalesForceClient : ICrmClient
     {
         private readonly ILogger _logger;
         private const string LEAD_ATTRIBUTE_KEY = "attributes";
@@ -24,11 +24,12 @@ namespace Take.Blip.Builder.Utils.SalesForce
             _logger = logger;
         }
 
-        public async Task<AuthorizationResponse> GetAuthorizationAsync(SalesForceConfig salesForceConfig, string ownerId, CancellationToken cancellationToken)
+        public async Task<AuthorizationResponse> GetAuthorizationAsync(CrmConfig crmConfig, string ownerId, CancellationToken cancellationToken)
         {
+            var salesForceConfig = crmConfig.SalesForceConfig;
             var body = new Dictionary<string, string>()
             {
-                {"grant_type", "hybrid_refresh" },
+                {SalesForceConstants.GRANT_TYPE_KEY, SalesForceConstants.GRANT_TYPE },
                 {SalesForceConstants.CLIENT_ID, salesForceConfig.ClientId },
                 {SalesForceConstants.CLIENT_SECRET, salesForceConfig.ClientSecret},
                 {SalesForceConstants.REFRESH_TOKEN, salesForceConfig.RefreshToken }

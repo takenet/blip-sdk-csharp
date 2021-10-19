@@ -14,24 +14,24 @@ namespace Take.Blip.Builder.Actions.CreateLead
     {
         private readonly ICrmContext _crmContext;
         private readonly IConfigurationExtension _configurationExtension;
-        private readonly ISalesForceClient _salesForceClient;
+        private readonly ICrmClient _crmClient;
 
         public RegisterLeadAction(
             ICrmContext crmContext,
             IConfigurationExtension configurationExtension,
-            ISalesForceClient salesForceClient
+            ICrmClient crmClient
             ) : base(nameof(CreateLead))
         {
             _crmContext = crmContext;
             _configurationExtension = configurationExtension;
-            _salesForceClient = salesForceClient;
+            _crmClient = crmClient;
         }
 
         public override async Task ExecuteAsync(IContext context, CrmSettings settings, CancellationToken cancellationToken)
         {
             if (settings.Crm == Crm.SalesForce)
             {
-                _crmContext.SetCrm(new SalesForceProcessor(_configurationExtension, _salesForceClient));
+                _crmContext.SetCrm(new SalesForceProcessor(_configurationExtension, _crmClient));
             }
 
             await _crmContext.ExecuteAsync(context, settings, ActionType.CreateLead, cancellationToken);
