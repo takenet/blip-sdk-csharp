@@ -11,7 +11,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// Sales force config
         /// </summary>
-        [JsonProperty("SalesForce")]
+        [JsonProperty("salesForce")]
         public SalesForceConfig SalesForceConfig { get; set; }
 
         /// <summary>
