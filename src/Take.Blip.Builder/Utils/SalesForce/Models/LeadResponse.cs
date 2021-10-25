@@ -31,5 +31,11 @@ namespace Take.Blip.Builder.Utils.SalesForce.Models
         /// </summary>
         [JsonProperty("message")]
         public string Message { get; set; }
+
+        /// <summary>
+        /// Error code in case of bad request response
+        /// </summary>
+        [JsonProperty("errorCode")]
+        public string ErrorCode { get; set; }
     }
 }

@@ -6,11 +6,6 @@
     public static class SalesForceConstants
     {
         /// <summary>
-        /// Sales force uri
-        /// </summary>
-        public const string SALES_FORCE_URI = "https://take3-dev-ed.my.salesforce.com";
-
-        /// <summary>
         /// Advanced config domain
         /// </summary>
         public const string CONFIG_DOMAIN = "postmaster@portal.blip.ai";

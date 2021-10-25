@@ -4,11 +4,13 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils.SalesForce.Models;
 
@@ -18,10 +20,12 @@ namespace Take.Blip.Builder.Utils.SalesForce
     {
         private readonly ILogger _logger;
         private const string LEAD_ATTRIBUTE_KEY = "attributes";
+        private readonly IConfiguration _configuration;
 
-        public SalesForceClient(ILogger logger)
+        public SalesForceClient(ILogger logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task<AuthorizationResponse> GetAuthorizationAsync(CrmConfig crmConfig, string ownerId, CancellationToken cancellationToken)
@@ -42,7 +46,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
                 using (HttpClient client = new HttpClient())
                 {
                     HttpResponseMessage response = client.PostAsync(
-                        $"{SalesForceConstants.SALES_FORCE_URI}{SalesForceRoutes.REFRESH_TOKEN}",
+                        $"{_configuration.SalesForceBaseUri}{SalesForceRoutes.REFRESH_TOKEN}",
                         new FormUrlEncodedContent(body)
                         ).Result;
                     responseToken = await response.Content.ReadAsStringAsync();
@@ -51,14 +55,16 @@ namespace Take.Blip.Builder.Utils.SalesForce
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, $"An exception occurred while processing a Sales Force  HTTP request");
-                throw ex;
+                _logger.Error(ex, $"An exception occurred while processing a Sales Force HTTP request");
+                throw;
             }
         }
 
         public async Task<LeadResponse> CreateLeadAsync(CrmSettings registerLeadSettings, AuthorizationResponse authorization)
         {
             var response = string.Empty;
+            var statusCode = HttpStatusCode.OK;
+
             try
             {
                 using (HttpClient client = new HttpClient())
@@ -75,20 +81,29 @@ namespace Take.Blip.Builder.Utils.SalesForce
                             "application/json"
                             )
                         ).Result;
+                    statusCode = responseMessage.StatusCode;
                     response = await responseMessage.Content.ReadAsStringAsync();
                 };
+                if (statusCode == HttpStatusCode.BadRequest)
+                {
+                    var convertedErrorResponse = JsonConvert.DeserializeObject<List<LeadResponse>>(response);
+                    return convertedErrorResponse.First();
+                }
+
                 return JsonConvert.DeserializeObject<LeadResponse>(response);
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, $"An exception occurred while processing a Sales Force  HTTP request");
-                throw ex;
+                _logger.Error(ex, $"An exception occurred while processing a Sales Force HTTP request");
+                throw;
             }
         }
 
         public async Task<JObject> GetLeadAsync(CrmSettings settings, AuthorizationResponse authorization, CancellationToken cancellationToken)
         {
             var response = string.Empty;
+            var statusCode = HttpStatusCode.OK;
+
             var uri = $"{authorization.InstanceUrl}" +
                 $"{ApplyUriParams(SalesForceRoutes.GET_LEAD, settings.LeadId)}";
             
@@ -104,16 +119,27 @@ namespace Take.Blip.Builder.Utils.SalesForce
                         uri,
                         cancellationToken
                         ).Result;
+                    statusCode = responseMessage.StatusCode;
                     response = await responseMessage.Content.ReadAsStringAsync();
                 };
-                var convertedObject = JsonConvert.DeserializeObject<JObject>(response);
-                convertedObject.Remove(LEAD_ATTRIBUTE_KEY);
+
+                JObject convertedObject;
+                if(statusCode == HttpStatusCode.NotFound)
+                {
+                    var notFoundResponse = JsonConvert.DeserializeObject<List<JObject>>(response);
+                    convertedObject = notFoundResponse.First();
+                }
+                else
+                {
+                    convertedObject = JsonConvert.DeserializeObject<JObject>(response);
+                    convertedObject.Remove(LEAD_ATTRIBUTE_KEY);
+                }
                 return convertedObject;
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, $"An exception occurred while processing a Sales Force  HTTP request");
-                throw ex;
+                _logger.Error(ex, $"An exception occurred while processing a Sales Force  HTTP request");
+                throw;
             }
         }
 

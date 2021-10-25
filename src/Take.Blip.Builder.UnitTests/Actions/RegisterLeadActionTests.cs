@@ -107,5 +107,82 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 CancellationToken.None
                 );
         }
+
+        [Fact]
+        public async Task TestCreateLeadOnSalesForce_ShouldFailAsync()
+        {
+            // Arrange
+            var settings = new CrmSettings()
+            {
+                Crm = Crm.SalesForce,
+                LeadBody = new Dictionary<string, string>()
+                {
+                    { "FirstName", "Gabriel" },
+                    { "LastName", "Rodrigues" },
+                    { "Email", "jsdpablo@take.net" },
+                    { "Company", "Take" },
+                    { "cidade__c", "Bh" },
+                    { "Suplemento__c", "Whey" }
+                },
+                ReturnValue = "sfReturn"
+            };
+
+            var configurationResponse = new CrmConfig()
+            {
+                SalesForceConfig = new SalesForceConfig()
+                {
+                    ClientId = "clientId",
+                    ClientSecret = "clientSecret",
+                    RefreshToken = "refreshToken"
+                }
+            };
+            var salesForceConfig = configurationResponse.SalesForceConfig;
+
+            var mockedSalesForceAuth = new AuthorizationResponse
+            {
+                AccessToken = "123",
+                InstanceUrl = "salesforce.com",
+                TokenType = "Bearer"
+            };
+
+            var mockedSalesForceResponse = new LeadResponse
+            {
+                Message = "Use one of these records?",
+                ErrorCode = "DUPLICATES_DETECTED",
+                Succes = false
+            };
+
+            // Act
+            _configurationExtension.GetKeyValueAsync<CrmConfig>(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(configurationResponse);
+            _crmClient.GetAuthorizationAsync(
+                Arg.Is<CrmConfig>(sc =>
+                sc.SalesForceConfig.ClientId == salesForceConfig.ClientId &&
+                sc.SalesForceConfig.ClientSecret == salesForceConfig.ClientSecret &&
+                sc.SalesForceConfig.RefreshToken == salesForceConfig.RefreshToken),
+                Context.OwnerIdentity,
+                Arg.Any<CancellationToken>())
+                .Returns(mockedSalesForceAuth);
+
+            _crmClient.CreateLeadAsync(
+                Arg.Is<CrmSettings>(rl =>
+                rl.Crm == settings.Crm &&
+                rl.ReturnValue == settings.ReturnValue
+                ),
+                Arg.Is<AuthorizationResponse>(ar =>
+                ar.AccessToken == mockedSalesForceAuth.AccessToken &&
+                ar.InstanceUrl == mockedSalesForceAuth.InstanceUrl &&
+                ar.TokenType == mockedSalesForceAuth.TokenType
+                ))
+                .Returns(mockedSalesForceResponse);
+
+            await _registerLeadAction.ExecuteAsync(Context, settings, CancellationToken.None);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(
+                settings.ReturnValue,
+                JsonConvert.SerializeObject(mockedSalesForceResponse),
+                CancellationToken.None
+                );
+        }
     }
 }
