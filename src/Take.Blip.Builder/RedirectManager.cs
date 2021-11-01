@@ -16,7 +16,7 @@ namespace Take.Blip.Builder
 
         public Task RedirectUserAsync(IContext context, Redirect redirect, CancellationToken cancellationToken)
         {
-            return _sender.SendMessageAsync(redirect, context.Input.Message.From, cancellationToken);
+            return _sender.SendMessageAsync(redirect, context.Input.Message.From, cancellationToken, metadata: context.Input.Message.Metadata);
         }
     }
 }

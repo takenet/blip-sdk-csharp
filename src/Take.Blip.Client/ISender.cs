@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
@@ -33,14 +34,15 @@ namespace Take.Blip.Client
         /// <param name="content">The content of the message</param>
         /// <param name="to">The destination of the message</param>
         /// <param name="cancellationToken">A cancellation token to allow the task to be canceled</param>
-        public static Task SendMessageAsync(this ISender sender, Document content, Node to, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task SendMessageAsync(this ISender sender, Document content, Node to, CancellationToken cancellationToken = default(CancellationToken), IDictionary<string, string> metadata = null)
         {
             if (content == null) throw new ArgumentNullException(nameof(content));
             var message = new Message
             {
                 Id = Guid.NewGuid().ToString(),
                 To = to,
-                Content = content
+                Content = content,
+                Metadata = metadata
             };
             return sender.SendMessageAsync(message, cancellationToken);
         }
