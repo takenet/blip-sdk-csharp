@@ -3,7 +3,7 @@
     /// <summary>
     /// Sales force routes
     /// </summary>
-    public static class SalesForceRoutes
+    public static class SalesForceUriTemplates
     {
         /// <summary>
         /// Refresh token

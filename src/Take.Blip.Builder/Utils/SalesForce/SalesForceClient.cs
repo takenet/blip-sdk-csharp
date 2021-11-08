@@ -46,7 +46,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
                 using (HttpClient client = new HttpClient())
                 {
                     HttpResponseMessage response = client.PostAsync(
-                        $"{_configuration.SalesForceBaseUri}{SalesForceRoutes.REFRESH_TOKEN}",
+                        $"{_configuration.SalesForceBaseUri}{SalesForceUriTemplates.REFRESH_TOKEN}",
                         new FormUrlEncodedContent(body)
                         ).Result;
                     responseToken = await response.Content.ReadAsStringAsync();
@@ -74,7 +74,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
                         authorization.AccessToken
                         );
                     HttpResponseMessage responseMessage = client.PostAsync(
-                        $"{authorization.InstanceUrl}{SalesForceRoutes.CREATE_LEAD}",
+                        $"{authorization.InstanceUrl}{SalesForceUriTemplates.CREATE_LEAD}",
                         new StringContent(
                             registerLeadSettings.LeadBody as string,
                             Encoding.UTF8,
@@ -105,7 +105,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
             var statusCode = HttpStatusCode.OK;
 
             var uri = $"{authorization.InstanceUrl}" +
-                $"{ApplyUriParams(SalesForceRoutes.GET_LEAD, settings.LeadId)}";
+                $"{ApplyUriParams(SalesForceUriTemplates.GET_LEAD, settings.LeadId)}";
             
             try
             {
