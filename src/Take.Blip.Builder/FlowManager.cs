@@ -43,6 +43,9 @@ namespace Take.Blip.Builder
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
+        InputTrace inputTrace = null;
+        TraceSettings traceSettings;
+        State state = default;
 
         public FlowManager(
             IConfiguration configuration,
@@ -102,10 +105,6 @@ namespace Take.Blip.Builder
             // Determine the user / owner pair
             var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
 
-            // Input tracing infrastructure
-            InputTrace inputTrace = null;
-            TraceSettings traceSettings;
-
             if (message.Metadata != null &&
                 message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
             {
@@ -134,7 +133,6 @@ namespace Take.Blip.Builder
 
             var ownerContext = OwnerContext.Create(ownerIdentity);
 
-            State state = default;
             try
             {
                 // Create a cancellation token
@@ -352,7 +350,15 @@ namespace Take.Blip.Builder
 
         private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
         {
-            
+
+            //Pre declare variable for memory use improve
+            IAction action;
+            ActionTrace actionTrace;
+            Stopwatch actionStopwatch;
+            double? executionTimeoutInSeconds;
+            TimeSpan executionTimeout;
+            JObject settings;
+
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
@@ -362,10 +368,10 @@ namespace Take.Blip.Builder
                     continue;
                 }
 
-                var action = _actionProvider.Get(stateAction.Type);
+                action = _actionProvider.Get(stateAction.Type);
 
                 // Trace infra
-                var (actionTrace, actionStopwatch) = actionTraces != null
+                (actionTrace, actionStopwatch) = actionTraces != null
                     ? (stateAction.ToTrace(), Stopwatch.StartNew())
                     : (null, null);
 
@@ -375,10 +381,10 @@ namespace Take.Blip.Builder
                 }
 
                 // Configure the action timeout, that can be defined in action or flow level
-                var executionTimeoutInSeconds =
+                executionTimeoutInSeconds =
                     stateAction.Timeout ?? context.Flow?.BuilderConfiguration?.ActionExecutionTimeout;
 
-                var executionTimeout = executionTimeoutInSeconds.HasValue
+                executionTimeout = executionTimeoutInSeconds.HasValue
                     ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
                     : _configuration.DefaultActionExecutionTimeout;
 
@@ -387,7 +393,7 @@ namespace Take.Blip.Builder
                 {
                     try
                     {
-                        var settings = stateAction.Settings;
+                        settings = stateAction.Settings;
                         if (settings != null)
                         {
                             var settingsJson = settings.ToString(Formatting.None);
@@ -452,8 +458,12 @@ namespace Take.Blip.Builder
 
         private async Task<State> ProcessOutputsAsync(LazyInput lazyInput, IContext context, Flow flow, State state, ICollection<OutputTrace> outputTraces, CancellationToken cancellationToken)
         {
+            //pre declare variables to improve memory performance
             var outputs = state.Outputs;
             state = null;
+            OutputTrace outputTrace;
+            Stopwatch outputStopwatch;
+            string replacedVariable;
 
             // If there's any output in the current state
             if (outputs != null)
@@ -461,7 +471,7 @@ namespace Take.Blip.Builder
                 // Evalute each output conditions
                 foreach (var output in outputs.OrderBy(o => o.Order))
                 {
-                    var (outputTrace, outputStopwatch) = outputTraces != null
+                    (outputTrace, outputStopwatch) = outputTraces != null
                         ? (output.ToTrace(), Stopwatch.StartNew())
                         : (null, null);
 
@@ -470,7 +480,7 @@ namespace Take.Blip.Builder
                         if (output.Conditions == null ||
                             await output.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken))
                         {
-                            var replacedVariable = output.StateId;
+                            replacedVariable = output.StateId;
                             
                             if (IsContextVariable(replacedVariable)) {
                                 replacedVariable = await _variableReplacer.ReplaceAsync(replacedVariable, context, cancellationToken);

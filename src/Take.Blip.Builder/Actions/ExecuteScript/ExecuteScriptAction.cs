@@ -91,18 +91,19 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         protected async Task<object[]> GetScriptArgumentsAsync(
             IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
-            object[] arguments = null;
             if (settings.InputVariables != null && settings.InputVariables.Length > 0)
             {
-                arguments = new object[settings.InputVariables.Length];
+                //improve memory alocation for arguments object
+                var arguments = new object[settings.InputVariables.Length];
                 for (int i = 0; i < arguments.Length; i++)
                 {
                     arguments[i] =
                         await context.GetVariableAsync(settings.InputVariables[i], cancellationToken);
                 }
+                return arguments;
             }
 
-            return arguments;
+            return null;
         }
 
         private async Task SetScriptResultAsync(

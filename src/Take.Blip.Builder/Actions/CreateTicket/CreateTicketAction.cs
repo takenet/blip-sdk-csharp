@@ -11,6 +11,7 @@ namespace Take.Blip.Builder.Actions.CreateTicket
     {
         private readonly IHelpDeskExtension _helpDeskExtension;
         private readonly Application _application;
+        Ticket ticket;
 
         public CreateTicketAction(IHelpDeskExtension helpDeskExtension, Application application)
             : base(nameof(CreateTicket))
@@ -21,7 +22,7 @@ namespace Take.Blip.Builder.Actions.CreateTicket
 
         public override async Task ExecuteAsync(IContext context, CreateTicketSettings settings, CancellationToken cancellationToken)
         {
-            var ticket = new Ticket()
+            ticket = new Ticket()
             {
                 OwnerIdentity = settings.OwnerIdentity,
                 CustomerIdentity = settings.CustomerIdentity,
@@ -66,12 +67,12 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                 };
             }
 
-            var createdTicket = await _helpDeskExtension.CreateTicketAsync(ticket, cancellationToken);
-            context.SetTicket(createdTicket);
+            ticket = await _helpDeskExtension.CreateTicketAsync(ticket, cancellationToken);
+            context.SetTicket(ticket);
 
             if (!string.IsNullOrWhiteSpace(settings.Variable))
             {
-                await context.SetVariableAsync(settings.Variable, createdTicket.Id, cancellationToken);
+                await context.SetVariableAsync(settings.Variable, ticket.Id, cancellationToken);
             }
         }
     }

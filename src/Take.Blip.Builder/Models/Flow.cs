@@ -106,6 +106,7 @@ namespace Take.Blip.Builder.Models
                 }
             }
 
+            State outputState;
             foreach (var state in States)
             {
                 state.Validate();
@@ -121,15 +122,13 @@ namespace Take.Blip.Builder.Models
                     bool CanBeReached(State targetState, Output output, ISet<string> checkedStates)
                     {
                         if (checkedStates.Contains(output.StateId)) return false;
-                        var outputState = States.FirstOrDefault(s => s.Id == output.StateId);
+                        outputState = States.FirstOrDefault(s => s.Id == output.StateId);
                         if (outputState?.Outputs == null || outputState.Outputs.Length == 0) return false;
                         if (outputState.Input != null && !outputState.Input.Bypass) return false;
                         if (outputState.Outputs.Any(o => o.StateId == targetState.Id)) return true;
                         checkedStates.Add(output.StateId);
                         return outputState.Outputs.Any(o => CanBeReached(targetState, o, checkedStates));
-                    }
-
-                    ;
+                    };
 
                     foreach (var output in state.Outputs)
                     {
