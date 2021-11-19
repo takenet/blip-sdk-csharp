@@ -11,7 +11,6 @@ namespace Take.Blip.Builder.Actions.CreateTicket
     {
         private readonly IHelpDeskExtension _helpDeskExtension;
         private readonly Application _application;
-        Ticket ticket;
 
         public CreateTicketAction(IHelpDeskExtension helpDeskExtension, Application application)
             : base(nameof(CreateTicket))
@@ -22,7 +21,7 @@ namespace Take.Blip.Builder.Actions.CreateTicket
 
         public override async Task ExecuteAsync(IContext context, CreateTicketSettings settings, CancellationToken cancellationToken)
         {
-            ticket = new Ticket()
+            var ticket = new Ticket()
             {
                 OwnerIdentity = settings.OwnerIdentity,
                 CustomerIdentity = settings.CustomerIdentity,

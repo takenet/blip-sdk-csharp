@@ -43,9 +43,6 @@ namespace Take.Blip.Builder
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
-        InputTrace inputTrace = null;
-        TraceSettings traceSettings;
-        State state = default;
 
         public FlowManager(
             IConfiguration configuration,
@@ -105,6 +102,10 @@ namespace Take.Blip.Builder
             // Determine the user / owner pair
             var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
 
+            // Input tracing infrastructure
+            InputTrace inputTrace = null;
+            TraceSettings traceSettings;
+
             if (message.Metadata != null &&
                 message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
             {
@@ -133,6 +134,7 @@ namespace Take.Blip.Builder
 
             var ownerContext = OwnerContext.Create(ownerIdentity);
 
+            State state = default;
             try
             {
                 // Create a cancellation token
