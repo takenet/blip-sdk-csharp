@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
         /// <param name="ownerId">bot id</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<AuthorizationResponse> GetAuthorizationAsync(CrmConfig crmConfig, string ownerId, CancellationToken cancellationToken);
+        Task<AuthorizationResponse> GetAuthorizationAsync(CrmConfig crmConfig, string ownerId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Create a lead on a given crm

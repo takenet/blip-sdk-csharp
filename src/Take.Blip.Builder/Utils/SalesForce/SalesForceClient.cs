@@ -21,11 +21,13 @@ namespace Take.Blip.Builder.Utils.SalesForce
         private readonly ILogger _logger;
         private const string LEAD_ATTRIBUTE_KEY = "attributes";
         private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public SalesForceClient(ILogger logger, IConfiguration configuration)
+        public SalesForceClient(ILogger logger, IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<AuthorizationResponse> GetAuthorizationAsync(CrmConfig crmConfig, string ownerId, CancellationToken cancellationToken)
@@ -39,11 +41,11 @@ namespace Take.Blip.Builder.Utils.SalesForce
                 {SalesForceConstants.REFRESH_TOKEN, salesForceConfig.RefreshToken }
             };
 
-            var responseToken = string.Empty;
 
             try
             {
-                using (HttpClient client = new HttpClient())
+                var responseToken = string.Empty;
+                using (var client = _httpClientFactory.CreateClient())
                 {
                     HttpResponseMessage response = client.PostAsync(
                         $"{_configuration.SalesForceBaseUri}{SalesForceUriTemplates.REFRESH_TOKEN}",
@@ -67,7 +69,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
 
             try
             {
-                using (HttpClient client = new HttpClient())
+                using (var client = _httpClientFactory.CreateClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                         authorization.TokenType,
@@ -109,7 +111,7 @@ namespace Take.Blip.Builder.Utils.SalesForce
             
             try
             {
-                using (HttpClient client = new HttpClient())
+                using (var client = _httpClientFactory.CreateClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                         authorization.TokenType,

@@ -1,7 +1,5 @@
-﻿using Lime.Messaging;
-using Lime.Protocol.Serialization;
+﻿using Lime.Protocol.Serialization;
 using System;
-using System.Reflection;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.AdvancedConfig;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;

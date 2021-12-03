@@ -36,6 +36,8 @@ using Take.Blip.Client;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions;
 using Take.Elephant;
+using System.Net.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -160,6 +162,11 @@ namespace Take.Blip.Builder.Hosting
 
         private static Container RegisterExternal(this Container container)
         {
+            var serviceProvider = new ServiceCollection()
+                .AddHttpClient()
+                .BuildServiceProvider();
+            var httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();
+            container.RegisterInstance(httpClientFactory);
             container.RegisterSingleton<IDocumentTypeResolver>(() =>
             {
                 var documentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
@@ -169,7 +176,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
             container.RegisterSingleton<ILogger>(() => LoggerProvider.Logger);
-
+                
             return container;
         }
     }
