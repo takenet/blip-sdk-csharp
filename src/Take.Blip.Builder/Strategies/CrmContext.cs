@@ -10,11 +10,11 @@ namespace Take.Blip.Builder.Strategies
         private ICrmProcessor _crmProcessor;
         public async Task ExecuteAsync(IContext context, CrmSettings settings, CrmActionType actionType, CancellationToken cancellationToken)
         {
-            if (actionType.Equals(CrmActionType.GetLead))
+            if (actionType == CrmActionType.GetLead)
             {
                 await _crmProcessor.GetLeadAsync(context, settings, cancellationToken);
             }
-            else if (actionType.Equals(CrmActionType.CreateLead))
+            else if (actionType == CrmActionType.CreateLead)
             {
                 await _crmProcessor.RegisterLeadAsync(context, settings, cancellationToken);
             }

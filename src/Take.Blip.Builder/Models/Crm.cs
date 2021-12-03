@@ -8,6 +8,6 @@
         /// <summary>
         /// Sales force crm
         /// </summary>
-        SalesForce
+        SalesForce = 1
     }
 }

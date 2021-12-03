@@ -1,8 +1,6 @@
 ﻿using Lime.Protocol;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +17,6 @@ namespace Take.Blip.Client.Extensions.AdvancedConfig
 
         public async Task<Document> GetDomainAsync(string domain, CancellationToken cancellationToken)
         {
-            if (domain.IsNullOrEmpty()) throw new ArgumentNullException(nameof(domain));
             var requestCommand = new Command()
             {
                 Method = CommandMethod.Get,

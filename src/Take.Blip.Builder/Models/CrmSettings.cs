@@ -28,15 +28,10 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         public string ReturnValue { get; set; }
 
-        /// <summary>
-        /// Validate if lead request has a body
-        /// </summary>
         public void Validate()
         {
-            if (Crm.Equals(null))
-            {
-                throw new ValidationException(
-                    $"The '{nameof(Crm)}' settings value is requied for 'Crm' action");
+            if (Crm.Equals(0)) {
+                throw new System.NotImplementedException();
             }
         }
     }
