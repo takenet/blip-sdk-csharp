@@ -56,19 +56,6 @@ namespace Take.Blip.Client.UnitTests.Extensions.Configurations
 
         }
 
-        [Fact]
-        public async Task TestGetDomain_ShouldFailAsync()
-        {
-            //Arrange
-            var domain = string.Empty;
-
-            //Act
-            Func<Task<Document>> functionCall = () => _configurationExtension.GetDomainAsync(domain, CancellationToken.None);
-
-            //Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(functionCall);
-        }
-
         [Theory]
         [InlineData("", "key")]
         [InlineData("domain", "")]
