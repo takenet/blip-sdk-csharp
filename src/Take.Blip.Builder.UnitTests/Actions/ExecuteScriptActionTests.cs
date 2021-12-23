@@ -299,5 +299,31 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 ex.Message.ShouldBe("XMLHttpRequest is not defined");
             }
         }
+
+        [Fact]
+        public async Task ExecuteScriptParseIntWithExcededLengthShouldSucceed()
+        {
+            // Arrange
+            var result = "NaN";
+            var settings = new ExecuteScriptSettings()
+            {
+                Source = @"
+                    function run() {
+                        let numberTest = new Array(100000).join('Z');
+                        let convert = parseInt(numberTest);
+                        return convert;
+                    }
+                ",
+                OutputVariable = nameof(result)
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
+        }
     }
 }

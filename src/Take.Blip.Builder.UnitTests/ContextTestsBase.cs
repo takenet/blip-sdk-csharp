@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Lime.Protocol;
 using NSubstitute;
 using Take.Blip.Builder.Models;
@@ -11,6 +12,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             Context = Substitute.For<IContext>();
             Flow = new Flow();
+            Flow.Configuration = new Dictionary<string, string>();
             UserIdentity = new Identity(Guid.NewGuid().ToString(), "msging.net");
             OwnerIdentity = new Identity("application", "msging.net");
             Context.Flow.Returns(Flow);
