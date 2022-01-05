@@ -10,7 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-- skipDecorator: true
+  skipDecorator: true
 
 name: x.x.1$
 
