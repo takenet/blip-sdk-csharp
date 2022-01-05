@@ -12,7 +12,7 @@ pool:
 variables:
   skipDecorator: true
 
-name: x.x.1$
+name: 0.6.70$(Rev:.r)
 
 resources:
   repositories:   
