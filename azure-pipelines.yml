@@ -1,0 +1,28 @@
+#Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+name: v0.6.63
+
+resources:
+  repositories:   
+  - repository: templates
+    type: git
+    name: Operações/template-take-blip
+    ref: refs/tags/v1.3.7
+
+extends:
+  template: template-pipeline.yml@templates    
+  parameters:    
+    packagename: blip-sdk-csharp
+    type: dotnet
+    to: nuget
+    nugetServiceConnection: TestNuget
+    includeSymbols: true
+    dotnetVersion: "3.1.0"
+    testProjects: src/Take.Blip.Client.sln
+    testPermission: true
