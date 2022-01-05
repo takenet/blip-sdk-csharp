@@ -27,7 +27,7 @@ extends:
     packagename: blip-sdk-csharp    
     type: dotnet
     to: nuget
-    nugetServiceConnection: TestNuget
+    nugetServiceConnection: Nuget.org Take
     dotnetVersion: "3.1.x"
     testProjects: src/Take.Blip.Client.sln
     testPermission: true
