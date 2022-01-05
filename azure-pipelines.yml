@@ -10,10 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-- sonarQubeTags: Flow Building
-- sonarQubeKey: blip-sdk-csharp
-- sonarQubeName: blip-sdk-csharp
-- framework: dotnet
+- skipDecorator: true
 
 name: x.x.1$
 
