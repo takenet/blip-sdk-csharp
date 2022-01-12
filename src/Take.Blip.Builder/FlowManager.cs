@@ -44,6 +44,8 @@ namespace Take.Blip.Builder
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
 
+        private const string END_SUBFLOW_STATE_ID = "end";
+
         public FlowManager(
             IConfiguration configuration,
             IStateManager stateManager,
@@ -239,8 +241,14 @@ namespace Take.Blip.Builder
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
                                 }
 
-                                // Determine the next state
-                                state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
+                                if (state.Id != END_SUBFLOW_STATE_ID)
+                                {
+                                    // Determine the next state
+                                    state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
+                                } else
+                                {
+                                    state = null;
+                                }
                                 // Store the previous state
                                 await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
 
