@@ -156,10 +156,9 @@ namespace Take.Blip.Builder
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
                         
-                        if (parentFlow != null && stateId.IsNullOrEmpty() && previousState.IsNullOrEmpty())
+                        if (parentFlow != null)
                         {
                             parentFlow.Validate();
-                            flow = parentFlow;
                         }
 
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
