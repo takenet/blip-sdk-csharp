@@ -78,7 +78,7 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, Flow parentFlow = null)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -155,11 +155,6 @@ namespace Take.Blip.Builder
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
-                        
-                        if (parentFlow != null)
-                        {
-                            parentFlow.Validate();
-                        }
 
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
