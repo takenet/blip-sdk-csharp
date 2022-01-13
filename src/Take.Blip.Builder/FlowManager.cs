@@ -44,6 +44,8 @@ namespace Take.Blip.Builder
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
 
+        private const string END_SUBFLOW_STATE_ID = "end";
+
         public FlowManager(
             IConfiguration configuration,
             IStateManager stateManager,
@@ -154,6 +156,8 @@ namespace Take.Blip.Builder
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
+                        var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
+
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // If current stateId of user is different of inputExpiration stop processing
@@ -232,8 +236,14 @@ namespace Take.Blip.Builder
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
                                 }
 
-                                // Determine the next state
-                                state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
+                                if (state.Id != END_SUBFLOW_STATE_ID)
+                                {
+                                    // Determine the next state
+                                    state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
+                                } else
+                                {
+                                    state = null;
+                                }
                                 // Store the previous state
                                 await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
 
