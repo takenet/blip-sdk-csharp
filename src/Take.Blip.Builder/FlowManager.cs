@@ -1,11 +1,4 @@
-﻿using Lime.Messaging.Contents;
-using Lime.Protocol;
-using Lime.Protocol.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Serilog;
-using Serilog.Context;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -13,6 +6,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
+using Lime.Protocol.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog;
+using Serilog.Context;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
@@ -42,6 +42,7 @@ namespace Take.Blip.Builder
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
+        private readonly IAttendanceRedirectHandler _attendanceRedirectHandler;
         private readonly Node _applicationNode;
 
         private const string END_SUBFLOW_STATE_ID = "end";
@@ -61,6 +62,7 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
+            IAttendanceRedirectHandler attendanceRedirectHandler,
             Application application)
         {
             _configuration = configuration;
@@ -77,6 +79,7 @@ namespace Take.Blip.Builder
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
             _inputExpirationHandler = inputExpirationHandler;
+            _attendanceRedirectHandler = attendanceRedirectHandler;
             _applicationNode = application.Node;
         }
 
@@ -173,6 +176,17 @@ namespace Take.Blip.Builder
 
                         // Create trace instances, if required
                         var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
+
+
+                        // Redirect Action
+                        var attendanceRedirect = await context.GetContextVariableAsync(AttendanceRedirectHandler.ATTENDANCE_REDIRECT_KEY, cancellationToken);
+
+                        if (attendanceRedirect != null)
+                        {
+                            await _attendanceRedirectHandler.RedirectToAttendanceAsync(
+                                attendanceRedirect, userIdentity, context, message, cancellationToken);
+                        }
+
 
                         // Process the global input actions
                         if (flow.InputActions != null)
