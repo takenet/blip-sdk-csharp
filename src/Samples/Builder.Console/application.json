@@ -16,14 +16,16 @@
   "serviceProviderType": "BuilderServiceProvider",
   "settings": {
     "flow": {
-      "id": "0d2e60c6-a9cf-4101-a094-2a073246ef63",
+      "id": "1f7023a1-2bb1-41ba-909a-f5277a82e921",
       "states": [
         {
           "id": "onboarding",
           "root": true,
           "name": "Start",
           "inputActions": [],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [
             {
               "type": "TrackContactsJourney",
@@ -40,11 +42,15 @@
                 {
                   "source": "input",
                   "comparison": "matches",
-                  "values": [ ".*" ]
+                  "values": [
+                    ".*"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -65,14 +71,18 @@
               "settings": {
                 "function": "run",
                 "source": "\nfunction run(input) {\n try\n {\n var int = parseInt(input);\n return isNaN(int) ? \"false\" : \"true\";\n }\n catch (_ex) \n {\n return \"false\";\n }\n}",
-                "inputVariables": [ "input.content" ],
+                "inputVariables": [
+                  "input.content"
+                ],
                 "outputVariable": "isnumber",
                 "LocalTimeZoneEnabled": true
               },
               "conditions": []
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -81,7 +91,9 @@
                 {
                   "source": "context",
                   "comparison": "equals",
-                  "values": [ "true" ],
+                  "values": [
+                    "true"
+                  ],
                   "variable": "isnumber"
                 }
               ]
@@ -92,12 +104,16 @@
                 {
                   "source": "context",
                   "comparison": "equals",
-                  "values": [ "false" ],
+                  "values": [
+                    "false"
+                  ],
                   "variable": "isnumber"
                 }
               ]
             },
-            { "stateId": "c7e71405-6214-47f7-a901-f9fa954a3361" }
+            {
+              "stateId": "c7e71405-6214-47f7-a901-f9fa954a3361"
+            }
           ]
         },
         {
@@ -213,7 +229,9 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -226,7 +244,9 @@
                 }
               ]
             },
-            { "stateId": "8f9b14dd-9f99-40bb-8bda-7bbef0ff5929" }
+            {
+              "stateId": "8f9b14dd-9f99-40bb-8bda-7bbef0ff5929"
+            }
           ]
         },
         {
@@ -277,7 +297,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -286,7 +308,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "H. Atendimento Humano", "H", "Atendimento Humano" ]
+                  "values": [
+                    "H. Atendimento Humano",
+                    "H",
+                    "Atendimento Humano"
+                  ]
                 }
               ]
             },
@@ -296,7 +322,12 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "Plain Text", "1. Texto comum", "Texto comum" ]
+                  "values": [
+                    "1",
+                    "Plain Text",
+                    "1. Texto comum",
+                    "Texto comum"
+                  ]
                 }
               ]
             },
@@ -306,7 +337,13 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "Media", "2. Media", "mídia", "2. mídia" ]
+                  "values": [
+                    "2",
+                    "Media",
+                    "2. Media",
+                    "mídia",
+                    "2. mídia"
+                  ]
                 }
               ]
             },
@@ -316,7 +353,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3", "3. Resposta Rápida" ]
+                  "values": [
+                    "3",
+                    "3. Resposta Rápida"
+                  ]
                 }
               ]
             },
@@ -326,7 +366,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4", "4. Menu" ]
+                  "values": [
+                    "4",
+                    "4. Menu"
+                  ]
                 }
               ]
             },
@@ -336,7 +379,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "5", "5. Localização" ]
+                  "values": [
+                    "5",
+                    "5. Localização"
+                  ]
                 }
               ]
             },
@@ -346,7 +392,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "6", "6. Weblink" ]
+                  "values": [
+                    "6",
+                    "6. Weblink"
+                  ]
                 }
               ]
             },
@@ -356,7 +405,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "7", "7. Carrossel" ]
+                  "values": [
+                    "7",
+                    "7. Carrossel"
+                  ]
                 }
               ]
             },
@@ -366,7 +418,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "8", "8. Conteúdo HTTP" ]
+                  "values": [
+                    "8",
+                    "8. Conteúdo HTTP"
+                  ]
                 }
               ]
             },
@@ -376,7 +431,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "9", "9. Conteúdo Sensível", "Conteúdo Sensível" ]
+                  "values": [
+                    "9",
+                    "9. Conteúdo Sensível",
+                    "Conteúdo Sensível"
+                  ]
                 }
               ]
             },
@@ -386,11 +445,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "X", "Conteúdo Especializado", "X. Conteúdo Especializado" ]
+                  "values": [
+                    "X",
+                    "Conteúdo Especializado",
+                    "X. Conteúdo Especializado"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -441,9 +506,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "075dfac9-811c-4fb4-89ff-e35cf2985c72" } ]
+          "outputs": [
+            {
+              "stateId": "075dfac9-811c-4fb4-89ff-e35cf2985c72"
+            }
+          ]
         },
         {
           "id": "541930d8-3131-46f4-96ba-71b436d93b29",
@@ -493,9 +564,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "075dfac9-811c-4fb4-89ff-e35cf2985c72" } ]
+          "outputs": [
+            {
+              "stateId": "075dfac9-811c-4fb4-89ff-e35cf2985c72"
+            }
+          ]
         },
         {
           "id": "a5341241-fa4c-4ae7-bb49-3a8ddca11f07",
@@ -545,9 +622,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "075dfac9-811c-4fb4-89ff-e35cf2985c72" } ]
+          "outputs": [
+            {
+              "stateId": "075dfac9-811c-4fb4-89ff-e35cf2985c72"
+            }
+          ]
         },
         {
           "id": "075dfac9-811c-4fb4-89ff-e35cf2985c72",
@@ -597,7 +680,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -606,7 +691,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "1. Texto pequeno", "Texto pequeno" ]
+                  "values": [
+                    "1",
+                    "1. Texto pequeno",
+                    "Texto pequeno"
+                  ]
                 }
               ]
             },
@@ -616,7 +705,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Texto longo (2200 Caracteres)", "Texto longo (2200 Caracteres)" ]
+                  "values": [
+                    "2",
+                    "2. Texto longo (2200 Caracteres)",
+                    "Texto longo (2200 Caracteres)"
+                  ]
                 }
               ]
             },
@@ -626,7 +719,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3. Emojis", "3", "Emojis" ]
+                  "values": [
+                    "3. Emojis",
+                    "3",
+                    "Emojis"
+                  ]
                 }
               ]
             },
@@ -636,11 +733,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4. Markdown", "4", "Markdown" ]
+                  "values": [
+                    "4. Markdown",
+                    "4",
+                    "Markdown"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -691,7 +794,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -700,7 +805,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "1. Imagem", "Imagem" ]
+                  "values": [
+                    "1",
+                    "1. Imagem",
+                    "Imagem"
+                  ]
                 }
               ]
             },
@@ -710,7 +819,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Arquivo", "Arquivo" ]
+                  "values": [
+                    "2",
+                    "2. Arquivo",
+                    "Arquivo"
+                  ]
                 }
               ]
             },
@@ -720,7 +833,13 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3. Video", "3", "3. Vídeo", "Vídeo", "Video" ]
+                  "values": [
+                    "3. Video",
+                    "3",
+                    "3. Vídeo",
+                    "Vídeo",
+                    "Video"
+                  ]
                 }
               ]
             },
@@ -730,11 +849,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4. Audio", "4", "Audio" ]
+                  "values": [
+                    "4. Audio",
+                    "4",
+                    "Audio"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -791,9 +916,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9" } ]
+          "outputs": [
+            {
+              "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9"
+            }
+          ]
         },
         {
           "id": "55965c71-fdf2-4c44-ad30-e538ffc7748d",
@@ -849,9 +980,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9" } ]
+          "outputs": [
+            {
+              "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9"
+            }
+          ]
         },
         {
           "id": "14be4237-d06e-4fdd-9b78-e2086f85cd24",
@@ -904,9 +1041,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "052fb487-7be1-4e24-aecb-80ef1102969f" } ]
+          "outputs": [
+            {
+              "stateId": "052fb487-7be1-4e24-aecb-80ef1102969f"
+            }
+          ]
         },
         {
           "id": "9d152356-42a2-4d58-832d-85c4f3dea6e8",
@@ -959,9 +1102,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "052fb487-7be1-4e24-aecb-80ef1102969f" } ]
+          "outputs": [
+            {
+              "stateId": "052fb487-7be1-4e24-aecb-80ef1102969f"
+            }
+          ]
         },
         {
           "id": "39228daf-7005-4dfc-a125-d0851aa461bb",
@@ -1014,9 +1163,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "c006b6fa-313a-4ba0-87c0-d2fac679aaaa" } ]
+          "outputs": [
+            {
+              "stateId": "c006b6fa-313a-4ba0-87c0-d2fac679aaaa"
+            }
+          ]
         },
         {
           "id": "4e38e3b3-cfcb-4073-8176-6aa9477bdbd6",
@@ -1069,9 +1224,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "c006b6fa-313a-4ba0-87c0-d2fac679aaaa" } ]
+          "outputs": [
+            {
+              "stateId": "c006b6fa-313a-4ba0-87c0-d2fac679aaaa"
+            }
+          ]
         },
         {
           "id": "a18422b2-c3df-4f0c-a131-7708ae47f878",
@@ -1125,9 +1286,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "69e36e8b-ca9d-4c21-9192-11bb31ec1988" } ]
+          "outputs": [
+            {
+              "stateId": "69e36e8b-ca9d-4c21-9192-11bb31ec1988"
+            }
+          ]
         },
         {
           "id": "bcd7c77d-6165-476c-b7c3-8dbbd41255f5",
@@ -1181,9 +1348,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "69e36e8b-ca9d-4c21-9192-11bb31ec1988" } ]
+          "outputs": [
+            {
+              "stateId": "69e36e8b-ca9d-4c21-9192-11bb31ec1988"
+            }
+          ]
         },
         {
           "id": "e4adc0f0-cd4a-4a16-b34c-41cfe2790cb8",
@@ -1237,9 +1410,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "69e36e8b-ca9d-4c21-9192-11bb31ec1988" } ]
+          "outputs": [
+            {
+              "stateId": "69e36e8b-ca9d-4c21-9192-11bb31ec1988"
+            }
+          ]
         },
         {
           "id": "b842ebee-8391-422f-9071-7ca638ca1bd8",
@@ -1295,9 +1474,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9" } ]
+          "outputs": [
+            {
+              "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9"
+            }
+          ]
         },
         {
           "id": "61d9e884-9c71-4181-bf0f-b4d51a3d1054",
@@ -1353,9 +1538,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9" } ]
+          "outputs": [
+            {
+              "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9"
+            }
+          ]
         },
         {
           "id": "dfd2a601-d49c-4786-9169-7517ab836af9",
@@ -1405,7 +1596,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -1414,7 +1607,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1. 1:1 Image", "1" ]
+                  "values": [
+                    "1. 1:1 Image",
+                    "1"
+                  ]
                 }
               ]
             },
@@ -1424,7 +1620,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2. 2:1 Image", "2" ]
+                  "values": [
+                    "2. 2:1 Image",
+                    "2"
+                  ]
                 }
               ]
             },
@@ -1434,7 +1633,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "Large Image", "3", "3. Large Image" ]
+                  "values": [
+                    "Large Image",
+                    "3",
+                    "3. Large Image"
+                  ]
                 }
               ]
             },
@@ -1444,7 +1647,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4. Animated Image", "4" ]
+                  "values": [
+                    "4. Animated Image",
+                    "4"
+                  ]
                 }
               ]
             },
@@ -1454,7 +1660,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "0", "0. Retornar ao Menu de Media", "Retornar ao Menu de Media" ]
+                  "values": [
+                    "0",
+                    "0. Retornar ao Menu de Media",
+                    "Retornar ao Menu de Media"
+                  ]
                 }
               ]
             },
@@ -1464,11 +1674,15 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "5" ]
+                  "values": [
+                    "5"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -1519,7 +1733,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -1528,7 +1744,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "1. Arquivo", "Arquivo" ]
+                  "values": [
+                    "1",
+                    "1. Arquivo",
+                    "Arquivo"
+                  ]
                 }
               ]
             },
@@ -1538,7 +1758,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Arquivo grande", "Arquivo grande" ]
+                  "values": [
+                    "2",
+                    "2. Arquivo grande",
+                    "Arquivo grande"
+                  ]
                 }
               ]
             },
@@ -1548,7 +1772,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3", "3. Arquivo com extensão estranha", "Arquivo com extensão estranha" ]
+                  "values": [
+                    "3",
+                    "3. Arquivo com extensão estranha",
+                    "Arquivo com extensão estranha"
+                  ]
                 }
               ]
             },
@@ -1558,11 +1786,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "0", "0. Retornar ao Menu de Media", "Retornar ao Menu de Media" ]
+                  "values": [
+                    "0",
+                    "0. Retornar ao Menu de Media",
+                    "Retornar ao Menu de Media"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -1613,7 +1847,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -1622,7 +1858,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1. Video", "1", "Video" ]
+                  "values": [
+                    "1. Video",
+                    "1",
+                    "Video"
+                  ]
                 }
               ]
             },
@@ -1632,7 +1872,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "Vídeo grande", "2. Vídeo grande" ]
+                  "values": [
+                    "2",
+                    "Vídeo grande",
+                    "2. Vídeo grande"
+                  ]
                 }
               ]
             },
@@ -1642,11 +1886,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "0", "0. Retornar ao Menu de Media", "Retornar ao Menu de Media" ]
+                  "values": [
+                    "0",
+                    "0. Retornar ao Menu de Media",
+                    "Retornar ao Menu de Media"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -1697,7 +1947,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -1706,7 +1958,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1. Audio", "1", "Audio" ]
+                  "values": [
+                    "1. Audio",
+                    "1",
+                    "Audio"
+                  ]
                 }
               ]
             },
@@ -1716,7 +1972,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Audio Grande", "Audio Grande" ]
+                  "values": [
+                    "2",
+                    "2. Audio Grande",
+                    "Audio Grande"
+                  ]
                 }
               ]
             },
@@ -1726,11 +1986,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "0", "0. Retornar ao Menu de Media", "Retornar ao Menu de Media" ]
+                  "values": [
+                    "0",
+                    "0. Retornar ao Menu de Media",
+                    "Retornar ao Menu de Media"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -1781,7 +2047,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -1790,7 +2058,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "Uma opção", "1. Uma opção" ]
+                  "values": [
+                    "1",
+                    "Uma opção",
+                    "1. Uma opção"
+                  ]
                 }
               ]
             },
@@ -1800,7 +2072,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Múltiplas opções", "Múltiplas opções" ]
+                  "values": [
+                    "2",
+                    "2. Múltiplas opções",
+                    "Múltiplas opções"
+                  ]
                 }
               ]
             },
@@ -1810,7 +2086,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3", "3. Múltiplas opções com emojis", "Múltiplas opções com emojis" ]
+                  "values": [
+                    "3",
+                    "3. Múltiplas opções com emojis",
+                    "Múltiplas opções com emojis"
+                  ]
                 }
               ]
             },
@@ -1820,11 +2100,18 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4", "4. Conteúdo dinâmico", "Conteúdo dinâmico", "conteudo dinamico" ]
+                  "values": [
+                    "4",
+                    "4. Conteúdo dinâmico",
+                    "Conteúdo dinâmico",
+                    "conteudo dinamico"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -1887,9 +2174,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "267af6b7-0b9d-41ff-a9a7-b3bea7efd3e6" } ]
+          "outputs": [
+            {
+              "stateId": "267af6b7-0b9d-41ff-a9a7-b3bea7efd3e6"
+            }
+          ]
         },
         {
           "id": "ccc59c81-73b8-4813-9204-3d9f19926c7e",
@@ -1972,9 +2265,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "267af6b7-0b9d-41ff-a9a7-b3bea7efd3e6" } ]
+          "outputs": [
+            {
+              "stateId": "267af6b7-0b9d-41ff-a9a7-b3bea7efd3e6"
+            }
+          ]
         },
         {
           "id": "ebd3b622-c79f-4fd8-bab3-ab6f06c7c299",
@@ -2050,9 +2349,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "267af6b7-0b9d-41ff-a9a7-b3bea7efd3e6" } ]
+          "outputs": [
+            {
+              "stateId": "267af6b7-0b9d-41ff-a9a7-b3bea7efd3e6"
+            }
+          ]
         },
         {
           "id": "b5586915-18ff-4241-ae82-c1e0cd2d81d5",
@@ -2102,7 +2407,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -2111,7 +2418,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "1. Uma opção", "Uma opção" ]
+                  "values": [
+                    "1",
+                    "1. Uma opção",
+                    "Uma opção"
+                  ]
                 }
               ]
             },
@@ -2121,7 +2432,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Múltiplas opções", "Múltiplas opções" ]
+                  "values": [
+                    "2",
+                    "2. Múltiplas opções",
+                    "Múltiplas opções"
+                  ]
                 }
               ]
             },
@@ -2131,7 +2446,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3", "3. Múltiplas opções com emojis", "Múltiplas opções com emojis" ]
+                  "values": [
+                    "3",
+                    "3. Múltiplas opções com emojis",
+                    "Múltiplas opções com emojis"
+                  ]
                 }
               ]
             },
@@ -2141,7 +2460,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4", "4. Payload Menu", "Payload Menu" ]
+                  "values": [
+                    "4",
+                    "4. Payload Menu",
+                    "Payload Menu"
+                  ]
                 }
               ]
             },
@@ -2151,11 +2474,15 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "5" ]
+                  "values": [
+                    "5"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -2217,9 +2544,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5" } ]
+          "outputs": [
+            {
+              "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5"
+            }
+          ]
         },
         {
           "id": "311dbfd2-1f2d-4d41-a475-f702bf0fc132",
@@ -2301,9 +2634,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5" } ]
+          "outputs": [
+            {
+              "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5"
+            }
+          ]
         },
         {
           "id": "6b921eb2-1b32-492a-95d3-837911588064",
@@ -2378,9 +2717,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5" } ]
+          "outputs": [
+            {
+              "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5"
+            }
+          ]
         },
         {
           "id": "110f6a3d-72d6-4d15-80cd-7d321fe54249",
@@ -2448,9 +2793,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5" } ]
+          "outputs": [
+            {
+              "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5"
+            }
+          ]
         },
         {
           "id": "1f95d9af-2a9d-4467-9a57-da64262b54f3",
@@ -2500,7 +2851,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -2509,7 +2862,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "1. Receber localização", "Receber localização" ]
+                  "values": [
+                    "1",
+                    "1. Receber localização",
+                    "Receber localização"
+                  ]
                 }
               ]
             },
@@ -2519,11 +2876,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Solicitar Localização", "Solicitar Localização" ]
+                  "values": [
+                    "2",
+                    "2. Solicitar Localização",
+                    "Solicitar Localização"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -2561,9 +2924,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "1f95d9af-2a9d-4467-9a57-da64262b54f3" } ]
+          "outputs": [
+            {
+              "stateId": "1f95d9af-2a9d-4467-9a57-da64262b54f3"
+            }
+          ]
         },
         {
           "id": "dc056f66-2f16-456f-8157-77804d796195",
@@ -2604,9 +2973,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "1f95d9af-2a9d-4467-9a57-da64262b54f3" } ]
+          "outputs": [
+            {
+              "stateId": "1f95d9af-2a9d-4467-9a57-da64262b54f3"
+            }
+          ]
         },
         {
           "id": "df5469c4-c3d7-4374-a829-595e31430fba",
@@ -2656,7 +3031,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -2665,7 +3042,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "1. Blank Weblink" ]
+                  "values": [
+                    "1",
+                    "1. Blank Weblink"
+                  ]
                 }
               ]
             },
@@ -2675,7 +3055,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Self Weblink" ]
+                  "values": [
+                    "2",
+                    "2. Self Weblink"
+                  ]
                 }
               ]
             },
@@ -2685,7 +3068,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3", "3. Self Compact Weblink" ]
+                  "values": [
+                    "3",
+                    "3. Self Compact Weblink"
+                  ]
                 }
               ]
             },
@@ -2695,7 +3081,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4", "4. Self Tall Weblink" ]
+                  "values": [
+                    "4",
+                    "4. Self Tall Weblink"
+                  ]
                 }
               ]
             },
@@ -2705,11 +3094,16 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "5", "5. Auto Description Weblink" ]
+                  "values": [
+                    "5",
+                    "5. Auto Description Weblink"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -2766,9 +3160,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "df5469c4-c3d7-4374-a829-595e31430fba" } ]
+          "outputs": [
+            {
+              "stateId": "df5469c4-c3d7-4374-a829-595e31430fba"
+            }
+          ]
         },
         {
           "id": "de8d10dc-db65-41f8-bbef-5b07b2e0b6d1",
@@ -2824,9 +3224,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "df5469c4-c3d7-4374-a829-595e31430fba" } ]
+          "outputs": [
+            {
+              "stateId": "df5469c4-c3d7-4374-a829-595e31430fba"
+            }
+          ]
         },
         {
           "id": "0ebc8f70-2691-4b84-8d68-3f5da6cca7fa",
@@ -2882,9 +3288,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "df5469c4-c3d7-4374-a829-595e31430fba" } ]
+          "outputs": [
+            {
+              "stateId": "df5469c4-c3d7-4374-a829-595e31430fba"
+            }
+          ]
         },
         {
           "id": "b5f0b7d8-ed67-4ccb-9d34-174ad68f1adf",
@@ -2940,9 +3352,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "df5469c4-c3d7-4374-a829-595e31430fba" } ]
+          "outputs": [
+            {
+              "stateId": "df5469c4-c3d7-4374-a829-595e31430fba"
+            }
+          ]
         },
         {
           "id": "7b239cb6-c447-415c-acc3-2909e992046c",
@@ -2998,9 +3416,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "df5469c4-c3d7-4374-a829-595e31430fba" } ]
+          "outputs": [
+            {
+              "stateId": "df5469c4-c3d7-4374-a829-595e31430fba"
+            }
+          ]
         },
         {
           "id": "efbba0ff-555e-4989-92f5-97abb4a68bda",
@@ -3050,7 +3474,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -3059,7 +3485,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "1. Carrossel com um card", "Carrossel com um card" ]
+                  "values": [
+                    "1",
+                    "1. Carrossel com um card",
+                    "Carrossel com um card"
+                  ]
                 }
               ]
             },
@@ -3069,7 +3499,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "2. Carrossel com uma opção", "Carrossel com uma opção" ]
+                  "values": [
+                    "2",
+                    "2. Carrossel com uma opção",
+                    "Carrossel com uma opção"
+                  ]
                 }
               ]
             },
@@ -3079,7 +3513,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3", "3. Card com proporção 1:1", "Card com proporção 1:1" ]
+                  "values": [
+                    "3",
+                    "3. Card com proporção 1:1",
+                    "Card com proporção 1:1"
+                  ]
                 }
               ]
             },
@@ -3089,7 +3527,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4", "4. Carrossel com payload", "Carrossel com payload" ]
+                  "values": [
+                    "4",
+                    "4. Carrossel com payload",
+                    "Carrossel com payload"
+                  ]
                 }
               ]
             },
@@ -3099,7 +3541,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "5", "5. Carrossel com weblink", "Carrossel com weblink" ]
+                  "values": [
+                    "5",
+                    "5. Carrossel com weblink",
+                    "Carrossel com weblink"
+                  ]
                 }
               ]
             },
@@ -3109,7 +3555,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "6", "6. Carrossel com emoji", "Carrossel com emoji" ]
+                  "values": [
+                    "6",
+                    "6. Carrossel com emoji",
+                    "Carrossel com emoji"
+                  ]
                 }
               ]
             },
@@ -3119,11 +3569,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "7", "7. Carrossel misturado", "Carrossel misturado" ]
+                  "values": [
+                    "7",
+                    "7. Carrossel misturado",
+                    "Carrossel misturado"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -3208,9 +3664,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda" } ]
+          "outputs": [
+            {
+              "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda"
+            }
+          ]
         },
         {
           "id": "45b829ec-2e5f-4dc0-bde2-1640bb6fa5d2",
@@ -3310,9 +3772,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda" } ]
+          "outputs": [
+            {
+              "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda"
+            }
+          ]
         },
         {
           "id": "1692e59d-9bdd-4478-ab3b-c4a2faf953fe",
@@ -3433,9 +3901,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda" } ]
+          "outputs": [
+            {
+              "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda"
+            }
+          ]
         },
         {
           "id": "2c8618d7-947f-465c-8bf3-9288967d6ea5",
@@ -3586,9 +4060,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda" } ]
+          "outputs": [
+            {
+              "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda"
+            }
+          ]
         },
         {
           "id": "030e51a4-f79c-4e66-accb-a536a08e5f1f",
@@ -3718,9 +4198,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda" } ]
+          "outputs": [
+            {
+              "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda"
+            }
+          ]
         },
         {
           "id": "2e6b752f-9c63-40a8-9dba-7ea7496fccf3",
@@ -3846,9 +4332,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda" } ]
+          "outputs": [
+            {
+              "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda"
+            }
+          ]
         },
         {
           "id": "586409b0-d8f8-4aec-8be3-6105905b41a2",
@@ -3962,9 +4454,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda" } ]
+          "outputs": [
+            {
+              "stateId": "efbba0ff-555e-4989-92f5-97abb4a68bda"
+            }
+          ]
         },
         {
           "id": "8b51d13f-c8e2-4b30-809f-ab40caa550f4",
@@ -4014,7 +4512,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -4023,7 +4523,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "Resposta Rápida", "1. Resposta Rápida" ]
+                  "values": [
+                    "1",
+                    "Resposta Rápida",
+                    "1. Resposta Rápida"
+                  ]
                 }
               ]
             },
@@ -4033,7 +4537,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "Menu", "2. Menu" ]
+                  "values": [
+                    "2",
+                    "Menu",
+                    "2. Menu"
+                  ]
                 }
               ]
             },
@@ -4043,11 +4551,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3", "Carrossel", "3. Carrossel" ]
+                  "values": [
+                    "3",
+                    "Carrossel",
+                    "3. Carrossel"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -4097,9 +4611,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f" } ]
+          "outputs": [
+            {
+              "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f"
+            }
+          ]
         },
         {
           "id": "d6fdf19f-105c-44a4-8df5-f5f187fa1993",
@@ -4149,9 +4669,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "8b51d13f-c8e2-4b30-809f-ab40caa550f4" } ]
+          "outputs": [
+            {
+              "stateId": "8b51d13f-c8e2-4b30-809f-ab40caa550f4"
+            }
+          ]
         },
         {
           "id": "5a3fc3a6-2d6c-4348-8edb-ae64d9162279",
@@ -4201,9 +4727,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "8b51d13f-c8e2-4b30-809f-ab40caa550f4" } ]
+          "outputs": [
+            {
+              "stateId": "8b51d13f-c8e2-4b30-809f-ab40caa550f4"
+            }
+          ]
         },
         {
           "id": "0d7c835d-8bde-472f-b74d-99f347f8a2ce",
@@ -4253,9 +4785,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "8b51d13f-c8e2-4b30-809f-ab40caa550f4" } ]
+          "outputs": [
+            {
+              "stateId": "8b51d13f-c8e2-4b30-809f-ab40caa550f4"
+            }
+          ]
         },
         {
           "id": "2266cb63-e38a-472e-82f9-bb51d6751bfa",
@@ -4305,7 +4843,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -4314,11 +4854,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "WhatsApp", "1. WhatsApp" ]
+                  "values": [
+                    "1",
+                    "WhatsApp",
+                    "1. WhatsApp"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -4369,7 +4915,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -4378,7 +4926,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "Message Template", "1. Message Template" ]
+                  "values": [
+                    "1",
+                    "Message Template",
+                    "1. Message Template"
+                  ]
                 }
               ]
             },
@@ -4388,7 +4940,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "List Message", "3", "3. List Message" ]
+                  "values": [
+                    "List Message",
+                    "3",
+                    "3. List Message"
+                  ]
                 }
               ]
             },
@@ -4398,7 +4954,13 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4", "4.", "RepplyButton", "4. RepplyButton", "4.RepplyButton" ]
+                  "values": [
+                    "4",
+                    "4.",
+                    "RepplyButton",
+                    "4. RepplyButton",
+                    "4.RepplyButton"
+                  ]
                 }
               ]
             },
@@ -4408,11 +4970,20 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "5", "5.", "Product Message", "5. Product Message", "5.Product Message", "ProductMessage" ]
+                  "values": [
+                    "5",
+                    "5.",
+                    "Product Message",
+                    "5. Product Message",
+                    "5.Product Message",
+                    "ProductMessage"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -4463,7 +5034,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -4472,7 +5045,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "Texto", "1. Texto" ]
+                  "values": [
+                    "1",
+                    "Texto",
+                    "1. Texto"
+                  ]
                 }
               ]
             },
@@ -4482,7 +5059,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2", "Imagem", "2. Imagem" ]
+                  "values": [
+                    "2",
+                    "Imagem",
+                    "2. Imagem"
+                  ]
                 }
               ]
             },
@@ -4492,7 +5073,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "3", "Documento", "3. Documento" ]
+                  "values": [
+                    "3",
+                    "Documento",
+                    "3. Documento"
+                  ]
                 }
               ]
             },
@@ -4502,7 +5087,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "4", "Vídeo", "4. Vídeo" ]
+                  "values": [
+                    "4",
+                    "Vídeo",
+                    "4. Vídeo"
+                  ]
                 }
               ]
             },
@@ -4512,7 +5101,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "5", "Resposta Rápida", "5. Resposta Rápida" ]
+                  "values": [
+                    "5",
+                    "Resposta Rápida",
+                    "5. Resposta Rápida"
+                  ]
                 }
               ]
             },
@@ -4522,7 +5115,12 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "6", "Call-to-action", "CTA", "6. Call-to-action" ]
+                  "values": [
+                    "6",
+                    "Call-to-action",
+                    "CTA",
+                    "6. Call-to-action"
+                  ]
                 }
               ]
             },
@@ -4532,11 +5130,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "0. Retornar ao menu do WhatsApp", "Retornar ao menu do WhatsApp", "0" ]
+                  "values": [
+                    "0. Retornar ao menu do WhatsApp",
+                    "Retornar ao menu do WhatsApp",
+                    "0"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -4586,9 +5190,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f" } ]
+          "outputs": [
+            {
+              "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f"
+            }
+          ]
         },
         {
           "id": "dac33d0e-1e53-4bef-b526-483b580e237c",
@@ -4637,9 +5247,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f" } ]
+          "outputs": [
+            {
+              "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f"
+            }
+          ]
         },
         {
           "id": "0b1ef7d0-4911-4eb2-9f73-ee9b8c3594d4",
@@ -4688,9 +5304,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f" } ]
+          "outputs": [
+            {
+              "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f"
+            }
+          ]
         },
         {
           "id": "ec9bf7b5-02a0-4a57-82a8-258cbba95d9a",
@@ -4739,9 +5361,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f" } ]
+          "outputs": [
+            {
+              "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f"
+            }
+          ]
         },
         {
           "id": "94b9a2c0-9e3e-48a4-b2c6-d117e1ee9f1f",
@@ -4790,9 +5418,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f" } ]
+          "outputs": [
+            {
+              "stateId": "19a9ae84-a244-4686-a73d-ef71933b783f"
+            }
+          ]
         },
         {
           "id": "d8d52d2f-bb41-45c4-9cba-6f59b8bcc862",
@@ -4842,7 +5476,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -4851,7 +5487,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "1", "1. Receber Conteúdo Sensível", "Receber Conteúdo Sensível" ]
+                  "values": [
+                    "1",
+                    "1. Receber Conteúdo Sensível",
+                    "Receber Conteúdo Sensível"
+                  ]
                 }
               ]
             },
@@ -4861,11 +5501,17 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "2. Solicitar Conteúdo Sensível", "2", "Solicitar Conteúdo Sensível" ]
+                  "values": [
+                    "2. Solicitar Conteúdo Sensível",
+                    "2",
+                    "Solicitar Conteúdo Sensível"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -4915,9 +5561,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "d8d52d2f-bb41-45c4-9cba-6f59b8bcc862" } ]
+          "outputs": [
+            {
+              "stateId": "d8d52d2f-bb41-45c4-9cba-6f59b8bcc862"
+            }
+          ]
         },
         {
           "id": "f137b1a0-edc6-4123-bbd7-66b920af4396",
@@ -4966,9 +5618,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "d8d52d2f-bb41-45c4-9cba-6f59b8bcc862" } ]
+          "outputs": [
+            {
+              "stateId": "d8d52d2f-bb41-45c4-9cba-6f59b8bcc862"
+            }
+          ]
         },
         {
           "id": "desk:60ab30a4-b003-4d86-bc47-d601e18cb69d",
@@ -4992,7 +5650,9 @@
                   "source": "context",
                   "variable": "state.previous.id",
                   "comparison": "notEquals",
-                  "values": [ "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a" ]
+                  "values": [
+                    "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a"
+                  ]
                 },
                 {
                   "source": "context",
@@ -5004,7 +5664,10 @@
               "settings": {
                 "function": "run",
                 "source": "function run(contact, tunnel_identity) {\n contact = JSON.parse(contact);\n contact.identity = tunnel_identity;\n return contact;\n}",
-                "inputVariables": [ "contact.serialized", "tunnel.identity" ],
+                "inputVariables": [
+                  "contact.serialized",
+                  "tunnel.identity"
+                ],
                 "outputVariable": "deskUpdateTunnelContactBody",
                 "LocalTimeZoneEnabled": true
               }
@@ -5016,7 +5679,9 @@
                   "source": "context",
                   "variable": "state.previous.id",
                   "comparison": "notEquals",
-                  "values": [ "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a" ]
+                  "values": [
+                    "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a"
+                  ]
                 },
                 {
                   "source": "context",
@@ -5042,13 +5707,17 @@
                   "source": "context",
                   "variable": "state.previous.id",
                   "comparison": "notEquals",
-                  "values": [ "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a" ]
+                  "values": [
+                    "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a"
+                  ]
                 }
               ],
               "settings": {
                 "function": "run",
                 "source": "function run(identity) {\n return (identity !== undefined) ? encodeURIComponent(identity) : identity;\n}",
-                "inputVariables": [ "input.message.fromidentity" ],
+                "inputVariables": [
+                  "input.message.fromidentity"
+                ],
                 "outputVariable": "helpDeskEncodedFromIdentity",
                 "LocalTimeZoneEnabled": true
               }
@@ -5060,7 +5729,9 @@
                   "source": "context",
                   "variable": "state.previous.id",
                   "comparison": "notEquals",
-                  "values": [ "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a" ]
+                  "values": [
+                    "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a"
+                  ]
                 }
               ],
               "settings": {
@@ -5068,7 +5739,9 @@
                 "to": "postmaster@desk.msging.net",
                 "method": "get",
                 "uri": "/tickets?$filter=customerIdentity%20eq%20%27{{helpDeskEncodedFromIdentity}}%27%20and%20%28status%20eq%20%27Open%27%20or%20status%20eq%20%27Waiting%27%20or%20status%20eq%20%27Assigned%27%29",
-                "metadata": { "server.shouldStore": true },
+                "metadata": {
+                  "server.shouldStore": true
+                },
                 "variable": "helpDeskGetOpenTicketCommandResponse"
               }
             },
@@ -5079,13 +5752,17 @@
                   "source": "context",
                   "variable": "state.previous.id",
                   "comparison": "notEquals",
-                  "values": [ "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a" ]
+                  "values": [
+                    "desk:26b93e41-d018-4a99-8ce9-1099b5bb2a0a"
+                  ]
                 }
               ],
               "settings": {
                 "function": "run",
                 "source": "function run(commandResponse) {\n var response = JSON.parse(commandResponse)\n var ticketExists = (response && response.resource && response.resource.items && response.resource.items.length > 0);\n return ticketExists ? \"true\" : \"false\";\n}",
-                "inputVariables": [ "helpDeskGetOpenTicketCommandResponse" ],
+                "inputVariables": [
+                  "helpDeskGetOpenTicketCommandResponse"
+                ],
                 "outputVariable": "helpDeskHasTicket",
                 "LocalTimeZoneEnabled": true
               }
@@ -5097,7 +5774,9 @@
                   "source": "context",
                   "variable": "helpDeskHasTicket",
                   "comparison": "notEquals",
-                  "values": [ "true" ]
+                  "values": [
+                    "true"
+                  ]
                 }
               ],
               "settings": {
@@ -5108,7 +5787,9 @@
                 "variable": "helpDeskOpenTicketCommandResponse",
                 "type": "text/plain",
                 "resource": "{{input.content}}",
-                "metadata": { "server.shouldStore": true }
+                "metadata": {
+                  "server.shouldStore": true
+                }
               }
             },
             {
@@ -5118,13 +5799,17 @@
                   "source": "context",
                   "variable": "helpDeskHasTicket",
                   "comparison": "notEquals",
-                  "values": [ "true" ]
+                  "values": [
+                    "true"
+                  ]
                 }
               ],
               "settings": {
                 "function": "run",
                 "source": "function run(commandResponse) {\n var response = commandResponse ? JSON.parse(commandResponse) : {}\n var ticketExists = response && response.type === \"application/vnd.iris.ticket+json\" && response.resource \n return ticketExists ? \"true\" : \"false\";\n}",
-                "inputVariables": [ "helpDeskOpenTicketCommandResponse" ],
+                "inputVariables": [
+                  "helpDeskOpenTicketCommandResponse"
+                ],
                 "outputVariable": "helpDeskHasTicket",
                 "LocalTimeZoneEnabled": true
               }
@@ -5136,7 +5821,9 @@
                   "source": "context",
                   "variable": "helpDeskHasTicket",
                   "comparison": "equals",
-                  "values": [ "true" ]
+                  "values": [
+                    "true"
+                  ]
                 }
               ],
               "settings": {}
@@ -5149,7 +5836,9 @@
                 "source": "context",
                 "variable": "helpDeskHasTicket",
                 "comparison": "equals",
-                "values": [ "true" ]
+                "values": [
+                  "true"
+                ]
               }
             ]
           },
@@ -5161,13 +5850,18 @@
                   "source": "context",
                   "variable": "input.type",
                   "comparison": "equals",
-                  "values": [ "application/vnd.iris.ticket+json" ]
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
                 },
                 {
                   "source": "context",
                   "variable": "input.content@status",
                   "comparison": "equals",
-                  "values": [ "ClosedAttendant", "ClosedClient" ]
+                  "values": [
+                    "ClosedAttendant",
+                    "ClosedClient"
+                  ]
                 }
               ],
               "settings": {
@@ -5183,13 +5877,17 @@
                   "source": "context",
                   "variable": "input.type",
                   "comparison": "equals",
-                  "values": [ "application/vnd.iris.ticket+json" ]
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
                 },
                 {
                   "source": "context",
                   "variable": "input.content@status",
                   "comparison": "equals",
-                  "values": [ "ClosedAttendant" ]
+                  "values": [
+                    "ClosedAttendant"
+                  ]
                 }
               ],
               "stateId": "8f9b14dd-9f99-40bb-8bda-7bbef0ff5929"
@@ -5200,13 +5898,17 @@
                   "source": "context",
                   "variable": "input.type",
                   "comparison": "equals",
-                  "values": [ "application/vnd.iris.ticket+json" ]
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
                 },
                 {
                   "source": "context",
                   "variable": "input.content@status",
                   "comparison": "equals",
-                  "values": [ "ClosedClient" ]
+                  "values": [
+                    "ClosedClient"
+                  ]
                 }
               ],
               "stateId": "8f9b14dd-9f99-40bb-8bda-7bbef0ff5929"
@@ -5217,18 +5919,24 @@
                   "source": "context",
                   "variable": "input.type",
                   "comparison": "equals",
-                  "values": [ "application/vnd.iris.ticket+json" ]
+                  "values": [
+                    "application/vnd.iris.ticket+json"
+                  ]
                 },
                 {
                   "source": "context",
                   "variable": "input.content@status",
                   "comparison": "equals",
-                  "values": [ "ClosedClientInactivity" ]
+                  "values": [
+                    "ClosedClientInactivity"
+                  ]
                 }
               ],
               "stateId": "8f9b14dd-9f99-40bb-8bda-7bbef0ff5929"
             },
-            { "stateId": "desk:60ab30a4-b003-4d86-bc47-d601e18cb69d" }
+            {
+              "stateId": "desk:60ab30a4-b003-4d86-bc47-d601e18cb69d"
+            }
           ]
         },
         {
@@ -5246,7 +5954,9 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -5255,11 +5965,15 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "0" ]
+                  "values": [
+                    "0"
+                  ]
                 }
               ]
             },
-            { "stateId": "c7e71405-6214-47f7-a901-f9fa954a3361" }
+            {
+              "stateId": "c7e71405-6214-47f7-a901-f9fa954a3361"
+            }
           ]
         },
         {
@@ -5330,7 +6044,9 @@
                 }
               ]
             },
-            { "stateId": "8f9b14dd-9f99-40bb-8bda-7bbef0ff5929" }
+            {
+              "stateId": "8f9b14dd-9f99-40bb-8bda-7bbef0ff5929"
+            }
           ]
         },
         {
@@ -5348,7 +6064,9 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -5357,7 +6075,9 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "onde estou" ]
+                  "values": [
+                    "onde estou"
+                  ]
                 }
               ]
             },
@@ -5367,7 +6087,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "texto", "text", "texto comum" ]
+                  "values": [
+                    "texto",
+                    "text",
+                    "texto comum"
+                  ]
                 }
               ]
             },
@@ -5377,7 +6101,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "quick reply", "resposta rápida", "resposta rapida" ]
+                  "values": [
+                    "quick reply",
+                    "resposta rápida",
+                    "resposta rapida"
+                  ]
                 }
               ]
             },
@@ -5387,7 +6115,9 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "menu" ]
+                  "values": [
+                    "menu"
+                  ]
                 }
               ]
             },
@@ -5397,7 +6127,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "localização", "localizacao", "local" ]
+                  "values": [
+                    "localização",
+                    "localizacao",
+                    "local"
+                  ]
                 }
               ]
             },
@@ -5407,7 +6141,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "weblink", "link" ]
+                  "values": [
+                    "weblink",
+                    "link"
+                  ]
                 }
               ]
             },
@@ -5417,7 +6154,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "carrossel", "carrosel" ]
+                  "values": [
+                    "carrossel",
+                    "carrosel"
+                  ]
                 }
               ]
             },
@@ -5427,7 +6167,12 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "sensível", "sensivel", "conteúdo sensível", "conteudo sensivel" ]
+                  "values": [
+                    "sensível",
+                    "sensivel",
+                    "conteúdo sensível",
+                    "conteudo sensivel"
+                  ]
                 }
               ]
             },
@@ -5437,7 +6182,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "mídia", "midia", "media" ]
+                  "values": [
+                    "mídia",
+                    "midia",
+                    "media"
+                  ]
                 }
               ]
             },
@@ -5447,7 +6196,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "imagem", "foto" ]
+                  "values": [
+                    "imagem",
+                    "foto"
+                  ]
                 }
               ]
             },
@@ -5457,7 +6209,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "vídeo", "video" ]
+                  "values": [
+                    "vídeo",
+                    "video"
+                  ]
                 }
               ]
             },
@@ -5467,7 +6222,13 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "áudio", "audio", "som", "música", "musica" ]
+                  "values": [
+                    "áudio",
+                    "audio",
+                    "som",
+                    "música",
+                    "musica"
+                  ]
                 }
               ]
             },
@@ -5477,7 +6238,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "arquivo", "pdf" ]
+                  "values": [
+                    "arquivo",
+                    "pdf"
+                  ]
                 }
               ]
             },
@@ -5487,7 +6251,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "conteúdo http", "conteudo http" ]
+                  "values": [
+                    "conteúdo http",
+                    "conteudo http"
+                  ]
                 }
               ]
             },
@@ -5497,7 +6264,10 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "especializado", "conteúdo especializado" ]
+                  "values": [
+                    "especializado",
+                    "conteúdo especializado"
+                  ]
                 }
               ]
             },
@@ -5507,7 +6277,9 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "whatsapp" ]
+                  "values": [
+                    "whatsapp"
+                  ]
                 }
               ]
             },
@@ -5517,7 +6289,11 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "atendimento humano", "humano", "desk" ]
+                  "values": [
+                    "atendimento humano",
+                    "humano",
+                    "desk"
+                  ]
                 }
               ]
             },
@@ -5527,11 +6303,15 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "menu principal" ]
+                  "values": [
+                    "menu principal"
+                  ]
                 }
               ]
             },
-            { "stateId": "c7e71405-6214-47f7-a901-f9fa954a3361" }
+            {
+              "stateId": "c7e71405-6214-47f7-a901-f9fa954a3361"
+            }
           ]
         },
         {
@@ -5648,7 +6428,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -5661,7 +6443,9 @@
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -5727,7 +6511,9 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "row-title-1" ]
+                  "values": [
+                    "row-title-1"
+                  ]
                 }
               ]
             },
@@ -5737,11 +6523,15 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "row-title-3" ]
+                  "values": [
+                    "row-title-3"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -5818,7 +6608,9 @@
                 }
               ]
             },
-            { "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9" }
+            {
+              "stateId": "dfd2a601-d49c-4786-9169-7517ab836af9"
+            }
           ]
         },
         {
@@ -5868,7 +6660,9 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -5877,11 +6671,15 @@
                 {
                   "source": "input",
                   "comparison": "equals",
-                  "values": [ "First" ]
+                  "values": [
+                    "First"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -5965,7 +6763,9 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -5974,11 +6774,15 @@
                 {
                   "source": "input",
                   "comparison": "matches",
-                  "values": [ ".*" ]
+                  "values": [
+                    ".*"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -5996,9 +6800,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "fallback" } ]
+          "outputs": [
+            {
+              "stateId": "fallback"
+            }
+          ]
         },
         {
           "id": "fd711672-6cb9-48e5-ac38-5eee83ce7eff",
@@ -6081,7 +6891,9 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -6090,11 +6902,15 @@
                 {
                   "source": "input",
                   "comparison": "matches",
-                  "values": [ ".*" ]
+                  "values": [
+                    ".*"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -6178,7 +6994,9 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
           "outputs": [
             {
@@ -6187,11 +7005,15 @@
                 {
                   "source": "input",
                   "comparison": "matches",
-                  "values": [ ".*" ]
+                  "values": [
+                    ".*"
+                  ]
                 }
               ]
             },
-            { "stateId": "fallback" }
+            {
+              "stateId": "fallback"
+            }
           ]
         },
         {
@@ -6241,9 +7063,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "fallback" } ]
+          "outputs": [
+            {
+              "stateId": "fallback"
+            }
+          ]
         },
         {
           "id": "d354d244-3911-4a5d-9bec-3620eb5c3e30",
@@ -6326,9 +7154,15 @@
               }
             }
           ],
-          "input": { "bypass": true },
+          "input": {
+            "bypass": true
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "075dfac9-811c-4fb4-89ff-e35cf2985c72" } ]
+          "outputs": [
+            {
+              "stateId": "075dfac9-811c-4fb4-89ff-e35cf2985c72"
+            }
+          ]
         },
         {
           "id": "593a48a5-a04e-4508-aac2-36f50943498b",
@@ -6475,9 +7309,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "267af6b7-0b9d-41ff-a9a7-b3bea7efd3e6" } ]
+          "outputs": [
+            {
+              "stateId": "267af6b7-0b9d-41ff-a9a7-b3bea7efd3e6"
+            }
+          ]
         },
         {
           "id": "be8a0e2b-9dcc-4b0e-a34b-b6a76be22a2f",
@@ -6526,9 +7366,15 @@
               }
             }
           ],
-          "input": { "bypass": false },
+          "input": {
+            "bypass": false
+          },
           "outputActions": [],
-          "outputs": [ { "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5" } ]
+          "outputs": [
+            {
+              "stateId": "b5586915-18ff-4241-ae82-c1e0cd2d81d5"
+            }
+          ]
         }
       ],
       "configuration": {
@@ -6540,7 +7386,9 @@
         {
           "type": "ProcessHttp",
           "settings": {
-            "headers": { "Authorization": "Key d2hhdHNhcHAyOkFad1ozOGhXVTV3alhIdXk4Y2R3" },
+            "headers": {
+              "Authorization": "Key d2hhdHNhcHAyOkFad1ozOGhXVTV3alhIdXk4Y2R3"
+            },
             "method": "POST",
             "body": "{\n \"id\": \"{{random.guid}}\",\n \"to\": \"postmaster@desk.msging.net\",\n \"method\": \"set\",\n \"uri\": \"/tickets\",\n \"type\": \"application/vnd.iris.ticket+json\",\n \"resource\": {\n \"customerIdentity\": \"553185091268@wa.gw.msging.net\",\n \"team\": \"luiz_activeMessage\"\n }\n}",
             "uri": "https://hmg-http.msging.net/commands",

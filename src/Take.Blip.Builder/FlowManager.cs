@@ -157,6 +157,8 @@ namespace Take.Blip.Builder
                         // Load the user context
                         var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
 
+                        var stateIdContext = await context.GetVariableAsync("stateId", cancellationToken);
+
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
