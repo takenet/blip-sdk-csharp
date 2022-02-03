@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.Redirect;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -409,7 +410,16 @@ namespace Take.Blip.Builder
                         {
                             actionTrace.ParsedSettings = settings;
                         }
-                        
+
+                        if (action is RedirectAction)
+                        {
+                            var redirect = settings.ToObject<Redirect>(LimeSerializerContainer.Serializer);
+                            if (redirect.Address == "netflix-recomendacao")
+                            {
+                                _logger.Warning($"#lognetflix# ({lazyInput.Message}) - ({redirect.Address}) - ({redirect.Context})");
+                            }
+                        }
+
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), settings, true))
                             await action.ExecuteAsync(context, settings, linkedCts.Token);
