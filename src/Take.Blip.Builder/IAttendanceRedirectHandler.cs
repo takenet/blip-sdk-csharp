@@ -6,8 +6,7 @@ namespace Take.Blip.Builder
 {
     public interface IAttendanceRedirectHandler
     {
-        Task RedirectToAttendanceAsync(string attendanceRedirect, Identity userIdentity,
-            IContext context, Message message,
-            CancellationToken cancellationToken);
+        Task RedirectToAttendanceAsync(Identity fromIdentity, Identity userIdentity,
+            IContext context, CancellationToken cancellationToken);
     }
 }

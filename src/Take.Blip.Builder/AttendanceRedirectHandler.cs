@@ -11,8 +11,8 @@ namespace Take.Blip.Builder
     {
 
         public static string ATTENDANCE_REDIRECT_KEY = "attendanceRedirect";
-        public const string HELP_DESK_HAS_TICKET = "helpDeskHasTicket";
-        public const string DIRECT_TRANSFER_KEY = "DIRECT_TRANSFER";
+        public static string HELP_DESK_HAS_TICKET = "helpDeskHasTicket";
+        public static string DIRECT_TRANSFER_KEY = "DIRECT_TRANSFER";
 
         public readonly IHelpDeskExtension _helpDeskExtension;
         public readonly IConfiguration _configuration;
@@ -23,20 +23,27 @@ namespace Take.Blip.Builder
             _configuration = configuration;
         }
 
-        public async Task RedirectToAttendanceAsync(string attendanceRedirect, Identity userIdentity, IContext context, Message message, CancellationToken cancellationToken)
+        public async Task RedirectToAttendanceAsync(Identity fromIdentity, Identity userIdentity,
+            IContext context, CancellationToken cancellationToken)
         {
             if (!_configuration.IsAttendanceRedirectAllowed)
                 return;
 
+            var attendanceRedirect = await context.GetContextVariableAsync(ATTENDANCE_REDIRECT_KEY, cancellationToken);
+
+            if (attendanceRedirect.IsNullOrWhiteSpace())
+                return;
+
             await context.SetVariableAsync(HELP_DESK_HAS_TICKET, true.ToString(), cancellationToken);
 
-            await CreateTicketWithRedirectAsync(attendanceRedirect, userIdentity, message, cancellationToken);
+            await CreateTicketWithRedirectAsync(attendanceRedirect, fromIdentity, userIdentity, cancellationToken);
 
             await context.DeleteVariableAsync(ATTENDANCE_REDIRECT_KEY, cancellationToken);
         }
 
 
-        private async Task CreateTicketWithRedirectAsync(string attendanceRedirect, Identity userIdentity, Message message, CancellationToken cancellationToken)
+        private async Task CreateTicketWithRedirectAsync(string attendanceRedirect, Identity fromIdentity, 
+            Identity userIdentity, CancellationToken cancellationToken)
         {
             var content = new Ticket()
             {
@@ -45,7 +52,7 @@ namespace Take.Blip.Builder
                 AgentIdentity = attendanceRedirect
             };
 
-            await _helpDeskExtension.CreateTicketAsync(message.From.ToIdentity(), content, cancellationToken);
+            await _helpDeskExtension.CreateTicketAsync(fromIdentity, content, cancellationToken);
         }
 
     }
