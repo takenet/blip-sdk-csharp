@@ -62,6 +62,7 @@ namespace Take.Blip.Builder.UnitTests
                 _fixture.FromIdentity, _fixture.UserIdentity, _fixture.Context, _fixture.CancellationToken);
 
             /* Assert */
+            await _fixture.Context.Received(0).GetContextVariableAsync(AttendanceRedirectHandler.ATTENDANCE_REDIRECT_KEY, _fixture.CancellationToken);
             await _fixture.Context.Received(0).SetVariableAsync(AttendanceRedirectHandler.HELP_DESK_HAS_TICKET, true.ToString(), _fixture.CancellationToken);
             await _fixture.HelpDeskExtension.Received(0).CreateTicketAsync(_fixture.FromIdentity, Arg.Any<Ticket>(), _fixture.CancellationToken);
             await _fixture.Context.Received(0).DeleteVariableAsync(AttendanceRedirectHandler.ATTENDANCE_REDIRECT_KEY, _fixture.CancellationToken);
