@@ -1,11 +1,4 @@
-﻿using Lime.Messaging.Contents;
-using Lime.Protocol;
-using Lime.Protocol.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Serilog;
-using Serilog.Context;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -13,6 +6,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
+using Lime.Protocol.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog;
+using Serilog.Context;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
@@ -42,6 +42,7 @@ namespace Take.Blip.Builder
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
+        private readonly IAttendanceRedirectHandler _attendanceRedirectHandler;
         private readonly Node _applicationNode;
 
         private const string END_SUBFLOW_STATE_ID = "end";
@@ -61,6 +62,7 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
+            IAttendanceRedirectHandler attendanceRedirectHandler,
             Application application)
         {
             _configuration = configuration;
@@ -77,6 +79,7 @@ namespace Take.Blip.Builder
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
             _inputExpirationHandler = inputExpirationHandler;
+            _attendanceRedirectHandler = attendanceRedirectHandler;
             _applicationNode = application.Node;
         }
 
@@ -154,6 +157,8 @@ namespace Take.Blip.Builder
                         // Load the user context
                         var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
 
+                        var stateIdContext = await context.GetVariableAsync("stateId", cancellationToken);
+
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
                         var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
@@ -173,6 +178,9 @@ namespace Take.Blip.Builder
 
                         // Create trace instances, if required
                         var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
+
+                        // Redirect to Attendance Action
+                        await _attendanceRedirectHandler.RedirectToAttendanceAsync(message.From.ToIdentity(), userIdentity, context, cancellationToken);
 
                         // Process the global input actions
                         if (flow.InputActions != null)
@@ -208,7 +216,7 @@ namespace Take.Blip.Builder
                                                 validationMessage.Content = new PlainDocument(state.Input.Validation.Error, MediaType.TextPlain);
                                                 await _sender.SendMessageAsync(validationMessage, linkedCts.Token);
                                             }
-                                            else 
+                                            else
                                             {
                                                 await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
                                             }
@@ -232,7 +240,8 @@ namespace Take.Blip.Builder
                                 }
 
                                 var previousStateId = state.Id;
-                                if (IsContextVariable(state.Id)) {
+                                if (IsContextVariable(state.Id))
+                                {
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
                                 }
 
@@ -240,7 +249,8 @@ namespace Take.Blip.Builder
                                 {
                                     // Determine the next state
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
-                                } else
+                                }
+                                else
                                 {
                                     state = null;
                                 }
@@ -362,7 +372,7 @@ namespace Take.Blip.Builder
 
         private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
         {
-            
+
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
@@ -409,7 +419,7 @@ namespace Take.Blip.Builder
                         {
                             actionTrace.ParsedSettings = settings;
                         }
-                        
+
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), settings, true))
                             await action.ExecuteAsync(context, settings, linkedCts.Token);
@@ -456,7 +466,8 @@ namespace Take.Blip.Builder
             }
         }
 
-        private Boolean IsContextVariable(string stateId) {
+        private Boolean IsContextVariable(string stateId)
+        {
             return (stateId.StartsWith("{{") && stateId.EndsWith("}}"));
         }
 
@@ -481,10 +492,12 @@ namespace Take.Blip.Builder
                             await output.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken))
                         {
                             var replacedVariable = output.StateId;
-                            
-                            if (IsContextVariable(replacedVariable)) {
+
+                            if (IsContextVariable(replacedVariable))
+                            {
                                 replacedVariable = await _variableReplacer.ReplaceAsync(replacedVariable, context, cancellationToken);
-                                if(replacedVariable.IsNullOrEmpty()) {
+                                if (replacedVariable.IsNullOrEmpty())
+                                {
                                     continue;
                                 }
                             }
