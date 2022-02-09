@@ -411,15 +411,6 @@ namespace Take.Blip.Builder
                             actionTrace.ParsedSettings = settings;
                         }
 
-                        if (action is RedirectAction)
-                        {
-                            var redirect = settings.ToObject<Redirect>(LimeSerializerContainer.Serializer);
-                            if (redirect.Address == "netflix-recomendacao")
-                            {
-                                _logger.Warning($"#lognetflix# ({lazyInput.Message}) - ({redirect.Address}) - ({redirect.Context})");
-                            }
-                        }
-
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), settings, true))
                             await action.ExecuteAsync(context, settings, linkedCts.Token);
