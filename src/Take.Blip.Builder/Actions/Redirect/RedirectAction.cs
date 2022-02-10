@@ -10,6 +10,7 @@ namespace Take.Blip.Builder.Actions.Redirect
     {
         private readonly IRedirectManager _redirectManager;
         private readonly ILogger _logger;
+        private const string REDIRECT_TEST_LOG = "REDIRECT_TEST_LOG";
 
         public RedirectAction(IRedirectManager redirectManager, ILogger logger)
         {
@@ -26,10 +27,10 @@ namespace Take.Blip.Builder.Actions.Redirect
 
             var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
             if (context.Input.Message.Metadata != null && 
-                context.Input.Message.Metadata.TryGetValue("REDIRECT_TEST_LOG", out var metadataRedirectAddress) && 
+                context.Input.Message.Metadata.TryGetValue(REDIRECT_TEST_LOG, out var metadataRedirectAddress) && 
                 redirect.Address == metadataRedirectAddress) 
             {
-                _logger.Warning($"#REDIRECT_LOG# ({context.Input.Message}) - ({redirect.Address}) - ({redirect.Context})");
+                _logger.Warning($"#({REDIRECT_TEST_LOG})# ({context.Input.Message}) - ({redirect.Address}) - ({redirect.Context})");
             }
             return _redirectManager.RedirectUserAsync(context, redirect, cancellationToken);
         }
