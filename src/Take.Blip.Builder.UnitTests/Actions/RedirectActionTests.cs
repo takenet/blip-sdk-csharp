@@ -18,8 +18,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Logger = Substitute.For<ILogger>();
         }
 
-        //public SetVariableSettings Settings { get; }
-
         private RedirectAction GetTarget()
         {
             return new RedirectAction(RedirectManager, Logger);
