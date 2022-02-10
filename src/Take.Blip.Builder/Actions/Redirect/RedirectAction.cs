@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using Lime.Messaging.Contents;
 
 namespace Take.Blip.Builder.Actions.Redirect
 {
@@ -21,15 +22,15 @@ namespace Take.Blip.Builder.Actions.Redirect
 
         public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
-            var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+            var redirect = settings.ToObject<Redirect>(LimeSerializerContainer.Serializer);
             context.Input.Message.Metadata.TryGetValue("REDIRECT_TEST_LOG", out var metadataRedirectAddress);
             if (redirect.Address == metadataRedirectAddress) 
             {
                 _logger.Warning($"#REDIRECT_LOG# ({context.Input.Message}) - ({redirect.Address}) - ({redirect.Context})");
             }
-                        
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
             return _redirectManager.RedirectUserAsync(context, redirect, cancellationToken);
         }
     }
