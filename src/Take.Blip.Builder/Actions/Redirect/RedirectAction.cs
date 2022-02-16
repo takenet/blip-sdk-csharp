@@ -28,7 +28,7 @@ namespace Take.Blip.Builder.Actions.Redirect
             var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
             if (context.Input.Message.Metadata != null && 
                 context.Input.Message.Metadata.TryGetValue(REDIRECT_TEST_LOG, out var metadataRedirectAddress) && 
-                redirect.Address == metadataRedirectAddress) 
+                redirect.Address.ToString().Contains(metadataRedirectAddress)) 
             {
                 _logger.Warning($"#({REDIRECT_TEST_LOG})# ({context.Input.Message}) - ({redirect.Address}) - ({redirect.Context})");
             }
