@@ -81,7 +81,7 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, IContext messageContext = null)
         {
             if (message == null)
             {
@@ -153,7 +153,7 @@ namespace Take.Blip.Builder
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context
-                        var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
+                        var context = messageContext ?? _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
@@ -209,7 +209,7 @@ namespace Take.Blip.Builder
                                                 validationMessage.Content = new PlainDocument(state.Input.Validation.Error, MediaType.TextPlain);
                                                 await _sender.SendMessageAsync(validationMessage, linkedCts.Token);
                                             }
-                                            else 
+                                            else
                                             {
                                                 await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
                                             }
@@ -233,7 +233,8 @@ namespace Take.Blip.Builder
                                 }
 
                                 var previousStateId = state.Id;
-                                if (IsContextVariable(state.Id)) {
+                                if (IsContextVariable(state.Id))
+                                {
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
                                 }
 
@@ -241,7 +242,8 @@ namespace Take.Blip.Builder
                                 {
                                     // Determine the next state
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
-                                } else
+                                }
+                                else
                                 {
                                     state = null;
                                 }
@@ -363,7 +365,7 @@ namespace Take.Blip.Builder
 
         private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
         {
-            
+
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
@@ -457,7 +459,8 @@ namespace Take.Blip.Builder
             }
         }
 
-        private Boolean IsContextVariable(string stateId) {
+        private Boolean IsContextVariable(string stateId)
+        {
             return (stateId.StartsWith("{{") && stateId.EndsWith("}}"));
         }
 
@@ -482,10 +485,12 @@ namespace Take.Blip.Builder
                             await output.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken))
                         {
                             var replacedVariable = output.StateId;
-                            
-                            if (IsContextVariable(replacedVariable)) {
+
+                            if (IsContextVariable(replacedVariable))
+                            {
                                 replacedVariable = await _variableReplacer.ReplaceAsync(replacedVariable, context, cancellationToken);
-                                if(replacedVariable.IsNullOrEmpty()) {
+                                if (replacedVariable.IsNullOrEmpty())
+                                {
                                     continue;
                                 }
                             }
