@@ -81,7 +81,12 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, IContext messageContext = null)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
+        {
+            await ProcessInputAsync(message, flow, null, cancellationToken);
+        }
+
+        public async Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken)
         {
             if (message == null)
             {
