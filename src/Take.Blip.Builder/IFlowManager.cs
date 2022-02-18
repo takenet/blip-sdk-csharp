@@ -19,7 +19,7 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken">The operation cancellation token.</param>
         /// <param name="messageContext">Context from Message Receiver. Its not mandatory.</param>
         /// <returns></returns>
-        Task ProcessInputAsync(Message message, Flow flow, IContext messageContext = null, CancellationToken cancellationToken);
+        Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken);
         Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken);
     }
 }
