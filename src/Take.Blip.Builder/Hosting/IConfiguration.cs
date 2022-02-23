@@ -6,8 +6,6 @@ namespace Take.Blip.Builder.Hosting
     {
         TimeSpan InputProcessingTimeout { get; }
 
-        string RedisStorageConfiguration { get; }
-
         int RedisDatabase { get; }
 
         string RedisKeyPrefix { get; }
