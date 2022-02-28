@@ -17,5 +17,7 @@ namespace Take.Blip.Client
         public const string POSTMASTER = "postmaster";
 
         public const string DEFAULT_STATE = "default";
+
+        public const string ORIGINAL_SUBFLOW_REDIRECT_FROM = "originalSubflowRedirectFrom";
     }
 }
