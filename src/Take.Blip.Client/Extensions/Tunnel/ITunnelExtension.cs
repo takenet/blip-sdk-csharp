@@ -28,8 +28,16 @@ namespace Take.Blip.Client.Extensions.Tunnel
         {
             if (envelope == null) throw new ArgumentNullException(nameof(envelope));
 
-            if (envelope.From?.Domain == null ||
-                !envelope.From.Domain.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase))
+            var fromNode = envelope.From;
+
+            if (envelope.Metadata != null && envelope.Metadata.ContainsKey(Constants.ORIGINAL_SUBFLOW_REDIRECT_FROM))
+            {
+                envelope.Metadata.TryGetValue(Constants.ORIGINAL_SUBFLOW_REDIRECT_FROM, out string originalFrom);
+                fromNode = Identity.Parse(originalFrom).ToNode();
+            }
+
+            if (fromNode?.Domain == null ||
+                !fromNode.Domain.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
@@ -41,7 +49,7 @@ namespace Take.Blip.Client.Extensions.Tunnel
 
             try
             {
-                return await tunnelExtension.GetTunnelAsync(envelope.From.ToIdentity(), cancellationToken);
+                return await tunnelExtension.GetTunnelAsync(fromNode.ToIdentity(), cancellationToken);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
