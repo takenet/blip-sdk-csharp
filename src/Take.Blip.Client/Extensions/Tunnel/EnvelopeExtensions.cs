@@ -7,11 +7,10 @@ namespace Take.Blip.Client.Extensions.Tunnel
     {
         public static bool TryGetTunnelFromEnvelope<T>(this T envelope, out Takenet.Iris.Messaging.Resources.Tunnel tunnelInformation) where T : Envelope
         {
-            Node fromNode = envelope.From;
+            var fromNode = envelope.From;
 
-            if (envelope.Metadata != null && envelope.Metadata.ContainsKey(Constants.ORIGINAL_SUBFLOW_REDIRECT_FROM))
+            if (envelope.Metadata != null && envelope.Metadata.TryGetValue(Constants.ORIGINAL_SUBFLOW_REDIRECT_FROM, out string originalFrom))
             {
-                envelope.Metadata.TryGetValue(Constants.ORIGINAL_SUBFLOW_REDIRECT_FROM, out string originalFrom);
                 fromNode = Identity.Parse(originalFrom).ToNode();
             }
 

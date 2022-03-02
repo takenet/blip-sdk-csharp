@@ -26,10 +26,9 @@ namespace Take.Blip.Client.Extensions.Tunnel
             CancellationToken cancellationToken)
             where T : Envelope
         {
-            Node fromNode = envelope.From;
-            var envelopeClone = envelope;
-
             if (envelope == null) throw new ArgumentNullException(nameof(envelope));
+
+            var fromNode = envelope.From;
 
             if (envelope.Metadata != null && envelope.Metadata.ContainsKey(Constants.ORIGINAL_SUBFLOW_REDIRECT_FROM))
             {
