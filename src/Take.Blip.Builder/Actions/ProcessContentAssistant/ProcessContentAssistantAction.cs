@@ -49,14 +49,14 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         private async Task SetContentResultAsync(
           IContext context, string outputVariable, ContentResult contentResult, CancellationToken cancellationToken)
         {
-            var combinationFound = contentResult.Combinations?.FirstOrDefault();
+            var bestCombinationFound = contentResult.Combinations?.FirstOrDefault();  // The first combination is that has the best score
 
             var value = JsonConvert.SerializeObject(new ContentAssistantActionResponse
             {
                 HasCombination = contentResult?.Result?.Content != null,
                 Value = contentResult?.Result?.Content?.ToString() ?? string.Empty,
-                Intent = combinationFound?.Intent ?? string.Empty,
-                Entities = combinationFound?.Entities.ToList() ?? new List<string>()
+                Intent = bestCombinationFound?.Intent ?? string.Empty,
+                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>()
             });
 
             await context.SetVariableAsync(outputVariable, value, cancellationToken);
