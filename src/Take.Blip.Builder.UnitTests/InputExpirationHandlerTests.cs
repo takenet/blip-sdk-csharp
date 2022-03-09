@@ -68,7 +68,7 @@ namespace Take.Blip.Builder.UnitTests
             Message.Content = messageContent;
 
             // Act
-            var returnMessage = InputHandler.ValidateMessage(Message);
+            var (_, returnMessage) = InputHandler.ValidateMessage(Message);
 
             // Assert
             Assert.True(returnMessage.Metadata.ContainsKey(TraceSettings.BUILDER_TRACE_TARGET));
