@@ -14,7 +14,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
-using Take.Blip.Builder.Actions.Redirect;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -103,7 +102,15 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            message = _inputExpirationHandler.ValidateMessage(message);
+            var (messageHasChanged, newMessage) = _inputExpirationHandler.ValidateMessage(message);
+
+            // If the message has changedm the old context can't be used because it has the old message.
+            // Setting it to null will force a new context to be created later with the new message.
+            if (messageHasChanged)
+            {
+                messageContext = null;
+                message = newMessage;
+            }
 
             flow.Validate();
 

@@ -3,7 +3,6 @@ using Lime.Protocol;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
@@ -92,7 +91,7 @@ namespace Take.Blip.Builder
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public Message ValidateMessage(Message message)
+        public (bool, Message) ValidateMessage(Message message)
         {
             if (message.Content is InputExpiration inputExpiration)
             {
@@ -110,16 +109,18 @@ namespace Take.Blip.Builder
                 messageMetadata.Add(STATE_ID, inputExpiration.StateId);
                 messageMetadata.Add(IDENTITY, inputExpiration.Identity);
 
-                return new Message(message.Id)
+                message = new Message(message.Id)
                 {
                     To = message.To,
                     From = inputExpiration.Identity.ToNode(),
                     Content = _emptyContent,
                     Metadata = messageMetadata
                 };
+
+                return (true, message);
             }
 
-            return message;
+            return (false, message);
         }
 
         private bool IsMessageFromExpiration(Message message)
