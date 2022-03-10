@@ -7,7 +7,7 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: ubuntu-latest
 
 variables:
   skipDecorator: true
@@ -19,7 +19,7 @@ resources:
   - repository: templates
     type: git
     name: Operações/template-take-blip
-    ref: refs/tags/v1.3.7
+    ref: refs/heads/feature/test-publishWin
 
 extends:
   template: template-pipeline.yml@templates    
