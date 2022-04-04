@@ -3,6 +3,7 @@ using Lime.Protocol;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol.Network;
+using Take.Blip.Client.Content;
 
 namespace Take.Blip.Client.Extensions.Tunnel
 {
@@ -29,11 +30,16 @@ namespace Take.Blip.Client.Extensions.Tunnel
             if (envelope == null) throw new ArgumentNullException(nameof(envelope));
 
             var fromNode = envelope.From;
+            var isInputExpiration = (envelope is Message && (envelope as Message).Content is InputExpiration);
 
             if (envelope.Metadata != null && envelope.Metadata.ContainsKey(Constants.ORIGINAL_SUBFLOW_REDIRECT_FROM))
             {
                 envelope.Metadata.TryGetValue(Constants.ORIGINAL_SUBFLOW_REDIRECT_FROM, out string originalFrom);
                 fromNode = Identity.Parse(originalFrom).ToNode();
+            }
+            else if (isInputExpiration)
+            {
+                fromNode = ((envelope as Message).Content as InputExpiration).Identity.ToNode();
             }
 
             if (fromNode?.Domain == null ||
