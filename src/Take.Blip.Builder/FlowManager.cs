@@ -159,7 +159,7 @@ namespace Take.Blip.Builder
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
-                    // If the flow is contained in another flow, such as a subflow or a bot running on a router, the mutext key must consider the parent flow id. 
+                    // If the flow is contained in another flow, such as a subflow or a bot running on a router, the mutex key must consider the parent flow id. 
                     var mutexKey = DefineMutexKey(message, flow, userIdentity);
                     var handle = await _namedSemaphore.WaitAsync(mutexKey, _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
@@ -547,8 +547,8 @@ namespace Take.Blip.Builder
 
         private string DefineMutexKey(Message message, Flow flow, Identity userIdentity)
         {
-            string parent = flow.Id;
-            string identity = userIdentity.ToString();
+            var parent = flow.Id;
+            var identity = userIdentity.ToString();
 
             if (message.Metadata != null && message.Metadata.ContainsKey(TUNNEL_OWNER_METADATA))
             {
