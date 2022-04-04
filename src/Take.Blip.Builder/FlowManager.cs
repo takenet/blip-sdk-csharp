@@ -550,7 +550,7 @@ namespace Take.Blip.Builder
             var parent = flow.Id;
             var identity = userIdentity.ToString();
 
-            if (message.Metadata != null && message.Metadata.ContainsKey(TUNNEL_OWNER_METADATA))
+            if (message.Metadata != null && message.Metadata.ContainsKey(TUNNEL_OWNER_METADATA) && message.Metadata.ContainsKey(TUNNEL_ORIGINATOR_METADATA))
             {
                 //when the message is traveling in the context of a router, we must consider the key as the router identifier and the tunnel originator
                 message.Metadata.TryGetValue(TUNNEL_OWNER_METADATA, out parent);
