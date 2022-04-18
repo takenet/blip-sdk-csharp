@@ -45,11 +45,6 @@ namespace Take.Blip.Builder.Models
         public Dictionary<string, string> Configuration { get; set; }
 
         /// <summary>
-        /// The identifier of the parent flow.
-        /// </summary>
-        public string ParentId { get; set; }
-
-        /// <summary>
         /// Provides a view over the 'builder:' <see cref="Configuration"/> keys.
         /// </summary>
         [JsonIgnore]
