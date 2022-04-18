@@ -18,8 +18,9 @@ namespace Take.Blip.Builder
     /// </summary>
     public class InputExpirationHandler : IInputExpirationHandler
     {
-        public const string STATE_ID = "inputExpiration.stateId";
-        public const string IDENTITY = "inputExpiration.identity";
+        private const string STATE_ID = "inputExpiration.stateId";
+        private const string IDENTITY = "inputExpiration.identity";
+        private const string IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT = "isInputExpirationFromSubflowRedirect";
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
         private readonly ILogger _logger;
@@ -140,6 +141,7 @@ namespace Take.Blip.Builder
 
             return message?.Metadata?.TryGetValue(STATE_ID, out stateToGo) != true ||
                             string.IsNullOrEmpty(stateToGo) ||
+                            stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
                             state?.Id == stateToGo;
         }
 
