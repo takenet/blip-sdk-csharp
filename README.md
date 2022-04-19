@@ -5,7 +5,7 @@ The **BLiP C# SDK** is a set of Nuget packages that allow the creation of [BLiP]
 
 ## Requirements
 
-- .NET Core 3.1 or above (download the SDK [here](https://dotnet.microsoft.com/download))
+- .NET Core 3.0 or above (download the SDK [here](https://dotnet.microsoft.com/download))
 
 ## Getting Started
 
