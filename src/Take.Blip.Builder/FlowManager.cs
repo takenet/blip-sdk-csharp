@@ -45,8 +45,6 @@ namespace Take.Blip.Builder
         private readonly Node _applicationNode;
 
         private const string END_SUBFLOW_STATE_ID = "end";
-        private const string TUNNEL_OWNER_METADATA = "#tunnel.owner";
-        private const string TUNNEL_ORIGINATOR_METADATA = "#tunnel.originator";
 
         public FlowManager(
             IConfiguration configuration,
@@ -159,9 +157,7 @@ namespace Take.Blip.Builder
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
-                    // If the flow is contained in another flow, such as a subflow or a bot running on a router, the mutex key must consider the parent flow id. 
-                    var mutexKey = DefineMutexKey(message, flow, userIdentity);
-                    var handle = await _namedSemaphore.WaitAsync(mutexKey, _configuration.InputProcessingTimeout, linkedCts.Token);
+                    var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
                         // Create the input evaluator
@@ -543,26 +539,6 @@ namespace Take.Blip.Builder
             }
 
             return state;
-        }
-
-        private string DefineMutexKey(Message message, Flow flow, Identity userIdentity)
-        {
-            var parent = flow.Id;
-            var identity = userIdentity.ToString();
-
-            if (message.Metadata != null && message.Metadata.ContainsKey(TUNNEL_OWNER_METADATA) && message.Metadata.ContainsKey(TUNNEL_ORIGINATOR_METADATA))
-            {
-                //when the message is traveling in the context of a router, we must consider the key as the router identifier and the tunnel originator
-                message.Metadata.TryGetValue(TUNNEL_OWNER_METADATA, out parent);
-                message.Metadata.TryGetValue(TUNNEL_ORIGINATOR_METADATA, out identity);
-            }
-            else if (!flow.ParentId.IsNullOrEmpty())
-            {
-                //when the message is traveling in the context of subflow, we must consider the key as the parent flow
-                parent = flow.ParentId;
-            }
-
-            return $"{parent}:{identity}";
         }
     }
 }
