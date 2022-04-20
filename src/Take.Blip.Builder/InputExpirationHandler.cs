@@ -18,8 +18,8 @@ namespace Take.Blip.Builder
     /// </summary>
     public class InputExpirationHandler : IInputExpirationHandler
     {
-        private const string STATE_ID = "inputExpiration.stateId";
-        private const string IDENTITY = "inputExpiration.identity";
+        public const string STATE_ID = "inputExpiration.stateId";
+        public const string IDENTITY = "inputExpiration.identity";
         private const string IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT = "isInputExpirationFromSubflowRedirect";
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
