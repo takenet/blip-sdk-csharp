@@ -31,3 +31,6 @@ extends:
     dotnetVersion: "3.1.x"
     testProjects: src/Take.Blip.Client.sln
     testPermission: true
+    csprojToPublish:
+    - 'Take.Blip.Builder.csproj'
+    - 'Take.Blip.Client.csproj'
