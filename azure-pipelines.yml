@@ -19,7 +19,7 @@ resources:
   - repository: templates
     type: git
     name: Operações/template-take-blip
-    ref: refs/tags/v1.4.2
+    ref: refs/heads/feature/fix-multiPack
 
 extends:
   template: template-pipeline.yml@templates    
