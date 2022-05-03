@@ -36,7 +36,12 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
             var contentAssistantResource = new AnalysisRequest
             {
                 Text = settings.Text,
-                Score = settings.Score.HasValue ? settings.Score.Value/Constants.PERCENTAGE_DENOMINATOR : context.Flow.BuilderConfiguration.MinimumIntentScore.Value
+                Score = settings.Score.HasValue ? settings.Score.Value/Constants.PERCENTAGE_DENOMINATOR : context.Flow.BuilderConfiguration.MinimumIntentScore.Value,
+                Extras = new Dictionary<string, string>
+                {
+                    ["MessageId"] = context.Input.Message.Id,
+                    ["UserIdentity"] = context.UserIdentity.ToString()
+                }
             } as Document;
 
             var contentResult = await _artificialIntelligenceExtension.GetContentResultAsync(
