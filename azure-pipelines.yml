@@ -8,6 +8,7 @@ trigger:
     include:
     - master
     - beta/*
+    - hotfix/*
 
 pool:
   vmImage: ubuntu-latest
@@ -34,6 +35,7 @@ extends:
     dotnetVersion: "3.1.x"
     testProjects: src/Take.Blip.Client.sln
     testPermission: true
+    skipSonarBranch: true
     csprojToPack:
     - 'Take.Blip.Builder.csproj'
     - 'Take.Blip.Client.csproj'
