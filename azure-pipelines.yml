@@ -12,10 +12,7 @@ pool:
 variables:
   skipDecorator: true
 
-${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/beta/') }}:
-    name: 0.7$(Rev:.r)-beta
-${{ else }}:
-    name: 0.7$(Rev:.r)
+name: 0.7$(Rev:.r)
 
 resources:
   repositories:   
