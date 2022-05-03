@@ -14,7 +14,9 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  skipDecorator: true
+  sonarQubeTags: 'Flow Building'
+  sonarQubeKey: 'MessagingHub_MessagingHubClient'
+  sonarQubeName: 'BLiP SDK'
 
 name: 0.7$(Rev:.r)
 
