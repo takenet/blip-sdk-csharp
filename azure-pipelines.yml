@@ -17,6 +17,7 @@ variables:
   sonarQubeTags: 'Flow Building'
   sonarQubeKey: 'MessagingHub_MessagingHubClient'
   sonarQubeName: 'BLiP SDK'
+  framework: dotnet
 
 name: 0.7$(Rev:.r)
 
