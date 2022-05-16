@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Storage;
-using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client.Content;
 using Takenet.Iris.Messaging.Resources;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
