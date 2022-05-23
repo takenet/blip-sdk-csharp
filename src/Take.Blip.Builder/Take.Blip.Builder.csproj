@@ -11,7 +11,7 @@
     <PackageReference Include="SimpleInjector" Version="5.3.2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.10.0" />
-    <PackageReference Include="Take.Elephant.Redis" Version="0.10.2" />
+    <PackageReference Include="Take.Elephant" Version="0.10.2" />
     <PackageReference Include="Take.Jint.Unnoficial" Version="3.0.1-beta-1716001" />
     <PackageReference Include="TimeZoneConverter" Version="3.4.0" />
   </ItemGroup>

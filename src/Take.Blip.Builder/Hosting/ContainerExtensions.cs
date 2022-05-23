@@ -3,7 +3,6 @@ using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Serilog;
 using SimpleInjector;
-using StackExchange.Redis;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.CreateTicket;
 using Take.Blip.Builder.Actions.DeleteVariable;
@@ -112,11 +111,6 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
             container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
             container.RegisterSingleton<ISerializer<Contact>, JsonSerializer<Contact>>();
-            container.RegisterSingleton<IConnectionMultiplexer>(() =>
-            {
-                var configuration = container.GetInstance<IConfiguration>();
-                return ConnectionMultiplexer.Connect(configuration.RedisStorageConfiguration);
-            });
 
             return container;
         }
