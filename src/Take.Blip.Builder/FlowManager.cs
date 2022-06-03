@@ -30,6 +30,7 @@ namespace Take.Blip.Builder
     {
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
+        private readonly Take.Blip.Client.Session.IStateManager _stateSessionManager;
         private readonly IContextProvider _contextProvider;
         private readonly INamedSemaphore _namedSemaphore;
         private readonly IActionProvider _actionProvider;
@@ -61,7 +62,8 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
-            Application application)
+            Application application, 
+            Client.Session.IStateManager stateSessionManager)
         {
             _configuration = configuration;
             _stateManager = stateManager;
@@ -78,6 +80,7 @@ namespace Take.Blip.Builder
             _userOwnerResolver = userOwnerResolver;
             _inputExpirationHandler = inputExpirationHandler;
             _applicationNode = application.Node;
+            _stateSessionManager = stateSessionManager;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -196,6 +199,8 @@ namespace Take.Blip.Builder
                         var stateWaitForInput = true;
                         do
                         {
+                            var firstStateOfSubflow = false;
+                            var redirectToClientState = String.Empty;
                             try
                             {
                                 linkedCts.Token.ThrowIfCancellationRequested();
@@ -254,13 +259,27 @@ namespace Take.Blip.Builder
                                 {
                                     // Determine the next state
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
+
+                                    // Store the previous state
+                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
+
+                                    if (isSubflowStateId(state.Id))
+                                    {
+                                        //await ProcessGlobalOutputActions(context, flow, lazyInput, inputTrace, linkedCts.Token);
+
+                                        await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
+                                        (flow, state) = await RedirectToSubflowAsync(context, state, cancellationToken);
+                                        firstStateOfSubflow = true;
+                                    }
                                 }
                                 else
                                 {
-                                    state = null;
+                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
+                                    await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
+
+                                    (flow, state) = await RedirectToParentFlowAsync(context, cancellationToken);
+                                    state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
                                 }
-                                // Store the previous state
-                                await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
 
                                 // Create trace instances, if required
                                 (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
@@ -301,7 +320,7 @@ namespace Take.Blip.Builder
                                 var inputConditionIsValid = state?.Input?.Conditions == null ||
                                                             await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
                                 stateWaitForInput = state == null ||
-                                                    (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
+                                                    (state.Input != null && !state.Input.Bypass && inputConditionIsValid && !firstStateOfSubflow);
                                 if (stateTrace?.Error != null || stateWaitForInput)
                                 {
                                     // Create a new trace if the next state waits for an input or the state without an input throws an error     
@@ -310,11 +329,7 @@ namespace Take.Blip.Builder
                             }
                         } while (!stateWaitForInput);
 
-                        // Process the global output actions
-                        if (flow.OutputActions != null)
-                        {
-                            await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, linkedCts.Token);
-                        }
+                        await ProcessGlobalOutputActions(context, flow, lazyInput, inputTrace, linkedCts.Token);
 
                         await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
                     }
@@ -350,6 +365,56 @@ namespace Take.Blip.Builder
                 ownerContext.Dispose();
             }
         }
+
+        private async Task ProcessGlobalOutputActions(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
+        {
+            if (flow.OutputActions != null)
+            {
+                await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, cancellationToken);
+            }
+        }
+
+        private async Task<(Flow, State)> RedirectToSubflowAsync(IContext context, State state, CancellationToken cancellationToken)
+        {
+            var shortNameOfSubflow = state.GetExtensionDataValue("name");
+            if (shortNameOfSubflow.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException($"Error on redirect to subflow '{state.Id}'");
+            }
+
+            context.Flow.Subflows.TryGetValue(shortNameOfSubflow, out var flow);
+            if (flow == null)
+            {
+                throw new ArgumentNullException($"Error on return subflow '{shortNameOfSubflow}'");
+            }
+
+            context.Flow = flow;
+            var newState = flow.States.Single(s => s.Root);
+
+            await _stateSessionManager.SetStateAsync(context.UserIdentity, shortNameOfSubflow, cancellationToken);
+
+            return (flow, newState);
+        }
+
+        private async Task<(Flow, State)> RedirectToParentFlowAsync(IContext context, CancellationToken cancellationToken)
+        {
+            if (context.Flow.Parent == null)
+            {
+                throw new ArgumentNullException($"Error on return to parent flow of '{context.Flow.Id}'");
+            }
+            var flow = context.Flow.Parent;
+
+            context.Flow = flow;
+            var stateId = await _stateManager.GetStateIdAsync(context, cancellationToken);
+            var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
+            await _stateSessionManager.SetStateAsync(context.UserIdentity, flow.SessionState, cancellationToken);
+
+            return (flow, state);
+        }
+
+
+        private bool isSubflowStateId(string id) => id.StartsWith("subflow:");
 
         private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
         {
@@ -540,5 +605,15 @@ namespace Take.Blip.Builder
 
             return state;
         }
+    }
+
+    static class StateExtensions
+    {
+        public static string GetExtensionDataValue(this State value, string key)
+        {
+            value.ExtensionData.TryGetValue(key, out var extensionData);
+            return extensionData.ToString();
+        }
+
     }
 }

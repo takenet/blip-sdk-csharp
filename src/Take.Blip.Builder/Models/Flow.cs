@@ -22,7 +22,12 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         [Required(ErrorMessage = "The flow id is required")]
         public string Id { get; set; }
-        
+
+        /// <summary>
+        /// Identifier of session state
+        /// </summary>
+        public string SessionState { get; set; } = "default";
+
         /// <summary>
         /// Determine the global actions that should be executed before processing the input. Optional.
         /// </summary>
@@ -43,6 +48,16 @@ namespace Take.Blip.Builder.Models
         /// The flow configuration.
         /// </summary>
         public Dictionary<string, string> Configuration { get; set; }
+
+        /// <summary>
+        /// Subflows in flow
+        /// </summary>
+        public Dictionary<string, Flow> Subflows { get; set; } = new Dictionary<string, Flow>();
+
+        /// <summary>
+        /// Parent flow if intance is a subflow
+        /// </summary>
+        public Flow Parent { get; set; }
 
         /// <summary>
         /// Provides a view over the 'builder:' <see cref="Configuration"/> keys.

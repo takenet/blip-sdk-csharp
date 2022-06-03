@@ -30,7 +30,7 @@ namespace Take.Blip.Builder
         /// <summary>
         /// The flow that is being processed.
         /// </summary>
-        Flow Flow { get; }
+        Flow Flow { get; set; }
 
         /// <summary>
         /// Gets the local context data associated with the current input.
