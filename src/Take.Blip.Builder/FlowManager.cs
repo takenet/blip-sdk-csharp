@@ -46,6 +46,7 @@ namespace Take.Blip.Builder
         private readonly Node _applicationNode;
 
         private const string END_SUBFLOW_STATE_ID = "end";
+        private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
 
         public FlowManager(
             IConfiguration configuration,
@@ -269,6 +270,8 @@ namespace Take.Blip.Builder
 
                                         await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
                                         (flow, state) = await RedirectToSubflowAsync(context, state, cancellationToken);
+
+                                        //just to support old versions of subflows... in new version, the "onboarding" input has "byPass" property with "true"
                                         firstStateOfSubflow = true;
                                     }
                                 }
@@ -376,7 +379,7 @@ namespace Take.Blip.Builder
 
         private async Task<(Flow, State)> RedirectToSubflowAsync(IContext context, State state, CancellationToken cancellationToken)
         {
-            var shortNameOfSubflow = state.GetExtensionDataValue("name");
+            var shortNameOfSubflow = state.GetExtensionDataValue(SHORTNAME_OF_SUBFLOW_EXTENSION_DATA);
             if (shortNameOfSubflow.IsNullOrEmpty())
             {
                 throw new ArgumentNullException($"Error on redirect to subflow '{state.Id}'");
