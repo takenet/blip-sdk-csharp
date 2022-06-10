@@ -16,9 +16,6 @@ namespace Take.Blip.Builder.Models
     {
         private const string DEFAULT_SESSION_STATE = "default";
 
-        private const string TYPE_FLOW = "flow";
-        private const string TYPE_SUBFLOW = "subflow";
-
         private bool _isValid;
         private BuilderConfiguration _builderConfiguration;
         
@@ -31,7 +28,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// Type of flow
         /// </summary>
-        public string Type { get; set; } = TYPE_FLOW;
+        public FlowType Type { get; set; } = FlowType.Flow;
 
         /// <summary>
         /// Identifier of session state
@@ -112,7 +109,7 @@ namespace Take.Blip.Builder.Models
             }
 
             var rootState = States.First(s => s.Root);
-            if (rootState.Input == null || (Type != TYPE_SUBFLOW && rootState.Input.Bypass))
+            if (rootState.Input == null || (Type != FlowType.Subflow && rootState.Input.Bypass))
             {
                 throw new ValidationException("The root state must expect an input");
             }
@@ -163,7 +160,7 @@ namespace Take.Blip.Builder.Models
                             throw new ValidationException($"The output state id '{output.StateId}' is invalid");
                         }
 
-                        if (state.Input == null || (Type != TYPE_SUBFLOW && rootState.Input.Bypass))
+                        if (state.Input == null || (Type != FlowType.Subflow && rootState.Input.Bypass))
                         {
                             var checkedStates = new HashSet<string>();
 

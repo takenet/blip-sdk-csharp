@@ -15,6 +15,11 @@ namespace Take.Blip.Builder
         Task<string> GetStateIdAsync(IContext context, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Gets the current state for the user in the parent flow.
+        /// </summary>
+        public Task<string> GetParentStateIdAsync(IContext context, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Gets the previous state for the user in the flow.
         /// </summary>
         Task<string> GetPreviousStateIdAsync(IContext context, CancellationToken cancellationToken);

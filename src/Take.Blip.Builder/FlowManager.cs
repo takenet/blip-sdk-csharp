@@ -198,6 +198,7 @@ namespace Take.Blip.Builder
                         }
 
                         var stateWaitForInput = true;
+                        Queue<string> parentStateIdQueue = new Queue<string>();
                         do
                         {
                             var firstStateOfSubflow = false;
@@ -264,12 +265,12 @@ namespace Take.Blip.Builder
                                     // Store the previous state
                                     await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
 
-                                    if (isSubflowStateId(state.Id))
+                                    if (isSubflowState(state))
                                     {
                                         //await ProcessGlobalOutputActions(context, flow, lazyInput, inputTrace, linkedCts.Token);
-
+                                        parentStateIdQueue.Enqueue(state.Id);
                                         await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
-                                        (flow, state) = await RedirectToSubflowAsync(context, state, cancellationToken);
+                                        (flow, state) = await RedirectToSubflowAsync(context, userIdentity, flow, state, cancellationToken);
 
                                         //just to support old versions of subflows... in new version, the "onboarding" input has "byPass" property with "true"
                                         firstStateOfSubflow = true;
@@ -280,7 +281,13 @@ namespace Take.Blip.Builder
                                     await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
                                     await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
 
-                                    (flow, state) = await RedirectToParentFlowAsync(context, cancellationToken);
+                                    (flow, state) = await RedirectToParentFlowAsync(
+                                        context, 
+                                        userIdentity, 
+                                        flow, 
+                                        await GetParentStateId(context, parentStateIdQueue, cancellationToken), 
+                                        cancellationToken
+                                    );
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
                                 }
 
@@ -377,7 +384,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task<(Flow, State)> RedirectToSubflowAsync(IContext context, State state, CancellationToken cancellationToken)
+        private async Task<(Flow, State)> RedirectToSubflowAsync(IContext context, Identity userIdentity, Flow flow, State state, CancellationToken cancellationToken)
         {
             var shortNameOfSubflow = state.GetExtensionDataValue(SHORTNAME_OF_SUBFLOW_EXTENSION_DATA);
             if (shortNameOfSubflow.IsNullOrEmpty())
@@ -385,39 +392,37 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException($"Error on redirect to subflow '{state.Id}'");
             }
 
-            context.Flow.Subflows.TryGetValue(shortNameOfSubflow, out var flow);
-            if (flow == null)
+            flow.Subflows.TryGetValue(shortNameOfSubflow, out var subflow);
+            if (subflow == null)
             {
                 throw new ArgumentNullException($"Error on return subflow '{shortNameOfSubflow}'");
             }
 
-            context.Flow = flow;
-            var newState = flow.States.Single(s => s.Root);
+            context.Flow = subflow;
+            var newState = subflow.States.Single(s => s.Root);
 
-            await _stateSessionManager.SetStateAsync(context.UserIdentity, shortNameOfSubflow, cancellationToken);
+            await _stateSessionManager.SetStateAsync(userIdentity, shortNameOfSubflow, cancellationToken);
 
-            return (flow, newState);
+            return (subflow, newState);
         }
 
-        private async Task<(Flow, State)> RedirectToParentFlowAsync(IContext context, CancellationToken cancellationToken)
+        private async Task<(Flow, State)> RedirectToParentFlowAsync(IContext context, Identity userIdentity, Flow flow, string parentStateId, CancellationToken cancellationToken)
         {
             if (context.Flow.Parent == null)
             {
                 throw new ArgumentNullException($"Error on return to parent flow of '{context.Flow.Id}'");
             }
-            var flow = context.Flow.Parent;
+            var parentFlow = flow.Parent;
 
-            context.Flow = flow;
-            var stateId = await _stateManager.GetStateIdAsync(context, cancellationToken);
-            var state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+            context.Flow = parentFlow;
+            var state = parentFlow.States.FirstOrDefault(s => s.Id == parentStateId) ?? parentFlow.States.Single(s => s.Root);
 
-            await _stateSessionManager.SetStateAsync(context.UserIdentity, flow.SessionState, cancellationToken);
+            await _stateSessionManager.SetStateAsync(userIdentity, parentFlow.SessionState, cancellationToken);
 
-            return (flow, state);
+            return (parentFlow, state);
         }
 
-
-        private bool isSubflowStateId(string id) => id.StartsWith("subflow:");
+        private bool isSubflowState(State state) => state != null && state.Id.StartsWith("subflow:");
 
         private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
         {
@@ -608,6 +613,8 @@ namespace Take.Blip.Builder
 
             return state;
         }
+
+        private async Task<string> GetParentStateId(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);
     }
 
     static class StateExtensions
