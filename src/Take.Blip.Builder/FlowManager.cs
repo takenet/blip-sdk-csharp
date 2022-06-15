@@ -501,12 +501,16 @@ namespace Take.Blip.Builder
                             if (IsContextVariable(replacedVariable))
                             {
                                 replacedVariable = await _variableReplacer.ReplaceAsync(replacedVariable, context, cancellationToken);
-                                if (replacedVariable.IsNullOrEmpty())
-                                {
-                                    continue;
-                                }
                             }
-                            state = flow.States.SingleOrDefault(s => s.Id == replacedVariable);
+                            state = flow.States.FirstOrDefault(s => s.Id == replacedVariable);
+
+                            if (state == null)
+                            {
+                                await _stateManager.DeleteStateIdAsync(context, cancellationToken);
+
+                                throw new InvalidOperationException($"Failed to process output condition, bacause the output context variable '{output.StateId}' is undefined or does not exist in the context.");
+                            }
+
                             break;
                         }
                     }
