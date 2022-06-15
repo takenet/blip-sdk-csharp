@@ -508,7 +508,7 @@ namespace Take.Blip.Builder
                             {
                                 await _stateManager.DeleteStateIdAsync(context, cancellationToken);
 
-                                throw new ArgumentException($"Failed to process output condition, bacause the output context variable '{output.StateId}' is undefined or does not exist in the context.");
+                                throw new InvalidOperationException($"Failed to process output condition, bacause the output context variable '{output.StateId}' is undefined or does not exist in the context.");
                             }
 
                             break;

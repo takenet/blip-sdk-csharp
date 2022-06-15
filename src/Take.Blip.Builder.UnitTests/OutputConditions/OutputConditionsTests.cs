@@ -276,7 +276,7 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
 
             // Act
             await target.ProcessInputAsync(Message, flow, CancellationToken);
-            
+
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
 
@@ -809,6 +809,105 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Any<LazyInput>(), flow);
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "success", Arg.Any<CancellationToken>());
             await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
+        }
+
+        private Flow GetVariableStateFlow(string variableName) => new Flow
+        {
+            Id = Guid.NewGuid().ToString(),
+            States = new[]
+            {
+                new State
+                {
+                    Id = "root",
+                    Root = true,
+                    Input = new Input(),
+                    Outputs = new[]
+                    {
+                        new Output
+                        {
+                            Conditions = new[]
+                            {
+                                new Condition
+                                {
+                                    Source = ValueSource.Input,
+                                    Comparison = ConditionComparison.Exists,
+                                    Variable = variableName
+                                }
+                            },
+                            StateId = "{{" + variableName + "}}"
+                        }
+                    }
+                },
+                new State
+                {
+                    Id = "state2"
+                }
+            }
+        };
+
+        [Fact]
+        public async Task FlowWithStateVariableShouldSucceed()
+        {
+            // Arrange
+            var variableName = "variableWithState";
+            var state2 = "state2";
+
+            var flow = GetVariableStateFlow(variableName);
+            var target = GetTarget();
+
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(state2);
+
+            Message.Content = new PlainText() { Text = "hello" };
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            await StateManager.Received(1).SetStateIdAsync(Context, state2, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithoutStateVariableShouldError()
+        {
+            // Arrange
+            var flow = GetVariableStateFlow("variableWithState");
+            var target = GetTarget();
+
+            Message.Content = new PlainText() { Text = "hello" };
+
+            // Act
+            await Assert.ThrowsAsync<OutputProcessingException>(
+                async () => await target.ProcessInputAsync(Message, flow, CancellationToken)
+            );
+
+            // Assert
+            await StateManager.DidNotReceive().SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("  ")]
+        [InlineData("inexistent state")]
+        public async Task FlowWithInvalidStateVariableShouldError(string variableValue)
+        {
+            // Arrange
+            var variableName = "variableWithState";
+
+            var flow = GetVariableStateFlow(variableName);
+            var target = GetTarget();
+
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+
+            Message.Content = new PlainText() { Text = "hello" };
+
+            // Act
+            await Assert.ThrowsAsync<OutputProcessingException>(
+                async () => await target.ProcessInputAsync(Message, flow, CancellationToken)
+            );
+
+            // Assert
+            await StateManager.DidNotReceive().SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
         }
     }
 }
