@@ -811,40 +811,6 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             await Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
         }
 
-        private Flow GetVariableStateFlow(string variableName) => new Flow
-        {
-            Id = Guid.NewGuid().ToString(),
-            States = new[]
-            {
-                new State
-                {
-                    Id = "root",
-                    Root = true,
-                    Input = new Input(),
-                    Outputs = new[]
-                    {
-                        new Output
-                        {
-                            Conditions = new[]
-                            {
-                                new Condition
-                                {
-                                    Source = ValueSource.Input,
-                                    Comparison = ConditionComparison.Exists,
-                                    Variable = variableName
-                                }
-                            },
-                            StateId = "{{" + variableName + "}}"
-                        }
-                    }
-                },
-                new State
-                {
-                    Id = "state2"
-                }
-            }
-        };
-
         [Fact]
         public async Task FlowWithStateVariableShouldSucceed()
         {
@@ -909,5 +875,39 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
             // Assert
             await StateManager.DidNotReceive().SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
         }
+
+        private Flow GetVariableStateFlow(string variableName) => new Flow
+        {
+            Id = Guid.NewGuid().ToString(),
+            States = new[]
+            {
+                new State
+                {
+                    Id = "root",
+                    Root = true,
+                    Input = new Input(),
+                    Outputs = new[]
+                    {
+                        new Output
+                        {
+                            Conditions = new[]
+                            {
+                                new Condition
+                                {
+                                    Source = ValueSource.Input,
+                                    Comparison = ConditionComparison.Exists,
+                                    Variable = variableName
+                                }
+                            },
+                            StateId = "{{" + variableName + "}}"
+                        }
+                    }
+                },
+                new State
+                {
+                    Id = "state2"
+                }
+            }
+        };
     }
 }
