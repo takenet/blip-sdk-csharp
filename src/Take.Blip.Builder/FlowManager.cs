@@ -45,7 +45,6 @@ namespace Take.Blip.Builder
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
 
-        private const string END_SUBFLOW_STATE_ID = "end";
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
 
         public FlowManager(
@@ -257,7 +256,7 @@ namespace Take.Blip.Builder
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
                                 }
 
-                                if (state.Id != END_SUBFLOW_STATE_ID)
+                                if (!state.End)
                                 {
                                     // Determine the next state
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
@@ -398,6 +397,7 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException($"Error on return subflow '{shortNameOfSubflow}'");
             }
 
+            subflow.Validate();
             context.Flow = subflow;
             var newState = subflow.States.Single(s => s.Root);
 

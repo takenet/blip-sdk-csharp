@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using System.Threading;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
+using System.ComponentModel.DataAnnotations;
 
 #pragma warning disable 4014
 
@@ -185,12 +186,37 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
         }
 
+        [Fact]
+        public async Task SubflowWithOldVersionShouldFail()
+        {
+            var flow = CreateFlowObject("subflowShortName", "text/plain", "messageContent", "messageContent2");
+            var subflow = CreateSubflowObject("text/plain", "messageContent", false);
+
+            var target = GetTarget();
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+            subflow.Parent = flow;
+            flow.Subflows.Add("subflowShortName", subflow);
+            subflow.Version = 0;
+
+            // Act
+            var exception = await Assert.ThrowsAsync<BuilderException>(
+                async () => await target.ProcessInputAsync(Message, flow, CancellationToken)
+            );
+            Assert.IsType<ValidationException>(exception.InnerException);
+
+            await Assert.ThrowsAsync<ValidationException>(
+                async () => await target.ProcessInputAsync(Message, subflow, CancellationToken)
+            );
+        }
+
         private static Flow CreateSubflowObject(string messageType, string messageContentSubflow, bool inputUserBeforeEnd)
         {
             return new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
                 Type = FlowType.Subflow,
+                Version = 2,
                 States = new[]
                 {
                     new State
@@ -235,7 +261,8 @@ namespace Take.Blip.Builder.UnitTests
                     },
                     new State
                     {
-                        Id = "end"
+                        Id = "end",
+                        End = true
                     }
                 }
             };

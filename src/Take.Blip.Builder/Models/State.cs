@@ -26,6 +26,11 @@ namespace Take.Blip.Builder.Models
         public bool Root { get; set; }
 
         /// <summary>
+        /// Indicates if this is the end state of flow (used in subflows). Optional.
+        /// </summary>
+        public bool End { get; set; } = false;
+
+        /// <summary>
         /// Determine the actions that should be executed when entering the state. Optional.
         /// </summary>
         public Action[] InputActions { get; set; }
