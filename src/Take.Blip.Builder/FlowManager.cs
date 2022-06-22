@@ -549,8 +549,8 @@ namespace Take.Blip.Builder
 
         private string DefineMutexKey(Message message, Flow flow, Identity userIdentity)
         {
-            string parent = flow.Id;
-            string identity = userIdentity.ToString();
+            var parent = flow.Id;
+            var identity = userIdentity.ToString();
 
             if (message.Metadata != null && message.Metadata.ContainsKey(TUNNEL_OWNER_METADATA))
             {
