@@ -31,7 +31,8 @@ namespace Take.Blip.Builder
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
         private readonly IContextProvider _contextProvider;
-        private readonly INamedSemaphore _namedSemaphore;
+        private readonly IFlowSemaphore _flowSemaphore;
+
         private readonly IActionProvider _actionProvider;
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
@@ -45,14 +46,12 @@ namespace Take.Blip.Builder
         private readonly Node _applicationNode;
 
         private const string END_SUBFLOW_STATE_ID = "end";
-        private const string TUNNEL_OWNER_METADATA = "#tunnel.owner";
-        private const string TUNNEL_ORIGINATOR_METADATA = "#tunnel.originator";
 
         public FlowManager(
             IConfiguration configuration,
             IStateManager stateManager,
             IContextProvider contextProvider,
-            INamedSemaphore namedSemaphore,
+            IFlowSemaphore flowSemaphore,
             IActionProvider actionProvider,
             ISender sender,
             IDocumentSerializer documentSerializer,
@@ -68,7 +67,7 @@ namespace Take.Blip.Builder
             _configuration = configuration;
             _stateManager = stateManager;
             _contextProvider = contextProvider;
-            _namedSemaphore = namedSemaphore;
+            _flowSemaphore = flowSemaphore;
             _actionProvider = actionProvider;
             _sender = sender;
             _documentSerializer = documentSerializer;
@@ -159,7 +158,7 @@ namespace Take.Blip.Builder
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
-                    var handle = await _namedSemaphore.WaitAsync(DefineMutexKey(message, flow, userIdentity), _configuration.InputProcessingTimeout, linkedCts.Token);
+                    var handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
                         // Create the input evaluator
@@ -545,28 +544,6 @@ namespace Take.Blip.Builder
             }
 
             return state;
-        }
-
-        private string DefineMutexKey(Message message, Flow flow, Identity userIdentity)
-        {
-            var parent = flow.Id;
-            var identity = userIdentity.ToString();
-
-            if (message.Metadata != null
-                && message.Metadata.TryGetValue(TUNNEL_OWNER_METADATA, out var parentTunnel)
-                && message.Metadata.TryGetValue(TUNNEL_ORIGINATOR_METADATA, out var identityTunnel))
-            {
-                //when the message is traveling in the context of a router, we must consider the key as the router identifier and the tunnel originator
-                parent = parentTunnel;
-                identity = identityTunnel;
-            }
-            else if (!flow.ParentId.IsNullOrEmpty())
-            {
-                //when the message is traveling in the context of subflow, we must consider the key as the parent flow
-                parent = flow.ParentId;
-            }
-
-            return $"{parent}:{identity}";
         }
     }
 }
