@@ -31,7 +31,8 @@ namespace Take.Blip.Builder
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
         private readonly IContextProvider _contextProvider;
-        private readonly INamedSemaphore _namedSemaphore;
+        private readonly IFlowSemaphore _flowSemaphore;
+
         private readonly IActionProvider _actionProvider;
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
@@ -50,7 +51,7 @@ namespace Take.Blip.Builder
             IConfiguration configuration,
             IStateManager stateManager,
             IContextProvider contextProvider,
-            INamedSemaphore namedSemaphore,
+            IFlowSemaphore flowSemaphore,
             IActionProvider actionProvider,
             ISender sender,
             IDocumentSerializer documentSerializer,
@@ -66,7 +67,7 @@ namespace Take.Blip.Builder
             _configuration = configuration;
             _stateManager = stateManager;
             _contextProvider = contextProvider;
-            _namedSemaphore = namedSemaphore;
+            _flowSemaphore = flowSemaphore;
             _actionProvider = actionProvider;
             _sender = sender;
             _documentSerializer = documentSerializer;
@@ -157,7 +158,7 @@ namespace Take.Blip.Builder
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
-                    var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", _configuration.InputProcessingTimeout, linkedCts.Token);
+                    var handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
                         // Create the input evaluator
