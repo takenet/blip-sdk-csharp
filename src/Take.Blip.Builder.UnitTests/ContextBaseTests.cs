@@ -12,8 +12,6 @@ using Serilog;
 using Shouldly;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Storage;
-using Take.Blip.Builder.Storage.Memory;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;

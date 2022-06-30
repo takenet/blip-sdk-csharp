@@ -32,7 +32,8 @@ namespace Take.Blip.Builder
         private readonly IStateManager _stateManager;
         private readonly Take.Blip.Client.Session.IStateManager _stateSessionManager;
         private readonly IContextProvider _contextProvider;
-        private readonly INamedSemaphore _namedSemaphore;
+        private readonly IFlowSemaphore _flowSemaphore;
+
         private readonly IActionProvider _actionProvider;
         private readonly ISender _sender;
         private readonly IDocumentSerializer _documentSerializer;
@@ -51,7 +52,7 @@ namespace Take.Blip.Builder
             IConfiguration configuration,
             IStateManager stateManager,
             IContextProvider contextProvider,
-            INamedSemaphore namedSemaphore,
+            IFlowSemaphore flowSemaphore,
             IActionProvider actionProvider,
             ISender sender,
             IDocumentSerializer documentSerializer,
@@ -68,7 +69,7 @@ namespace Take.Blip.Builder
             _configuration = configuration;
             _stateManager = stateManager;
             _contextProvider = contextProvider;
-            _namedSemaphore = namedSemaphore;
+            _flowSemaphore = flowSemaphore;
             _actionProvider = actionProvider;
             _sender = sender;
             _documentSerializer = documentSerializer;
@@ -160,7 +161,7 @@ namespace Take.Blip.Builder
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
-                    var handle = await _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", _configuration.InputProcessingTimeout, linkedCts.Token);
+                    var handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
                         // Create the input evaluator
@@ -574,12 +575,16 @@ namespace Take.Blip.Builder
                             if (IsContextVariable(replacedVariable))
                             {
                                 replacedVariable = await _variableReplacer.ReplaceAsync(replacedVariable, context, cancellationToken);
-                                if (replacedVariable.IsNullOrEmpty())
-                                {
-                                    continue;
-                                }
                             }
-                            state = flow.States.SingleOrDefault(s => s.Id == replacedVariable);
+                            state = flow.States.FirstOrDefault(s => s.Id == replacedVariable);
+
+                            if (state == null)
+                            {
+                                await _stateManager.DeleteStateIdAsync(context, cancellationToken);
+
+                                throw new InvalidOperationException($"Failed to process output condition, bacause the output context variable '{output.StateId}' is undefined or does not exist in the context.");
+                            }
+
                             break;
                         }
                     }
