@@ -31,6 +31,7 @@ namespace Take.Blip.Builder
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
         private readonly Take.Blip.Client.Session.IStateManager _stateSessionManager;
+        private readonly IFlowLoader _flowLoader;
         private readonly IContextProvider _contextProvider;
         private readonly IFlowSemaphore _flowSemaphore;
 
@@ -64,7 +65,9 @@ namespace Take.Blip.Builder
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
             Application application, 
-            Client.Session.IStateManager stateSessionManager)
+            Client.Session.IStateManager stateSessionManager,
+            IFlowLoader flowLoader
+            )
         {
             _configuration = configuration;
             _stateManager = stateManager;
@@ -82,6 +85,7 @@ namespace Take.Blip.Builder
             _inputExpirationHandler = inputExpirationHandler;
             _applicationNode = application.Node;
             _stateSessionManager = stateSessionManager;
+            _flowLoader = flowLoader;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -270,7 +274,7 @@ namespace Take.Blip.Builder
                                         //await ProcessGlobalOutputActions(context, flow, lazyInput, inputTrace, linkedCts.Token);
                                         parentStateIdQueue.Enqueue(state.Id);
                                         await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
-                                        (flow, state) = await RedirectToSubflowAsync(context, userIdentity, flow, state, cancellationToken);
+                                        (flow, state) = await RedirectToSubflowAsync(context, userIdentity, state, flow, cancellationToken);
 
                                         //just to support old versions of subflows... in new version, the "onboarding" input has "byPass" property with "true"
                                         firstStateOfSubflow = true;
@@ -384,7 +388,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task<(Flow, State)> RedirectToSubflowAsync(IContext context, Identity userIdentity, Flow flow, State state, CancellationToken cancellationToken)
+        private async Task<(Flow, State)> RedirectToSubflowAsync(IContext context, Identity userIdentity, State state, Flow parentFlow, CancellationToken cancellationToken)
         {
             var shortNameOfSubflow = state.GetExtensionDataValue(SHORTNAME_OF_SUBFLOW_EXTENSION_DATA);
             if (shortNameOfSubflow.IsNullOrEmpty())
@@ -392,7 +396,7 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException($"Error on redirect to subflow '{state.Id}'");
             }
 
-            flow.Subflows.TryGetValue(shortNameOfSubflow, out var subflow);
+            var subflow = await _flowLoader.LoadFlowAsync(FlowType.Subflow, parentFlow, shortNameOfSubflow, cancellationToken);
             if (subflow == null)
             {
                 throw new ArgumentNullException($"Error on return subflow '{shortNameOfSubflow}'");

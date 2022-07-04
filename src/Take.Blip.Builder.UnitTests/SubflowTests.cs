@@ -57,7 +57,9 @@ namespace Take.Blip.Builder.UnitTests
 
             var target = GetTarget();
             subflow.Parent = flow;
-            flow.Subflows.Add(subflowShortName, subflow);
+            FlowLoader
+                .LoadFlowAsync(FlowType.Subflow, Arg.Any<Flow>(), subflowShortName, Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(subflow));
 
             context1.Flow.Returns(flow);
             context2.Flow.Returns(subflow);
@@ -85,6 +87,8 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input1.Content), flow);
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input2.Content), subflow);
+
+            FlowLoader.Received(1).LoadFlowAsync(FlowType.Subflow, flow, subflowShortName, Arg.Any<CancellationToken>());
 
             StateManager.Received(1).SetStateIdAsync(context1, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).SetStateIdAsync(context1, "subflow:subflowTest", Arg.Any<CancellationToken>());
@@ -140,13 +144,17 @@ namespace Take.Blip.Builder.UnitTests
 
             var target = GetTarget();
             subflow.Parent = flow;
-            flow.Subflows.Add(subflowShortName, subflow);
+            FlowLoader
+                .LoadFlowAsync(FlowType.Subflow, Arg.Any<Flow>(), subflowShortName, Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(subflow));
 
             // Act
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+
+            FlowLoader.Received(1).LoadFlowAsync(FlowType.Subflow, flow, subflowShortName, Arg.Any<CancellationToken>());
 
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).SetStateIdAsync(Context, "subflow:subflowTest", Arg.Any<CancellationToken>());
@@ -189,14 +197,19 @@ namespace Take.Blip.Builder.UnitTests
         [Fact]
         public async Task SubflowWithOldVersionShouldFail()
         {
-            var flow = CreateFlowObject("subflowShortName", "text/plain", "messageContent", "messageContent2");
+            var subflowShortName = "subflowShortName";
+            var flow = CreateFlowObject(subflowShortName, "text/plain", "messageContent", "messageContent2");
             var subflow = CreateSubflowObject("text/plain", "messageContent", false);
 
             var target = GetTarget();
             var input = new PlainText() { Text = "Ping!" };
             Message.Content = input;
             subflow.Parent = flow;
-            flow.Subflows.Add("subflowShortName", subflow);
+
+            FlowLoader
+                .LoadFlowAsync(FlowType.Subflow, Arg.Any<Flow>(), subflowShortName, Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(subflow));
+
             subflow.Version = 0;
 
             // Act

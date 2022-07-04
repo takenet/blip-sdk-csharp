@@ -74,6 +74,8 @@ namespace Take.Blip.Builder.UnitTests
             UserOwnerResolver
                 .GetUserOwnerIdentitiesAsync(Arg.Any<Message>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
                 .Returns(new UserOwner(UserIdentity, ApplicationIdentity));
+
+            FlowLoader = Substitute.For<IFlowLoader>();
         }
 
         public Identity UserIdentity { get; set; }
@@ -120,6 +122,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IUserOwnerResolver UserOwnerResolver { get; }
 
+        public IFlowLoader FlowLoader { get; set; }
+
         public virtual Container CreateContainer()
         {
             var container = new Container();
@@ -145,6 +149,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(() => Logger);
             container.RegisterSingleton(() => TraceProcessor);
             container.RegisterSingleton(() => UserOwnerResolver);
+            container.RegisterSingleton(() => FlowLoader);
 
             return container;
         }
