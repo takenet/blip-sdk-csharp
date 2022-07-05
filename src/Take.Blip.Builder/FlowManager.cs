@@ -205,7 +205,6 @@ namespace Take.Blip.Builder
                         Queue<string> parentStateIdQueue = new Queue<string>();
                         do
                         {
-                            var firstStateOfSubflow = false;
                             var redirectToClientState = String.Empty;
                             try
                             {
@@ -271,13 +270,9 @@ namespace Take.Blip.Builder
 
                                     if (isSubflowState(state))
                                     {
-                                        //await ProcessGlobalOutputActions(context, flow, lazyInput, inputTrace, linkedCts.Token);
                                         parentStateIdQueue.Enqueue(state.Id);
                                         await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
                                         (flow, state) = await RedirectToSubflowAsync(context, userIdentity, state, flow, cancellationToken);
-
-                                        //just to support old versions of subflows... in new version, the "onboarding" input has "byPass" property with "true"
-                                        firstStateOfSubflow = true;
                                     }
                                 }
                                 else
@@ -334,7 +329,7 @@ namespace Take.Blip.Builder
                                 var inputConditionIsValid = state?.Input?.Conditions == null ||
                                                             await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
                                 stateWaitForInput = state == null ||
-                                                    (state.Input != null && !state.Input.Bypass && inputConditionIsValid && !firstStateOfSubflow);
+                                                    (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
                                 if (stateTrace?.Error != null || stateWaitForInput)
                                 {
                                     // Create a new trace if the next state waits for an input or the state without an input throws an error     
