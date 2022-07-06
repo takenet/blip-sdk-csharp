@@ -31,5 +31,7 @@ namespace Take.Blip.Builder.Hosting
         public long ExecuteScriptLimitMemoryWarning => 10_000_000; // Nearly 10MB
 
         public TimeSpan ExecuteScriptTimeout => TimeSpan.FromSeconds(5);
+
+        public string SalesForceBaseUri => "https://take3-dev-ed.my.salesforce.com";
     }
 }

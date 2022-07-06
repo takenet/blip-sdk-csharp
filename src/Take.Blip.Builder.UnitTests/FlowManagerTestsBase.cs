@@ -10,6 +10,7 @@ using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
+using Take.Blip.Client.Extensions.AdvancedConfig;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
@@ -31,6 +32,7 @@ namespace Take.Blip.Builder.UnitTests
             SchedulerExtension = Substitute.For<ISchedulerExtension>();
             BucketExtension = Substitute.For<IBucketExtension>();
             ArtificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+            ConfigurationExtension = Substitute.For<IConfigurationExtension>();
             EventTrackExtension = Substitute.For<IEventTrackExtension>();
             ContactsJourneyExtension = Substitute.For<IContactsJourneyExtension>();
             BroadcastExtension = Substitute.For<IBroadcastExtension>();
@@ -91,6 +93,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; set; }
 
+        public IConfigurationExtension ConfigurationExtension { get; set; }
+
         public IEventTrackExtension EventTrackExtension { get; set; }
 
         public IContactsJourneyExtension ContactsJourneyExtension { get; set; }
@@ -129,6 +133,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(() => SchedulerExtension);
             container.RegisterSingleton(() => BucketExtension);
             container.RegisterSingleton(() => ArtificialIntelligenceExtension);
+            container.RegisterSingleton(() => ConfigurationExtension);
             container.RegisterSingleton(() => EventTrackExtension);
             container.RegisterSingleton(() => ContactsJourneyExtension);
             container.RegisterSingleton(() => BroadcastExtension);

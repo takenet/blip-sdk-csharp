@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Take.Blip.Builder\Take.Blip.Builder.csproj" />
     <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 

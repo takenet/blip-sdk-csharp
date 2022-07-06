@@ -4,10 +4,12 @@ using Lime.Protocol.Serialization.Newtonsoft;
 using Serilog;
 using SimpleInjector;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.CreateLead;
 using Take.Blip.Builder.Actions.CreateTicket;
 using Take.Blip.Builder.Actions.DeleteVariable;
 using Take.Blip.Builder.Actions.ExecuteScript;
 using Take.Blip.Builder.Actions.ForwardMessageToDesk;
+using Take.Blip.Builder.Actions.GetLead;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.MergeContact;
 using Take.Blip.Builder.Actions.ProcessCommand;
@@ -25,12 +27,16 @@ using Take.Blip.Builder.Actions.TrackContactsJourney;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
+using Take.Blip.Builder.Strategies;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Builder.Utils.SalesForce;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions;
 using Take.Elephant;
+using System.Net.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -58,6 +64,8 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterDecorator<ISender, OwnerSenderDecorator>(Lifestyle.Singleton);
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
             container.RegisterSingleton<IInputExpirationHandler, InputExpirationHandler>();
+            container.RegisterSingleton<ICrmContext, CrmContext>();
+            container.RegisterSingleton<ICrmClient, SalesForceClient>();
 
             return container;
         }
@@ -68,6 +76,7 @@ namespace Take.Blip.Builder.Hosting
             container.Collection.Register<IAction>(
                 new[]
                 {
+                    typeof(RegisterLeadAction),
                     typeof(ExecuteScriptAction),
                     typeof(SendMessageAction),
                     typeof(SendMessageFromHttpAction),
@@ -84,6 +93,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(ForwardMessageToDeskAction),
                     typeof(CreateTicketAction),
                     typeof(DeleteVariableAction),
+                    typeof(GetLeadAction),
                     typeof(ProcessContentAssistantAction),
                     typeof(TrackContactsJourneyAction)
                 });
@@ -147,15 +157,21 @@ namespace Take.Blip.Builder.Hosting
 
         private static Container RegisterExternal(this Container container)
         {
-            container.RegisterSingleton<IDocumentTypeResolver>( () => {
+            var serviceProvider = new ServiceCollection()
+                .AddHttpClient()
+                .BuildServiceProvider();
+            var httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();
+            container.RegisterInstance(httpClientFactory);
+            container.RegisterSingleton<IDocumentTypeResolver>(() =>
+            {
                 var documentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
                 documentTypeResolver.RegisterDocument<InputExpiration>();
                 return documentTypeResolver;
-                });
+            });
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
             container.RegisterSingleton<ILogger>(() => LoggerProvider.Logger);
-
+                
             return container;
         }
     }

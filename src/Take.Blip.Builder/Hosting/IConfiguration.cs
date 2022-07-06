@@ -29,5 +29,10 @@ namespace Take.Blip.Builder.Hosting
         long ExecuteScriptLimitMemoryWarning { get; }
 
         TimeSpan ExecuteScriptTimeout { get; }
+        
+        /// <summary>
+        /// Sales force api base uri
+        /// </summary>
+        string SalesForceBaseUri { get; }
     }
 }
