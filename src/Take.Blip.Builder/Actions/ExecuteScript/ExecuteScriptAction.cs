@@ -67,7 +67,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                         .DebugMode());
             }
 
-            engine.Step += (sender, e) =>
+            engine.DebugHandler.Step += (sender, e) =>
             {
                 CheckMemoryUsage(context, e);
                 return StepMode.Into;
