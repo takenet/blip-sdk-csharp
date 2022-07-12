@@ -24,6 +24,11 @@ namespace Take.Blip.Builder
 
         public Task<string> GetParentStateIdAsync(IContext context, CancellationToken cancellationToken)
         {
+            if (context.Flow.Parent == null)
+            {
+                return null;
+            }
+
             return context.GetContextVariableAsync(GetStateKey(context.Flow.Parent.Id), cancellationToken);
         }
 
