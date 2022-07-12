@@ -223,6 +223,30 @@ namespace Take.Blip.Builder.UnitTests
             );
         }
 
+        [Fact]
+        public async Task RedirectToSubflowWithNullParentShouldFail()
+        {
+            var subflowShortName = "subflowShortName";
+            var flow = CreateFlowObject(subflowShortName, "text/plain", "messageContent", "messageContent2");
+            var subflow = CreateSubflowObject("text/plain", "messageContent", false);
+
+            var target = GetTarget();
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+            subflow.Parent = null;
+
+            FlowLoader
+                .LoadFlowAsync(FlowType.Subflow, Arg.Any<Flow>(), subflowShortName, Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(subflow));
+
+            // Act
+            var exception = await Assert.ThrowsAsync<BuilderException>(
+                async () => await target.ProcessInputAsync(Message, flow, CancellationToken)
+            );
+            Assert.IsType<ArgumentNullException>(exception.InnerException);
+            Assert.Equal($"Value cannot be null. (Parameter 'Error on return to parent flow of '{subflow.Id}'')", exception.InnerException.Message);
+        }
+
         private static Flow CreateSubflowObject(string messageType, string messageContentSubflow, bool inputUserBeforeEnd)
         {
             return new Flow()
