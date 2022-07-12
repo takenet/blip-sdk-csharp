@@ -15,7 +15,7 @@ namespace Take.Blip.Builder.Models
     public class Flow : IValidable
     {
         private const string DEFAULT_SESSION_STATE = "default";
-        private const int MINIMUM_SUBFLOW_VERSION = 2;
+        private const int CURRENT_SUBFLOW_VERSION = 2;
 
         private bool _isValid;
         private BuilderConfiguration _builderConfiguration;
@@ -104,9 +104,9 @@ namespace Take.Blip.Builder.Models
 
             this.ValidateObject();
 
-            if (Type == FlowType.Subflow && Version < MINIMUM_SUBFLOW_VERSION)
+            if (Type == FlowType.Subflow && Version < CURRENT_SUBFLOW_VERSION)
             {
-                throw new ValidationException($"The subflow version must be greater then or equal to {MINIMUM_SUBFLOW_VERSION}");
+                throw new ValidationException($"The subflow version must be greater then or equal to {CURRENT_SUBFLOW_VERSION}");
             }
 
             if (States.Count(s => s.Root) != 1)
