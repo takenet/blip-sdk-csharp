@@ -109,6 +109,7 @@ namespace Take.Blip.Builder.Hosting
         private static Container RegisterBuilderStorage(this Container container)
         {
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
+            container.RegisterSingleton<IFlowSemaphore, BasicFlowSemaphore>();
             container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
             container.RegisterSingleton<ISerializer<Contact>, JsonSerializer<Contact>>();
 
