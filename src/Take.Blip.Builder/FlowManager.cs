@@ -202,7 +202,7 @@ namespace Take.Blip.Builder
                         }
 
                         var stateWaitForInput = true;
-                        Queue<string> parentStateIdQueue = new Queue<string>();
+                        var parentStateIdQueue = new Queue<string>();
                         do
                         {
                             var redirectToClientState = String.Empty;
@@ -268,7 +268,7 @@ namespace Take.Blip.Builder
                                     // Store the previous state
                                     await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
 
-                                    if (isSubflowState(state))
+                                    if (IsSubflowState(state))
                                     {
                                         parentStateIdQueue.Enqueue(state.Id);
                                         await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
@@ -408,11 +408,12 @@ namespace Take.Blip.Builder
 
         private async Task<(Flow, State)> RedirectToParentFlowAsync(IContext context, Identity userIdentity, Flow flow, string parentStateId, CancellationToken cancellationToken)
         {
-            if (context.Flow.Parent == null)
-            {
-                throw new ArgumentNullException($"Error on return to parent flow of '{context.Flow.Id}'");
-            }
             var parentFlow = flow.Parent;
+
+            if (parentFlow == null)
+            {
+                throw new ArgumentNullException($"Error on return to parent flow of '{flow.Id}'");
+            }
 
             context.Flow = parentFlow;
             var state = parentFlow.States.FirstOrDefault(s => s.Id == parentStateId) ?? parentFlow.States.Single(s => s.Root);
@@ -422,7 +423,7 @@ namespace Take.Blip.Builder
             return (parentFlow, state);
         }
 
-        private bool isSubflowState(State state) => state != null && state.Id.StartsWith("subflow:");
+        private bool IsSubflowState(State state) => state != null && state.Id.StartsWith("subflow:");
 
         private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
         {
