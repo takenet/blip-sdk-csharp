@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2008
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
 EndProject
@@ -35,7 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaReceiver", "Samples\Me
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageTypes", "Samples\MessageTypes\MessageTypes.csproj", "{BC0159D2-995C-4060-B886-F3ED6ECB5EFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelpDesk", "Samples\HelpDesk\HelpDesk.csproj", "{10DC6EDE-CF09-4D37-A63C-41E035C215E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelpDesk", "Samples\HelpDesk\HelpDesk.csproj", "{10DC6EDE-CF09-4D37-A63C-41E035C215E5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jint", "..\..\..\Outros\jint\Jint\Jint.csproj", "{7C0F27B9-A379-4785-AF5B-0F2756D6E143}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,6 +97,10 @@ Global
 		{10DC6EDE-CF09-4D37-A63C-41E035C215E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10DC6EDE-CF09-4D37-A63C-41E035C215E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10DC6EDE-CF09-4D37-A63C-41E035C215E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C0F27B9-A379-4785-AF5B-0F2756D6E143}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C0F27B9-A379-4785-AF5B-0F2756D6E143}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C0F27B9-A379-4785-AF5B-0F2756D6E143}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C0F27B9-A379-4785-AF5B-0F2756D6E143}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

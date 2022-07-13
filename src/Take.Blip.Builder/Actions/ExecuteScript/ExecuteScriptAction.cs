@@ -88,9 +88,10 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         {
             var internalInvokeFunction = "TAKE_INTERNAL_INVOKE_RUN";
 
-            source += $@"
-            function {internalInvokeFunction} (args) {{
+            source = $@"
+            function {internalInvokeFunction}(args) {{
                     {source}
+
                     if ({defaultFunction} && {defaultFunction} instanceof Function) {{
                         return {defaultFunction}.apply(null, args);
                     }}
@@ -99,7 +100,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             engine = engine.Execute(source, parserOptions);
 
             return args != null
-                ? engine.Invoke(internalInvokeFunction, args)
+                ? engine.Invoke(internalInvokeFunction, new object[] { args } )
                 : engine.Invoke(internalInvokeFunction);
         }
 

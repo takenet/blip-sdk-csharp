@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>		
-    <PackageReference Include="Jint" Version="3.0.0-beta-2038" />		
     <PackageReference Include="SimpleInjector" Version="5.3.2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.10.0" />
@@ -17,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Outros\jint\Jint\Jint.csproj" />
     <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 
