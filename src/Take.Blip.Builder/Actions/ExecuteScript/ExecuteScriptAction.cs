@@ -79,13 +79,28 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 Tolerant = true
             };
 
-            engine = engine.Execute(settings.Source, DefaultParserOptions);
-
-            var result = arguments != null
-               ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
-               : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
+            var result = RunScript(engine, settings.Function ?? DEFAULT_FUNCTION, settings.Source, arguments, DefaultParserOptions);
 
             await SetScriptResultAsync(context, settings, result, cancellationToken);
+        }
+
+        private static JsValue RunScript(Engine engine, string defaultFunction, string source, object[] args, ParserOptions parserOptions)
+        {
+            var internalInvokeFunction = "TAKE_INTERNAL_INVOKE_RUN";
+
+            source += $@"
+            function {internalInvokeFunction} (args) {{
+                    {source}
+                    if ({defaultFunction} && {defaultFunction} instanceof Function) {{
+                        return {defaultFunction}.apply(null, args);
+                    }}
+            }}";
+
+            engine = engine.Execute(source, parserOptions);
+
+            return args != null
+                ? engine.Invoke(internalInvokeFunction, args)
+                : engine.Invoke(internalInvokeFunction);
         }
 
         protected async Task<object[]> GetScriptArgumentsAsync(
