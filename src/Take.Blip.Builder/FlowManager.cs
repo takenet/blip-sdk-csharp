@@ -284,7 +284,7 @@ namespace Take.Blip.Builder
                                         context, 
                                         userIdentity, 
                                         flow, 
-                                        await GetParentStateId(context, parentStateIdQueue, cancellationToken), 
+                                        await GetParentStateIdAsync(context, parentStateIdQueue, cancellationToken), 
                                         cancellationToken
                                     );
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
@@ -338,7 +338,7 @@ namespace Take.Blip.Builder
                             }
                         } while (!stateWaitForInput);
 
-                        await ProcessGlobalOutputActions(context, flow, lazyInput, inputTrace, linkedCts.Token);
+                        await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, linkedCts.Token);
 
                         await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
                     }
@@ -375,7 +375,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessGlobalOutputActions(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
+        private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
         {
             if (flow.OutputActions != null)
             {
@@ -619,7 +619,7 @@ namespace Take.Blip.Builder
             return state;
         }
 
-        private async Task<string> GetParentStateId(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);
+        private async Task<string> GetParentStateIdAsync(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);
     }
 
     static class StateExtensions
