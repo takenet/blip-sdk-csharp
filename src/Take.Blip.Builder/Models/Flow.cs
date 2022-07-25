@@ -14,6 +14,9 @@ namespace Take.Blip.Builder.Models
     /// </summary>
     public class Flow : IValidable
     {
+        private const string DEFAULT_SESSION_STATE = "default";
+        private const int CURRENT_SUBFLOW_VERSION = 2;
+
         private bool _isValid;
         private BuilderConfiguration _builderConfiguration;
         
@@ -22,7 +25,22 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         [Required(ErrorMessage = "The flow id is required")]
         public string Id { get; set; }
-        
+
+        /// <summary>
+        /// Version of flow
+        /// </summary>
+        public int Version { get; set; } = 1;
+
+        /// <summary>
+        /// Type of flow
+        /// </summary>
+        public FlowType Type { get; set; } = FlowType.Flow;
+
+        /// <summary>
+        /// Identifier of session state
+        /// </summary>
+        public string SessionState { get; set; } = DEFAULT_SESSION_STATE;
+
         /// <summary>
         /// Determine the global actions that should be executed before processing the input. Optional.
         /// </summary>
@@ -45,9 +63,9 @@ namespace Take.Blip.Builder.Models
         public Dictionary<string, string> Configuration { get; set; }
 
         /// <summary>
-        /// The identifier of the parent flow.
+        /// Parent flow if intance is a subflow
         /// </summary>
-        public string ParentId { get; set; }
+        public Flow Parent { get; set; }
 
         /// <summary>
         /// Provides a view over the 'builder:' <see cref="Configuration"/> keys.
@@ -86,13 +104,18 @@ namespace Take.Blip.Builder.Models
 
             this.ValidateObject();
 
+            if (Type == FlowType.Subflow && Version < CURRENT_SUBFLOW_VERSION)
+            {
+                throw new ValidationException($"The subflow version must be greater then or equal to {CURRENT_SUBFLOW_VERSION}");
+            }
+
             if (States.Count(s => s.Root) != 1)
             {
                 throw new ValidationException("The flow must have one root state");
             }
 
             var rootState = States.First(s => s.Root);
-            if (rootState.Input == null || rootState.Input.Bypass)
+            if (rootState.Input == null || (Type != FlowType.Subflow && rootState.Input.Bypass))
             {
                 throw new ValidationException("The root state must expect an input");
             }
@@ -143,7 +166,7 @@ namespace Take.Blip.Builder.Models
                             throw new ValidationException($"The output state id '{output.StateId}' is invalid");
                         }
 
-                        if (state.Input == null || state.Input.Bypass)
+                        if (state.Input == null || (Type != FlowType.Subflow && rootState.Input.Bypass))
                         {
                             var checkedStates = new HashSet<string>();
 

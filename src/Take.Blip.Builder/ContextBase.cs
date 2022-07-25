@@ -38,7 +38,7 @@ namespace Take.Blip.Builder
 
         public LazyInput Input { get; }
 
-        public Flow Flow { get; }
+        public Flow Flow { get; set; }
 
         public IDictionary<string, object> InputContext { get; }
 
