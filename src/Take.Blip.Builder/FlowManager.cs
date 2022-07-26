@@ -257,7 +257,7 @@ namespace Take.Blip.Builder
                                 var previousStateId = state.Id;
                                 if (IsContextVariable(state.Id))
                                 {
-                                    previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
+                                    previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, linkedCts.Token);
                                 }
 
                                 if (!state.End)
@@ -266,7 +266,7 @@ namespace Take.Blip.Builder
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
 
                                     // Store the previous state
-                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
+                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
 
                                     if (IsSubflowState(state))
                                     {
@@ -281,20 +281,20 @@ namespace Take.Blip.Builder
 
                                         parentStateIdQueue.Enqueue(state.Id);
                                         await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
-                                        (flow, state) = await RedirectToSubflowAsync(context, userIdentity, state, flow, cancellationToken);
+                                        (flow, state) = await RedirectToSubflowAsync(context, userIdentity, state, flow, linkedCts.Token);
                                     }
                                 }
                                 else
                                 {
-                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
+                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
                                     await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
 
                                     (flow, state) = await RedirectToParentFlowAsync(
                                         context, 
                                         userIdentity, 
                                         flow, 
-                                        await GetParentStateIdAsync(context, parentStateIdQueue, cancellationToken), 
-                                        cancellationToken
+                                        await GetParentStateIdAsync(context, parentStateIdQueue, linkedCts.Token),
+                                        linkedCts.Token
                                     );
 
                                     // Create trace instances, if required
