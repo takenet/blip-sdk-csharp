@@ -270,6 +270,15 @@ namespace Take.Blip.Builder
 
                                     if (IsSubflowState(state))
                                     {
+                                        // Create trace instances, if required
+                                        (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
+
+                                        // Process the next state input actions
+                                        if (state?.InputActions != null)
+                                        {
+                                            await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, linkedCts.Token);
+                                        }
+
                                         parentStateIdQueue.Enqueue(state.Id);
                                         await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
                                         (flow, state) = await RedirectToSubflowAsync(context, userIdentity, state, flow, cancellationToken);
@@ -287,6 +296,16 @@ namespace Take.Blip.Builder
                                         await GetParentStateIdAsync(context, parentStateIdQueue, cancellationToken), 
                                         cancellationToken
                                     );
+
+                                    // Create trace instances, if required
+                                    (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
+
+                                    // Prepare to leave the current state executing the output actions
+                                    if (state.OutputActions != null)
+                                    {
+                                        await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
+                                    }
+
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
                                 }
 
