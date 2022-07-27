@@ -97,6 +97,9 @@ namespace Take.Blip.Builder.UnitTests
             StateManager.Received(1).SetStateIdAsync(context2, "end", Arg.Any<CancellationToken>());
             StateManager.Received(1).SetStateIdAsync(context2, "ping2", Arg.Any<CancellationToken>());
 
+            context1.Received(1).SetVariableAsync("testSetVariableInput", "testSetVariableInputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
+            context2.Received(1).SetVariableAsync("testSetVariableOutput", "testSetVariableOutputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
+
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -162,6 +165,9 @@ namespace Take.Blip.Builder.UnitTests
             StateManager.Received(1).SetStateIdAsync(Context, "pingSubflow", Arg.Any<CancellationToken>());
             StateManager.Received(1).SetStateIdAsync(Context, "end", Arg.Any<CancellationToken>());
             StateManager.Received(1).SetStateIdAsync(Context, "ping2", Arg.Any<CancellationToken>());
+
+            Context.Received(1).SetVariableAsync("testSetVariableInput", "testSetVariableInputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
+            Context.Received(1).SetVariableAsync("testSetVariableOutput", "testSetVariableOutputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
 
             Sender
                 .Received(1)
@@ -364,6 +370,24 @@ namespace Take.Blip.Builder.UnitTests
                             new Output
                             {
                                 StateId = "ping2"
+                            }
+                        },
+                        InputActions = new[] { 
+                            new Action() {
+                                Type = "SetVariable",
+                                Settings = new JObject() {
+                                    {"variable", "testSetVariableInput"},
+                                    {"value", "testSetVariableInputValue"}
+                                }
+                            }
+                        },
+                        OutputActions = new[] {
+                            new Action() {
+                                Type = "SetVariable",
+                                Settings = new JObject() {
+                                    {"variable", "testSetVariableOutput"},
+                                    {"value", "testSetVariableOutputValue"}
+                                }
                             }
                         }
                     },
