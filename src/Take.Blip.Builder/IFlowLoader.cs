@@ -5,7 +5,7 @@ using Take.Blip.Builder.Models;
 namespace Take.Blip.Builder
 {
     /// <summary>
-    /// Defines a flow loader service, used to load flow information when occors a redirect
+    /// Defines a flow loader service, used to load flow information when a redirect occurs
     /// </summary>
     public interface IFlowLoader
     {
