@@ -30,8 +30,8 @@ namespace Take.Blip.Builder
     {
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
-        private readonly Take.Blip.Client.Session.IStateManager _stateSessionManager;
         private readonly IFlowLoader _flowLoader;
+        private readonly IFlowSessionManager _flowSessionManager;
         private readonly IContextProvider _contextProvider;
         private readonly IFlowSemaphore _flowSemaphore;
 
@@ -65,8 +65,8 @@ namespace Take.Blip.Builder
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
             Application application, 
-            Client.Session.IStateManager stateSessionManager,
-            IFlowLoader flowLoader
+            IFlowLoader flowLoader,
+            IFlowSessionManager flowSessionManager
             )
         {
             _configuration = configuration;
@@ -84,8 +84,8 @@ namespace Take.Blip.Builder
             _userOwnerResolver = userOwnerResolver;
             _inputExpirationHandler = inputExpirationHandler;
             _applicationNode = application.Node;
-            _stateSessionManager = stateSessionManager;
             _flowLoader = flowLoader;
+            this._flowSessionManager = flowSessionManager;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -409,7 +409,7 @@ namespace Take.Blip.Builder
             context.Flow = subflow;
             var newState = subflow.States.Single(s => s.Root);
 
-            await _stateSessionManager.SetStateAsync(userIdentity, shortNameOfSubflow, cancellationToken);
+            await _flowSessionManager.SetFlowSessionAsync(context, shortNameOfSubflow, cancellationToken);
 
             return (subflow, newState, newStateTrace, newStateStopwatch);
         }
@@ -429,7 +429,7 @@ namespace Take.Blip.Builder
             context.Flow = parentFlow;
             var state = parentFlow.States.FirstOrDefault(s => s.Id == parentStateId) ?? parentFlow.States.Single(s => s.Root);
 
-            await _stateSessionManager.SetStateAsync(userIdentity, parentFlow.SessionState, cancellationToken);
+            await _flowSessionManager.SetFlowSessionAsync(context, parentFlow.SessionState, cancellationToken);
 
             // Create trace instances, if required
             var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
