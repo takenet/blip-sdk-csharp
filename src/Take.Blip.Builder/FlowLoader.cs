@@ -10,7 +10,7 @@ namespace Take.Blip.Builder
         public Task<Flow> LoadFlowAsync(FlowType flowType, Flow parentFlow, string identifier, CancellationToken cancellationToken)
         {
             //Used when occurs a subflow redirect. Will be implemented in the future.
-            throw new NotImplementedException("Loading a subflow from the SDK is not supported.");
+            throw new NotImplementedException("Loading a subflow from the SDK is not supported yet.");
         }
     }
 }
