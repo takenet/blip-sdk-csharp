@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 
 namespace Take.Blip.Builder
 {
-
     /// <summary>
     /// Defines a service for managing the current flow session for a given user.
     /// </summary>
@@ -15,7 +14,7 @@ namespace Take.Blip.Builder
         Task<string> GetFlowSessionAsync(IContext context, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets the current flow session for the user in the flow.
+        /// Sets the current flow session for the user in the flow.
         /// </summary>
         Task SetFlowSessionAsync(IContext context, string flowSession, CancellationToken cancellationToken);
     }

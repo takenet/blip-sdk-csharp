@@ -85,7 +85,7 @@ namespace Take.Blip.Builder
             _inputExpirationHandler = inputExpirationHandler;
             _applicationNode = application.Node;
             _flowLoader = flowLoader;
-            this._flowSessionManager = flowSessionManager;
+            _flowSessionManager = flowSessionManager;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)

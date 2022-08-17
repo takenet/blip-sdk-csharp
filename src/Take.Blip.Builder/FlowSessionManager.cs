@@ -19,7 +19,7 @@ namespace Take.Blip.Builder
         }
 
         /// <summary>
-        /// Gets the current flow session for the user in the flow.
+        /// Sets the current flow session for the user in the flow.
         /// </summary>
         public Task SetFlowSessionAsync(IContext context, string flowSession, CancellationToken cancellationToken)
         {
