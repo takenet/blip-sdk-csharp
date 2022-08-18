@@ -30,7 +30,11 @@ namespace Take.Blip.Builder.Actions.Redirect
                 context.Input.Message.Metadata.TryGetValue(REDIRECT_TEST_LOG, out var metadataRedirectAddress) && 
                 redirect.Address.ToString().Contains(metadataRedirectAddress)) 
             {
-                _logger.Warning($"#({REDIRECT_TEST_LOG})# ({context.Input.Message}) - ({redirect.Address}) - ({redirect.Context})");
+                _logger.Warning("#({REDIRECT_TEST_LOG})# ({Message}) - ({Address}) - ({Context})",
+                    REDIRECT_TEST_LOG,
+                    context.Input.Message,
+                    redirect.Address,
+                    redirect.Context);
             }
             return _redirectManager.RedirectUserAsync(context, redirect, cancellationToken);
         }

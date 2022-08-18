@@ -41,7 +41,7 @@ namespace Take.Blip.Client
         {
             public Task TraceAsync(string data, DataOperation operation)
             {
-                Log.Logger?.Verbose("{Operation}: " + data, operation);
+                Log.Logger?.Verbose("{Operation}: {Data}", operation, data);
                 return Task.CompletedTask;
             }
 
