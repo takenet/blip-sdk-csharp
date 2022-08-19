@@ -127,7 +127,7 @@ dotnet_diagnostic.Serilog007.severity = error
 dotnet_diagnostic.Serilog008.severity = warning
 
 # CA2000: Dispose objectes before losing scope
-dotnet_diagnostic.CA2000.severity = error
+dotnet_diagnostic.CA2000.severity = warning
 
 # CA1062 - Validate arguments of public methods
 dotnet_code_quality.CA1062.exclude_extension_method_this_parameter = true
