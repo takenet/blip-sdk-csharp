@@ -44,7 +44,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             }
             catch (Exception e)
             {
-                _logger.Information("{Message}", e.Message);
+                _logger.Information(e, "Error converting timezone");
             }
 
             if (settings.LocalTimeZoneEnabled)
