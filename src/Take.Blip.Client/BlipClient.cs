@@ -61,7 +61,7 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"An error ocurred while starting the client: {ex.Message}");
+                _logger.Error(ex, "An error ocurred while starting the client: {Message}", ex.Message);
                 throw;
             }
             finally
@@ -84,7 +84,7 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"An error ocurred while stopping the client: {ex.Message}");
+                _logger.Error(ex, "An error ocurred while stopping the client: {Message}", ex.Message);
                 throw;
             }
             finally

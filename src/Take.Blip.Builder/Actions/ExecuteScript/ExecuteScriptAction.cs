@@ -44,7 +44,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             }
             catch (Exception e)
             {
-                _logger.Information(e.Message);
+                _logger.Information(e, "Error converting timezone");
             }
 
             if (settings.LocalTimeZoneEnabled)
@@ -126,16 +126,16 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         {
             if (debugInformation.CurrentMemoryUsage >= _configuration.ExecuteScriptLimitMemoryWarning)
             {
-                var warningMessage =
-                    $"The script memory allocation ({debugInformation.CurrentMemoryUsage:N0} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning:N0} bytes";
-
                 using (LogContext.PushProperty(nameof(DebugInformation), debugInformation, true))
-                    _logger.Warning(warningMessage);
+                    _logger.Warning("The script memory allocation ({CurrentMemoryUsage}:N0 bytes) is above the warning threshold of {ExecuteScriptLimitMemoryWarning}:N0 bytes",
+                        debugInformation.CurrentMemoryUsage,
+                        _configuration.ExecuteScriptLimitMemoryWarning);
+
 
                 var currentActionTrace = context.GetCurrentActionTrace();
                 if (currentActionTrace != null)
                 {
-                    currentActionTrace.Warning = warningMessage;
+                    currentActionTrace.Warning = $"The script memory allocation ({debugInformation.CurrentMemoryUsage:N0} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning:N0} bytes";
                 }
             }
         }

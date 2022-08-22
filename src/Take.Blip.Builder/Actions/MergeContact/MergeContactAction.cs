@@ -29,8 +29,9 @@ namespace Take.Blip.Builder.Actions.MergeContact
             var contact = settings.ToObject<Contact>(LimeSerializerContainer.Serializer);
             contact.Identity = contact.Identity;
 
-            var informationMessage = $"Trying to merge contact values ({settings}) for UserIdentity {context.UserIdentity}";
-            _logger.Information(informationMessage);
+            _logger.Information("Trying to merge contact values ({Settings}) for UserIdentity {UserIdentity}",
+               settings,
+               context.UserIdentity);
 
             await _contactExtension.MergeAsync(context.UserIdentity, contact, cancellationToken);
             context.RemoveContact();
