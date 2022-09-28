@@ -327,7 +327,13 @@ namespace Take.Blip.Client
             using (LogContext.PushProperty(nameof(Envelope.From), envelope.From))
             using (LogContext.PushProperty(nameof(Envelope.To), envelope.To))
             {
-                _logger.Error(ex, "Error processing the received envelope: {Message}", ex.Message);
+                if(ex.GetType().Name == "FlowConstructionException")
+                {
+                    _logger.Warning(ex, "{Message}", ex.Message);
+                } else
+                {
+                    _logger.Error(ex, "Error processing the received envelope: {Message}", ex.Message);
+                }
             }
         }
 

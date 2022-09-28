@@ -1,4 +1,5 @@
-﻿using Lime.Messaging.Contents;
+﻿using Jint.Runtime;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
@@ -7,6 +8,7 @@ using Serilog;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -46,6 +48,7 @@ namespace Take.Blip.Builder
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
+        private List<Func<Exception, bool>> _validations;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
 
@@ -86,6 +89,16 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
             _flowLoader = flowLoader;
             _flowSessionManager = flowSessionManager;
+            InitializeValidations();
+        }
+
+        private void InitializeValidations()
+        {
+            _validations = new List<Func<Exception, bool>>();
+            _validations.Add(ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is ArgumentException);
+            _validations.Add(ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is ValidationException);
+            _validations.Add(ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is JavaScriptException);
+            _validations.Add(ex => ex is OutputProcessingException);
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -292,7 +305,7 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    throw new BuilderException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
+                                    throw new FlowConstructionException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
                                 }
                             }
                             catch (Exception ex)
@@ -330,6 +343,8 @@ namespace Take.Blip.Builder
             }
             catch (Exception ex)
             {
+                ex = VerifyFlowConstructionException(ex);
+
                 if (inputTrace != null)
                 {
                     inputTrace.Error = ex.ToString();
@@ -353,6 +368,19 @@ namespace Take.Blip.Builder
 
                 ownerContext.Dispose();
             }
+        }
+
+        private Exception VerifyFlowConstructionException(Exception ex)
+        {
+            foreach (var validation in _validations)
+            {
+                if(validation(ex))
+                {
+                    return new FlowConstructionException($"[FlowConstruction] {ex.Message}", ex);
+                }
+            }
+
+            return ex;
         }
 
         private async Task ProcessStateInputActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
