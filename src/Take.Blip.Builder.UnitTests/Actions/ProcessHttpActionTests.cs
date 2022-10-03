@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
@@ -13,6 +12,7 @@ using NSubstitute;
 using Serilog;
 using Shouldly;
 using Take.Blip.Builder.Actions.ProcessHttp;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
 using Xunit;
 
@@ -27,10 +27,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         public IHttpClient HttpClient { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         private ProcessHttpAction GetTarget()
         {
-            return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>());
+            Configuration = new ProcessHttpActionTestsConfiguration();
+            return new ProcessHttpAction(Configuration, HttpClient, Substitute.For<ILogger>());
         }
 
         [Fact]
@@ -72,6 +74,48 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int)HttpStatusCode.Accepted).ToString(), Arg.Any<CancellationToken>());
             await Context.Received(1).SetVariableAsync(settings.ResponseBodyVariable, "Some result", Arg.Any<CancellationToken>());
+        }
+
+        [Theory]
+        [InlineData("http://169.254.169.254/")]
+        [InlineData("http://[fd00:ec2::254]/")]
+        [InlineData("http://168.63.129.16/")]
+        [InlineData("http://10.0.0.0/")]
+        [InlineData("http://172.16.0.0/")]
+        [InlineData("http://192.168.0.0/")]
+        public async Task ProcessActionWithDeniedUriShouldFailed(string uri)
+        {
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri(uri),
+                Method = HttpMethod.Post.ToString(),
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+                Content = new StringContent("Some result")
+            };
+
+            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(httpResponseMessage);
+
+            // Act
+            try
+            {
+                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+                throw new Exception();
+            }
+            catch (ValidationException exception)
+            {
+                // Assert
+                exception.Message.ShouldBe($"The '{uri}' settings value is invalid.");
+            }
         }
 
         [Fact]
@@ -257,7 +301,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         [InlineData("false", false)]
         [InlineData("true", true)]
         [InlineData("", false)]
-        public async Task ProcessAction_CheckConfigurationVariableValues(string botIdentifierVariableValue, bool expectedResult)
+        public async Task ProcessActionCheckConfigurationVariableValues(string botIdentifierVariableValue, bool expectedResult)
         {
             // Arrange
             const string userIdentity = "user@domain.local";
@@ -309,5 +353,36 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Arg.Is<HttpRequestMessage>(
                     h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
         }
+    }
+
+    internal class ProcessHttpActionTestsConfiguration : IConfiguration
+    {
+        public TimeSpan InputProcessingTimeout => TimeSpan.FromMinutes(1);
+
+        public int RedisDatabase => 0;
+
+        public string RedisKeyPrefix => "builder";
+
+        public int MaxTransitionsByInput => 10;
+
+        public int TraceQueueBoundedCapacity => 512;
+
+        public int TraceQueueMaxDegreeOfParallelism => 512;
+
+        public TimeSpan TraceTimeout => TimeSpan.FromSeconds(5);
+
+        public TimeSpan DefaultActionExecutionTimeout => TimeSpan.FromSeconds(30);
+
+        public int ExecuteScriptLimitRecursion => 50;
+
+        public int ExecuteScriptMaxStatements => 1000;
+
+        public long ExecuteScriptLimitMemory => 100_000_000; // Nearly 100MB
+
+        public long ExecuteScriptLimitMemoryWarning => 10_000_000; // Nearly 10MB
+
+        public TimeSpan ExecuteScriptTimeout => TimeSpan.FromSeconds(5);
+
+        public string IpsDeniedOnHttpAction => "^((10\\.|(172\\.0?1[6-9]\\.|172\\.0?2[0-9]\\.|172\\.0?3[0-1]\\.)|192\\.168\\.*)|168\\.63\\.129\\.16|169\\.254\\.169\\.254|\\[fd00:ec2::254\\]|(127\\.|localhost))";
     }
 }

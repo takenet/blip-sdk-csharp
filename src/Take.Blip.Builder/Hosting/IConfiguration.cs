@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using static System.Net.WebRequestMethods;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -29,5 +31,7 @@ namespace Take.Blip.Builder.Hosting
         long ExecuteScriptLimitMemoryWarning { get; }
 
         TimeSpan ExecuteScriptTimeout { get; }
+
+        string IpsDeniedOnHttpAction { get; }
     }
 }

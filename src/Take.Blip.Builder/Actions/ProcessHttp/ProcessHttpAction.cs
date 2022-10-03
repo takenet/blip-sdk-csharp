@@ -1,10 +1,12 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
-using Serilog.Context;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
@@ -15,12 +17,14 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         private const string ADD_BOT_KEY = "processHttpAddBotIdentityToRequestHeader";
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
 
+        private readonly IConfiguration _configuration;
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
 
-        public ProcessHttpAction(IHttpClient httpClient, ILogger logger)
+        public ProcessHttpAction(IConfiguration configuration, IHttpClient httpClient, ILogger logger)
             : base(nameof(ProcessHttp))
         {
+            _configuration = configuration;
             _httpClient = httpClient;
             _logger = logger;
         }
@@ -29,6 +33,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         {
             var responseStatus = 0;
             string responseBody = null;
+            
+            AssertDenyIps(settings.Uri);
+            
             try
             {
                 using (var httpRequestMessage =
@@ -65,8 +72,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     }
                 }
 
-            //Set the responses variables
-            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
+                //Set the responses variables
+                if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
                 {
                     await context.SetVariableAsync(settings.ResponseStatusVariable,
                         responseStatus.ToString(), cancellationToken);
@@ -87,6 +94,16 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 }
             }
 
+        }
+
+        private void AssertDenyIps(Uri uri)
+        {
+            Regex re = new Regex($"{_configuration.IpsDeniedOnHttpAction}");
+
+            if (re.IsMatch(uri.Host))
+            {
+                throw new ValidationException($"The '{uri}' settings value is invalid.");
+            }
         }
 
         private void PushTimeoutWarning(IContext context)
