@@ -295,6 +295,317 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
+        public async Task FlowWithEmptyActionOnTrackEventShouldReturnFlowConstructionException()
+        {
+            // Arrange
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "TrackEvent",
+                                Settings = new JObject()
+                                {
+                                    {"category", "Variable doesn't exist"},
+                                    {"action", "{{variable.doesntExist}}"}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            exception.Message.ShouldBe("[FlowConstruction] The processing of the action 'TrackEvent' has failed");
+        }
+
+        [Fact]
+        public async Task FlowWithEmptyUriOnProcessHttpShouldReturnFlowConstructionException()
+        {
+            // Arrange
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "ProcessHttp",
+                                Settings = new JObject()
+                                {
+                                    {"method", "GET"},
+                                    {"uri", "{{variable.doesntExist}}"}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            exception.Message.ShouldBe("[FlowConstruction] The processing of the action 'ProcessHttp' has failed");
+        }
+
+        [Fact]
+        public async Task FlowWithInvalidValueOnRedirectShouldReturnFlowConstructionException()
+        {
+            // Arrange
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "Redirect",
+                                Settings = new JObject()
+                                {
+                                    {"address", "{{variable.doesntExist}}"}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            exception.Message.ShouldBe("[FlowConstruction] The processing of the action 'Redirect' has failed");
+        }
+
+        [Fact]
+        public async Task FlowWithInvalidStateIdOnOutputConditionsShouldReturnFlowConstructionException()
+        {
+            // Arrange
+            var stateIdVariable = "{{variable.doesntExist}}";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = stateIdVariable
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            exception.Message.ShouldBe($"[FlowConstruction] Failed to process output condition to state '{stateIdVariable}'");
+        }
+
+        [Fact]
+        public async Task FlowWithInvalidScriptOnExecuteScriptShouldReturnFlowConstructionException()
+        {
+            // Arrange
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "ExecuteScript",
+                                Settings = new JObject()
+                                {
+                                    {"function", "run"},
+                                    {"source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}"},
+                                    {"outputVariable", "invalidScript"}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            exception.Message.ShouldBe("[FlowConstruction] The processing of the action 'ExecuteScript' has failed");
+        }
+
+        [Fact]
+        public async Task FlowWithTenTransitionsWithoutInterruptionsShouldReturnFlowConstructionException()
+        {
+            // Arrange
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition2"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition2",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition3"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition3",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition4"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition4",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition5"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition5",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition6"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition6",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition7"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition7",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition8"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition8",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition9"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition9",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition10"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition10",
+                        Outputs = new[]
+                        {
+                            new Output
+                            {
+                                StateId = "transition11"
+                            }
+                        }
+                    },
+                    new State
+                    {
+                        Id = "transition11"
+                    }
+                }
+            };
+
+            var target = GetTarget();
+
+            // Act
+            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            exception.Message.ShouldBe("[FlowConstruction] Max state transitions of 10 was reached");
+        }
+
+        [Fact]
         public async Task FlowWithInputVariableShouldSaveInContext()
         {
             // Arrange

@@ -94,11 +94,13 @@ namespace Take.Blip.Builder
 
         private void InitializeValidations()
         {
-            _validations = new List<Func<Exception, bool>>();
-            _validations.Add(ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is ArgumentException);
-            _validations.Add(ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is ValidationException);
-            _validations.Add(ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is JavaScriptException);
-            _validations.Add(ex => ex is OutputProcessingException);
+            _validations = new List<Func<Exception, bool>>()
+            {
+                ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is ArgumentException,
+                ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is ValidationException,
+                ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is JavaScriptException,
+                ex => ex is OutputProcessingException
+            };
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -305,7 +307,7 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    throw new FlowConstructionException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
+                                    throw new FlowConstructionException($"[FlowConstruction] Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
                                 }
                             }
                             catch (Exception ex)

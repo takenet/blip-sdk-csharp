@@ -31,6 +31,7 @@ namespace Take.Blip.Client
 
         private CancellationTokenSource _cts;
         private readonly object _syncRoot = new object();
+        private const string FLOW_CONSTRUCTION_EXCEPTION = "FlowConstructionException";
 
         public BlipChannelListener(ISender sender, bool autoNotify, ILogger logger = null)
         {
@@ -327,9 +328,9 @@ namespace Take.Blip.Client
             using (LogContext.PushProperty(nameof(Envelope.From), envelope.From))
             using (LogContext.PushProperty(nameof(Envelope.To), envelope.To))
             {
-                if(ex.GetType().Name == "FlowConstructionException")
+                if(ex.GetType().Name == FLOW_CONSTRUCTION_EXCEPTION)
                 {
-                    _logger.Warning(ex, "{Message}", ex.Message);
+                    _logger.Warning(ex, "Error processing the received envelope: {Message}", ex.Message);
                 } else
                 {
                     _logger.Error(ex, "Error processing the received envelope: {Message}", ex.Message);
