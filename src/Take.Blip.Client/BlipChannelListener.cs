@@ -315,8 +315,12 @@ namespace Take.Blip.Client
                     {
                         throw new ApplicationException("A receiver factory produced a null instance"); 
                     }
-                
-                    return receiver.ReceiveAsync(envelope, cancellationToken);
+
+                    using (var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1)))
+                    using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+                    {
+                        return receiver.ReceiveAsync(envelope, linkedCts.Token);
+                    }   
                 }));
         }
 
