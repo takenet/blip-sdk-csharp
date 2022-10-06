@@ -327,7 +327,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
-            exception.Message.ShouldBe("[FlowConstruction] The processing of the action 'TrackEvent' has failed");
+            exception.Message.ShouldContain("[FlowConstruction]");
         }
 
         [Fact]
@@ -363,7 +363,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
-            exception.Message.ShouldBe("[FlowConstruction] The processing of the action 'ProcessHttp' has failed");
+            exception.Message.ShouldContain("[FlowConstruction]");
         }
 
         [Fact]
@@ -398,7 +398,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
-            exception.Message.ShouldBe("[FlowConstruction] The processing of the action 'Redirect' has failed");
+            exception.Message.ShouldContain("[FlowConstruction]");
         }
 
         [Fact]
@@ -430,7 +430,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
-            exception.Message.ShouldBe($"[FlowConstruction] Failed to process output condition to state '{stateIdVariable}'");
+            exception.Message.ShouldContain("[FlowConstruction]");
         }
 
         [Fact]
@@ -467,7 +467,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
-            exception.Message.ShouldBe("[FlowConstruction] The processing of the action 'ExecuteScript' has failed");
+            exception.Message.ShouldContain("[FlowConstruction]");
         }
 
         [Fact]
@@ -602,7 +602,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
-            exception.Message.ShouldBe("[FlowConstruction] Max state transitions of 10 was reached");
+            exception.Message.ShouldContain("[FlowConstruction]");
         }
 
         [Fact]
