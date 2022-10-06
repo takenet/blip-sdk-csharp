@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -307,6 +308,8 @@ namespace Take.Blip.Client
                 .OrderBy(r => r.Key)
                 .First(r => r.Any());
 
+            AssertThreadCount();
+
             await Task.WhenAll(
                 receiverGroup.Select(r =>
                 {
@@ -318,6 +321,15 @@ namespace Take.Blip.Client
                 
                     return receiver.ReceiveAsync(envelope, cancellationToken);
                 }));
+        }
+
+        private void AssertThreadCount()
+        {
+            int threads = Process.GetCurrentProcess().Threads.Count;
+            if (threads > 250)
+            {
+                throw new Exception("Exceeded thread count");
+            }
         }
 
         private void LogException<T>(T envelope, Exception ex) where T : Envelope
