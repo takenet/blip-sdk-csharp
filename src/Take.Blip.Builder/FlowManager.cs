@@ -297,7 +297,7 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    throw new FlowConstructionException(_analyzeBuilderExceptions.CreateFlowConstructionExceptionMessage($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached"));
+                                    throw new FlowConstructionException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
                                 }
                             }
                             catch (Exception ex)

@@ -11,7 +11,6 @@ namespace Take.Blip.Builder
     public class AnalyzeBuilderExceptions : IAnalyzeBuilderExceptions
     {
         private List<Func<Exception, bool>> _validations;
-        private const string FLOW_CONSTRUCTION_TAG = "[FlowConstruction]";
 
         /// <inheritdoc />
         public AnalyzeBuilderExceptions()
@@ -32,17 +31,11 @@ namespace Take.Blip.Builder
             {
                 if (validation(ex))
                 {
-                    return new FlowConstructionException(CreateFlowConstructionExceptionMessage(ex.Message), ex);
+                    return new FlowConstructionException(ex.Message, ex);
                 }
             }
 
             return ex;
-        }
-
-        /// <inheritdoc />
-        public string CreateFlowConstructionExceptionMessage(string message)
-        {
-            return $"{FLOW_CONSTRUCTION_TAG} {message}";        
         }
     }
 }

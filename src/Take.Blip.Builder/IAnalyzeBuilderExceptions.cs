@@ -13,12 +13,5 @@ namespace Take.Blip.Builder
         /// <param name="ex">An exception that occurred during the flow.</param>
         /// <returns></returns>
         Exception VerifyFlowConstructionException(Exception ex);
-
-        /// <summary>
-        /// Process a flow construction exception message.
-        /// </summary>
-        /// <param name="message">The error message.</param>
-        /// <returns></returns>
-        string CreateFlowConstructionExceptionMessage(string message);
     }
 }
