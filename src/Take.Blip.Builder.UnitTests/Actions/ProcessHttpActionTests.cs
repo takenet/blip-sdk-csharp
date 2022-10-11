@@ -22,6 +22,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
     {
         public ProcessHttpActionTests()
         {
+            Configuration = Substitute.For<IConfiguration>();
+            Configuration.IpsDeniedOnHttpAction.Returns("^((10\\.|(172\\.0?1[6-9]\\.|172\\.0?2[0-9]\\.|172\\.0?3[0-1]\\.)|192\\.168\\.*)|168\\.63\\.129\\.16|169\\.254\\.169\\.254|\\[fd00:ec2::254\\]|(127\\.|localhost))");
+
             HttpClient = Substitute.For<IHttpClient>();
             Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
         }
@@ -31,7 +34,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         private ProcessHttpAction GetTarget()
         {
-            Configuration = new ProcessHttpActionTestsConfiguration();
             return new ProcessHttpAction(Configuration, HttpClient, Substitute.For<ILogger>());
         }
 
@@ -77,13 +79,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Theory]
-        [InlineData("http://169.254.169.254/")]
-        [InlineData("http://[fd00:ec2::254]/")]
-        [InlineData("http://168.63.129.16/")]
         [InlineData("http://10.0.0.0/")]
         [InlineData("http://172.16.0.0/")]
         [InlineData("http://192.168.0.0/")]
-        public async Task ProcessActionWithDeniedUriShouldFailed(string uri)
+        public async Task ProcessAction_WithDeniedUriShouldFailed(string uri)
         {
             var settings = new ProcessHttpSettings
             {
@@ -106,16 +105,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 .Returns(httpResponseMessage);
 
             // Act
-            try
-            {
-                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
-                throw new Exception();
-            }
-            catch (ValidationException exception)
-            {
-                // Assert
-                exception.Message.ShouldBe($"The '{uri}' settings value is invalid.");
-            }
+            var exception = await Assert.ThrowsAsync<ValidationException>(
+                    async () => await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken)
+                );
+
+            // Assert
+            Assert.IsType<ValidationException>(exception);
+            Assert.Equal($"The '{uri}' settings value is invalid.", exception.Message);
         }
 
         [Fact]
@@ -301,7 +297,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         [InlineData("false", false)]
         [InlineData("true", true)]
         [InlineData("", false)]
-        public async Task ProcessActionCheckConfigurationVariableValues(string botIdentifierVariableValue, bool expectedResult)
+        public async Task ProcessAction_CheckConfigurationVariableValues(string botIdentifierVariableValue, bool expectedResult)
         {
             // Arrange
             const string userIdentity = "user@domain.local";
@@ -353,36 +349,5 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Arg.Is<HttpRequestMessage>(
                     h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
         }
-    }
-
-    internal class ProcessHttpActionTestsConfiguration : IConfiguration
-    {
-        public TimeSpan InputProcessingTimeout => TimeSpan.FromMinutes(1);
-
-        public int RedisDatabase => 0;
-
-        public string RedisKeyPrefix => "builder";
-
-        public int MaxTransitionsByInput => 10;
-
-        public int TraceQueueBoundedCapacity => 512;
-
-        public int TraceQueueMaxDegreeOfParallelism => 512;
-
-        public TimeSpan TraceTimeout => TimeSpan.FromSeconds(5);
-
-        public TimeSpan DefaultActionExecutionTimeout => TimeSpan.FromSeconds(30);
-
-        public int ExecuteScriptLimitRecursion => 50;
-
-        public int ExecuteScriptMaxStatements => 1000;
-
-        public long ExecuteScriptLimitMemory => 100_000_000; // Nearly 100MB
-
-        public long ExecuteScriptLimitMemoryWarning => 10_000_000; // Nearly 10MB
-
-        public TimeSpan ExecuteScriptTimeout => TimeSpan.FromSeconds(5);
-
-        public string IpsDeniedOnHttpAction => "^((10\\.|(172\\.0?1[6-9]\\.|172\\.0?2[0-9]\\.|172\\.0?3[0-1]\\.)|192\\.168\\.*)|168\\.63\\.129\\.16|169\\.254\\.169\\.254|\\[fd00:ec2::254\\]|(127\\.|localhost))";
     }
 }

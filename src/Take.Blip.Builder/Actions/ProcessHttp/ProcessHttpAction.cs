@@ -98,6 +98,11 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private void AssertDenyIps(Uri uri)
         {
+            if (_configuration.IpsDeniedOnHttpAction == String.Empty || _configuration.IpsDeniedOnHttpAction == null)
+            {
+                return;
+            }
+
             Regex re = new Regex($"{_configuration.IpsDeniedOnHttpAction}");
 
             if (re.IsMatch(uri.Host))
