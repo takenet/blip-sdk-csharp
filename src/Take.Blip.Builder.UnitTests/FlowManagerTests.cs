@@ -328,6 +328,7 @@ namespace Take.Blip.Builder.UnitTests
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
+            exception.Message.ShouldContain("TrackEvent");
         }
 
         [Fact]
@@ -364,6 +365,7 @@ namespace Take.Blip.Builder.UnitTests
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
+            exception.Message.ShouldContain("ProcessHttp");
         }
 
         [Fact]
@@ -399,6 +401,7 @@ namespace Take.Blip.Builder.UnitTests
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
+            exception.Message.ShouldContain("Redirect");
         }
 
         [Fact]
@@ -431,6 +434,7 @@ namespace Take.Blip.Builder.UnitTests
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
+            exception.Message.ShouldContain("output condition to state");
         }
 
         [Fact]
@@ -468,6 +472,7 @@ namespace Take.Blip.Builder.UnitTests
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
+            exception.Message.ShouldContain("ExecuteScript");
         }
 
         [Fact]
@@ -603,6 +608,7 @@ namespace Take.Blip.Builder.UnitTests
             // Act
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
+            exception.Message.ShouldContain("Max state transitions");
         }
 
         [Fact]

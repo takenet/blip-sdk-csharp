@@ -17,9 +17,9 @@ namespace Take.Blip.Builder
         {
             _validations = new List<Func<Exception, bool>>()
             {
-                ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is ArgumentException,
-                ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is ValidationException,
-                ex => ex is ActionProcessingException && ex.InnerException != null && ex.InnerException is JavaScriptException,
+                ex => ex is ActionProcessingException && ex?.InnerException is ArgumentException,
+                ex => ex is ActionProcessingException && ex?.InnerException is ValidationException,
+                ex => ex is ActionProcessingException && ex?.InnerException is JavaScriptException,
                 ex => ex is OutputProcessingException
             };
         }
