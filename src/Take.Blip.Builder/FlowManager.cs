@@ -160,12 +160,13 @@ namespace Take.Blip.Builder
             State state = default;
             try
             {
+                // Synchronize to avoid concurrency issues on multiple running instances
+                var handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, cancellationToken);
+
                 // Create a cancellation token
-                using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
+                using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeoutAfterSemaphore))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
-                    // Synchronize to avoid concurrency issues on multiple running instances
-                    var handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
                         // Create the input evaluator

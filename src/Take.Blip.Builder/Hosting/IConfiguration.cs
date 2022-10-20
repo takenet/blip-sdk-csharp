@@ -6,6 +6,11 @@ namespace Take.Blip.Builder.Hosting
     {
         TimeSpan InputProcessingTimeout { get; }
 
+        /// <summary>
+        /// The input processing timeout after semaphore.
+        /// </summary>
+        TimeSpan InputProcessingTimeoutAfterSemaphore { get; }
+
         int RedisDatabase { get; }
 
         string RedisKeyPrefix { get; }
