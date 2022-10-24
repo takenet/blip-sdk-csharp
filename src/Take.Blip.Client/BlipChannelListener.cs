@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +19,7 @@ namespace Take.Blip.Client
         private readonly ISender _sender;
         private readonly bool _autoNotify;
         private readonly ILogger _logger;
-        private readonly int _maxThreadCountAllowed;
+
         private readonly IChannelListener _channelListener;
         private readonly IList<ReceiverFactoryPredicate<Message>> _messageReceivers;
         private readonly IList<ReceiverFactoryPredicate<Notification>> _notificationReceivers;
@@ -33,17 +32,12 @@ namespace Take.Blip.Client
         private CancellationTokenSource _cts;
         private readonly object _syncRoot = new object();
 
-        public BlipChannelListener(
-            ISender sender, 
-            bool autoNotify, 
-            ILogger logger = null,
-            int maxThreadCountAllowed = 0
-        )
+        public BlipChannelListener(ISender sender, bool autoNotify, ILogger logger = null)
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
             _autoNotify = autoNotify;
             _logger = logger ?? LoggerProvider.Logger;
-            _maxThreadCountAllowed = maxThreadCountAllowed;
+
             _messageReceivers = new List<ReceiverFactoryPredicate<Message>>(new[]
             {
                 new ReceiverFactoryPredicate<Message>(() => new UnsupportedMessageReceiver(), m => Task.FromResult(true), int.MaxValue)
@@ -313,8 +307,6 @@ namespace Take.Blip.Client
                 .OrderBy(r => r.Key)
                 .First(r => r.Any());
 
-            AssertMaxThreadCountAllowed();
-
             await Task.WhenAll(
                 receiverGroup.Select(r =>
                 {
@@ -328,17 +320,6 @@ namespace Take.Blip.Client
                 }));
         }
 
-        private void AssertMaxThreadCountAllowed()
-        {
-            if (
-                _maxThreadCountAllowed > 0 &&
-                Process.GetCurrentProcess().Threads.Count > _maxThreadCountAllowed
-                )
-            {
-                throw new InvalidOperationException($"Exceeded max thread count of Template Hosting ({_maxThreadCountAllowed})");
-            }
-        }
-
         private void LogException<T>(T envelope, Exception ex) where T : Envelope
         {
             using (LogContext.PushProperty(nameof(Envelope), typeof(T).Name))
@@ -346,7 +327,7 @@ namespace Take.Blip.Client
             using (LogContext.PushProperty(nameof(Envelope.From), envelope.From))
             using (LogContext.PushProperty(nameof(Envelope.To), envelope.To))
             {
-                _logger.Error(ex, "Error processing the received envelope: {Message}", ex.Message);
+                _logger.Error(ex, $"Error processing the received envelope: {ex.Message}");
             }
         }
 

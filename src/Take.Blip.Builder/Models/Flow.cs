@@ -62,6 +62,8 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         public Dictionary<string, string> Configuration { get; set; }
 
+        public string ParentId { get; set; }
+
         /// <summary>
         /// Parent flow if intance is a subflow
         /// </summary>
