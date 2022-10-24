@@ -30,8 +30,6 @@ namespace Take.Blip.Builder
     {
         private readonly IConfiguration _configuration;
         private readonly IStateManager _stateManager;
-        private readonly IFlowLoader _flowLoader;
-        private readonly IFlowSessionManager _flowSessionManager;
         private readonly IContextProvider _contextProvider;
         private readonly IFlowSemaphore _flowSemaphore;
 
@@ -47,7 +45,7 @@ namespace Take.Blip.Builder
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
 
-        private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
+        private const string END_SUBFLOW_STATE_ID = "end";
 
         public FlowManager(
             IConfiguration configuration,
@@ -64,10 +62,7 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
-            Application application, 
-            IFlowLoader flowLoader,
-            IFlowSessionManager flowSessionManager
-            )
+            Application application)
         {
             _configuration = configuration;
             _stateManager = stateManager;
@@ -84,8 +79,6 @@ namespace Take.Blip.Builder
             _userOwnerResolver = userOwnerResolver;
             _inputExpirationHandler = inputExpirationHandler;
             _applicationNode = application.Node;
-            _flowLoader = flowLoader;
-            _flowSessionManager = flowSessionManager;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -202,18 +195,39 @@ namespace Take.Blip.Builder
                         }
 
                         var stateWaitForInput = true;
-                        var parentStateIdQueue = new Queue<string>();
                         do
                         {
-                            var redirectToClientState = String.Empty;
                             try
                             {
                                 linkedCts.Token.ThrowIfCancellationRequested();
 
                                 if (stateWaitForInput)
                                 {
-                                    if (!await ValidateInputAsync(message, state, lazyInput, context, linkedCts))
+                                    // Validate the input for the current state
+                                    if (state.Input?.Validation != null && !lazyInput.SerializedContent.IsNullOrEmpty() &&
+                                        !ValidateDocument(lazyInput, state.Input.Validation))
                                     {
+                                        if (state.Input.Validation.Error != null)
+                                        {
+                                            // Send the validation error message
+                                            if (IsContextVariable(state.Input.Validation.Error))
+                                            {
+                                                var validationMessage = new Message(null)
+                                                {
+                                                    To = context.Input.Message.From
+                                                };
+                                                validationMessage.Metadata = new Dictionary<string, string>
+                                                {  { "#message.spinText", "true"} };
+
+                                                validationMessage.Content = new PlainDocument(state.Input.Validation.Error, MediaType.TextPlain);
+                                                await _sender.SendMessageAsync(validationMessage, linkedCts.Token);
+                                            }
+                                            else
+                                            {
+                                                await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
+                                            }
+                                        }
+
                                         break;
                                     }
 
@@ -226,52 +240,28 @@ namespace Take.Blip.Builder
                                 }
 
                                 // Prepare to leave the current state executing the output actions
-                                await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
+                                if (state.OutputActions != null)
+                                {
+                                    await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, linkedCts.Token);
+                                }
 
                                 var previousStateId = state.Id;
                                 if (IsContextVariable(state.Id))
                                 {
-                                    previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, linkedCts.Token);
+                                    previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, cancellationToken);
                                 }
 
-                                if (!state.End)
+                                if (state.Id != END_SUBFLOW_STATE_ID)
                                 {
                                     // Determine the next state
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
-
-                                    // Store the previous state
-                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
-
-                                    if (IsSubflowState(state))
-                                    {
-                                        parentStateIdQueue.Enqueue(state.Id);
-
-                                        (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
-                                            context, 
-                                            userIdentity, 
-                                            state, 
-                                            flow,
-                                            stateTrace,
-                                            stateStopwatch,
-                                            inputTrace,
-                                            lazyInput,
-                                            linkedCts.Token
-                                       );
-                                    }
                                 }
                                 else
                                 {
-                                    (flow, state, stateTrace, stateStopwatch) = await RedirectToParentFlowAsync(
-                                        context,
-                                        userIdentity,
-                                        flow,
-                                        previousStateId,
-                                        await GetParentStateIdAsync(context, parentStateIdQueue, linkedCts.Token),
-                                        inputTrace,
-                                        lazyInput,
-                                        linkedCts.Token
-                                    );
+                                    state = null;
                                 }
+                                // Store the previous state
+                                await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
 
                                 // Create trace instances, if required
                                 (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
@@ -287,7 +277,10 @@ namespace Take.Blip.Builder
                                 }
 
                                 // Process the next state input actions
-                                await ProcessStateInputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
+                                if (state?.InputActions != null)
+                                {
+                                    await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, linkedCts.Token);
+                                }
 
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
@@ -318,7 +311,11 @@ namespace Take.Blip.Builder
                             }
                         } while (!stateWaitForInput);
 
-                        await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, linkedCts.Token);
+                        // Process the global output actions
+                        if (flow.OutputActions != null)
+                        {
+                            await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, linkedCts.Token);
+                        }
 
                         await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
                     }
@@ -354,95 +351,6 @@ namespace Take.Blip.Builder
                 ownerContext.Dispose();
             }
         }
-
-        private async Task ProcessStateInputActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
-        {
-            if (state?.InputActions == null)
-            {
-                return;
-            }
-
-            await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, cancellationToken);
-        }
-
-        private async Task ProcessStateOutputActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
-        {
-            if (state?.OutputActions == null)
-            {
-                return;
-            }
-
-            await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, cancellationToken);
-        }
-
-        private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
-        {
-            if (flow.OutputActions != null)
-            {
-                await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, cancellationToken);
-            }
-        }
-
-        private async Task<(Flow, State, StateTrace, Stopwatch)> RedirectToSubflowAsync(IContext context, Identity userIdentity, State state, Flow parentFlow, StateTrace stateTrace, Stopwatch stateStopwatch, InputTrace inputTrace, LazyInput lazyInput, CancellationToken cancellationToken)
-        {
-            var shortNameOfSubflow = state.GetExtensionDataValue(SHORTNAME_OF_SUBFLOW_EXTENSION_DATA);
-            if (shortNameOfSubflow.IsNullOrEmpty())
-            {
-                throw new ArgumentNullException($"Error on redirect to subflow '{state.Id}'");
-            }
-
-            // Create trace instances, if required
-            var (newStateTrace, newStateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
-
-            // Process the next state input actions
-            await ProcessStateInputActionsAsync(state, lazyInput, context, stateTrace, cancellationToken);
-
-            await _stateManager.SetStateIdAsync(context, state.Id, cancellationToken);
-
-            var subflow = await _flowLoader.LoadFlowAsync(FlowType.Subflow, parentFlow, shortNameOfSubflow, cancellationToken);
-            if (subflow == null)
-            {
-                throw new ArgumentNullException($"Error on return subflow '{shortNameOfSubflow}'");
-            }
-
-            subflow.Validate();
-            context.Flow = subflow;
-            var newState = subflow.States.Single(s => s.Root);
-
-            await _flowSessionManager.SetFlowSessionAsync(context, shortNameOfSubflow, cancellationToken);
-
-            return (subflow, newState, newStateTrace, newStateStopwatch);
-        }
-
-        private async Task<(Flow, State, StateTrace, Stopwatch)> RedirectToParentFlowAsync(IContext context, Identity userIdentity, Flow flow, string previousStateId, string parentStateId, InputTrace inputTrace, LazyInput lazyInput, CancellationToken cancellationToken)
-        {
-            var parentFlow = flow.Parent;
-
-            if (parentFlow == null)
-            {
-                throw new ArgumentNullException($"Error on return to parent flow of '{flow.Id}'");
-            }
-
-            await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
-            await _stateManager.DeleteStateIdAsync(context, cancellationToken);
-
-            context.Flow = parentFlow;
-            var state = parentFlow.States.FirstOrDefault(s => s.Id == parentStateId) ?? parentFlow.States.Single(s => s.Root);
-
-            await _flowSessionManager.SetFlowSessionAsync(context, parentFlow.SessionState, cancellationToken);
-
-            // Create trace instances, if required
-            var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
-
-            // Prepare to leave the current state executing the output actions
-            await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, cancellationToken);
-
-            state = await ProcessOutputsAsync(lazyInput, context, parentFlow, state, stateTrace?.Outputs, cancellationToken);
-
-            return (parentFlow, state, stateTrace, stateStopwatch);
-        }
-
-        private bool IsSubflowState(State state) => state != null && state.Id.StartsWith("subflow:");
 
         private static bool ValidateDocument(LazyInput lazyInput, InputValidation inputValidation)
         {
@@ -637,50 +545,5 @@ namespace Take.Blip.Builder
 
             return state;
         }
-
-        private async Task<bool> ValidateInputAsync(Message message, State state, LazyInput lazyInput, IContext context, CancellationTokenSource linkedCts)
-        {
-            // Validate the input for the current state
-            if (state.Input?.Validation != null && !lazyInput.SerializedContent.IsNullOrEmpty() &&
-                !ValidateDocument(lazyInput, state.Input.Validation))
-            {
-                if (state.Input.Validation.Error != null)
-                {
-                    // Send the validation error message
-                    if (IsContextVariable(state.Input.Validation.Error))
-                    {
-                        var validationMessage = new Message(null)
-                        {
-                            To = context.Input.Message.From
-                        };
-                        validationMessage.Metadata = new Dictionary<string, string>
-                                                {  { "#message.spinText", "true"} };
-
-                        validationMessage.Content = new PlainDocument(state.Input.Validation.Error, MediaType.TextPlain);
-                        await _sender.SendMessageAsync(validationMessage, linkedCts.Token);
-                    }
-                    else
-                    {
-                        await _sender.SendMessageAsync(state.Input.Validation.Error, message.From, linkedCts.Token);
-                    }
-                }
-
-                return false;
-            }
-
-            return true;
-        }
-
-        private async Task<string> GetParentStateIdAsync(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);
-    }
-
-    static class StateExtensions
-    {
-        public static string GetExtensionDataValue(this State value, string key)
-        {
-            value.ExtensionData.TryGetValue(key, out var extensionData);
-            return extensionData.ToString();
-        }
-
     }
 }

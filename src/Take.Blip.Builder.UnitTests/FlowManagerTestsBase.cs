@@ -39,7 +39,6 @@ namespace Take.Blip.Builder.UnitTests
             TunnelExtension = Substitute.For<ITunnelExtension>();
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
-            StateSessionManager = Substitute.For<Client.Session.IStateManager>();
             ContextProvider = Substitute.For<IContextProvider>();
             Context = Substitute.For<IContext>();
             Logger = new LoggerConfiguration().CreateLogger();
@@ -74,8 +73,6 @@ namespace Take.Blip.Builder.UnitTests
             UserOwnerResolver
                 .GetUserOwnerIdentitiesAsync(Arg.Any<Message>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
                 .Returns(new UserOwner(UserIdentity, ApplicationIdentity));
-
-            FlowLoader = Substitute.For<IFlowLoader>();
         }
 
         public Identity UserIdentity { get; set; }
@@ -110,8 +107,6 @@ namespace Take.Blip.Builder.UnitTests
 
         public IStateManager StateManager { get; set; }
 
-        public Client.Session.IStateManager StateSessionManager { get; set; }
-
         public IContextProvider ContextProvider { get; set; }
 
         public IContext Context { get; set; }
@@ -121,8 +116,6 @@ namespace Take.Blip.Builder.UnitTests
         public ITraceProcessor TraceProcessor { get; set; }
 
         public IUserOwnerResolver UserOwnerResolver { get; }
-
-        public IFlowLoader FlowLoader { get; set; }
 
         public virtual Container CreateContainer()
         {
@@ -145,11 +138,9 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(() => ContextProvider);
             container.RegisterSingleton(() => Sender);
             container.RegisterSingleton(() => StateManager);
-            container.RegisterSingleton(() => StateSessionManager);
             container.RegisterSingleton(() => Logger);
             container.RegisterSingleton(() => TraceProcessor);
             container.RegisterSingleton(() => UserOwnerResolver);
-            container.RegisterSingleton(() => FlowLoader);
 
             return container;
         }

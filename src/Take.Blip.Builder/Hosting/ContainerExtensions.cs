@@ -52,14 +52,12 @@ namespace Take.Blip.Builder.Hosting
         private static Container RegisterBuilderRoot(this Container container)
         {
             container.RegisterSingleton<IFlowManager, FlowManager>();
-            container.RegisterSingleton<IFlowSessionManager, FlowSessionManager>();
             container.RegisterSingleton<IStateManager, StateManager>();
             container.RegisterSingleton<IRedirectManager, RedirectManager>();
             container.RegisterSingleton<IContextProvider, ContextProvider>();
             container.RegisterDecorator<ISender, OwnerSenderDecorator>(Lifestyle.Singleton);
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
             container.RegisterSingleton<IInputExpirationHandler, InputExpirationHandler>();
-            container.RegisterSingleton<IFlowLoader, FlowLoader>();
 
             return container;
         }
