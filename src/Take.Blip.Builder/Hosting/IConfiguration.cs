@@ -4,12 +4,15 @@ namespace Take.Blip.Builder.Hosting
 {
     public interface IConfiguration
     {
-        TimeSpan InputProcessingTimeout { get; }
-
         /// <summary>
         /// The input processing timeout after semaphore.
         /// </summary>
-        TimeSpan InputProcessingTimeoutAfterSemaphore { get; }
+        TimeSpan InputProcessingTimeout { get; }
+
+        /// <summary>
+        /// The semaphore processing timeout.
+        /// </summary>
+        TimeSpan SemaphoreProcessingTimeout { get; }
 
         int RedisDatabase { get; }
 
