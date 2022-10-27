@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -316,6 +316,45 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 ",
                 OutputVariable = nameof(result)
             };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
+        }
+
+        [Fact]
+        public async Task ExecuteScriptJsonParseWithSpecialCharacterShouldSucceed()
+        {
+            // Arrange
+            var invalidCharacter = "?";
+            Context.GetVariableAsync(nameof(invalidCharacter), CancellationToken).Returns(invalidCharacter);
+            var result = "{\"value\":\"\"}";
+
+            var settings = new ExecuteScriptSettings()
+            {
+                InputVariables = new[]
+                {
+                    nameof(invalidCharacter)
+
+                },
+                Source = @"
+                    function run (input) {
+                        try {
+                            return JSON.parse(input);
+                        } catch (e) {
+                            return {
+                                value: ''
+                            };
+                        }
+                    }
+                ",
+                OutputVariable = nameof(result)
+            };
+
             var target = GetTarget();
 
             // Act
