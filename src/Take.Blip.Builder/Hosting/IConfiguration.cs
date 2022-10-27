@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -12,7 +13,12 @@ namespace Take.Blip.Builder.Hosting
         /// <summary>
         /// The semaphore processing timeout.
         /// </summary>
-        TimeSpan SemaphoreProcessingTimeout { get; }
+        TimeSpan InputProcessingSemaphoreTimeout { get; }
+
+        /// <summary>
+        /// Flag that activates or not if the timeout will have a different time from the input and the semaphore.
+        /// </summary>
+        bool LogicOfTimeoutDifferentFromSemaphoreAndInput { get; }
 
         int RedisDatabase { get; }
 

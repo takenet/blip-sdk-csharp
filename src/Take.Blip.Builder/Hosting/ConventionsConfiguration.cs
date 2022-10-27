@@ -5,10 +5,13 @@ namespace Take.Blip.Builder.Hosting
     public class ConventionsConfiguration : IConfiguration
     {
         /// <inheritdoc />
-        public virtual TimeSpan InputProcessingTimeout => TimeSpan.FromSeconds(30);
+        public virtual TimeSpan InputProcessingTimeout => TimeSpan.FromMinutes(1);
 
         /// <inheritdoc />
-        public virtual TimeSpan SemaphoreProcessingTimeout => TimeSpan.FromMinutes(1);
+        public virtual TimeSpan InputProcessingSemaphoreTimeout => TimeSpan.FromMinutes(1);
+
+        /// <inheritdoc />
+        public virtual bool LogicOfTimeoutDifferentFromSemaphoreAndInput => true;
 
         public virtual string RedisStorageConfiguration => "localhost";
 
