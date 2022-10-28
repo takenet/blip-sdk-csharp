@@ -64,7 +64,7 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
-            Application application, 
+            Application application,
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager
             )
@@ -160,186 +160,183 @@ namespace Take.Blip.Builder
             State state = default;
             try
             {
-                CancellationTokenSource cts;
-                IAsyncDisposable handle;
+                IAsyncDisposable handle = null;
 
                 if(_configuration.LogicOfTimeoutDifferentFromSemaphoreAndInput)
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
                     handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingSemaphoreTimeout, cancellationToken);
-
-                    // Create a cancellation token
-                    cts = new CancellationTokenSource(_configuration.InputProcessingTimeout);
-                }
-                else
-                {
-                    // Create a cancellation token
-                    cts = new CancellationTokenSource(_configuration.InputProcessingTimeout);
-
-                    // Synchronize to avoid concurrency issues on multiple running instances
-                    handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, cts.Token);
                 }
 
-                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
-                try
+                using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
+                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
-                    // Create the input evaluator
-                    var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
-                        _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
-
-                    // Load the user context
-                    var context = messageContext ?? _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
-
-                    // Try restore a stored state
-                    var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
-                    var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
-
-                    state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
-
-                    // If current stateId of user is different of inputExpiration stop processing
-                    if (!_inputExpirationHandler.IsValidateState(state, message))
+                    try
                     {
-                        return;
-                    }
-
-                    await _inputExpirationHandler.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
-
-                    // Calculate the number of state transitions
-                    var transitions = 0;
-
-                    // Create trace instances, if required
-                    var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
-
-                    // Process the global input actions
-                    if (flow.InputActions != null)
-                    {
-                        await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, linkedCts.Token);
-                    }
-
-                    var stateWaitForInput = true;
-                    var parentStateIdQueue = new Queue<string>();
-                    do
-                    {
-                        var redirectToClientState = String.Empty;
-                        try
+                        if (!_configuration.LogicOfTimeoutDifferentFromSemaphoreAndInput)
                         {
-                            linkedCts.Token.ThrowIfCancellationRequested();
+                            // Synchronize to avoid concurrency issues on multiple running instances
+                            handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
+                        }
 
-                            if (stateWaitForInput)
+                        // Create the input evaluator
+                        var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
+                            _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
+
+                        // Load the user context
+                        var context = messageContext ?? _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
+
+                        // Try restore a stored state
+                        var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
+                        var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
+
+                        state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
+                        // If current stateId of user is different of inputExpiration stop processing
+                        if (!_inputExpirationHandler.IsValidateState(state, message))
+                        {
+                            return;
+                        }
+
+                        await _inputExpirationHandler.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
+
+                        // Calculate the number of state transitions
+                        var transitions = 0;
+
+                        // Create trace instances, if required
+                        var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
+
+                        // Process the global input actions
+                        if (flow.InputActions != null)
+                        {
+                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, linkedCts.Token);
+                        }
+
+                        var stateWaitForInput = true;
+                        var parentStateIdQueue = new Queue<string>();
+                        do
+                        {
+                            var redirectToClientState = String.Empty;
+                            try
                             {
-                                if (!await ValidateInputAsync(message, state, lazyInput, context, linkedCts))
+                                linkedCts.Token.ThrowIfCancellationRequested();
+
+                                if (stateWaitForInput)
                                 {
-                                    break;
+                                    if (!await ValidateInputAsync(message, state, lazyInput, context, linkedCts))
+                                    {
+                                        break;
+                                    }
+
+                                    // Set the input in the context
+                                    if (!string.IsNullOrEmpty(state.Input?.Variable))
+                                    {
+                                        await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
+                                            linkedCts.Token);
+                                    }
                                 }
 
-                                // Set the input in the context
-                                if (!string.IsNullOrEmpty(state.Input?.Variable))
+                                // Prepare to leave the current state executing the output actions
+                                await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
+
+                                var previousStateId = state.Id;
+                                if (IsContextVariable(state.Id))
                                 {
-                                    await context.SetVariableAsync(state.Input.Variable, lazyInput.SerializedContent,
-                                        linkedCts.Token);
+                                    previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, linkedCts.Token);
                                 }
-                            }
 
-                            // Prepare to leave the current state executing the output actions
-                            await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
-
-                            var previousStateId = state.Id;
-                            if (IsContextVariable(state.Id))
-                            {
-                                previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, linkedCts.Token);
-                            }
-
-                            if (!state.End)
-                            {
-                                // Determine the next state
-                                state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
-
-                                // Store the previous state
-                                await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
-
-                                if (IsSubflowState(state))
+                                if (!state.End)
                                 {
-                                    parentStateIdQueue.Enqueue(state.Id);
+                                    // Determine the next state
+                                    state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
 
-                                    (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
+                                    // Store the previous state
+                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
+
+                                    if (IsSubflowState(state))
+                                    {
+                                        parentStateIdQueue.Enqueue(state.Id);
+
+                                        (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
+                                            context,
+                                            userIdentity,
+                                            state,
+                                            flow,
+                                            stateTrace,
+                                            stateStopwatch,
+                                            inputTrace,
+                                            lazyInput,
+                                            linkedCts.Token
+                                       );
+                                    }
+                                }
+                                else
+                                {
+                                    (flow, state, stateTrace, stateStopwatch) = await RedirectToParentFlowAsync(
                                         context,
                                         userIdentity,
-                                        state,
                                         flow,
-                                        stateTrace,
-                                        stateStopwatch,
+                                        previousStateId,
+                                        await GetParentStateIdAsync(context, parentStateIdQueue, linkedCts.Token),
                                         inputTrace,
                                         lazyInput,
                                         linkedCts.Token
-                                   );
+                                    );
+                                }
+
+                                // Create trace instances, if required
+                                (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
+
+                                // Store the next state
+                                if (state != null)
+                                {
+                                    await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
+                                }
+                                else
+                                {
+                                    await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
+                                }
+
+                                // Process the next state input actions
+                                await ProcessStateInputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
+
+                                // Check if the state transition limit has reached (to avoid loops in the flow)
+                                if (transitions++ >= _configuration.MaxTransitionsByInput)
+                                {
+                                    throw new BuilderException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
                                 }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                (flow, state, stateTrace, stateStopwatch) = await RedirectToParentFlowAsync(
-                                    context,
-                                    userIdentity,
-                                    flow,
-                                    previousStateId,
-                                    await GetParentStateIdAsync(context, parentStateIdQueue, linkedCts.Token),
-                                    inputTrace,
-                                    lazyInput,
-                                    linkedCts.Token
-                                );
+                                if (stateTrace != null)
+                                {
+                                    stateTrace.Error = ex.ToString();
+                                }
+                                throw;
                             }
-
-                            // Create trace instances, if required
-                            (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
-
-                            // Store the next state
-                            if (state != null)
+                            finally
                             {
-                                await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
+                                // Continue processing if the next state do not expect the user input
+                                var inputConditionIsValid = state?.Input?.Conditions == null ||
+                                                            await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
+                                stateWaitForInput = state == null ||
+                                                    (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
+                                if (stateTrace?.Error != null || stateWaitForInput)
+                                {
+                                    // Create a new trace if the next state waits for an input or the state without an input throws an error     
+                                    (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
+                                }
                             }
-                            else
-                            {
-                                await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
-                            }
+                        } while (!stateWaitForInput);
 
-                            // Process the next state input actions
-                            await ProcessStateInputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
+                        await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, linkedCts.Token);
 
-                            // Check if the state transition limit has reached (to avoid loops in the flow)
-                            if (transitions++ >= _configuration.MaxTransitionsByInput)
-                            {
-                                throw new BuilderException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            if (stateTrace != null)
-                            {
-                                stateTrace.Error = ex.ToString();
-                            }
-                            throw;
-                        }
-                        finally
-                        {
-                            // Continue processing if the next state do not expect the user input
-                            var inputConditionIsValid = state?.Input?.Conditions == null ||
-                                                        await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
-                            stateWaitForInput = state == null ||
-                                                (state.Input != null && !state.Input.Bypass && inputConditionIsValid);
-                            if (stateTrace?.Error != null || stateWaitForInput)
-                            {
-                                // Create a new trace if the next state waits for an input or the state without an input throws an error     
-                                (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
-                            }
-                        }
-                    } while (!stateWaitForInput);
-
-                    await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, linkedCts.Token);
-
-                    await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
-                }
-                finally
-                {
-                    await handle?.DisposeAsync();
+                        await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
+                    }
+                    finally
+                    {
+                        await handle?.DisposeAsync();
+                    }
                 }
             }
             catch (Exception ex)
