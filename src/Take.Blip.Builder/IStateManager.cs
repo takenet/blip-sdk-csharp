@@ -28,14 +28,8 @@ namespace Take.Blip.Builder
         /// Sets the current state for the user in the flow.
         /// </summary>
         /// <returns></returns>
-        Task SetStateIdAsync(IContext context, string stateId, CancellationToken cancellationToken);
+        Task SetStateIdAsync(IContext context, string stateId, string previousStateId, CancellationToken cancellationToken);
 
-        /// <summary>
-        /// Sets the previous state id for the user in the flow.
-        /// This action is only informative and do not affect the user navigation.
-        /// </summary>
-        /// <returns></returns>
-        Task SetPreviousStateIdAsync(IContext context, string previousStateId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes the current state for the user in the flow.
