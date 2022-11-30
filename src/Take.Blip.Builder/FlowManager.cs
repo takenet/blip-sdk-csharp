@@ -64,7 +64,7 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
-            Application application,
+            Application application, 
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager
             )
@@ -160,25 +160,14 @@ namespace Take.Blip.Builder
             State state = default;
             try
             {
-                IAsyncDisposable handle = null;
-
-                if(_configuration.LogicOfTimeoutDifferentFromSemaphoreAndInput)
-                {
-                    // Synchronize to avoid concurrency issues on multiple running instances
-                    handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingSemaphoreTimeout, cancellationToken);
-                }
-
+                // Create a cancellation token
                 using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
+                    // Synchronize to avoid concurrency issues on multiple running instances
+                    var handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
-                        if (!_configuration.LogicOfTimeoutDifferentFromSemaphoreAndInput)
-                        {
-                            // Synchronize to avoid concurrency issues on multiple running instances
-                            handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
-                        }
-
                         // Create the input evaluator
                         var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
@@ -258,9 +247,9 @@ namespace Take.Blip.Builder
                                         parentStateIdQueue.Enqueue(state.Id);
 
                                         (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
-                                            context,
-                                            userIdentity,
-                                            state,
+                                            context, 
+                                            userIdentity, 
+                                            state, 
                                             flow,
                                             stateTrace,
                                             stateStopwatch,
