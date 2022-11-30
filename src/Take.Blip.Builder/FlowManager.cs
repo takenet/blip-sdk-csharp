@@ -64,7 +64,7 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
-            Application application,
+            Application application, 
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager
             )
@@ -188,7 +188,6 @@ namespace Take.Blip.Builder
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
-                        var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
 
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
@@ -236,10 +235,14 @@ namespace Take.Blip.Builder
                                     }
                                 }
 
-                                // Prepare to leave the current state executing the output actions
-                                await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
+                                if (!state.Id.StartsWith(Constants.DESK_STATE_PREFIX))
+                                {
+                                    // Prepare to leave the current state executing the output actions
+                                    await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
+                                }
 
                                 var previousStateId = state.Id;
+                                var previosState = state;
                                 if (IsContextVariable(state.Id))
                                 {
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, linkedCts.Token);
@@ -253,14 +256,20 @@ namespace Take.Blip.Builder
                                     // Store the previous state
                                     await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
 
+                                    if (previousStateId.StartsWith(Constants.DESK_STATE_PREFIX) && previousStateId != state.Id)
+                                    {
+                                        // Prepare to leave the current state executing the output actions
+                                        await ProcessStateOutputActionsAsync(previosState, lazyInput, context, stateTrace, linkedCts.Token);
+                                    }
+
                                     if (IsSubflowState(state))
                                     {
                                         parentStateIdQueue.Enqueue(state.Id);
 
                                         (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
-                                            context,
-                                            userIdentity,
-                                            state,
+                                            context, 
+                                            userIdentity, 
+                                            state, 
                                             flow,
                                             stateTrace,
                                             stateStopwatch,

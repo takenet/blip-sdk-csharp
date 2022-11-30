@@ -40,5 +40,10 @@ namespace Take.Blip.Builder
         /// Denominator percentage
         /// </summary>
         public const int PERCENTAGE_DENOMINATOR = 100;
+
+        /// <summary>
+        /// Desk State Id Prefix
+        /// </summary>
+        public const string DESK_STATE_PREFIX = "desk:";
     }
 }

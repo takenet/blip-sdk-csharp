@@ -8,6 +8,8 @@ using Take.Blip.Builder.Actions.CreateTicket;
 using Take.Blip.Builder.Actions.DeleteVariable;
 using Take.Blip.Builder.Actions.ExecuteScript;
 using Take.Blip.Builder.Actions.ForwardMessageToDesk;
+using Take.Blip.Builder.Actions.ForwardToDesk;
+using Take.Blip.Builder.Actions.LeavingFromDesk;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.MergeContact;
 using Take.Blip.Builder.Actions.ProcessCommand;
@@ -60,13 +62,15 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
             container.RegisterSingleton<IInputExpirationHandler, InputExpirationHandler>();
             container.RegisterSingleton<IFlowLoader, FlowLoader>();
-
+            
             return container;
         }
 
         private static Container RegisterBuilderActions(this Container container)
         {
             container.RegisterSingleton<IActionProvider, ActionProvider>();
+            container.RegisterSingleton<IForwardToDesk, ForwardToDesk>();
+            container.RegisterSingleton<ILeavingFromDesk, LeavingFromDesk>();
             container.Collection.Register<IAction>(
                 new[]
                 {
@@ -84,6 +88,8 @@ namespace Take.Blip.Builder.Hosting
                     typeof(SetBucketAction),
                     typeof(RedirectAction),
                     typeof(ForwardMessageToDeskAction),
+                    typeof(ForwardToDeskAction),
+                    typeof(LeavingFromDeskAction),
                     typeof(CreateTicketAction),
                     typeof(DeleteVariableAction),
                     typeof(ProcessContentAssistantAction),
