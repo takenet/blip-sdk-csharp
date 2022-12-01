@@ -1,5 +1,4 @@
-﻿using Jint.Runtime;
-using Lime.Messaging.Contents;
+﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
@@ -8,7 +7,6 @@ using Serilog;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -48,7 +46,6 @@ namespace Take.Blip.Builder
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
-        private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
 
@@ -69,8 +66,7 @@ namespace Take.Blip.Builder
             IInputExpirationHandler inputExpirationHandler,
             Application application,
             IFlowLoader flowLoader,
-            IFlowSessionManager flowSessionManager,
-            IAnalyzeBuilderExceptions analyzeBuilderExceptions
+            IFlowSessionManager flowSessionManager
             )
         {
             _configuration = configuration;
@@ -90,7 +86,6 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
             _flowLoader = flowLoader;
             _flowSessionManager = flowSessionManager;
-            _analyzeBuilderExceptions = analyzeBuilderExceptions;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -165,25 +160,14 @@ namespace Take.Blip.Builder
             State state = default;
             try
             {
-                IAsyncDisposable handle = null;
-
-                if(_configuration.LogicOfTimeoutDifferentFromSemaphoreAndInput)
-                {
-                    // Synchronize to avoid concurrency issues on multiple running instances
-                    handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingSemaphoreTimeout, cancellationToken);
-                }
-
+                // Create a cancellation token
                 using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
                 {
+                    // Synchronize to avoid concurrency issues on multiple running instances
+                    var handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
                     try
                     {
-                        if (!_configuration.LogicOfTimeoutDifferentFromSemaphoreAndInput)
-                        {
-                            // Synchronize to avoid concurrency issues on multiple running instances
-                            handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
-                        }
-
                         // Create the input evaluator
                         var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
@@ -308,7 +292,7 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    throw new FlowConstructionException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
+                                    throw new BuilderException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
                                 }
                             }
                             catch (Exception ex)
@@ -346,15 +330,13 @@ namespace Take.Blip.Builder
             }
             catch (Exception ex)
             {
-                ex = _analyzeBuilderExceptions.VerifyFlowConstructionException(ex);
-
                 if (inputTrace != null)
                 {
                     inputTrace.Error = ex.ToString();
                 }
 
                 var builderException = ex is BuilderException be ? be :
-                    new BuilderException($"Error processing input '{message.Content}' for user '{userIdentity}' in state '{state?.Id}'", ex);
+                    new BuilderException($"Error processing input with ID '{message.Id}' for user '{userIdentity}' in state '{state?.Id}'", ex);
 
                 builderException.StateId = state?.Id;
                 builderException.UserId = userIdentity;
