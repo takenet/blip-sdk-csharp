@@ -336,7 +336,7 @@ namespace Take.Blip.Builder
                 }
 
                 var builderException = ex is BuilderException be ? be :
-                    new BuilderException($"Error processing input '{message.Content}' for user '{userIdentity}' in state '{state?.Id}'", ex);
+                    new BuilderException($"Error processing input with ID '{message.Id}' for user '{userIdentity}' in state '{state?.Id}'", ex);
 
                 builderException.StateId = state?.Id;
                 builderException.UserId = userIdentity;
