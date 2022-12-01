@@ -64,7 +64,7 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
-            Application application, 
+            Application application,
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager
             )
@@ -267,9 +267,9 @@ namespace Take.Blip.Builder
                                         parentStateIdQueue.Enqueue(state.Id);
 
                                         (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
-                                            context, 
-                                            userIdentity, 
-                                            state, 
+                                            context,
+                                            userIdentity,
+                                            state,
                                             flow,
                                             stateTrace,
                                             stateStopwatch,

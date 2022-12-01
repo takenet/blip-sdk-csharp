@@ -62,7 +62,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
             container.RegisterSingleton<IInputExpirationHandler, InputExpirationHandler>();
             container.RegisterSingleton<IFlowLoader, FlowLoader>();
-            
+
             return container;
         }
 
