@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace Take.Blip.Client
         private readonly ISender _sender;
         private readonly bool _autoNotify;
         private readonly ILogger _logger;
-
+        private readonly int _maxThreadCountAllowed;
         private readonly IChannelListener _channelListener;
         private readonly IList<ReceiverFactoryPredicate<Message>> _messageReceivers;
         private readonly IList<ReceiverFactoryPredicate<Notification>> _notificationReceivers;
@@ -34,12 +35,17 @@ namespace Take.Blip.Client
         private const string FLOW_CONSTRUCTION_EXCEPTION = "FlowConstructionException";
         private const string DEFAULT_ERROR_MESSAGE = "Error processing the received envelope:";
 
-        public BlipChannelListener(ISender sender, bool autoNotify, ILogger logger = null)
+        public BlipChannelListener(
+            ISender sender, 
+            bool autoNotify, 
+            ILogger logger = null,
+            int maxThreadCountAllowed = 0
+        )
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
             _autoNotify = autoNotify;
             _logger = logger ?? LoggerProvider.Logger;
-
+            _maxThreadCountAllowed = maxThreadCountAllowed;
             _messageReceivers = new List<ReceiverFactoryPredicate<Message>>(new[]
             {
                 new ReceiverFactoryPredicate<Message>(() => new UnsupportedMessageReceiver(), m => Task.FromResult(true), int.MaxValue)
@@ -309,6 +315,8 @@ namespace Take.Blip.Client
                 .OrderBy(r => r.Key)
                 .First(r => r.Any());
 
+            AssertMaxThreadCountAllowed();
+
             await Task.WhenAll(
                 receiverGroup.Select(r =>
                 {
@@ -320,6 +328,17 @@ namespace Take.Blip.Client
                 
                     return receiver.ReceiveAsync(envelope, cancellationToken);
                 }));
+        }
+
+        private void AssertMaxThreadCountAllowed()
+        {
+            if (
+                _maxThreadCountAllowed > 0 &&
+                Process.GetCurrentProcess().Threads.Count > _maxThreadCountAllowed
+                )
+            {
+                throw new InvalidOperationException($"Exceeded max thread count of Template Hosting ({_maxThreadCountAllowed})");
+            }
         }
 
         private void LogException<T>(T envelope, Exception ex) where T : Envelope
