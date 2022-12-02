@@ -46,6 +46,7 @@ namespace Take.Blip.Builder
         private readonly IUserOwnerResolver _userOwnerResolver;
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
+        private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
 
@@ -64,9 +65,10 @@ namespace Take.Blip.Builder
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
             IInputExpirationHandler inputExpirationHandler,
-            Application application, 
+            Application application,
             IFlowLoader flowLoader,
-            IFlowSessionManager flowSessionManager
+            IFlowSessionManager flowSessionManager,
+            IAnalyzeBuilderExceptions analyzeBuilderExceptions
             )
         {
             _configuration = configuration;
@@ -86,6 +88,7 @@ namespace Take.Blip.Builder
             _applicationNode = application.Node;
             _flowLoader = flowLoader;
             _flowSessionManager = flowSessionManager;
+            _analyzeBuilderExceptions = analyzeBuilderExceptions;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -247,9 +250,9 @@ namespace Take.Blip.Builder
                                         parentStateIdQueue.Enqueue(state.Id);
 
                                         (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
-                                            context, 
-                                            userIdentity, 
-                                            state, 
+                                            context,
+                                            userIdentity,
+                                            state,
                                             flow,
                                             stateTrace,
                                             stateStopwatch,
@@ -292,7 +295,7 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    throw new BuilderException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
+                                    throw new FlowConstructionException($"Max state transitions of {_configuration.MaxTransitionsByInput} was reached");
                                 }
                             }
                             catch (Exception ex)
@@ -330,13 +333,15 @@ namespace Take.Blip.Builder
             }
             catch (Exception ex)
             {
+                ex = _analyzeBuilderExceptions.VerifyFlowConstructionException(ex);
+
                 if (inputTrace != null)
                 {
                     inputTrace.Error = ex.ToString();
                 }
 
                 var builderException = ex is BuilderException be ? be :
-                    new BuilderException($"Error processing input with ID '{message.Id}' for user '{userIdentity}' in state '{state?.Id}'", ex);
+                    new BuilderException($"Error processing input with message ID '{message.Id}' for user '{userIdentity}' in state '{state?.Id}'", ex);
 
                 builderException.StateId = state?.Id;
                 builderException.UserId = userIdentity;
