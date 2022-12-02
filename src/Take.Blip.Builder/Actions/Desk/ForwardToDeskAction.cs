@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 using Take.Blip.Builder.Actions.ForwardMessageToDesk;
 
 namespace Take.Blip.Builder.Actions.ForwardToDesk
@@ -9,26 +10,28 @@ namespace Take.Blip.Builder.Actions.ForwardToDesk
     {
         private readonly IForwardToDesk _forwardToDesk;
         private readonly IStateManager _stateManager;
+        private readonly ILogger _logger;
 
-        public ForwardToDeskAction(IForwardToDesk forwardToDesk, IStateManager stateManager) : base(nameof(ForwardToDesk))
+        public ForwardToDeskAction(IForwardToDesk forwardToDesk, IStateManager stateManager, ILogger logger) : base(nameof(ForwardToDesk))
         {
             _forwardToDesk = forwardToDesk;
             _stateManager = stateManager;
+            _logger = logger;
         }
 
         public override async Task ExecuteAsync(IContext context, ForwardToDeskSettings settings, CancellationToken cancellationToken)
         {
             bool helpDeskHasTicket = await _forwardToDesk.GetOrCreateTicketAsync(context, settings, cancellationToken);
 
-            if (helpDeskHasTicket)
+            if (!helpDeskHasTicket)
             {
-                await _forwardToDesk.SendMessageAsync(context, settings, cancellationToken);
+                _logger.Information("[Desk-State] Cannot get or create ticket to send message to Desk for UserIdentity {UserIdentity} from OwnerIdentity {OwnerIdentity}.",
+                   context.UserIdentity,
+                   context.OwnerIdentity
+                );
             }
-            else
-            {
-                throw new ValidationException(
-                    $"Cannot find ticket to send message to Desk. Error occurred in the '{nameof(ForwardToDesk)}' action");
-            }
+
+            await _forwardToDesk.SendMessageAsync(context, settings, cancellationToken);
         }
     }
 }
