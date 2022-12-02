@@ -18,9 +18,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Settings = new ForwardToDeskSettings();
         }
         
-        public IForwardToDesk ForwardToDesk { get; }
-        public IStateManager StateManager { get; }
-        public ILogger Logger { get; }
+        private IForwardToDesk ForwardToDesk { get; }
+        private IStateManager StateManager { get; }
+        private ILogger Logger { get; }
 
 
         public ForwardToDeskSettings Settings { get; }
@@ -35,8 +35,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             // Arrange
             var target = GetTarget();
-            IContext context = Substitute.For<IContext>();
-            ForwardToDeskSettings forwardToDeskSettings = new ForwardToDeskSettings();
             ForwardToDesk.GetOrCreateTicketAsync(Context, Settings, CancellationToken).Returns(true);
 
             // Act
@@ -55,8 +53,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             // Arrange
             var target = GetTarget();
-            IContext context = Substitute.For<IContext>();
-            ForwardToDeskSettings forwardToDeskSettings = new ForwardToDeskSettings();
             ForwardToDesk.GetOrCreateTicketAsync(Context, Settings, CancellationToken).Returns(false);
 
             // Act

@@ -15,9 +15,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Settings = new LeavingFromDeskSettings();
         }
         
-        public ILeavingFromDesk LeavingFromDesk { get; }
+        private ILeavingFromDesk LeavingFromDesk { get; }
 
-        public LeavingFromDeskSettings Settings { get; }
+        private LeavingFromDeskSettings Settings { get; }
         
         private LeavingFromDeskAction GetTarget()
         {
@@ -29,7 +29,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             // Arrange
             var target = GetTarget();
-            LeavingFromDeskSettings leavingFromDeskSettings = new LeavingFromDeskSettings();
 
             // Act
             await target.ExecuteAsync(Context, Settings, CancellationToken);
