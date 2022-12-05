@@ -35,7 +35,7 @@ namespace Take.Blip.Builder
 
         public static async Task<TicketContext> GetTicketVariableAsync(this IContext context, CancellationToken cancellationToken)
         {
-            var ticketJson = await GetVariableAsync(context, TICKET_KEY, cancellationToken);
+            var ticketJson = await context.GetVariableAsync(TICKET_KEY, cancellationToken);
             if (string.IsNullOrEmpty(ticketJson))
                 return null;
 
@@ -68,9 +68,6 @@ namespace Take.Blip.Builder
 
         public static void RemoveValue(this IContext context, string key) 
             => context.InputContext.Remove(key);
-
-        public static Task<string> GetVariableAsync(this IContext context, string key, CancellationToken cancellationToken)
-           => context.GetVariableAsync(key, cancellationToken);
 
         public static void SetVariableAsync(this IContext context, string key, string value, CancellationToken cancellationToken)
         {
