@@ -180,7 +180,6 @@ namespace Take.Blip.Builder
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
-                        var previousState = await _stateManager.GetPreviousStateIdAsync(context, linkedCts.Token);
 
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
