@@ -348,12 +348,14 @@ namespace Take.Blip.Client
             using (LogContext.PushProperty(nameof(Envelope.From), envelope.From))
             using (LogContext.PushProperty(nameof(Envelope.To), envelope.To))
             {
-                if(ex.GetType().Name == FLOW_CONSTRUCTION_EXCEPTION)
+                switch (ex.GetType().Name)
                 {
-                    _logger.Warning(ex, DEFAULT_ERROR_MESSAGE + " {Message}", ex.Message);
-                } else
-                {
-                    _logger.Error(ex, DEFAULT_ERROR_MESSAGE + " {Message}", ex.Message);
+                    case FLOW_CONSTRUCTION_EXCEPTION:
+                        _logger.Warning(ex, DEFAULT_ERROR_MESSAGE + " {Message}", ex.Message);
+                        break;
+                    default:
+                        _logger.Error(ex, DEFAULT_ERROR_MESSAGE + " {Message}", ex.Message);
+                        break;
                 }
             }
         }
