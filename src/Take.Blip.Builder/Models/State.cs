@@ -88,6 +88,14 @@ namespace Take.Blip.Builder.Models
             }
         }
 
+        /// <summary>
+        /// Indicates if the state is a Desk type.
+        /// </summary>
+        public bool IsDesk()
+        {
+            return Id.StartsWith(Constants.DESK_STATE_PREFIX);
+        }
+
         public StateTrace ToTrace()
         {
             return new StateTrace()

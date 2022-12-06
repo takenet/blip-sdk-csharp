@@ -27,7 +27,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         
         private ForwardToDeskAction GetTarget()
         {
-            return new ForwardToDeskAction(ForwardToDesk, StateManager, Logger);
+            return new ForwardToDeskAction(ForwardToDesk);
         }
 
         [Fact]
@@ -41,30 +41,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, Settings, CancellationToken);
 
             // Assert
-            _ = ForwardToDesk.Received(1)
-                .GetOrCreateTicketAsync(Context, Settings, CancellationToken);
-            _ = Logger.Received(0);
-            _ = ForwardToDesk.Received(1)
-                .SendMessageAsync(Context, Settings, CancellationToken);
-        }
-
-        [Fact]
-        public async Task ExecuteShouldLogMessage()
-        {
-            // Arrange
-            var target = GetTarget();
-            ForwardToDesk.GetOrCreateTicketAsync(Context, Settings, CancellationToken).Returns(false);
-
-            // Act
-            await target.ExecuteAsync(Context, Settings, CancellationToken);
-
-            // Assert
-            _ = ForwardToDesk.Received(1)
-                .GetOrCreateTicketAsync(Context, Settings, CancellationToken);
-            Logger.Received(1)
-                .Information("[Desk-State] Cannot get or create ticket to send message to Desk for UserIdentity {UserIdentity} from OwnerIdentity {OwnerIdentity}.", 
-                    Context.UserIdentity, 
-                    Context.OwnerIdentity);
             _ = ForwardToDesk.Received(1)
                 .SendMessageAsync(Context, Settings, CancellationToken);
         }

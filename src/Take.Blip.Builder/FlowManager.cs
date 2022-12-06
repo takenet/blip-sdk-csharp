@@ -235,14 +235,14 @@ namespace Take.Blip.Builder
                                     }
                                 }
 
-                                if (!state.Id.StartsWith(Constants.DESK_STATE_PREFIX))
+                                if (!state.IsDesk())
                                 {
                                     // Prepare to leave the current state executing the output actions
                                     await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
                                 }
 
                                 var previousStateId = state.Id;
-                                var previosState = state;
+                                var previousState = state;
                                 if (IsContextVariable(state.Id))
                                 {
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, linkedCts.Token);
@@ -256,10 +256,10 @@ namespace Take.Blip.Builder
                                     // Store the previous state
                                     await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
 
-                                    if (previousStateId.StartsWith(Constants.DESK_STATE_PREFIX) && previousStateId != state.Id)
+                                    if (previousState.IsDesk() && previousState.Id != state.Id)
                                     {
                                         // Prepare to leave the current state executing the output actions
-                                        await ProcessStateOutputActionsAsync(previosState, lazyInput, context, stateTrace, linkedCts.Token);
+                                        await ProcessStateOutputActionsAsync(previousState, lazyInput, context, stateTrace, linkedCts.Token);
                                     }
 
                                     if (IsSubflowState(state))
