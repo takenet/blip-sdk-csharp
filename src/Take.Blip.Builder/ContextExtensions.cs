@@ -13,6 +13,7 @@ namespace Take.Blip.Builder
     {
         public const string CONTACT_KEY = "contact";
         public const string TICKET_KEY = "ticket";
+        public const string TICKET_CONTEXT_KEY = "desk:ticket-context";
         public const string CURRENT_ACTION_TRACE_KEY = "current-action-trace";
 
         public static Contact GetContact(this IContext context) 
@@ -33,23 +34,23 @@ namespace Take.Blip.Builder
         public static void RemoveTicket(this IContext context)
             => RemoveValue(context, TICKET_KEY);
 
-        public static async Task<TicketContext> GetTicketVariableAsync(this IContext context, CancellationToken cancellationToken)
+        public static async Task<TicketContext> GetTicketContextVariableAsync(this IContext context, CancellationToken cancellationToken)
         {
-            var ticketJson = await context.GetVariableAsync(TICKET_KEY, cancellationToken);
+            var ticketJson = await context.GetVariableAsync(TICKET_CONTEXT_KEY, cancellationToken);
             if (string.IsNullOrEmpty(ticketJson))
                 return null;
 
             return ParseFromJson<TicketContext>(ticketJson);
         }
 
-        public static void SetTicketVariable(this IContext context, TicketContext ticketContext, CancellationToken cancellationToken)
+        public static void SetTicketContextVariable(this IContext context, TicketContext ticketContext, CancellationToken cancellationToken)
         {
             var ticketJson = ParseFromObject(ticketContext);
-            SetVariableAsync(context, TICKET_KEY, ticketJson, cancellationToken);
+            context.SetVariableAsync(TICKET_CONTEXT_KEY, ticketJson, cancellationToken);
         }
 
-        public static void RemoveTicketVariable(this IContext context, CancellationToken cancellationToken)
-            => DeleteVariableAsync(context, TICKET_KEY, cancellationToken);
+        public static void RemoveTicketContextVariable(this IContext context, CancellationToken cancellationToken)
+            => context.DeleteVariableAsync(TICKET_CONTEXT_KEY, cancellationToken);
 
         public static ActionTrace GetCurrentActionTrace(this IContext context)
             => GetValue<ActionTrace>(context, CURRENT_ACTION_TRACE_KEY);
@@ -68,15 +69,6 @@ namespace Take.Blip.Builder
 
         public static void RemoveValue(this IContext context, string key) 
             => context.InputContext.Remove(key);
-
-        public static void SetVariableAsync(this IContext context, string key, string value, CancellationToken cancellationToken)
-        {
-            DeleteVariableAsync(context, key, cancellationToken);
-            context.SetVariableAsync(key, value, cancellationToken);
-        }
-
-        public static void DeleteVariableAsync(this IContext context, string key, CancellationToken cancellationToken)
-            => context.DeleteVariableAsync(key, cancellationToken);
 
         private static T ParseFromJson<T>(string json)
         {

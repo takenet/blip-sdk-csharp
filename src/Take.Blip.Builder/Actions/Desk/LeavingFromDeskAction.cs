@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions.ForwardMessageToDesk;
-using Take.Blip.Client;
-using Take.Blip.Client.Extensions.HelpDesk;
 
 namespace Take.Blip.Builder.Actions.LeavingFromDesk
 {

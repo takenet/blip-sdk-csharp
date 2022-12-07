@@ -235,6 +235,7 @@ namespace Take.Blip.Builder
                                     }
                                 }
 
+                                // If is Desk state, the ProcessStateOutputActionsAsync will be executed after the ProcessOutputsAsync
                                 if (!state.IsDesk())
                                 {
                                     // Prepare to leave the current state executing the output actions
@@ -256,6 +257,7 @@ namespace Take.Blip.Builder
                                     // Store the previous state
                                     await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
 
+                                    // If is Desk state, only execute the ProcessStateOutputActionsAsync when the user current state changed after ProcessOutputsAsync
                                     if (previousState.IsDesk() && previousState.Id != state.Id)
                                     {
                                         // Prepare to leave the current state executing the output actions
