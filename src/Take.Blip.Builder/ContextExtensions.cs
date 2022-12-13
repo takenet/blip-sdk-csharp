@@ -13,7 +13,7 @@ namespace Take.Blip.Builder
     {
         public const string CONTACT_KEY = "contact";
         public const string TICKET_KEY = "ticket";
-        public const string TICKET_CONTEXT_KEY = "desk:ticket-context";
+        public const string TICKET_CONTEXT_KEY = "desk_ticketContext";
         public const string CURRENT_ACTION_TRACE_KEY = "current-action-trace";
 
         public static Contact GetContact(this IContext context) 
