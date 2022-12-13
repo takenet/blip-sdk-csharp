@@ -90,12 +90,12 @@ namespace Take.Blip.Builder.UnitTests
 
             FlowLoader.Received(1).LoadFlowAsync(FlowType.Subflow, flow, subflowShortName, Arg.Any<CancellationToken>());
 
-            StateManager.Received(1).SetStateIdAsync(context1, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(context1, "subflow:subflowTest", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(context1, "root", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(context1, "pingSubflow", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(context2, "end", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(context2, "ping2", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(context1, "ping", "root", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(context1, "subflow:subflowTest", "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(context1, "root", "", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(context1, "pingSubflow", "root", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(context2, "end", "pingSubflow", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(context2, "ping2", "subflow:subflowTest",  Arg.Any<CancellationToken>());
 
             context1.Received(1).SetVariableAsync("testSetVariableInput", "testSetVariableInputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
             context2.Received(1).SetVariableAsync("testSetVariableOutput", "testSetVariableOutputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
@@ -159,12 +159,12 @@ namespace Take.Blip.Builder.UnitTests
 
             FlowLoader.Received(1).LoadFlowAsync(FlowType.Subflow, flow, subflowShortName, Arg.Any<CancellationToken>());
 
-            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(Context, "subflow:subflowTest", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(Context, "root", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(Context, "pingSubflow", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(Context, "end", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(Context, "ping2", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "ping", "root", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "subflow:subflowTest", "ping", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "root", "", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "pingSubflow", "root", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "end", "pingSubflow", Arg.Any<CancellationToken>());
+            StateManager.Received(1).SetStateIdAsync(Context, "ping2", "subflow:subflowTest", Arg.Any<CancellationToken>());
 
             Context.Received(1).SetVariableAsync("testSetVariableInput", "testSetVariableInputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
             Context.Received(1).SetVariableAsync("testSetVariableOutput", "testSetVariableOutputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
