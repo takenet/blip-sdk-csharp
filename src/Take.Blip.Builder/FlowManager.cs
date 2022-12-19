@@ -521,7 +521,7 @@ namespace Take.Blip.Builder
 
                         if (actionTrace != null)
                         {
-                            actionTrace.ParsedSettings = jObjectSettings;
+                            actionTrace.ParsedSettings = new JRaw(stringifySetting);
                         }
 
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
