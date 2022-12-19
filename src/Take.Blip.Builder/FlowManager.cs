@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -509,22 +510,23 @@ namespace Take.Blip.Builder
                 {
                     try
                     {
-                        var settings = stateAction.Settings;
-                        if (settings != null)
+                        var jObjectSettings = new JObject();
+                        var stringifySetting = stateAction.Settings?.ToString(Formatting.None);
+                        
+                        if (stringifySetting != null)
                         {
-                            var settingsJson = settings.ToString(Formatting.None);
-                            settingsJson = await _variableReplacer.ReplaceAsync(settingsJson, context, cancellationToken);
-                            settings = JObject.Parse(settingsJson);
+                            stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken);
+                            jObjectSettings = JObject.Parse(stringifySetting);
                         }
 
                         if (actionTrace != null)
                         {
-                            actionTrace.ParsedSettings = settings;
+                            actionTrace.ParsedSettings = jObjectSettings;
                         }
 
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
-                        using (LogContext.PushProperty(nameof(Action.Settings), settings, true))
-                            await action.ExecuteAsync(context, settings, linkedCts.Token);
+                        using (LogContext.PushProperty(nameof(Action.Settings), jObjectSettings, true))
+                            await action.ExecuteAsync(context, jObjectSettings, linkedCts.Token);
                     }
                     catch (Exception ex)
                     {
@@ -540,7 +542,7 @@ namespace Take.Blip.Builder
                         var actionProcessingException = new ActionProcessingException(message, ex)
                         {
                             ActionType = stateAction.Type,
-                            ActionSettings = stateAction.Settings.ToObject<IDictionary<string, object>>()
+                            ActionSettings = JsonConvert.DeserializeObject<IDictionary<string, object>>((string)stateAction.Settings)
                         };
 
                         if (stateAction.ContinueOnError)
