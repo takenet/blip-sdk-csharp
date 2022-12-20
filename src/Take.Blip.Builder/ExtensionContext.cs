@@ -26,7 +26,7 @@ namespace Take.Blip.Builder
             Flow flow,
             IEnumerable<IVariableProvider> variableProviders,
             IContextExtension contextExtension,
-            bool useUnitOfWork)
+            bool useUnitOfWork = false)
             : base (user, application, input, flow, variableProviders)
         {
             _contextExtension = contextExtension;
