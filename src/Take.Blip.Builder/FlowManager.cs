@@ -169,14 +169,16 @@ namespace Take.Blip.Builder
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
                     var handle = await _flowSemaphore.WaitAsync(flow, message, userIdentity, _configuration.InputProcessingTimeout, linkedCts.Token);
+
+                    // Create the input evaluator
+                    var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
+                        _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
+
+                    // Load the user context
+                    var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow, _configuration.UseUnitOfWork);
+
                     try
                     {
-                        // Create the input evaluator
-                        var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
-                            _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
-
-                        // Load the user context
-                        var context = messageContext ?? _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
@@ -277,7 +279,7 @@ namespace Take.Blip.Builder
 
                                 // Create trace instances, if required
                                 (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
-
+                                
                                 // Store the next state
                                 if (state != null)
                                 {
@@ -327,6 +329,11 @@ namespace Take.Blip.Builder
                     finally
                     {
                         await handle?.DisposeAsync();
+
+                        using (var commitCancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+                        {
+                            await _stateManager.CommitChangesAsync(context, commitCancellationToken.Token);
+                        }
                     }
                 }
             }

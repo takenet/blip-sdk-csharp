@@ -46,7 +46,7 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken"></param>
         /// <param name="expiration"></param>
         /// <returns></returns>
-        Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan));
+        Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default);
 
         /// <summary>
         /// Gets a defined context variable value.
@@ -68,5 +68,12 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task DeleteVariableAsync(string name, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task CommitChangesAsync(CancellationToken cancellationToken);
     }
 }

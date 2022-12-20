@@ -24,9 +24,9 @@ namespace Take.Blip.Builder
             _variableProviders = new Lazy<IEnumerable<IVariableProvider>>(() => _serviceProvider.GetService<IEnumerable<IVariableProvider>>());
         }
 
-        public IContext CreateContext(Identity userIdentity, Identity ownerIdentity, LazyInput input, Flow flow)
+        public IContext CreateContext(Identity userIdentity, Identity ownerIdentity, LazyInput input, Flow flow, bool useUnitOfWork = false)
         {
-            return new ExtensionContext(userIdentity, ownerIdentity, input, flow, _variableProviders.Value, _contextExtension.Value);
+            return new ExtensionContext(userIdentity, ownerIdentity, input, flow, _variableProviders.Value, _contextExtension.Value, useUnitOfWork);
         }
     }
 

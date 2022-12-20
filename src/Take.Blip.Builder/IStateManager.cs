@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
 
@@ -41,5 +42,10 @@ namespace Take.Blip.Builder
         /// Deletes the current state for the user in the flow.
         /// </summary>
         Task DeleteStateIdAsync(IContext context, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Confirms Unit Of Work modifications
+        /// </summary>
+        Task CommitChangesAsync(IContext context, CancellationToken cancellationToken);
     }
 }

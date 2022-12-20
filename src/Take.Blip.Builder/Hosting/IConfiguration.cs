@@ -10,6 +10,11 @@ namespace Take.Blip.Builder.Hosting
         /// </summary>
         TimeSpan InputProcessingTimeout { get; }
 
+        /// <summary>
+        /// Defines whether Unit of Work will be used
+        /// </summary>
+        bool UseUnitOfWork { get; }
+
         int RedisDatabase { get; }
 
         string RedisKeyPrefix { get; }

@@ -48,6 +48,12 @@ namespace Take.Blip.Builder
             return context.DeleteVariableAsync(GetStateKey(context.Flow.Id), cancellationToken);
         }
 
+        /// <inheritdoc />
+        public async Task CommitChangesAsync(IContext context, CancellationToken cancellationToken)
+        {
+            await context.CommitChangesAsync(cancellationToken);
+        }
+
         private static string GetStateKey(string flowId) => $"{STATE_ID_KEY}@{flowId}";
 
         private static string GetPreviousStateKey(string flowId) => $"{PREVIOUS_STATE_PREFIX}-{STATE_ID_KEY}@{flowId}";

@@ -71,11 +71,17 @@ namespace Take.Blip.Builder
             return GetJsonProperty(variableValue, variable.Property);
         }
 
+        /// <inheritdoc />
         public abstract Task DeleteVariableAsync(string name, CancellationToken cancellationToken);
 
+        /// <inheritdoc />
         public abstract Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan));
 
+        /// <inheritdoc />
         public abstract Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken);
+
+        /// <inheritdoc />
+        public abstract Task CommitChangesAsync(CancellationToken cancellationToken);
 
         private static string GetJsonProperty(string variableValue, string property)
         {

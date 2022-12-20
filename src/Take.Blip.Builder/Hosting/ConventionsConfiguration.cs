@@ -7,6 +7,9 @@ namespace Take.Blip.Builder.Hosting
         /// <inheritdoc />
         public virtual TimeSpan InputProcessingTimeout => TimeSpan.FromMinutes(1);
 
+        /// <inheritdoc />
+        public virtual bool UseUnitOfWork => true;
+
         public virtual string RedisStorageConfiguration => "localhost";
 
         public virtual int RedisDatabase => 0;
