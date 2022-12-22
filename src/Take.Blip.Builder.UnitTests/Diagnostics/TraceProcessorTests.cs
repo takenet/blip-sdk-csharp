@@ -58,11 +58,13 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                 new ActionTrace
                                 {
                                     Type = "ProcessHttp",
-                                    ParsedSettings = new JObject
-                                    {
-                                        { "property1", "value1" },
-                                        { "property2", 2 }
-                                    },
+                                    ParsedSettings = new JRaw(
+                                        new JObject
+                                        {
+                                            { "property1", "value1" },
+                                            { "property2", 2 }
+                                        }
+                                    ),
                                     ElapsedMilliseconds = 150
                                 }
                             },
@@ -85,12 +87,14 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                 new ActionTrace
                                 {
                                     Type = "SendMessage",
-                                    ParsedSettings = new JObject
-                                    {
-                                        { "to", "user@domain.com" },
-                                        { "type", "text/plain" },
-                                        { "content", "Hi there!" }
-                                    },
+                                    ParsedSettings = new JRaw(
+                                        new JObject
+                                        {
+                                            { "to", "user@domain.com" },
+                                            { "type", "text/plain" },
+                                            { "content", "Hi there!" }
+                                        }
+                                    ),
                                     ElapsedMilliseconds = 150
                                 }
                             }
@@ -145,11 +149,13 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                 new ActionTrace
                                 {
                                     Type = "ProcessHttp",
-                                    ParsedSettings = new JObject
-                                    {
-                                        { "property1", "value1" },
-                                        { "property2", 2 }
-                                    },
+                                    ParsedSettings = new JRaw(
+                                        new JObject
+                                        {
+                                            { "property1", "value1" },
+                                            { "property2", 2 }
+                                        }
+                                    ),
                                     ElapsedMilliseconds = 150
                                 }
                             },
@@ -172,12 +178,14 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                 new ActionTrace
                                 {
                                     Type = "SendMessage",
-                                    ParsedSettings = new JObject
-                                    {
-                                        { "to", "user@domain.com" },
-                                        { "type", "text/plain" },
-                                        { "content", "Hi there!" }
-                                    },
+                                    ParsedSettings = new JRaw(
+                                        new JObject
+                                        {
+                                            { "to", "user@domain.com" },
+                                            { "type", "text/plain" },
+                                            { "content", "Hi there!" }
+                                        }
+                                    ),
                                     ElapsedMilliseconds = 150
                                 }
                             }
