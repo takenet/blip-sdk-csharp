@@ -66,7 +66,7 @@ namespace Take.Blip.Builder
                 }
                 catch 
                 {
-                    _ = "Deu ruim";
+                    _ = "Error";
                 }
                 finally
                 {
