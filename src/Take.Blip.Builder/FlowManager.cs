@@ -510,7 +510,7 @@ namespace Take.Blip.Builder
                 {
                     try
                     {
-                        var jObjectSettings = new JObject();
+                        JObject jObjectSettings = null;
                         var stringifySetting = stateAction.Settings?.ToString(Formatting.None);
                         
                         if (stringifySetting != null)
