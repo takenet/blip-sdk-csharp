@@ -12,7 +12,7 @@ namespace Take.Blip.Builder.Diagnostics
         public string Type { get; set; }
 
         [DataMember(Name = "parsedSettings")]
-        public JObject ParsedSettings { get; set; }
+        public JRaw ParsedSettings { get; set; }
         
         [DataMember(Name = "continueOnError")]
         public bool ContinueOnError { get; set; }

@@ -287,11 +287,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContentSubflow}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContentSubflow }
+                                    }
+                                )
                             }
                         },
                         Outputs = new[]
@@ -339,11 +341,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw (
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         },
                         Outputs = new[]
@@ -375,19 +379,23 @@ namespace Take.Blip.Builder.UnitTests
                         InputActions = new[] { 
                             new Action() {
                                 Type = "SetVariable",
-                                Settings = new JObject() {
-                                    {"variable", "testSetVariableInput"},
-                                    {"value", "testSetVariableInputValue"}
-                                }
+                                Settings = new JRaw(
+                                        new JObject() {
+                                        { "variable", "testSetVariableInput" },
+                                        { "value", "testSetVariableInputValue" }
+                                    }
+                                )
                             }
                         },
                         OutputActions = new[] {
                             new Action() {
                                 Type = "SetVariable",
-                                Settings = new JObject() {
-                                    {"variable", "testSetVariableOutput"},
-                                    {"value", "testSetVariableOutputValue"}
-                                }
+                                Settings = new JRaw(
+                                    new JObject() {
+                                        { "variable", "testSetVariableOutput" },
+                                        { "value", "testSetVariableOutputValue" }
+                                    }
+                                )
                             }
                         }
                     },
@@ -399,11 +407,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent2}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent2 }
+                                    }
+                                )
                             }
                         }
                     }
