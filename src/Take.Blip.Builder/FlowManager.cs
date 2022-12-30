@@ -231,6 +231,7 @@ namespace Take.Blip.Builder
                                 await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
 
                                 var previousStateId = state.Id;
+                                var previousState = state;
                                 if (IsContextVariable(state.Id))
                                 {
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, linkedCts.Token);
@@ -243,6 +244,12 @@ namespace Take.Blip.Builder
 
                                     // Store the previous state
                                     await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
+
+                                    // Only execute the ProcessAfterStateActionsAsync when the user current state changed after ProcessOutputsAsync
+                                    if (previousState.Id != state.Id)
+                                    {
+                                        await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, linkedCts.Token);
+                                    }
 
                                     if (IsSubflowState(state))
                                     {
@@ -379,6 +386,17 @@ namespace Take.Blip.Builder
             await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, cancellationToken);
         }
 
+        private async Task ProcessAfterStateChangedActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
+        {
+            if (state?.AfterStateChangedActions == null)
+            {
+                return;
+            }
+
+            await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, cancellationToken);
+        }
+
+
         private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
         {
             if (flow.OutputActions != null)
@@ -441,7 +459,14 @@ namespace Take.Blip.Builder
             // Prepare to leave the current state executing the output actions
             await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, cancellationToken);
 
+            var previousState = state;
             state = await ProcessOutputsAsync(lazyInput, context, parentFlow, state, stateTrace?.Outputs, cancellationToken);
+
+            // Only execute the ProcessAfterStateActionsAsync when the user current state changed after ProcessOutputsAsync
+            if (previousState.Id != state.Id)
+            {
+                await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, cancellationToken);
+            }
 
             return (parentFlow, state, stateTrace, stateStopwatch);
         }
