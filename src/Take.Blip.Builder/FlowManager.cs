@@ -399,10 +399,10 @@ namespace Take.Blip.Builder
             // Create trace instances, if required
             var (newStateTrace, newStateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
 
+            await _stateManager.SetStateIdAsync(context, state.Id, cancellationToken);
+
             // Process the next state input actions
             await ProcessStateInputActionsAsync(state, lazyInput, context, stateTrace, cancellationToken);
-
-            await _stateManager.SetStateIdAsync(context, state.Id, cancellationToken);
 
             var subflow = await _flowLoader.LoadFlowAsync(FlowType.Subflow, parentFlow, shortNameOfSubflow, cancellationToken);
             if (subflow == null)
