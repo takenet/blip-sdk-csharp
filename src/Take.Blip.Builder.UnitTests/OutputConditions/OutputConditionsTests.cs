@@ -67,11 +67,13 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", pongMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", pongMessageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -83,11 +85,13 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", poloMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", poloMessageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -167,11 +171,13 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", pongMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", pongMessageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -183,11 +189,13 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", poloMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", poloMessageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -261,11 +269,13 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw (
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -337,11 +347,13 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", sentMessageType},
-                                    {"content", sentMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", sentMessageType },
+                                        { "content", sentMessageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -391,11 +403,13 @@ namespace Take.Blip.Builder.UnitTests.OutputConditions
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", sentMessageType},
-                                    {"content", sentMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", sentMessageType },
+                                        { "content", sentMessageContent }
+                                    }
+                                )
                             }
                         }
                     }

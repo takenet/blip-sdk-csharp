@@ -45,7 +45,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The action settings for the specified type. Optional.
         /// </summary>
-        public JObject Settings { get; set; }
+        public JRaw Settings { get; set; }
 
         public void Validate()
         {

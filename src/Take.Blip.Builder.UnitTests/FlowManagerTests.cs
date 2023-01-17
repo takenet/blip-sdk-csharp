@@ -58,11 +58,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -128,11 +130,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -198,11 +202,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -264,11 +270,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -313,11 +321,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "TrackEvent",
-                                Settings = new JObject()
-                                {
-                                    {"category", "Variable doesn't exist"},
-                                    {"action", "{{variable.doesntExist}}"}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "category", "Variable doesn't exist" },
+                                        { "action", "{{variable.doesntExist}}" }
+                                    }
+                                )
                             }
                         }
                     }
@@ -350,11 +360,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "ProcessHttp",
-                                Settings = new JObject()
-                                {
-                                    {"method", "GET"},
-                                    {"uri", "{{variable.doesntExist}}"}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "method", "GET" },
+                                        { "uri", "{{variable.doesntExist}}" }
+                                    }
+                                )
                             }
                         }
                     }
@@ -387,10 +399,12 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "Redirect",
-                                Settings = new JObject()
-                                {
-                                    {"address", "{{variable.doesntExist}}"}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "address", "{{variable.doesntExist}}" }
+                                    }
+                                )
                             }
                         }
                     }
@@ -456,12 +470,14 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "ExecuteScript",
-                                Settings = new JObject()
-                                {
-                                    {"function", "run"},
-                                    {"source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}"},
-                                    {"outputVariable", "invalidScript"}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "function", "run" },
+                                        { "source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}" },
+                                        { "outputVariable", "invalidScript" }
+                                    }
+                                )
                             }
                         }
                     }
@@ -732,11 +748,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType },
-                                    {"content", "Hello, {{contact.name}}"}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", "Hello, {{contact.name}}" }
+                                    }
+                                )
                             }
                         }
                     }
@@ -829,11 +847,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", pongMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", pongMessageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -845,11 +865,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", poloMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", poloMessageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -902,7 +924,8 @@ namespace Take.Blip.Builder.UnitTests
                 .Returns(callInfo =>
                 {
                     var key = callInfo.ArgAt<string>(0);
-                    if (variables.TryGetValue(key, out var value)) return value;
+                    if (variables.TryGetValue(key, out var value))
+                        return value;
                     return null;
                 });
 
@@ -944,12 +967,14 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "ExecuteScript",
-                                Settings = new JObject()
-                                {
-                                    { "function", "run" },
-                                    { "source", "function run() { return true; }" }, // Satisfying Input condition above
-                                    { "outputVariable", "InputIsValid" }
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "function", "run" },
+                                        { "source", "function run() { return true; }" }, // Satisfying Input condition above
+                                        { "outputVariable", "InputIsValid" }
+                                    }
+                                )
                             }
                         },
                         Outputs = new[]
@@ -994,11 +1019,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", okMessageContent }
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", okMessageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -1010,11 +1037,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", nokMessageContent }
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType},
+                                        { "content", nokMessageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -1026,11 +1055,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", "failed to set variable" }
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", "failed to set variable" }
+                                    }
+                                )
                             }
                         }
                     }
@@ -1080,7 +1111,8 @@ namespace Take.Blip.Builder.UnitTests
                 .Returns(callInfo =>
                 {
                     var key = callInfo.ArgAt<string>(0);
-                    if (variables.TryGetValue(key, out var value)) return value;
+                    if (variables.TryGetValue(key, out var value))
+                        return value;
                     return null;
                 });
 
@@ -1122,12 +1154,14 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "ExecuteScript",
-                                Settings = new JObject()
-                                {
-                                    { "function", "run" },
-                                    { "source", "function run(content) { return false; }" }, // Not satisfying Input condition above
-                                    { "outputVariable", "InputIsValid" }
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "function", "run" },
+                                        { "source", "function run(content) { return false; }" }, // Not satisfying Input condition above
+                                        { "outputVariable", "InputIsValid" }
+                                    }
+                                )
                             }
                         },
                         Outputs = new[]
@@ -1172,11 +1206,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", okMessageContent }
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", okMessageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -1188,11 +1224,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", nokMessageContent }
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", nokMessageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -1204,11 +1242,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", "failed to set variable" }
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", "failed to set variable" }
+                                    }
+                                )
                             }
                         }
                     }
@@ -1317,11 +1357,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", pongMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", pongMessageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -1333,11 +1375,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", poloMessageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", poloMessageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -1423,11 +1467,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -1439,11 +1485,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", "This is not supposed to be received..."}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", "This is not supposed to be received..." }
+                                    }
+                                )
                             }
                         }
                     }
@@ -1542,11 +1590,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     },
@@ -1558,11 +1608,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", "This is not supposed to be received..."}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", "This is not supposed to be received..." }
+                                    }
+                                )
                             }
                         }
                     }
@@ -1647,11 +1699,13 @@ namespace Take.Blip.Builder.UnitTests
                             {
                                 Type = "SendMessage",
                                 Timeout = timeout.TotalSeconds,
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -1699,11 +1753,13 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     }
@@ -1752,11 +1808,13 @@ namespace Take.Blip.Builder.UnitTests
                             {
                                 Type = "SendMessage",
                                 ContinueOnError = true,
-                                Settings = new JObject()
-                                {
-                                    {"type", messageType},
-                                    {"content", messageContent}
-                                }
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
                             }
                         }
                     }

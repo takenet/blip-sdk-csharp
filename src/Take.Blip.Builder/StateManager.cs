@@ -14,7 +14,7 @@ namespace Take.Blip.Builder
 
         private const int STATE_ID_INDEX = 0;
         private const int PREVIOUS_STATE_ID_INDEX = 1;
-        private const string STATE_AND_PREVIOUS_SEPARATOR = ":";
+        private const string STATE_AND_PREVIOUS_SEPARATOR = ";";
 
         public async Task<string> GetStateIdAsync(IContext context, CancellationToken cancellationToken) => ExtractStateId(await GetStateIdContextVariable(context, cancellationToken));
 
@@ -48,7 +48,7 @@ namespace Take.Blip.Builder
 
         private static string GetPreviousStateKey(string flowId) => $"{PREVIOUS_STATE_PREFIX}-{STATE_ID_KEY}@{flowId}";
 
-        private static string ExtractStateId(string value) => value.IsNullOrEmpty() || !value.Contains(STATE_AND_PREVIOUS_SEPARATOR) ? value : value.Split(':')[STATE_ID_INDEX];
+        private static string ExtractStateId(string value) => value.IsNullOrEmpty() || !value.Contains(STATE_AND_PREVIOUS_SEPARATOR) ? value : value.Split(STATE_AND_PREVIOUS_SEPARATOR)[STATE_ID_INDEX];
 
         private static string ExtractPreviousStateId(string value)
         {
