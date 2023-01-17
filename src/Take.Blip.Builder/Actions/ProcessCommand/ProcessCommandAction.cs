@@ -1,13 +1,12 @@
-﻿using Lime.Protocol;
-using Lime.Protocol.Serialization;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
+using Lime.Protocol.Serialization;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Client;
-using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Builder.Actions.ProcessCommand
 {
@@ -65,13 +64,10 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
             }
 
             var command = settings.ToObject<Command>(LimeSerializerContainer.Serializer);
-            if (command.Method == CommandMethod.Get)
-            {
-                command.Metadata = new Dictionary<string, string> {
-                    { "server.shouldStore", "true" },
-                    { "app.name", "BuilderAction" },
-                };
-            }
+            command.Metadata = new Dictionary<string, string> {
+                { "server.shouldStore", "true" },
+                { "app.name", "BuilderAction" },
+            };
 
             return command;
         }

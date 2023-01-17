@@ -31,6 +31,44 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
+        public async Task ProcessCommandActionShouldAddMetadata()
+        {
+            // Arrange
+            var command = new Command()
+            {
+                Id = EnvelopeId.NewId(),
+                Method = CommandMethod.Set,
+                Uri = new LimeUri("/uri")
+            };
+
+            var settings = JObject.FromObject(command, LimeSerializerContainer.Serializer);
+
+            var variable = "responseBody";
+            settings.TryAdd(nameof(variable), variable);
+
+            var target = GetTarget();
+
+            var responseCommand = new Command()
+            {
+                Method = CommandMethod.Get,
+                Status = CommandStatus.Success,
+                Resource = new JsonDocument()
+            };
+
+            BlipClient.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(responseCommand);
+
+            // Act
+            await target.ExecuteAsync(Context, settings, CancellationToken);
+
+            // Assert
+            await BlipClient
+                .Received(1)
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Metadata.ContainsKey("server.shouldStore") && c.Metadata.ContainsKey("app.name")),
+                    Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         public async Task ProcessGetActionShouldSucceed()
         {
             // Arrange
@@ -136,6 +174,47 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await BlipClient.Received(1).ProcessCommandAsync(Arg.Is<Command>(c => c.Uri.Equals(command.Uri)), Arg.Any<CancellationToken>());
 
             await Context.Received(1).SetVariableAsync(variable, JsonConvert.SerializeObject(responseCommand, LimeSerializerContainer.Serializer.Converters.ToArray()), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessCommandActionShouldAddIgnoreOwnerContextMetadata()
+        {
+            // Arrange
+            string matadataValue = "";
+            var command = new Command()
+            {
+                Id = EnvelopeId.NewId(),
+                Method = CommandMethod.Set,
+                Uri = new LimeUri("/uri")
+            };
+
+            var settings = JObject.FromObject(command, LimeSerializerContainer.Serializer);
+
+            var variable = "responseBody";
+            var ignoreOwnerContext = true;
+            settings.TryAdd(nameof(variable), variable);
+            settings.TryAdd(nameof(ignoreOwnerContext), ignoreOwnerContext);
+
+            var target = GetTarget();
+
+            var responseCommand = new Command()
+            {
+                Method = CommandMethod.Get,
+                Status = CommandStatus.Success,
+                Resource = new JsonDocument()
+            };
+
+            BlipClient.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(responseCommand);
+
+            // Act
+            await target.ExecuteAsync(Context, settings, CancellationToken);
+
+            // Assert
+            await BlipClient
+                .Received(1)
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Metadata.TryGetValue("builder.ignoreOwnerContext", out matadataValue) && matadataValue == "True"),
+                    Arg.Any<CancellationToken>());
         }
     }
 }
