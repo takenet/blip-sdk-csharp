@@ -40,5 +40,10 @@ namespace Take.Blip.Builder
         /// Denominator percentage
         /// </summary>
         public const int PERCENTAGE_DENOMINATOR = 100;
+
+        /// <summary>
+        /// Indicates if the tunnel owner context should be ignored on proccess command action
+        /// </summary>
+        public const string IGNORE_OWNER_CONTEXT = "ignoreOwnerContext";
     }
 }

@@ -2,10 +2,12 @@
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Client;
+using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Builder.Actions.ProcessCommand
 {
@@ -30,14 +32,20 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
             if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(ProcessCommandAction)}' action");
 
             string variable = null;
+            var ignoreTunnelOwnerContext = false.ToString();
 
             if (settings.TryGetValue(nameof(variable), out var variableToken))
             {
                 variable = variableToken.ToString().Trim('"');
             }
+            if (settings.TryGetValue(Constants.IGNORE_OWNER_CONTEXT, out var ignoreTunnelOwnerContextToken))
+            {
+                ignoreTunnelOwnerContext = ignoreTunnelOwnerContextToken.ToString();
+            }
 
             var command = ConvertToCommand(settings);
             command.Id = EnvelopeId.NewId();
+            command.Metadata.Add($"builder.{Constants.IGNORE_OWNER_CONTEXT}", ignoreTunnelOwnerContext.ToString());
 
             var resultCommand = await _sender.ProcessCommandAsync(command, cancellationToken);
 
@@ -49,14 +57,23 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         private Command ConvertToCommand(JObject settings)
         {
-            
             if (settings.TryGetValue(Command.TYPE_KEY, out var type)
                 && Regex.IsMatch(type.ToString(), SERIALIZABLE_PATTERN, default, Constants.REGEX_TIMEOUT)
                 && settings.TryGetValue(Command.RESOURCE_KEY, out var resource))
             {
                 settings.Property(Command.RESOURCE_KEY).Value = JObject.Parse(resource.ToString());
             }
-            return settings.ToObject<Command>(LimeSerializerContainer.Serializer);
+
+            var command = settings.ToObject<Command>(LimeSerializerContainer.Serializer);
+            if (command.Method == CommandMethod.Get)
+            {
+                command.Metadata = new Dictionary<string, string> {
+                    { "server.shouldStore", "true" },
+                    { "app.name", "BuilderAction" },
+                };
+            }
+
+            return command;
         }
     }
 }
