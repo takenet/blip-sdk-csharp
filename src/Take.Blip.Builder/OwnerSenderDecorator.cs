@@ -44,20 +44,20 @@ namespace Take.Blip.Builder
         {
             if (command.From == null)
             {
-                var ignoreOwnerContext = false;
-                if (command.Metadata?.TryGetValue($"builder.{Constants.IGNORE_OWNER_CONTEXT}", out var ignoreOwnerContextMetadata) == true)
-                {
-                    ignoreOwnerContext = bool.Parse(ignoreOwnerContextMetadata);
-                }
-                if (ignoreOwnerContext)
-                {
-                    return command;
-                }
-
                 var owner = OwnerContext.Owner;
                 if (owner != null &&
                     owner != _applicationIdentity)
                 {
+                    var ignoreOwnerContext = false;
+                    if (command.Metadata?.TryGetValue($"builder.{Constants.IGNORE_OWNER_CONTEXT}", out var ignoreOwnerContextMetadata) == true)
+                    {
+                        ignoreOwnerContext = bool.Parse(ignoreOwnerContextMetadata);
+                    }
+                    if (ignoreOwnerContext)
+                    {
+                        return command;
+                    }
+
                     var ownerCommand = command.ShallowCopy();
                     ownerCommand.From = owner.ToNode();
                     return ownerCommand;

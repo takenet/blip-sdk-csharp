@@ -37,9 +37,9 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
             {
                 variable = variableToken.ToString().Trim('"');
             }
-            if (settings.TryGetValue(Constants.IGNORE_OWNER_CONTEXT, out var ignoreTunnelOwnerContextToken))
+            if (settings.TryGetValue(Constants.IGNORE_OWNER_CONTEXT, out var ignoreOwnerContextToken))
             {
-                ignoreTunnelOwnerContext = ignoreTunnelOwnerContextToken.ToString();
+                ignoreTunnelOwnerContext = ignoreOwnerContextToken.ToString();
             }
 
             var command = ConvertToCommand(settings);
