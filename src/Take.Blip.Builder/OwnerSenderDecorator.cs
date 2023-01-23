@@ -51,7 +51,7 @@ namespace Take.Blip.Builder
                     var ignoreOwnerContext = false;
                     if (command.Metadata?.TryGetValue($"builder.{Constants.IGNORE_OWNER_CONTEXT}", out var ignoreOwnerContextMetadata) == true)
                     {
-                        ignoreOwnerContext = bool.Parse(ignoreOwnerContextMetadata);
+                        bool.TryParse(ignoreOwnerContextMetadata, out ignoreOwnerContext);
                     }
                     if (ignoreOwnerContext)
                     {
