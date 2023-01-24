@@ -95,6 +95,25 @@ namespace Take.Blip.Client.Extensions.HelpDesk
             EnsureSuccess(result);
         }
 
+        public async Task CloseTicketAsUserWithoutRedirect(string ticketId, CancellationToken cancellationToken)
+        {
+            var newTicketCommand = new Command
+            {
+                Id = EnvelopeId.NewId(),
+                To = _deskNode,
+                Method = CommandMethod.Set,
+                Uri = new LimeUri($"/tickets/change-status-without-redirect"),
+                Resource = new Ticket
+                {
+                    Id = ticketId,
+                    Status = TicketStatusEnum.ClosedClient
+                }
+            };
+
+            var result = await _sender.ProcessCommandAsync(newTicketCommand, cancellationToken);
+            EnsureSuccess(result);
+        }
+
         public async Task<Ticket> GetUserOpenTicketsAsync(Identity customerIdentity, CancellationToken cancellationToken)
         {
             var openTicketCommand = new Command

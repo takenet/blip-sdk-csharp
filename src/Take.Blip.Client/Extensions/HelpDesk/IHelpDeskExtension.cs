@@ -37,12 +37,19 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<Ticket> CreateTicketAsync(Ticket ticket, CancellationToken cancellationToken);
-        
+
         /// <summary>
         /// Close ticket as a user
         /// </summary>
         /// <param name="ticketId">The Ticket ID to be closed</param>
         Task CloseTicketAsUser(string ticketId, CancellationToken cancellationToken);
+
+
+        /// <summary>
+        /// Close ticket as a user without Desk send closed ticket redirect message to builder
+        /// </summary>
+        /// <param name="ticketId">The Ticket ID to be closed</param>
+        Task CloseTicketAsUserWithoutRedirect(string ticketId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Get user open ticket if any
