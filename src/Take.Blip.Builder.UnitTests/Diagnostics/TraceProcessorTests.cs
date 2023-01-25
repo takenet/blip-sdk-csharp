@@ -97,7 +97,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     ),
                                     ElapsedMilliseconds = 150
                                 }
-                            }
+                            },
+                            AfterStateChangedActions = new List<ActionTrace>()
                         }
                     }
                 }
@@ -188,7 +189,8 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     ),
                                     ElapsedMilliseconds = 150
                                 }
-                            }
+                            },
+                            AfterStateChangedActions = new List<ActionTrace>()
                         }
                     }
                 }

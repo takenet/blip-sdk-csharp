@@ -99,6 +99,7 @@ namespace Take.Blip.Builder.UnitTests
 
             context1.Received(1).SetVariableAsync("testSetVariableInput", "testSetVariableInputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
             context2.Received(1).SetVariableAsync("testSetVariableOutput", "testSetVariableOutputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
+            context2.Received(1).SetVariableAsync("testSetVariableAfterStateChanged", "testSetVariableAfterStateChangedValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
 
             Sender
                 .Received(1)
@@ -168,6 +169,7 @@ namespace Take.Blip.Builder.UnitTests
 
             Context.Received(1).SetVariableAsync("testSetVariableInput", "testSetVariableInputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
             Context.Received(1).SetVariableAsync("testSetVariableOutput", "testSetVariableOutputValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
+            Context.Received(1).SetVariableAsync("testSetVariableAfterStateChanged", "testSetVariableAfterStateChangedValue", Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
 
             Sender
                 .Received(1)
@@ -394,6 +396,17 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject() {
                                         { "variable", "testSetVariableOutput" },
                                         { "value", "testSetVariableOutputValue" }
+                                    }
+                                )
+                            }
+                        },
+                        AfterStateChangedActions = new[] {
+                            new Action() {
+                                Type = "SetVariable",
+                                Settings = new JRaw(
+                                    new JObject() {
+                                        { "variable", "testSetVariableAfterStateChanged" },
+                                        { "value", "testSetVariableAfterStateChangedValue" }
                                     }
                                 )
                             }

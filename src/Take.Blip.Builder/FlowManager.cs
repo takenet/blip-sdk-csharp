@@ -247,9 +247,10 @@ namespace Take.Blip.Builder
                                     await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
 
                                     // Only execute the ProcessAfterStateActionsAsync when the user current state changed after ProcessOutputsAsync
-                                    if (previousState.Id != state.Id)
+                                    if (previousState.Id != state?.Id)
                                     {
                                         await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, linkedCts.Token);
+                                        await ProcessGlobalAfterStateChangedActionsAsync(context, flow, lazyInput, inputTrace, linkedCts.Token);
                                     }
 
                                     if (IsSubflowState(state))
@@ -397,12 +398,19 @@ namespace Take.Blip.Builder
             await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, cancellationToken);
         }
 
-
         private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
         {
             if (flow.OutputActions != null)
             {
                 await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, cancellationToken);
+            }
+        }
+
+        private async Task ProcessGlobalAfterStateChangedActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
+        {
+            if (flow.AfterStateChangedActions != null)
+            {
+                await ProcessActionsAsync(lazyInput, context, flow.AfterStateChangedActions, inputTrace?.AfterStateChangedActions, cancellationToken);
             }
         }
 

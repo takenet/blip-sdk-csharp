@@ -10,6 +10,7 @@ namespace Take.Blip.Builder.Diagnostics
         {
             InputActions = new List<ActionTrace>();
             OutputActions = new List<ActionTrace>();
+            AfterStateChangedActions = new List<ActionTrace>();
             Outputs = new List<OutputTrace>();
         }
 
