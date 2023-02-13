@@ -248,6 +248,31 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     }
                                 )
                             }
+                        },
+                        AfterStateChangedActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JRaw (
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
+                            },
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JRaw (
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
+                            }
                         }
                     },
                     new State
@@ -323,9 +348,11 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     e.Trace.States.ToArray()[0].Id == "root" &&
                     e.Trace.States.ToArray()[0].InputActions.Count == 0 &&
                     e.Trace.States.ToArray()[0].OutputActions.Count == 3 &&
+                    e.Trace.States.ToArray()[0].AfterStateChangedActions.Count == 2 &&
                     e.Trace.States.ToArray()[1].Id == "ping" &&
                     e.Trace.States.ToArray()[1].InputActions.Count == 1 &&
-                    e.Trace.States.ToArray()[1].OutputActions.Count == 0),
+                    e.Trace.States.ToArray()[1].OutputActions.Count == 0 &&
+                    e.Trace.States.ToArray()[1].AfterStateChangedActions.Count == 0),
                 Arg.Any<CancellationToken>());
         }
 
@@ -438,6 +465,20 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     }
                                 )
                             }
+                        },
+                        AfterStateChangedActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "SendMessage",
+                                Settings = new JRaw (
+                                    new JObject()
+                                    {
+                                        { "type", messageType },
+                                        { "content", messageContent }
+                                    }
+                                )
+                            }
                         }
                     }
                 },
@@ -469,9 +510,11 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     e.Trace.States.ToArray()[0].Id == "root" &&
                     e.Trace.States.ToArray()[0].InputActions.Count == 0 &&
                     e.Trace.States.ToArray()[0].OutputActions.Count == 3 &&
+                    e.Trace.States.ToArray()[0].AfterStateChangedActions.Count == 0 &&
                     e.Trace.States.ToArray()[1].Id == "ping" &&
                     e.Trace.States.ToArray()[1].InputActions.Count == 1 &&
-                    e.Trace.States.ToArray()[1].OutputActions.Count == 2),
+                    e.Trace.States.ToArray()[1].OutputActions.Count == 2 &&
+                    e.Trace.States.ToArray()[1].AfterStateChangedActions.Count == 1),
                 Arg.Any<CancellationToken>());
         }
 

@@ -118,6 +118,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             flow.States.First(state => state.Id == stateId).OutputActions = actions;
         }
 
+        private void DefineAfterStateChangedActionsForDefinedState(Flow flow, string stateId, Action[] actions)
+        {
+            flow.States.First(state => state.Id == stateId).AfterStateChangedActions = actions;
+        }
+
         [Fact]
         public async Task FlowWithInputActionConditionsShouldSucceed()
         {
@@ -277,6 +282,91 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
 
             DefineOutputActionsForDefinedState(flow, "root", outputActions);
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            ActionProvider.DidNotReceiveWithAnyArgs().Get(Arg.Any<string>());
+        }
+
+        [Fact]
+        public async Task FlowWithAfterStateChangedActionsConditionsShouldSucceed()
+        {
+            // Arrange
+            var firstStateId = "ping";
+            var firstStateContent = "Ping!";
+            var secondStateId = "pong";
+            var secondStateContent = "Pong!";
+            var flow = CreateFlowWithTwoStates(firstStateId, firstStateContent, secondStateId, secondStateContent);
+
+            var afterStateChangedActions = new[]
+            {
+                new Action
+                {
+                    Type = "ActionFistState",
+                    Conditions = new[]
+                    {
+                        new Condition
+                        {
+                            Values = new[] { "Ping!" }
+                        }
+                    }
+                },
+                new Action
+                {
+                    Type = "OtherAction",
+                    Conditions = new[]
+                    {
+                        new Condition
+                        {
+                            Values = new[] { "Other!" }
+                        }
+                    }
+                },
+            };
+            DefineAfterStateChangedActionsForDefinedState(flow, "root", afterStateChangedActions);
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            ActionProvider.Received().Get("ActionFistState");
+            ActionProvider.DidNotReceive().Get("OtherAction");
+        }
+
+        [Fact]
+        public async Task FlowWithAfterStateChangedActionsShouldFail()
+        {
+            // Arrange
+            var firstStateId = "ping";
+            var firstStateContent = "Ping!";
+            var secondStateId = "pong";
+            var secondStateContent = "Pong!";
+            var flow = CreateFlowWithTwoStates(firstStateId, firstStateContent, secondStateId, secondStateContent);
+
+            var afterStateChangedActions = new[]
+            {
+                new Action
+                {
+                    Type = "ActionFistState",
+                    Conditions = new[]
+                    {
+                        new Condition
+                        {
+                            Values = new[] { "XPTO!" }
+                        }
+                    }
+                }
+            };
+
+            DefineAfterStateChangedActionsForDefinedState(flow, "root", afterStateChangedActions);
             var input = new PlainText() { Text = "Ping!" };
             Message.Content = input;
             var target = GetTarget();

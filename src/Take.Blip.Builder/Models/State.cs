@@ -46,10 +46,16 @@ namespace Take.Blip.Builder.Models
         public Action[] OutputActions { get; set; }
 
         /// <summary>
+        /// Determine the actions that should be executed after change to the next state. Optional.
+        /// </summary>
+        public Action[] AfterStateChangedActions { get; set; }
+
+        /// <summary>
         /// Determines the possible outputs and its conditions from the current state. Optional.
         /// Array of <see cref="Output"/>. Optional.
         /// </summary>
         public Output[] Outputs { get; set; }
+
 
         /// <summary>
         /// Stores additional JSON attributes that are not mapped in the type.
@@ -76,6 +82,14 @@ namespace Take.Blip.Builder.Models
                 foreach (var outputAction in OutputActions)
                 {
                     outputAction.Validate();
+                }
+            }
+
+            if (AfterStateChangedActions != null)
+            {
+                foreach (var afterStateChangedAction in AfterStateChangedActions)
+                {
+                    afterStateChangedAction.Validate();
                 }
             }
 
