@@ -244,7 +244,7 @@ namespace Take.Blip.Builder
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
 
                                     // Store the previous state
-                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
+                                    await _stateManager.SetStateIdAsync(context, state.Id, previousStateId, cancellationToken);
 
                                     // Only execute the ProcessAfterStateActionsAsync when the user current state changed after ProcessOutputsAsync
                                     if (previousState.Id != state?.Id)
@@ -258,7 +258,8 @@ namespace Take.Blip.Builder
                                         parentStateIdQueue.Enqueue(state.Id);
 
                                         (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
-                                            context, 
+                                            context,
+                                            userIdentity,
                                             state,
                                             previousStateId,
                                             flow,
@@ -487,7 +488,7 @@ namespace Take.Blip.Builder
                 await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, cancellationToken);
             }
 
-            return (parentFlow, state, stateTrace, stateStopwatch);
+            return (parentFlow, state, newPreviousStateId, stateTrace, stateStopwatch);
         }
 
         private bool IsSubflowState(State state) => state != null && state.Id.StartsWith("subflow:");
