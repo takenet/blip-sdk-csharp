@@ -10,6 +10,7 @@ namespace Take.Blip.Builder.Diagnostics
         {
             InputActions = new List<ActionTrace>();
             OutputActions = new List<ActionTrace>();
+            AfterStateChangedActions = new List<ActionTrace>();
             Outputs = new List<OutputTrace>();
         }
 
@@ -21,6 +22,9 @@ namespace Take.Blip.Builder.Diagnostics
 
         [DataMember(Name = "outputActions")]
         public ICollection<ActionTrace> OutputActions { get; set; }
+
+        [DataMember(Name = "afterStateChangedActions")]
+        public ICollection<ActionTrace> AfterStateChangedActions { get; set; }
 
         [DataMember(Name = "outputs")]
         public ICollection<OutputTrace> Outputs { get; set; }

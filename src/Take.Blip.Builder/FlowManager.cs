@@ -232,6 +232,7 @@ namespace Take.Blip.Builder
                                 await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
 
                                 var previousStateId = state.Id;
+                                var previousState = state;
                                 if (IsContextVariable(state.Id))
                                 {
                                     previousStateId = await _variableReplacer.ReplaceAsync(state.Id, context, linkedCts.Token);
@@ -241,6 +242,16 @@ namespace Take.Blip.Builder
                                 {
                                     // Determine the next state
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
+
+                                    // Store the previous state
+                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
+
+                                    // Only execute the ProcessAfterStateActionsAsync when the user current state changed after ProcessOutputsAsync
+                                    if (previousState.Id != state?.Id)
+                                    {
+                                        await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, linkedCts.Token);
+                                        await ProcessGlobalAfterStateChangedActionsAsync(context, flow, lazyInput, inputTrace, linkedCts.Token);
+                                    }
 
                                     if (IsSubflowState(state))
                                     {
@@ -386,6 +397,16 @@ namespace Take.Blip.Builder
             await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, cancellationToken);
         }
 
+        private async Task ProcessAfterStateChangedActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
+        {
+            if (state?.AfterStateChangedActions == null)
+            {
+                return;
+            }
+
+            await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, cancellationToken);
+        }
+
         private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
         {
             if (flow.OutputActions != null)
@@ -394,7 +415,15 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task<(Flow, State, StateTrace, Stopwatch)> RedirectToSubflowAsync(IContext context, State state, string previousStateId, Flow parentFlow, StateTrace stateTrace, Stopwatch stateStopwatch, InputTrace inputTrace, LazyInput lazyInput, CancellationToken cancellationToken)
+        private async Task ProcessGlobalAfterStateChangedActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
+        {
+            if (flow.AfterStateChangedActions != null)
+            {
+                await ProcessActionsAsync(lazyInput, context, flow.AfterStateChangedActions, inputTrace?.AfterStateChangedActions, cancellationToken);
+            }
+        }
+
+        private async Task<(Flow, State, StateTrace, Stopwatch)> RedirectToSubflowAsync(IContext context, Identity userIdentity, State state, string previousStateId, Flow parentFlow, StateTrace stateTrace, Stopwatch stateStopwatch, InputTrace inputTrace, LazyInput lazyInput, CancellationToken cancellationToken)
         {
             var shortNameOfSubflow = state.GetExtensionDataValue(SHORTNAME_OF_SUBFLOW_EXTENSION_DATA);
             if (shortNameOfSubflow.IsNullOrEmpty())
@@ -449,9 +478,16 @@ namespace Take.Blip.Builder
 
             var newPreviousStateId = state?.Id;
 
+            var previousState = state;
             state = await ProcessOutputsAsync(lazyInput, context, parentFlow, state, stateTrace?.Outputs, cancellationToken);
 
-            return (parentFlow, state, newPreviousStateId, stateTrace, stateStopwatch);
+            // Only execute the ProcessAfterStateActionsAsync when the user current state changed after ProcessOutputsAsync
+            if (previousState.Id != state.Id)
+            {
+                await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, cancellationToken);
+            }
+
+            return (parentFlow, state, stateTrace, stateStopwatch);
         }
 
         private bool IsSubflowState(State state) => state != null && state.Id.StartsWith("subflow:");

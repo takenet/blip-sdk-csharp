@@ -58,6 +58,11 @@ namespace Take.Blip.Builder.Models
         public Action[] OutputActions { get; set; }
 
         /// <summary>
+        /// Determine the actions that should be executed after change to the next state. Optional.
+        /// </summary>
+        public Action[] AfterStateChangedActions { get; set; }
+
+        /// <summary>
         /// The flow configuration.
         /// </summary>
         public Dictionary<string, string> Configuration { get; set; }
@@ -185,6 +190,14 @@ namespace Take.Blip.Builder.Models
                 foreach (var outputAction in OutputActions)
                 {
                     outputAction.Validate();
+                }
+            }
+
+            if (AfterStateChangedActions != null)
+            {
+                foreach (var afterStateChangedAction in AfterStateChangedActions)
+                {
+                    afterStateChangedAction.Validate();
                 }
             }
 
