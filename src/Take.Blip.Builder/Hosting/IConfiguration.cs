@@ -33,5 +33,10 @@ namespace Take.Blip.Builder.Hosting
         long ExecuteScriptLimitMemoryWarning { get; }
 
         TimeSpan ExecuteScriptTimeout { get; }
+
+        /// <summary>
+        /// indicates whether the variables previous state id and state id should be merged into a single variable in the database or not
+        /// </summary>
+        public bool UnifyStateIdAndPreviousStateId { get; }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using Take.Blip.Client.Extensions.Context;
+using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder
 {
@@ -15,6 +16,15 @@ namespace Take.Blip.Builder
         private const int STATE_ID_INDEX = 0;
         private const int PREVIOUS_STATE_ID_INDEX = 1;
         private const string STATE_AND_PREVIOUS_SEPARATOR = ";";
+
+        private readonly IConfiguration _configuration;
+
+        public StateManager(
+           IConfiguration configuration
+           )
+        {
+            _configuration = configuration;
+        }
 
         public async Task<string> GetStateIdAsync(IContext context, CancellationToken cancellationToken) => ExtractStateId(await GetStateIdContextVariable(context, cancellationToken));
 
@@ -38,8 +48,17 @@ namespace Take.Blip.Builder
 
         public Task SetStateIdAsync(IContext context, string stateId, string previousStateId, CancellationToken cancellationToken)
         {
-            var expiration = context.Flow?.BuilderConfiguration?.StateExpiration ?? default;            
-            return context.SetVariableAsync(GetStateKey(context.Flow.Id), $"{stateId}{STATE_AND_PREVIOUS_SEPARATOR}{previousStateId}", cancellationToken, expiration);
+            var expiration = context.Flow?.BuilderConfiguration?.StateExpiration ?? default;
+            if (_configuration.UnifyStateIdAndPreviousStateId)
+            {
+                return context.SetVariableAsync(GetStateKey(context.Flow.Id), $"{stateId}{STATE_AND_PREVIOUS_SEPARATOR}{previousStateId}", cancellationToken, expiration);
+            }
+            else
+            {
+                return Task.WhenAll(
+                    context.SetVariableAsync(GetStateKey(context.Flow.Id), stateId, cancellationToken, expiration),
+                    context.SetVariableAsync(GetPreviousStateKey(context.Flow.Id), previousStateId, cancellationToken));
+            }
         }
 
         public  Task DeleteStateIdAsync(IContext context, CancellationToken cancellationToken) => context.DeleteVariableAsync(GetStateKey(context.Flow.Id), cancellationToken);
@@ -48,13 +67,24 @@ namespace Take.Blip.Builder
 
         private static string GetPreviousStateKey(string flowId) => $"{PREVIOUS_STATE_PREFIX}-{STATE_ID_KEY}@{flowId}";
 
-        private static string ExtractStateId(string value) => value.IsNullOrEmpty() || !value.Contains(STATE_AND_PREVIOUS_SEPARATOR) ? value : value.Split(STATE_AND_PREVIOUS_SEPARATOR)[STATE_ID_INDEX];
+        private static string ExtractStateId(string value)
+        {
+            if (value.IsNullOrEmpty())
+            {
+                return null;
+            }
+            if (value.Contains(STATE_AND_PREVIOUS_SEPARATOR))
+            {
+                return value.Split(STATE_AND_PREVIOUS_SEPARATOR)[STATE_ID_INDEX];
+            }
+            return value;
+        }
 
         private static string ExtractPreviousStateId(string value)
         {
             if (value.IsNullOrEmpty())
             {
-                return value;
+                return null;
             }
 
             if (value.Contains(STATE_AND_PREVIOUS_SEPARATOR))
@@ -62,7 +92,7 @@ namespace Take.Blip.Builder
                 return value.Split(STATE_AND_PREVIOUS_SEPARATOR)[PREVIOUS_STATE_ID_INDEX];
             }
 
-            return "";
+            return null;
         }
 
         private Task<string> GetStateIdContextVariable(IContext context, CancellationToken cancellationToken) => context.GetContextVariableAsync(GetStateKey(context.Flow.Id), cancellationToken);
