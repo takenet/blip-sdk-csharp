@@ -6,6 +6,7 @@ using Lime.Protocol.Network;
 using Take.Blip.Client.Extensions.Context;
 using Take.Blip.Builder.Hosting;
 
+
 namespace Take.Blip.Builder
 {
     public class StateManager : IStateManager
