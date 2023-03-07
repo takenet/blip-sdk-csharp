@@ -42,3 +42,6 @@ extends:
     csprojToPack:
     - 'Take.Blip.Builder.csproj'
     - 'Take.Blip.Client.csproj'
+    - 'Take.Blip.Client.Web.csproj'
+    - 'Take.Blip.Client.Console.csproj'
+    - 'Take.Blip.Client.TestKit.csproj'
