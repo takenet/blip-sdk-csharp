@@ -37,7 +37,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 
             try
             {
-                if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR))
+                if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR) && settings.LocalTimeZoneEnabled)
                 {
                     timeZoneLocal = TZConvert.GetTimeZoneInfo(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
                 }
@@ -47,25 +47,13 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 _logger.Information(e, "Error converting timezone");
             }
 
-            if (settings.LocalTimeZoneEnabled)
-            {
-                engine = new Engine(options => options
-                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
-                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
-                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                        .DebugMode()
-                        .LocalTimeZone(timeZoneLocal));
-            }
-            else
-            {
-                engine = new Engine(options => options
-                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
-                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
-                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                        .DebugMode());
-            }
+            engine = new Engine(options => options
+                    .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                    .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                    .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                    .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                    .DebugMode()
+                    .LocalTimeZone(timeZoneLocal));
 
             engine.Step += (sender, e) =>
             {
