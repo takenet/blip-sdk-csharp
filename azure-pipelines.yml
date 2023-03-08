@@ -17,6 +17,7 @@ variables:
   sonarQubeTags: 'Flow Building'
   sonarQubeKey: 'MessagingHub_MessagingHubClient'
   sonarQubeName: 'BLiP SDK'
+  checkmarxName: 'BLiP SDK'
   framework: dotnet
 
 name: 0.7$(Rev:.r)
@@ -26,7 +27,7 @@ resources:
   - repository: templates
     type: git
     name: Operações/template-take-blip
-    ref: refs/tags/v1.4.5
+    ref: refs/tags/v1.4.26
 
 extends:
   template: template-pipeline.yml@templates    
@@ -39,6 +40,8 @@ extends:
     testProjects: src/Take.Blip.Client.sln
     testPermission: true
     skipSonarBranch: true
+    skipSast: false
+    sastFilter: "!**/**, src/**/*"
     csprojToPack:
     - 'Take.Blip.Builder.csproj'
     - 'Take.Blip.Client.csproj'
