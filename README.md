@@ -1,4 +1,13 @@
 
+## ⚠  Warning!
+```
+By using the SDK to process chatbot messages, notifications or commands, you become the manager of the 
+conversation routing, which is no longer done within Blip. It's important to note: in this case, you 
+assume the risks for message processing failures and any interruption in the message exchange with the 
+chatbot in case of an implementation or network error.
+
+```
+
 The **BLiP C# SDK** is a set of Nuget packages that allow the creation of [BLiP](https://blip.ai/) chatbots.
 
 <a href="https://www.nuget.org/packages/Take.Blip.Client/" rel="Take.Blip.Client">![NuGet](https://img.shields.io/nuget/v/Take.Blip.Client.svg)</a> 
