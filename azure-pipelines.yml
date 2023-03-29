@@ -40,6 +40,8 @@ extends:
     testProjects: src/Take.Blip.Client.sln
     testPermission: true
     skipSonarBranch: true
+    sonarInclusions: '**/*'
+    sonarExclusions: ''
     skipSast: false
     sastFilter: "!**/**, src/**/*"
     csprojToPack:
