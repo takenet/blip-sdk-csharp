@@ -18,6 +18,8 @@ variables:
   sonarQubeKey: 'MessagingHub_MessagingHubClient'
   sonarQubeName: 'BLiP SDK'
   checkmarxName: 'BLiP SDK'
+  sonarInclusions: '**/*'
+  sonarExclusions: ''
   framework: dotnet
 
 name: 0.7$(Rev:.r)
@@ -40,8 +42,6 @@ extends:
     testProjects: src/Take.Blip.Client.sln
     testPermission: true
     skipSonarBranch: true
-    sonarInclusions: "**/*"
-    sonarExclusions: ""
     skipSast: false
     sastFilter: "!**/**, src/**/*"
     csprojToPack:
