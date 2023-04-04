@@ -13,6 +13,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
     {
         private const string ADD_USER_KEY = "processHttpAddUserToRequestHeader";
         private const string ADD_BOT_KEY = "processHttpAddBotIdentityToRequestHeader";
+        private const string URI_COMMANDS = "/commands";
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
 
         private readonly IHttpClient _httpClient;
@@ -52,6 +53,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
                     AddUserToHeaders(httpRequestMessage, context);
                     AddBotIdentityToHeaders(httpRequestMessage, context);
+                    AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
                     using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
@@ -65,8 +67,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     }
                 }
 
-            //Set the responses variables
-            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
+                //Set the responses variables
+                if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
                 {
                     await context.SetVariableAsync(settings.ResponseStatusVariable,
                         responseStatus.ToString(), cancellationToken);
@@ -126,6 +128,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             if (context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.OwnerIdentity);
+            }
+        }
+
+        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string uri)
+        {
+            if (uri.Contains(URI_COMMANDS))
+            {
+                httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
+                httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
             }
         }
 

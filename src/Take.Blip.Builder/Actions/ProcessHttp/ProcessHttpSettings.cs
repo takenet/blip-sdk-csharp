@@ -21,6 +21,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         public TimeSpan? RequestTimeout { get; set; }
 
+        public string currentStateId { get; set; }
+
         public void Validate()
         {
             if (Uri == null)

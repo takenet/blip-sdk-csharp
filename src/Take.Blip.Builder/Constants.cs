@@ -40,5 +40,7 @@ namespace Take.Blip.Builder
         /// Denominator percentage
         /// </summary>
         public const int PERCENTAGE_DENOMINATOR = 100;
+
+        public const string BLIP_STATEID_HEADER = "Current-State-Id";
     }
 }
