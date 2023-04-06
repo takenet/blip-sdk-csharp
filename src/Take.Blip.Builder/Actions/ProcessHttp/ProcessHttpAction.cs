@@ -13,7 +13,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
     {
         private const string ADD_USER_KEY = "processHttpAddUserToRequestHeader";
         private const string ADD_BOT_KEY = "processHttpAddBotIdentityToRequestHeader";
-        private const string URI_COMMANDS = "/commands";
+        private const string URI_MSGING = "http.msging.net";
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
 
         private readonly IHttpClient _httpClient;
@@ -133,7 +133,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string uri)
         {
-            if (uri.Contains(URI_COMMANDS))
+            if (uri.Contains(URI_MSGING))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
                 httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
