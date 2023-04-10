@@ -244,7 +244,7 @@ namespace Take.Blip.Builder
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
 
                                     // Store the previous state
-                                    await _stateManager.SetPreviousStateIdAsync(context, previousStateId, linkedCts.Token);
+                                    await _stateManager.SetStateIdAsync(context, state.Id, previousStateId, cancellationToken);
 
                                     // Only execute the ProcessAfterStateActionsAsync when the user current state changed after ProcessOutputsAsync
                                     if (previousState.Id != state?.Id)
@@ -261,6 +261,7 @@ namespace Take.Blip.Builder
                                             context,
                                             userIdentity,
                                             state,
+                                            previousStateId,
                                             flow,
                                             stateTrace,
                                             stateStopwatch,
@@ -268,13 +269,14 @@ namespace Take.Blip.Builder
                                             lazyInput,
                                             linkedCts.Token
                                        );
+
+                                       previousStateId = "";
                                     }
                                 }
                                 else
                                 {
-                                    (flow, state, stateTrace, stateStopwatch) = await RedirectToParentFlowAsync(
+                                    (flow, state, previousStateId, stateTrace, stateStopwatch) = await RedirectToParentFlowAsync(
                                         context,
-                                        userIdentity,
                                         flow,
                                         previousStateId,
                                         await GetParentStateIdAsync(context, parentStateIdQueue, linkedCts.Token),
@@ -290,11 +292,19 @@ namespace Take.Blip.Builder
                                 // Store the next state
                                 if (state != null)
                                 {
-                                    await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
+                                    await _stateManager.SetStateIdAsync(context, state.Id, previousStateId, linkedCts.Token);
                                 }
                                 else
                                 {
-                                    await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
+                                    if (previousStateId.IsNullOrEmpty())
+                                    {
+                                        await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
+                                    }
+                                    else
+                                    {
+                                        await _stateManager.SetStateIdAsync(context, "", previousStateId, linkedCts.Token);
+                                    }
+                                    
                                 }
 
                                 // Process the next state input actions
@@ -414,7 +424,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task<(Flow, State, StateTrace, Stopwatch)> RedirectToSubflowAsync(IContext context, Identity userIdentity, State state, Flow parentFlow, StateTrace stateTrace, Stopwatch stateStopwatch, InputTrace inputTrace, LazyInput lazyInput, CancellationToken cancellationToken)
+        private async Task<(Flow, State, StateTrace, Stopwatch)> RedirectToSubflowAsync(IContext context, Identity userIdentity, State state, string previousStateId, Flow parentFlow, StateTrace stateTrace, Stopwatch stateStopwatch, InputTrace inputTrace, LazyInput lazyInput, CancellationToken cancellationToken)
         {
             var shortNameOfSubflow = state.GetExtensionDataValue(SHORTNAME_OF_SUBFLOW_EXTENSION_DATA);
             if (shortNameOfSubflow.IsNullOrEmpty())
@@ -425,7 +435,7 @@ namespace Take.Blip.Builder
             // Create trace instances, if required
             var (newStateTrace, newStateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
 
-            await _stateManager.SetStateIdAsync(context, state.Id, cancellationToken);
+            await _stateManager.SetStateIdAsync(context, state.Id, previousStateId, cancellationToken);
 
             // Process the next state input actions
             await ProcessStateInputActionsAsync(state, lazyInput, context, stateTrace, cancellationToken);
@@ -445,7 +455,7 @@ namespace Take.Blip.Builder
             return (subflow, newState, newStateTrace, newStateStopwatch);
         }
 
-        private async Task<(Flow, State, StateTrace, Stopwatch)> RedirectToParentFlowAsync(IContext context, Identity userIdentity, Flow flow, string previousStateId, string parentStateId, InputTrace inputTrace, LazyInput lazyInput, CancellationToken cancellationToken)
+        private async Task<(Flow, State, string, StateTrace, Stopwatch)> RedirectToParentFlowAsync(IContext context, Flow flow, string previousStateId, string parentStateId, InputTrace inputTrace, LazyInput lazyInput, CancellationToken cancellationToken)
         {
             var parentFlow = flow.Parent;
 
@@ -454,8 +464,7 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException($"Error on return to parent flow of '{flow.Id}'");
             }
 
-            await _stateManager.SetPreviousStateIdAsync(context, previousStateId, cancellationToken);
-            await _stateManager.DeleteStateIdAsync(context, cancellationToken);
+            await _stateManager.SetStateIdAsync(context, "", previousStateId, cancellationToken);
 
             context.Flow = parentFlow;
             var state = parentFlow.States.FirstOrDefault(s => s.Id == parentStateId) ?? parentFlow.States.Single(s => s.Root);
@@ -468,6 +477,8 @@ namespace Take.Blip.Builder
             // Prepare to leave the current state executing the output actions
             await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, cancellationToken);
 
+            var newPreviousStateId = state?.Id;
+
             var previousState = state;
             state = await ProcessOutputsAsync(lazyInput, context, parentFlow, state, stateTrace?.Outputs, cancellationToken);
 
@@ -477,7 +488,7 @@ namespace Take.Blip.Builder
                 await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, cancellationToken);
             }
 
-            return (parentFlow, state, stateTrace, stateStopwatch);
+            return (parentFlow, state, newPreviousStateId, stateTrace, stateStopwatch);
         }
 
         private bool IsSubflowState(State state) => state != null && state.Id.StartsWith("subflow:");
@@ -611,6 +622,7 @@ namespace Take.Blip.Builder
         private async Task<State> ProcessOutputsAsync(LazyInput lazyInput, IContext context, Flow flow, State state, ICollection<OutputTrace> outputTraces, CancellationToken cancellationToken)
         {
             var outputs = state.Outputs;
+            var previousStateId = state?.Id;
             state = null;
 
             // If there's any output in the current state
@@ -638,7 +650,14 @@ namespace Take.Blip.Builder
 
                             if (state == null)
                             {
-                                await _stateManager.DeleteStateIdAsync(context, cancellationToken);
+                                if (previousStateId.IsNullOrEmpty())
+                                {
+                                    await _stateManager.DeleteStateIdAsync(context, cancellationToken);
+                                }
+                                else
+                                {
+                                    await _stateManager.SetStateIdAsync(context, "", previousStateId, cancellationToken);
+                                }
 
                                 throw new InvalidOperationException($"Failed to process output condition, bacause the output context variable '{output.StateId}' is undefined or does not exist in the context.");
                             }
