@@ -52,8 +52,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     }
 
                     AddUserToHeaders(httpRequestMessage, context);
-                    AddBotIdentityToHeaders(httpRequestMessage, context);
-                    AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri);
+                    AddBotIdentityToHeaders(httpRequestMessage, context, settings.Uri.AbsoluteUri);
+                    AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri, context);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
                     using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
@@ -123,17 +123,17 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// </summary>
         /// <param name="httpRequestMessage"></param>
         /// <param name="context"></param>
-        private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
+        private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context, string uri)
         {
-            if (context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY))
+            if (context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY) && !uri.Contains(URI_MSGING))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.OwnerIdentity);
             }
         }
 
-        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string uri)
+        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string uri, IContext context)
         {
-            if (uri.Contains(URI_MSGING))
+            if (uri.Contains(URI_MSGING) && !context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
                 httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
