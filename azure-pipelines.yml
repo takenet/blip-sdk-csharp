@@ -27,7 +27,7 @@ resources:
   - repository: templates
     type: git
     name: Operações/template-take-blip
-    ref: refs/tags/v1.4.29
+    ref: refs/heads/fix/fixed-tag-name-in-nuget-project
 
 extends:
   template: template-pipeline.yml@templates    
