@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using Serilog.Context;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
@@ -13,17 +14,18 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
     {
         private const string ADD_USER_KEY = "processHttpAddUserToRequestHeader";
         private const string ADD_BOT_KEY = "processHttpAddBotIdentityToRequestHeader";
-        private const string URI_MSGING = "http.msging.net";
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
 
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
 
-        public ProcessHttpAction(IHttpClient httpClient, ILogger logger)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration)
             : base(nameof(ProcessHttp))
         {
             _httpClient = httpClient;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
@@ -51,8 +53,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                             contentType ?? "application/json");
                     }
 
-                    AddUserToHeaders(httpRequestMessage, context);
-                    AddBotIdentityToHeaders(httpRequestMessage, context, settings.Uri.AbsoluteUri);
+                    if (!_configuration.Internal_Uris.Contains(settings.Uri.AbsoluteUri))
+                    {
+                        AddUserToHeaders(httpRequestMessage, context);
+                    }
+                    else
+                    {
+                        AddBotIdentityToHeaders(httpRequestMessage, context, settings.Uri.AbsoluteUri);
+                    }
+                    
                     AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri, context);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
@@ -125,7 +134,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// <param name="context"></param>
         private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context, string uri)
         {
-            if (context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY) && !uri.Contains(URI_MSGING))
+            if (context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.OwnerIdentity);
             }
@@ -133,7 +142,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string uri, IContext context)
         {
-            if (uri.Contains(URI_MSGING) && !context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY))
+            if (uri.Contains(_configuration.Internal_Uris))
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
                 httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
