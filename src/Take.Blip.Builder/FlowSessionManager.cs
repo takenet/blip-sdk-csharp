@@ -15,7 +15,9 @@ namespace Take.Blip.Builder
         /// </summary>
         public Task<string> GetFlowSessionAsync(IContext context, CancellationToken cancellationToken)
         {
-            return context.GetContextVariableAsync(CURRENT_FLOW_SESSION_KEY, cancellationToken);
+            var flowSessionId = GetStateKey(GetFlowId(context));
+
+            return context.GetContextVariableAsync(flowSessionId, cancellationToken);
         }
 
         /// <summary>
@@ -23,7 +25,14 @@ namespace Take.Blip.Builder
         /// </summary>
         public Task SetFlowSessionAsync(IContext context, string flowSession, CancellationToken cancellationToken)
         {
-            return context.SetVariableAsync(CURRENT_FLOW_SESSION_KEY, flowSession, cancellationToken);
+            var flowSessionId = GetStateKey(GetFlowId(context));
+            var expiration = context.Flow?.BuilderConfiguration?.StateExpiration ?? default;
+
+            return context.SetVariableAsync(flowSessionId, flowSession, cancellationToken, expiration);
         }
+
+        private static string GetFlowId(IContext context) => context.Flow.Type == Models.FlowType.Flow ? context.Flow.Id : context.Flow.Parent?.Id;
+
+        private static string GetStateKey(string flowId) => $"{CURRENT_FLOW_SESSION_KEY}@{flowId}";
     }
 }
