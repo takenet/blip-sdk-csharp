@@ -53,16 +53,16 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                             contentType ?? "application/json");
                     }
 
-                    if (!_configuration.Internal_Uris.Contains(settings.Uri.AbsoluteUri))
+                    if (settings.Uri.AbsoluteUri.Contains(_configuration.InternalUris))
                     {
-                        AddUserToHeaders(httpRequestMessage, context);
+                        AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri);                                           
                     }
                     else
                     {
-                        AddBotIdentityToHeaders(httpRequestMessage, context, settings.Uri.AbsoluteUri);
+                        AddBotIdentityToHeaders(httpRequestMessage, context);
                     }
-                    
-                    AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri, context);
+
+                    AddUserToHeaders(httpRequestMessage, context);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
                     using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
@@ -132,7 +132,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         /// </summary>
         /// <param name="httpRequestMessage"></param>
         /// <param name="context"></param>
-        private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context, string uri)
+        private void AddBotIdentityToHeaders(HttpRequestMessage httpRequestMessage, IContext context)
         {
             if (context.Flow.ConfigurationFlagIsEnabled(ADD_BOT_KEY))
             {
@@ -140,13 +140,10 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             }
         }
 
-        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string uri, IContext context)
-        {
-            if (uri.Contains(_configuration.Internal_Uris))
-            {
-                httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
-                httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
-            }
+        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string uri)
+        {      
+             httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
+             httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
         }
 
         public void Dispose()

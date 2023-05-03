@@ -551,10 +551,7 @@ namespace Take.Blip.Builder
                         {
                             stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken);
                             jObjectSettings = JObject.Parse(stringifySetting);
-                            if (action.Type == ACTION_PROCESS_HTTP)
-                            {
-                                jObjectSettings.Add(new JProperty("currentStateId", state.Id.ToString()));
-                            }
+                            AddStateIdToSettings(action.Type, jObjectSettings, state.Id);
                         }
 
                         if (actionTrace != null)
@@ -713,6 +710,18 @@ namespace Take.Blip.Builder
             }
 
             return true;
+        }
+
+        private JObject AddStateIdToSettings(string actionType, JObject jObjectSettings, string stateId)
+        {
+            if (actionType != ACTION_PROCESS_HTTP)
+            {
+                return jObjectSettings;
+            }
+
+            jObjectSettings.Add(new JProperty("currentStateId", stateId));
+
+            return jObjectSettings;
         }
 
         private async Task<string> GetParentStateIdAsync(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);

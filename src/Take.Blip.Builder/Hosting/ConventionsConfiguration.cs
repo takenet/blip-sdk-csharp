@@ -33,6 +33,6 @@ namespace Take.Blip.Builder.Hosting
 
         public TimeSpan ExecuteScriptTimeout => TimeSpan.FromSeconds(5);
 
-        public string Internal_Uris => "http.msging.net";
+        public string InternalUris => "http.msging.net";
     }
 }
