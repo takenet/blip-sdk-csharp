@@ -712,16 +712,12 @@ namespace Take.Blip.Builder
             return true;
         }
 
-        private JObject AddStateIdToSettings(string actionType, JObject jObjectSettings, string stateId)
+        private void AddStateIdToSettings(string actionType, JObject jObjectSettings, string stateId)
         {
-            if (actionType != ACTION_PROCESS_HTTP)
+            if (actionType == ACTION_PROCESS_HTTP)
             {
-                return jObjectSettings;
-            }
-
-            jObjectSettings.Add(new JProperty("currentStateId", stateId));
-
-            return jObjectSettings;
+                jObjectSettings.Add(new JProperty("currentStateId", stateId));
+            }           
         }
 
         private async Task<string> GetParentStateIdAsync(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);

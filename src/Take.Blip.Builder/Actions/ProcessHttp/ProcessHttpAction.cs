@@ -52,16 +52,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                         httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
                             contentType ?? "application/json");
                     }
-
-                    if (settings.Uri.AbsoluteUri.Contains(_configuration.InternalUris))
-                    {
-                        AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri);                                           
-                    }
-                    else
-                    {
-                        AddBotIdentityToHeaders(httpRequestMessage, context);
-                    }
-
+                    
+                    AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri);
+                    AddBotIdentityToHeaders(httpRequestMessage, context);
                     AddUserToHeaders(httpRequestMessage, context);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
@@ -140,10 +133,17 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             }
         }
 
-        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string uri)
-        {      
-             httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
-             httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
+        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string absoluteUri)
+        {
+            var uriList = _configuration.InternalUris.Split(";");
+            foreach (var uri in uriList)
+            {
+                if (absoluteUri.Contains(uri))
+                {
+                    httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
+                    httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
+                }
+            }            
         }
 
         public void Dispose()
