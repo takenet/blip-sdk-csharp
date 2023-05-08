@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -135,15 +136,20 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string absoluteUri)
         {
-            var uriList = _configuration.InternalUris.Split(";");
-            foreach (var uri in uriList)
+            if (!CheckInternalUris(absoluteUri))
             {
-                if (absoluteUri.Contains(uri))
-                {
-                    httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
-                    httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
-                }
-            }            
+                return;
+            }              
+         
+            httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
+            httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
+        }
+
+        private bool CheckInternalUris(string absoluteUri)
+        {
+            var uriList = _configuration.InternalUris.Split(";");
+
+            return uriList.Any((uri) => absoluteUri.Contains(uri));
         }
 
         public void Dispose()
