@@ -31,7 +31,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public IHttpClient HttpClient { get; set; }
         public IConfiguration configuration { get; set; }
 
-    private ProcessHttpAction GetTarget()
+        private ProcessHttpAction GetTarget()
         {
             return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>(), configuration);
         }
