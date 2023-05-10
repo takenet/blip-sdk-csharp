@@ -714,10 +714,12 @@ namespace Take.Blip.Builder
 
         private void AddStateIdToSettings(string actionType, JObject jObjectSettings, string stateId)
         {
-            if (actionType == ACTION_PROCESS_HTTP)
+            if (actionType != ACTION_PROCESS_HTTP)
             {
-                jObjectSettings.Add(new JProperty("currentStateId", stateId));
-            }           
+                return;
+            }
+
+            jObjectSettings.Add(new JProperty("currentStateId", stateId));
         }
 
         private async Task<string> GetParentStateIdAsync(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);

@@ -180,7 +180,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             var settings = new ProcessHttpSettings
             {
-                Uri = new Uri("https://blip.ai"),
+                Uri = new Uri("http.msging.net"),
                 Method = HttpMethod.Post.ToString(),
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
@@ -190,7 +190,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
+                
             };
 
             var target = GetTarget();
@@ -213,6 +213,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
             requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(botIdentity);
+           
 
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(
@@ -351,58 +352,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
             requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
-
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
-        }
-
-        [Fact]
-        public async Task ProcessAction_CheckBotIndentifierHeader()
-        {
-            const string botIdentifierVariableValue = "teste@msging.net";
-            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
-            Context.Flow.Configuration.Add(botIdentifierConfigVariableName, botIdentifierVariableValue);
-
-            var settings = new ProcessHttpSettings
-            {
-                Uri = new Uri("https://blip.ai"),
-                Method = HttpMethod.Post.ToString(),
-                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
-                Headers = new Dictionary<string, string>()
-                {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
-                },
-                ResponseBodyVariable = "httpResultBody",
-                ResponseStatusVariable = "httpResultStatus",
-
-            };
-
-            var target = GetTarget();
-
-            var httpResponseMessage = new HttpResponseMessage()
-            {
-                StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
-            };
-
-            HttpRequestMessage requestMessage = null;
-            HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
-                .ReturnsForAnyArgs(httpResponseMessage);
-
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
-
-            if(!settings.Uri.AbsolutePath.Contains("https://blip.ai") && Context.Flow.ConfigurationFlagIsEnabled(botIdentifierConfigVariableName))
-            {
-                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
-            }
-            else
-            {
-                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
-                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
-            }
 
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(

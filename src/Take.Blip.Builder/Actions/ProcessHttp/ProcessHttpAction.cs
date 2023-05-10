@@ -54,8 +54,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                             contentType ?? "application/json");
                     }
                     
-                    AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity, settings.Uri.AbsoluteUri);
-                    AddBotIdentityToHeaders(httpRequestMessage, context);
+                    if (CheckInternalUris(settings.Uri.AbsoluteUri))
+                    {
+                        AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity);
+                    }
+                    else
+                    {
+                        AddBotIdentityToHeaders(httpRequestMessage, context);
+                    }                    
+                    
                     AddUserToHeaders(httpRequestMessage, context);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
@@ -134,13 +141,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             }
         }
 
-        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity, string absoluteUri)
+        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity)
         {
-            if (!CheckInternalUris(absoluteUri))
-            {
-                return;
-            }              
-         
             httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
             httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
         }
