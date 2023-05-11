@@ -180,7 +180,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             var settings = new ProcessHttpSettings
             {
-                Uri = new Uri("http.msging.net"),
+                Uri = new Uri("https://test.msging.net"),
                 Method = HttpMethod.Post.ToString(),
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
@@ -320,7 +320,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             var settings = new ProcessHttpSettings
             {
-                Uri = new Uri("https://blip.ai"),
+                Uri = new Uri("https://test.msging.net"),
                 Method = HttpMethod.Post.ToString(),
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
@@ -350,8 +350,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
-            requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
+            if (settings.Uri.AbsoluteUri.Contains("msging.net"))
+            {
+                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
+                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
+            }
+            else
+            {
+                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
+                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeFalse();
+            }
 
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(
