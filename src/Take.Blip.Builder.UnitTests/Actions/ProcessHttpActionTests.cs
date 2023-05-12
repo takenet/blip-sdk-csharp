@@ -355,10 +355,52 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
                 requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
             }
-            else
+
+            await HttpClient.Received(1).SendAsync(
+                Arg.Is<HttpRequestMessage>(
+                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessAction_CheckIfInternalUriNotMatch()
+        {
+
+            var settings = new ProcessHttpSettings
             {
-                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
-                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeFalse();
+                Uri = new Uri("https://test.msging.net"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+                Content = new StringContent("Some result")
+            };
+
+            HttpRequestMessage requestMessage = null;
+            HttpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            if (!settings.Uri.AbsoluteUri.Contains("msging.net"))
+            {
+                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
+                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
             }
 
             await HttpClient.Received(1).SendAsync(
