@@ -399,8 +399,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             if (!settings.Uri.AbsoluteUri.Contains("msging.net"))
             {
-                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
-                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
+                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
+                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeFalse();
             }
 
             await HttpClient.Received(1).SendAsync(
