@@ -317,6 +317,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
         [Fact]
         public async Task ProcessAction_AddBotIdentifierAndStateId()
         {
+            // Arrange
+            configuration.InternalUris.Returns("msging.net");
 
             var settings = new ProcessHttpSettings
             {
@@ -332,7 +334,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 ResponseStatusVariable = "httpResultStatus",
 
             };
-
+            
             var target = GetTarget();
 
             var httpResponseMessage = new HttpResponseMessage()
@@ -350,11 +352,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            if (settings.Uri.AbsoluteUri.Contains("msging.net"))
-            {
-                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
-                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
-            }
+            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
+            requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
 
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(
@@ -362,8 +361,101 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task ProcessAction_CheckIfInternalUriNotMatch()
+        public async Task ProcessAction_CheckIfInternalUriNotExist()
         {
+            // Arrange
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri("https://blip.ai"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+                Content = new StringContent("Some result")
+            };
+
+            HttpRequestMessage requestMessage = null;
+            HttpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
+            requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeFalse();
+
+            await HttpClient.Received(1).SendAsync(
+              Arg.Is<HttpRequestMessage>(
+                  h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessAction_CheckTwoOrMoreInternalUris()
+        {
+            // Arrange
+            configuration.InternalUris.Returns("msging.net;blip.ai");
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri("https://test.msging.net"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+                Content = new StringContent("Some result")
+            };
+
+            HttpRequestMessage requestMessage = null;
+            HttpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
+            requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
+
+            await HttpClient.Received(1).SendAsync(
+              Arg.Is<HttpRequestMessage>(
+                  h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessAction_CheckIfHeaderNotDuplicated()
+        {
+            // Arrange
+            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
+            configuration.InternalUris.Returns("msging.net");
+            Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
 
             var settings = new ProcessHttpSettings
             {
@@ -397,15 +489,58 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            if (!settings.Uri.AbsoluteUri.Contains("msging.net"))
-            {
-                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
-                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeFalse();
-            }
+            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
+            requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
 
             await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+              Arg.Is<HttpRequestMessage>(
+                  h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessAction_CheckIfInternalUriNotMatch()
+        {
+            // Arrange
+            configuration.InternalUris.Returns("msging.net");
+
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri("https://blip.ai"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+                Content = new StringContent("Some result")
+            };
+
+            HttpRequestMessage requestMessage = null;
+            HttpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
+            requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeFalse();
+
+            await HttpClient.Received(1).SendAsync(
+              Arg.Is<HttpRequestMessage>(
+                  h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
         }
     }
 }

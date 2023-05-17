@@ -149,6 +149,10 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private bool CheckInternalUris(string absoluteUri)
         {
+            if (string.IsNullOrEmpty(_configuration.InternalUris))
+            {
+                return false;
+            }
             var uriList = _configuration.InternalUris.Split(";");
 
             return uriList.Any((uri) => absoluteUri.Contains(uri));
