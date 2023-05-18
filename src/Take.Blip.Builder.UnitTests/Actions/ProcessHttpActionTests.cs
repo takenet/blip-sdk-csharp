@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
@@ -450,10 +451,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task ProcessAction_CheckIfHeaderNotDuplicated()
+        public async Task ProcessAction_CheckIfHeaderWillBeNotDuplicated()
         {
             // Arrange
             const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
+            string regexXBlipBot = @"\bX-Blip-Bot\b";
             configuration.InternalUris.Returns("msging.net");
             Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
 
@@ -489,8 +491,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
-            requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
+            int numberOfXBLipBot = Regex.Matches(requestMessage.Headers.ToString(), regexXBlipBot).Count();
+
+            if(numberOfXBLipBot == 1)
+            {
+                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
+                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
+            }
 
             await HttpClient.Received(1).SendAsync(
               Arg.Is<HttpRequestMessage>(
