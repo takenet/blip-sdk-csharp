@@ -455,7 +455,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             // Arrange
             const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
-            string regexXBlipBot = @"\bX-Blip-Bot\b";
             configuration.InternalUris.Returns("msging.net");
             Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
 
@@ -491,13 +490,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            int numberOfXBLipBot = Regex.Matches(requestMessage.Headers.ToString(), regexXBlipBot).Count();
-
-            if(numberOfXBLipBot == 1)
-            {
-                requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
-                requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
-            }
+            
+            requestMessage.Headers.GetValues("X-Blip-Bot").Count().ShouldBe(1); 
 
             await HttpClient.Received(1).SendAsync(
               Arg.Is<HttpRequestMessage>(
