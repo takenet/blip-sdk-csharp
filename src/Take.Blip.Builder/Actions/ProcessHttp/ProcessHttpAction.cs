@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using Serilog.Context;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
@@ -17,12 +19,14 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
 
-        public ProcessHttpAction(IHttpClient httpClient, ILogger logger)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration)
             : base(nameof(ProcessHttp))
         {
             _httpClient = httpClient;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
@@ -49,9 +53,17 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                         httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
                             contentType ?? "application/json");
                     }
-
+                    
+                    if (CheckInternalUris(settings.Uri.AbsoluteUri))
+                    {
+                        AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity);
+                    }
+                    else
+                    {
+                        AddBotIdentityToHeaders(httpRequestMessage, context);
+                    }                    
+                    
                     AddUserToHeaders(httpRequestMessage, context);
-                    AddBotIdentityToHeaders(httpRequestMessage, context);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
                     using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
@@ -65,8 +77,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     }
                 }
 
-            //Set the responses variables
-            if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
+                //Set the responses variables
+                if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
                 {
                     await context.SetVariableAsync(settings.ResponseStatusVariable,
                         responseStatus.ToString(), cancellationToken);
@@ -127,6 +139,23 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             {
                 httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, context.OwnerIdentity);
             }
+        }
+
+        private void AddHeadersToCommandRequest(HttpRequestMessage httpRequestMessage, string currentStateId, string ownerIdentity)
+        {
+            httpRequestMessage.Headers.Add(Constants.BLIP_BOT_HEADER, ownerIdentity);
+            httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER, currentStateId);
+        }
+
+        private bool CheckInternalUris(string absoluteUri)
+        {
+            if (string.IsNullOrEmpty(_configuration.InternalUris))
+            {
+                return false;
+            }
+            var uriList = _configuration.InternalUris.Split(";");
+
+            return uriList.Any((uri) => absoluteUri.Contains(uri));
         }
 
         public void Dispose()

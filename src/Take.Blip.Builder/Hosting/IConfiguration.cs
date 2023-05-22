@@ -14,6 +14,8 @@ namespace Take.Blip.Builder.Hosting
 
         string RedisKeyPrefix { get; }
 
+        string InternalUris { get; }
+
         int MaxTransitionsByInput { get; }
 
         int TraceQueueBoundedCapacity { get; }

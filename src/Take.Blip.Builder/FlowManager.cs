@@ -50,6 +50,7 @@ namespace Take.Blip.Builder
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
+        private const string ACTION_PROCESS_HTTP = "ProcessHttp";
 
         public FlowManager(
             IConfiguration configuration,
@@ -201,7 +202,7 @@ namespace Take.Blip.Builder
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
-                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, linkedCts.Token);
+                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, state, linkedCts.Token);
                         }
 
                         var stateWaitForInput = true;
@@ -250,7 +251,7 @@ namespace Take.Blip.Builder
                                     if (previousState.Id != state?.Id)
                                     {
                                         await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, linkedCts.Token);
-                                        await ProcessGlobalAfterStateChangedActionsAsync(context, flow, lazyInput, inputTrace, linkedCts.Token);
+                                        await ProcessGlobalAfterStateChangedActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
                                     }
 
                                     if (IsSubflowState(state))
@@ -329,7 +330,7 @@ namespace Take.Blip.Builder
                             }
                         } while (!stateWaitForInput);
 
-                        await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, linkedCts.Token);
+                        await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
 
                         await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
                     }
@@ -375,7 +376,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, state, cancellationToken);
         }
 
         private async Task ProcessStateOutputActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
@@ -385,7 +386,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, state, cancellationToken);
         }
 
         private async Task ProcessAfterStateChangedActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
@@ -395,22 +396,22 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, state, cancellationToken);
         }
 
-        private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
+        private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, State state, CancellationToken cancellationToken)
         {
             if (flow.OutputActions != null)
             {
-                await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, cancellationToken);
+                await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, state, cancellationToken);
             }
         }
 
-        private async Task ProcessGlobalAfterStateChangedActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, CancellationToken cancellationToken)
+        private async Task ProcessGlobalAfterStateChangedActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, State state, CancellationToken cancellationToken)
         {
             if (flow.AfterStateChangedActions != null)
             {
-                await ProcessActionsAsync(lazyInput, context, flow.AfterStateChangedActions, inputTrace?.AfterStateChangedActions, cancellationToken);
+                await ProcessActionsAsync(lazyInput, context, flow.AfterStateChangedActions, inputTrace?.AfterStateChangedActions, state, cancellationToken);
             }
         }
 
@@ -506,7 +507,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, CancellationToken cancellationToken)
+        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, State state, CancellationToken cancellationToken)
         {
 
             // Execute all state actions
@@ -545,11 +546,12 @@ namespace Take.Blip.Builder
                     {
                         JObject jObjectSettings = null;
                         var stringifySetting = stateAction.Settings?.ToString(Formatting.None);
-                        
+
                         if (stringifySetting != null)
                         {
                             stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken);
                             jObjectSettings = JObject.Parse(stringifySetting);
+                            AddStateIdToSettings(action.Type, jObjectSettings, state.Id);
                         }
 
                         if (actionTrace != null)
@@ -708,6 +710,16 @@ namespace Take.Blip.Builder
             }
 
             return true;
+        }
+
+        private void AddStateIdToSettings(string actionType, JObject jObjectSettings, string stateId)
+        {
+            if (actionType != ACTION_PROCESS_HTTP)
+            {
+                return;
+            }
+
+            jObjectSettings.Add(new JProperty("currentStateId", stateId));
         }
 
         private async Task<string> GetParentStateIdAsync(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);
