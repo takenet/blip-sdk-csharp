@@ -18,7 +18,6 @@ using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
@@ -114,6 +113,8 @@ namespace Take.Blip.Builder
             {
                 throw new ArgumentNullException(nameof(flow));
             }
+
+            message.Content = TryHandleReplyMessage(message);
 
             var (messageHasChanged, newMessage) = _inputExpirationHandler.ValidateMessage(message);
 
@@ -367,6 +368,15 @@ namespace Take.Blip.Builder
 
                 ownerContext.Dispose();
             }
+        }
+
+        private static Document TryHandleReplyMessage(Message message)
+        {
+            if (message.Content is Reply reply)
+            {
+                return reply.Replied?.Value;
+            }
+            return message.Content;
         }
 
         private async Task ProcessStateInputActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)

@@ -24,6 +24,7 @@ namespace Take.Blip.Builder.UnitTests
 {
     public class FlowManagerTests : FlowManagerTestsBase, IDisposable
     {
+
         [Fact]
         public async Task FlowWithoutConditionsShouldChangeStateAndSendMessage()
         {
@@ -658,6 +659,52 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
             Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
+            StateManager.Received(0).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task FlowWithReplyMessageShouldSaveInContext()
+        {
+            // Arrange
+            var input = new Reply()
+            {
+                Replied = new DocumentContainer
+                {
+                    Value = new PlainText { Text = "Replied" }
+                },
+                InReplyTo = new InReplyTo
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Value = new PlainText { Text = "InReplyTo" }
+                }
+            };
+
+            Message.Content = input;
+            var variableName = "MyVariable";
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input
+                        {
+                            Variable = variableName
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input.Replied.Value), flow);
+            Context.Received(1).SetVariableAsync(variableName, ((PlainText)input.Replied.Value).Text, Arg.Any<CancellationToken>());
             StateManager.Received(0).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         }
 
