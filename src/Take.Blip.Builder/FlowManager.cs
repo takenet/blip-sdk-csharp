@@ -47,6 +47,7 @@ namespace Take.Blip.Builder
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
+        private readonly IInputReplyHandler _inputReplyHandler;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
@@ -69,7 +70,8 @@ namespace Take.Blip.Builder
             Application application,
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager,
-            IAnalyzeBuilderExceptions analyzeBuilderExceptions
+            IAnalyzeBuilderExceptions analyzeBuilderExceptions,
+            IInputReplyHandler inputReplyHandler
             )
         {
             _configuration = configuration;
@@ -90,6 +92,7 @@ namespace Take.Blip.Builder
             _flowLoader = flowLoader;
             _flowSessionManager = flowSessionManager;
             _analyzeBuilderExceptions = analyzeBuilderExceptions;
+            _inputReplyHandler = inputReplyHandler;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -114,9 +117,16 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            message.Content = TryHandleReplyMessage(message);
+            bool messageHasChanged;
+            Message newMessage;
 
-            var (messageHasChanged, newMessage) = _inputExpirationHandler.ValidateMessage(message);
+            (messageHasChanged, newMessage) = _inputReplyHandler.ValidateReplyMessage(message);
+            if (messageHasChanged)
+            {
+                message = newMessage;
+            }
+
+            (messageHasChanged, newMessage) = _inputExpirationHandler.ValidateMessage(message);
 
             // If the message has changedm the old context can't be used because it has the old message.
             // Setting it to null will force a new context to be created later with the new message.
