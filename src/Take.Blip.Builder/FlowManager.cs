@@ -739,7 +739,7 @@ namespace Take.Blip.Builder
                 }
             }
 
-            return (false, null);
+            return (false, message);
         }
 
         private void AddStateIdToSettings(string actionType, JObject jObjectSettings, string stateId)
