@@ -47,7 +47,9 @@ namespace Take.Blip.Builder
         private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
-        private readonly IInputReplyHandler _inputReplyHandler;
+        private readonly IInputMessageHandler _inputReplyHandler;
+
+        private readonly List<IInputMessageHandler> _messageHandlers = new List<IInputMessageHandler>();
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
@@ -71,7 +73,7 @@ namespace Take.Blip.Builder
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager,
             IAnalyzeBuilderExceptions analyzeBuilderExceptions,
-            IInputReplyHandler inputReplyHandler
+            IInputMessageHandler inputReplyHandler
             )
         {
             _configuration = configuration;
@@ -93,6 +95,9 @@ namespace Take.Blip.Builder
             _flowSessionManager = flowSessionManager;
             _analyzeBuilderExceptions = analyzeBuilderExceptions;
             _inputReplyHandler = inputReplyHandler;
+
+            _messageHandlers.Add(_inputReplyHandler);
+            _messageHandlers.Add(_inputExpirationHandler);
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -117,16 +122,7 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            bool messageHasChanged;
-            Message newMessage;
-
-            (messageHasChanged, newMessage) = _inputReplyHandler.ValidateReplyMessage(message);
-            if (messageHasChanged)
-            {
-                message = newMessage;
-            }
-
-            (messageHasChanged, newMessage) = _inputExpirationHandler.ValidateMessage(message);
+            var (messageHasChanged, newMessage) = HandleMessage(message);
 
             // If the message has changedm the old context can't be used because it has the old message.
             // Setting it to null will force a new context to be created later with the new message.
@@ -730,6 +726,20 @@ namespace Take.Blip.Builder
             }
 
             return true;
+        }
+
+        private (bool, Message) HandleMessage(Message message)
+        {
+            foreach (var handler in _messageHandlers)
+            {
+                var (messageHasChanged, newMessage) = handler.ValidateMessage(message);
+                if (messageHasChanged)
+                {
+                    return (messageHasChanged, newMessage);
+                }
+            }
+
+            return (false, null);
         }
 
         private void AddStateIdToSettings(string actionType, JObject jObjectSettings, string stateId)
