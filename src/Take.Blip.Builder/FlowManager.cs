@@ -376,15 +376,6 @@ namespace Take.Blip.Builder
             }
         }
 
-        private static Document TryHandleReplyMessage(Message message)
-        {
-            if (message.Content is Reply reply)
-            {
-                return reply.Replied?.Value;
-            }
-            return message.Content;
-        }
-
         private async Task ProcessStateInputActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
         {
             if (state?.InputActions == null)
@@ -728,7 +719,7 @@ namespace Take.Blip.Builder
             return true;
         }
 
-        private (bool, Message) HandleMessage(Message message)
+        private (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message)
         {
             foreach (var handler in _messageHandlers)
             {
