@@ -18,7 +18,7 @@ public class InputReplyHandler : IInputMessageHandler
     {
         if (message.Content is Reply reply)
         {
-            message.Content = reply.Replied.Value;
+            message.Content = reply.Replied?.Value;
             return (true, message);
         }
 
