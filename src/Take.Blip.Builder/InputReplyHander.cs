@@ -17,7 +17,7 @@ public class InputReplyHandler : IInputMessageHandler
     /// A tuple containing a boolean value indicating the validation result
     /// and the modified message with the replied content.
     /// </returns>
-    public (bool, Message) HandleMessage(Message message)
+    public (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message)
     {
         if (message.Content is Reply reply)
         {

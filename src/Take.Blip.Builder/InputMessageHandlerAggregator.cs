@@ -17,7 +17,7 @@ namespace Take.Blip.Builder
 
         public IEnumerable<IInputMessageHandler> GetHandlers() => _handlers;
 
-        public (bool, Message) HandleMessage(Message message)
+        public (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message)
         {
             foreach (var handler in _handlers)
             {

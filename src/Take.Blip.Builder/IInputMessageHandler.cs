@@ -7,7 +7,7 @@ namespace Take.Blip.Builder
 {
     public interface IInputMessageHandler
     {
-        (bool, Message) HandleMessage(Message message);
+        (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message);
         bool IsValidateState(State state, Message message);
         Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken);
         Task OnFlowProcessedAsync(State state, Message message, Node from, CancellationToken cancellationToken);

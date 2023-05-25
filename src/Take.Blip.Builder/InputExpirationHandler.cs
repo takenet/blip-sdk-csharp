@@ -92,7 +92,7 @@ namespace Take.Blip.Builder
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public (bool, Message) HandleMessage(Message message)
+        public (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message)
         {
             if (message.Content is InputExpiration inputExpiration)
             {
