@@ -16,7 +16,7 @@ namespace Take.Blip.Builder
     /// <summary>
     /// Handle the logic of input expiration
     /// </summary>
-    public class InputExpirationHandler : IInputExpirationHandler
+    public class InputExpirationHandler : IInputMessageHandler
     {
         public const string STATE_ID = "inputExpiration.stateId";
         public const string IDENTITY = "inputExpiration.identity";
@@ -92,7 +92,7 @@ namespace Take.Blip.Builder
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public (bool, Message) ValidateMessage(Message message)
+        public (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message)
         {
             if (message.Content is InputExpiration inputExpiration)
             {

@@ -18,7 +18,6 @@ using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
@@ -45,9 +44,9 @@ namespace Take.Blip.Builder
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
         private readonly IUserOwnerResolver _userOwnerResolver;
-        private readonly IInputExpirationHandler _inputExpirationHandler;
         private readonly Node _applicationNode;
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
+        private readonly IInputMessageHandler _inputMessageHandlerAggregator;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
@@ -66,11 +65,11 @@ namespace Take.Blip.Builder
             ILogger logger,
             ITraceManager traceManager,
             IUserOwnerResolver userOwnerResolver,
-            IInputExpirationHandler inputExpirationHandler,
             Application application,
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager,
-            IAnalyzeBuilderExceptions analyzeBuilderExceptions
+            IAnalyzeBuilderExceptions analyzeBuilderExceptions,
+            IInputMessageHandlerAggregator inputMessageHandlerAggregator
             )
         {
             _configuration = configuration;
@@ -86,11 +85,11 @@ namespace Take.Blip.Builder
             _logger = logger;
             _traceManager = traceManager;
             _userOwnerResolver = userOwnerResolver;
-            _inputExpirationHandler = inputExpirationHandler;
             _applicationNode = application.Node;
             _flowLoader = flowLoader;
             _flowSessionManager = flowSessionManager;
             _analyzeBuilderExceptions = analyzeBuilderExceptions;
+            _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -115,7 +114,7 @@ namespace Take.Blip.Builder
                 throw new ArgumentNullException(nameof(flow));
             }
 
-            var (messageHasChanged, newMessage) = _inputExpirationHandler.ValidateMessage(message);
+            var (messageHasChanged, newMessage) = _inputMessageHandlerAggregator.HandleMessage(message);
 
             // If the message has changedm the old context can't be used because it has the old message.
             // Setting it to null will force a new context to be created later with the new message.
@@ -186,12 +185,12 @@ namespace Take.Blip.Builder
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // If current stateId of user is different of inputExpiration stop processing
-                        if (!_inputExpirationHandler.IsValidateState(state, message))
+                        if (!_inputMessageHandlerAggregator.IsValidateState(state, message))
                         {
                             return;
                         }
 
-                        await _inputExpirationHandler.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
+                        await _inputMessageHandlerAggregator.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
 
                         // Calculate the number of state transitions
                         var transitions = 0;
@@ -332,7 +331,7 @@ namespace Take.Blip.Builder
 
                         await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
 
-                        await _inputExpirationHandler.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
+                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
                     }
                     finally
                     {
