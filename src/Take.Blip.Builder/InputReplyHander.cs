@@ -9,6 +9,8 @@ using Take.Blip.Builder.Models;
 /// </summary>
 public class InputReplyHandler : IInputMessageHandler
 {
+    private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
+
     /// <summary>
     /// Validates a reply message and extracts the replied content.
     /// </summary>
@@ -21,7 +23,8 @@ public class InputReplyHandler : IInputMessageHandler
     {
         if (message.Content is Reply reply)
         {
-            message.Content = reply.Replied?.Value;
+            message.Content = reply.Replied?.Value ?? _emptyContent;
+
             return (true, message);
         }
 
