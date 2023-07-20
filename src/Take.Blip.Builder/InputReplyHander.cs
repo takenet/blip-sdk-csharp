@@ -31,7 +31,7 @@ public class InputReplyHandler : IInputMessageHandler
         return (false, message);
     }
 
-    public bool IsValidateState(State state, Message message) => true;
+    public bool IsValidateState(State state, Message message, Flow flow) => true;
     public Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken) => Task.CompletedTask;
-    public Task OnFlowProcessedAsync(State state, Message message, Node from, CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, CancellationToken cancellationToken) => Task.CompletedTask;
 }

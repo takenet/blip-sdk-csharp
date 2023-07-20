@@ -185,7 +185,7 @@ namespace Take.Blip.Builder
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
                         // If current stateId of user is different of inputExpiration stop processing
-                        if (!_inputMessageHandlerAggregator.IsValidateState(state, message))
+                        if (!_inputMessageHandlerAggregator.IsValidateState(state, message, flow))
                         {
                             return;
                         }
@@ -331,7 +331,8 @@ namespace Take.Blip.Builder
 
                         await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
 
-                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state, message, _applicationNode, linkedCts.Token);
+                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state,flow, message, _applicationNode, linkedCts.Token);
+                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state,flow, message, _applicationNode, linkedCts.Token);
                     }
                     finally
                     {

@@ -31,11 +31,11 @@ namespace Take.Blip.Builder
             return (false, message);
         }
 
-        public bool IsValidateState(State state, Message message)
+        public bool IsValidateState(State state, Message message, Flow flow)
         {
             foreach (var handler in _handlers)
             {
-                if (!handler.IsValidateState(state, message))
+                if (!handler.IsValidateState(state, message, flow))
                 {
                     return false;
                 }
@@ -52,11 +52,11 @@ namespace Take.Blip.Builder
             }
         }
 
-        public async Task OnFlowProcessedAsync(State state, Message message, Node from, CancellationToken cancellationToken)
+        public async Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, CancellationToken cancellationToken)
         {
             foreach (var handler in _handlers)
             {
-                await handler.OnFlowProcessedAsync(state, message, from, cancellationToken);
+                await handler.OnFlowProcessedAsync(state,flow, message, from, cancellationToken);
             }
         }
     }
