@@ -107,9 +107,10 @@ namespace Take.Blip.Builder.UnitTests
                     Expiration = TimeSpan.FromMinutes(1)
                 }
             };
+            var flow = new Flow();
 
             // Act
-            await InputHandler.OnFlowProcessedAsync(state, Message, null, default(CancellationToken));
+            await InputHandler.OnFlowProcessedAsync(state,flow,Message,null, default(CancellationToken));
 
             // Assert
             Scheduler
