@@ -28,8 +28,7 @@ namespace Take.Blip.Client.Content
         /// </summary>
         [DataMember(Name = "currentSessionState")]
         public string CurrentSessionState { get; set; }
-
-
+		
         public InputExpiration(): base(MediaType.Parse(MIME_TYPE))
         { }
     }

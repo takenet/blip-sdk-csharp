@@ -172,7 +172,6 @@ namespace Take.Blip.Builder
                     Identity = message.From,
                     StateId = stateId,
                     CurrentSessionState = currentSessionState
-
                 },
                 Metadata = traceSettings?.GetDictionary()
             };
