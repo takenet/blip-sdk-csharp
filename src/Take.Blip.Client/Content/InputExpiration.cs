@@ -23,6 +23,12 @@ namespace Take.Blip.Client.Content
         [DataMember(Name = "stateId")]
         public string StateId { get; set; }
 
+        /// <summary>
+        /// currentSessionState to identify flow current while message was being sent.
+        /// </summary>
+        [DataMember(Name = "currentSessionState")]
+        public string CurrentSessionState { get; set; }
+		
         public InputExpiration(): base(MediaType.Parse(MIME_TYPE))
         { }
     }

@@ -20,6 +20,7 @@ namespace Take.Blip.Builder
     {
         public const string STATE_ID = "inputExpiration.stateId";
         public const string IDENTITY = "inputExpiration.identity";
+        public const string CURRENT_SESSION_STATE = "inputExpiration.currentSessionState";
         private const string IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT = "isInputExpirationFromSubflowRedirect";
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
@@ -72,16 +73,17 @@ namespace Take.Blip.Builder
         /// Execute after flow process
         /// </summary>
         /// <param name="state"></param>
+        /// <param name="flow"></param>
         /// <param name="message"></param>
         /// <param name="from"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task OnFlowProcessedAsync(State state, Message message, Node from, CancellationToken cancellationToken)
+        public async Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, CancellationToken cancellationToken)
         {
             // Schedule expiration time if input is configured
             if (state.HasInputExpiration())
             {
-                var scheduleMessage = CreateInputExirationMessage(message, state.Id);
+                var scheduleMessage = CreateInputExirationMessage(message, state.Id, flow.SessionState);
                 var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes);
                 await _schedulerExtension.ScheduleMessageAsync(scheduleMessage, scheduleTime, from, cancellationToken);
             }
@@ -109,6 +111,7 @@ namespace Take.Blip.Builder
                 var messageMetadata = GetTraceSettings(message)?.GetDictionary() ?? new Dictionary<string, string>();
                 messageMetadata.Add(STATE_ID, inputExpiration.StateId);
                 messageMetadata.Add(IDENTITY, inputExpiration.Identity);
+                messageMetadata.Add(CURRENT_SESSION_STATE, inputExpiration.CurrentSessionState);
 
                 message = new Message(message.Id)
                 {
@@ -134,18 +137,23 @@ namespace Take.Blip.Builder
         /// </summary>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="flow"></param>
         /// <returns></returns>
-        public bool IsValidateState(State state, Message message)
+        public bool IsValidateState(State state, Message message, Flow flow)
         {
             string stateToGo = string.Empty;
+            string currentSessionState = string.Empty;
 
             return message?.Metadata?.TryGetValue(STATE_ID, out stateToGo) != true ||
                             string.IsNullOrEmpty(stateToGo) ||
                             stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
-                            state?.Id == stateToGo;
+                           ((state?.Id == stateToGo) && message?.Metadata?.TryGetValue(CURRENT_SESSION_STATE, out currentSessionState) != true) ||
+                            string.IsNullOrEmpty(stateToGo) ||
+                            stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
+                            (flow?.SessionState == currentSessionState);
         }
 
-        private Message CreateInputExirationMessage(Message message, string stateId)
+        private Message CreateInputExirationMessage(Message message, string stateId, string currentSessionState)
         {
             var idMessage = GetInputExirationIdMessage(message);
 
@@ -157,7 +165,8 @@ namespace Take.Blip.Builder
                 Content = new InputExpiration()
                 {
                     Identity = message.From,
-                    StateId = stateId
+                    StateId = stateId,
+                    CurrentSessionState = currentSessionState
                 },
                 Metadata = traceSettings?.GetDictionary()
             };
