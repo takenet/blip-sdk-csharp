@@ -110,7 +110,7 @@ namespace Take.Blip.Builder.UnitTests
             var flow = new Flow();
 
             // Act
-            await InputHandler.OnFlowProcessedAsync(state, flow , Message, null, default(CancellationToken));
+            await InputHandler.OnFlowProcessedAsync(state, flow, Message, null, default(CancellationToken));
 
             // Assert
             Scheduler
