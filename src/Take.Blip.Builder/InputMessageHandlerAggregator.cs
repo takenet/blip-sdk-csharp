@@ -56,7 +56,7 @@ namespace Take.Blip.Builder
         {
             foreach (var handler in _handlers)
             {
-                await handler.OnFlowProcessedAsync(state,   flow, message, from, cancellationToken);
+                await handler.OnFlowProcessedAsync(state, flow, message, from, cancellationToken);
             }
         }
     }
