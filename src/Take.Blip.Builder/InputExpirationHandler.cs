@@ -108,11 +108,6 @@ namespace Take.Blip.Builder
                     throw new ArgumentException("Message content 'StateId' must be present", nameof(InputExpiration.StateId));
                 }
 
-                if (string.IsNullOrWhiteSpace(inputExpiration?.CurrentSessionState))
-                {
-                    throw new ArgumentException("Message content 'CurrentSessionState' must be present", nameof(InputExpiration.CurrentSessionState));
-                }
-
                 var messageMetadata = GetTraceSettings(message)?.GetDictionary() ?? new Dictionary<string, string>();
                 messageMetadata.Add(STATE_ID, inputExpiration.StateId);
                 messageMetadata.Add(IDENTITY, inputExpiration.Identity);

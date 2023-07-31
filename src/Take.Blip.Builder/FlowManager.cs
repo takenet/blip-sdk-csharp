@@ -331,8 +331,7 @@ namespace Take.Blip.Builder
 
                         await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
 
-                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state,flow, message, _applicationNode, linkedCts.Token);
-                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state,flow, message, _applicationNode, linkedCts.Token);
+                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state, flow, message, _applicationNode, linkedCts.Token);
                     }
                     finally
                     {
