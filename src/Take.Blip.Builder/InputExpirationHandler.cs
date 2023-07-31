@@ -147,7 +147,7 @@ namespace Take.Blip.Builder
             return message?.Metadata?.TryGetValue(STATE_ID, out stateToGo) != true ||
                             string.IsNullOrEmpty(stateToGo) ||
                             stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
-                            (state?.Id == stateToGo) && message?.Metadata?.TryGetValue(CURRENT_SESSION_STATE, out currentSessionState) != true ||
+                            (state?.Id == stateToGo) && (message?.Metadata?.TryGetValue(CURRENT_SESSION_STATE, out currentSessionState) != true) ||
                             string.IsNullOrEmpty(stateToGo) ||
                             stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
                             (flow?.SessionState == currentSessionState);
