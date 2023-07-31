@@ -142,15 +142,15 @@ namespace Take.Blip.Builder
         public bool IsValidateState(State state, Message message, Flow flow)
         {
             string stateToGo = string.Empty;
-            string currentSeessionState = string.Empty;
+            string currentSessionState = string.Empty;
 
             return message?.Metadata?.TryGetValue(STATE_ID, out stateToGo) != true ||
                             string.IsNullOrEmpty(stateToGo) ||
                             stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
-                            (state?.Id == stateToGo) && message?.Metadata?.TryGetValue(CURRENT_SESSION_STATE, out currentSeessionState) != true ||
+                            (state?.Id == stateToGo) && message?.Metadata?.TryGetValue(CURRENT_SESSION_STATE, out currentSessionState) != true ||
                             string.IsNullOrEmpty(stateToGo) ||
                             stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
-                            (flow?.SessionState == currentSeessionState);
+                            (flow?.SessionState == currentSessionState);
         }
 
         private Message CreateInputExirationMessage(Message message, string stateId, string currentSessionState)
