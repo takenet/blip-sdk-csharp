@@ -48,7 +48,8 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             returnedMessage.Content.Equals(plainText);
             Assert.True(messageHasChanged);
-            Assert.Null(returnedMessage.Metadata);
+            Assert.True(returnedMessage.Metadata.ContainsKey(InputReplyHandler.REPLY_CONTENT));
+            Assert.False(returnedMessage.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_ID));
         }
 
         [Fact]
@@ -68,26 +69,7 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
-        public async Task HandleMessage_WhenPropertyValueFromInReplyToIsNull()
-        {
-            // Arrange
-            var plainText = MockPlainText();
-            Message.Content = MockReplyMessage();
-
-            // Act
-            var (messageHasChanged, returnedMessage) = InputHandler.HandleMessage(Message);
-
-            // Assert
-            returnedMessage.Content.Equals(plainText);
-            Assert.True(messageHasChanged);
-            Assert.True(returnedMessage.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_ID));
-            Assert.False(returnedMessage.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_TYPE));
-            Assert.False(returnedMessage.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_VALUE));
-            Assert.True(returnedMessage.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_DIRECTION));
-        }
-
-        [Fact]
-        public async Task HandleMessage_WhenMessageAlreadyHaveMetadata()
+        public async Task HandleMessage_WhenMessageHasMetadata()
         {
             // Arrange
             var traceIdentity = new Identity(Guid.NewGuid().ToString(), "msging.net");
@@ -210,9 +192,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             Assert.True(messageHasChanged);
             Assert.True(message.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_ID));
-            Assert.True(message.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_TYPE));
-            Assert.True(message.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_VALUE));
-            Assert.True(message.Metadata.ContainsKey(InputReplyHandler.IN_REPLY_TO_DIRECTION));
+            Assert.True(message.Metadata.ContainsKey(InputReplyHandler.REPLY_CONTENT));
         }
 
         private static Document MockPlainText() =>
