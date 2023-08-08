@@ -12,10 +12,8 @@ using Take.Blip.Builder.Models;
 /// </summary>
 public class InputReplyHandler : IInputMessageHandler
 {
+    public const string REPLY_CONTENT = "#replyContent";
     public const string IN_REPLY_TO_ID = "#inReplyToId";
-    public const string IN_REPLY_TO_TYPE = "#inReplyToType";
-    public const string IN_REPLY_TO_VALUE = "#inReplyToValue";
-    public const string IN_REPLY_TO_DIRECTION = "#inReplyToDirection";
 
     private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
     private readonly IDocumentSerializer _documentSerializer;
@@ -83,24 +81,17 @@ public class InputReplyHandler : IInputMessageHandler
 
     private void TryAddMetadataIntoMessage(Message message, Reply reply)
     {
-        if (reply.InReplyTo == null)
-        {
-            return;
-        }
-
         message.Metadata ??= new Dictionary<string, string>();
+        message?.Metadata?.TryAdd(REPLY_CONTENT, _documentSerializer.Serialize(reply));
 
-        if (!message.Metadata.ContainsKey(IN_REPLY_TO_ID) && !string.IsNullOrEmpty(reply.InReplyTo.Id))
+        if (ShouldAddMetadataInReplyToId(message, reply))
         {
             message?.Metadata?.TryAdd(IN_REPLY_TO_ID, reply.InReplyTo.Id);
         }
-
-        if (reply.InReplyTo.Value != null)
-        {
-            message?.Metadata?.TryAdd(IN_REPLY_TO_TYPE, reply.InReplyTo.Type);
-            message?.Metadata?.TryAdd(IN_REPLY_TO_VALUE, _documentSerializer.Serialize(reply.InReplyTo.Value));
-        }
-
-        message?.Metadata?.TryAdd(IN_REPLY_TO_DIRECTION, reply.InReplyTo.Direction.ToString());
     }
+
+    private bool ShouldAddMetadataInReplyToId(Message message, Reply reply) =>
+           reply.InReplyTo != null
+        && !message.Metadata.ContainsKey(IN_REPLY_TO_ID)
+        && !string.IsNullOrEmpty(reply.InReplyTo.Id);
 }
