@@ -93,7 +93,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(SetVariableAction),
                     typeof(SetBucketAction),
                     typeof(RedirectAction),
-                    typeof(ForwardMessageToDeskAction),
+                    //typeof(ForwardMessageToDeskAction),
                     typeof(CreateTicketAction),
                     typeof(DeleteVariableAction),
                     typeof(ProcessContentAssistantAction),
