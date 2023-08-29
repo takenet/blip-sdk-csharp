@@ -252,23 +252,6 @@ namespace Take.Blip.Builder
                                         await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, linkedCts.Token);
                                         await ProcessGlobalAfterStateChangedActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
                                     }
-
-                                    if (IsSubflowState(state))
-                                    {
-                                        parentStateIdQueue.Enqueue(state.Id);
-
-                                        (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
-                                            context,
-                                            userIdentity,
-                                            state,
-                                            flow,
-                                            stateTrace,
-                                            stateStopwatch,
-                                            inputTrace,
-                                            lazyInput,
-                                            linkedCts.Token
-                                       );
-                                    }
                                 }
                                 else
                                 {
@@ -282,6 +265,23 @@ namespace Take.Blip.Builder
                                         lazyInput,
                                         linkedCts.Token
                                     );
+                                }
+
+                                if (IsSubflowState(state))
+                                {
+                                    parentStateIdQueue.Enqueue(state.Id);
+
+                                    (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
+                                        context,
+                                        userIdentity,
+                                        state,
+                                        flow,
+                                        stateTrace,
+                                        stateStopwatch,
+                                        inputTrace,
+                                        lazyInput,
+                                        linkedCts.Token
+                                   );
                                 }
 
                                 // Create trace instances, if required
@@ -464,6 +464,7 @@ namespace Take.Blip.Builder
 
             // Create trace instances, if required
             var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
+
 
             // Prepare to leave the current state executing the output actions
             await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, cancellationToken);
