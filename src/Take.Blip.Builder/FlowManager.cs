@@ -465,7 +465,6 @@ namespace Take.Blip.Builder
             // Create trace instances, if required
             var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
 
-
             // Prepare to leave the current state executing the output actions
             await ProcessStateOutputActionsAsync(state, lazyInput, context, stateTrace, cancellationToken);
 
