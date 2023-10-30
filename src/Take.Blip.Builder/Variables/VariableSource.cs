@@ -61,5 +61,10 @@
         /// Get values from resources
         /// </summary>
         Resource,
+
+        /// <summary>
+        /// Get values from AiAnswers.
+        /// </summary>
+        AiAnswers
     }
 }
