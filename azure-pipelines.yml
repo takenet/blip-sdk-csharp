@@ -27,7 +27,7 @@ resources:
   - repository: templates
     type: git
     name: Operações/template-take-blip
-    ref: refs/tags/v1.4.32
+    ref: refs/tags/v1.4.46
 
 extends:
   template: template-pipeline.yml@templates    
