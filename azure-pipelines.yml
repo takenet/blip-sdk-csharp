@@ -38,7 +38,8 @@ extends:
     nugetServiceConnection: Nuget.org Take
     dotnetVersion: "6.0.x"
     testProjects: src/Take.Blip.Client.sln
-    testPermission: true
+    testParameters: '--configuration release --no-build --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover'
+    publishTestResults: '**/*.trx'
     skipSonarBranch: false
     skipSast: false
     sastFilter: "!**/**, src/**/*"
