@@ -9,6 +9,7 @@ using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.Directory;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
+using Take.Blip.Client.Content;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -47,11 +48,20 @@ namespace Take.Blip.Client.Receivers
 
         public virtual async Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var identity = envelope.From.ToIdentity();
+            var identity = GetIdentity(envelope);
             var contact = await GetContactAsync(identity, cancellationToken);
             await ReceiveAsync(envelope, contact, cancellationToken);
         }
-        
+
+        private static Identity GetIdentity(Message envelope)
+        {
+            if (envelope.Content is InputExpiration)
+            {
+                return (envelope.Content as InputExpiration).Identity;
+            }
+            return envelope.From.ToIdentity();
+        }
+
         protected MemoryCache ContactCache { get; }
 
         /// <summary>
