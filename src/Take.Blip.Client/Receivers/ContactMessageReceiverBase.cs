@@ -55,11 +55,7 @@ namespace Take.Blip.Client.Receivers
 
         private static Identity GetIdentity(Message envelope)
         {
-            if (envelope.Content is InputExpiration)
-            {
-                return (envelope.Content as InputExpiration).Identity;
-            }
-            return envelope.From.ToIdentity();
+            return envelope.Content is InputExpiration ? (envelope.Content as InputExpiration).Identity : envelope.From.ToIdentity();
         }
 
         protected MemoryCache ContactCache { get; }
