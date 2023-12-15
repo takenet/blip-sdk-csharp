@@ -89,6 +89,11 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 {
                     await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
                 }
+
+                if (responseStatus != 200)
+                {
+                    PushStatusCodeWarning(context);
+                }
             }
             catch (Exception ex)
             {
@@ -103,13 +108,37 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private void PushTimeoutWarning(IContext context)
         {
-            var warningMessage =
-                $"The process http command action has timed out.";
+            const string warningMessage = "The process http command action has timed out.";
 
             var currentActionTrace = context.GetCurrentActionTrace();
             if (currentActionTrace != null)
             {
                 currentActionTrace.Warning = warningMessage;
+            }
+        }
+
+        private void PushStatusCodeWarning(IContext context, int statusCode = 0)
+        {
+            try
+            {
+                const string warningMessage = "The process http command action has returned non-success status code.";
+
+                var currentActionTrace = context.GetCurrentActionTrace();
+                if (currentActionTrace == null)
+                {
+                    return;
+                }
+
+                currentActionTrace.Warning = warningMessage;
+
+                if (currentActionTrace.ParsedSettings != null)
+                {
+                    currentActionTrace.ParsedSettings["#responseStatusCode"] = statusCode;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "An error occurred while pushing status code warning");
             }
         }
 
