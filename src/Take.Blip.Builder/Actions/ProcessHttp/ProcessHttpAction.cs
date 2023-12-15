@@ -133,7 +133,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
                 if (currentActionTrace.ParsedSettings != null)
                 {
-                    currentActionTrace.ParsedSettings["#responseStatusCode"] = statusCode;
+                    currentActionTrace.ParsedSettings["responseStatusCode"] = statusCode;
                 }
             }
             catch (Exception ex)
