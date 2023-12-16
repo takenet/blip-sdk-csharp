@@ -35,6 +35,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             string responseBody = null;
             try
             {
+                bool isSuccessStatusCode;
+
                 using (var httpRequestMessage =
                     new HttpRequestMessage(new HttpMethod(settings.Method), settings.Uri))
                 {
@@ -70,6 +72,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     using (var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, linkedCts.Token).ConfigureAwait(false))
                     {
                         responseStatus = (int)httpResponseMessage.StatusCode;
+                        isSuccessStatusCode = httpResponseMessage.IsSuccessStatusCode;
+
                         if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
                         {
                             responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -90,9 +94,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
                 }
 
-                if (responseStatus != 200)
+                if (!isSuccessStatusCode)
                 {
-                    PushStatusCodeWarning(context);
+                    PushStatusCodeWarning(context, responseStatus);
                 }
             }
             catch (Exception ex)
@@ -117,9 +121,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             }
         }
 
-        private void PushStatusCodeWarning(IContext context, int statusCode = 0)
+        private void PushStatusCodeWarning(IContext context, int statusCode)
         {
-            var warningMessage = $"HTTP command action status code response: {statusCode}";
+            var warningMessage = $"Process http command action code response: {statusCode}";
 
             var currentActionTrace = context.GetCurrentActionTrace();
             if (currentActionTrace != null)
