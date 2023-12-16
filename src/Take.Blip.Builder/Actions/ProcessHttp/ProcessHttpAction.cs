@@ -119,26 +119,12 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private void PushStatusCodeWarning(IContext context, int statusCode = 0)
         {
-            try
+            var warningMessage = $"HTTP command action status code response: {statusCode}";
+
+            var currentActionTrace = context.GetCurrentActionTrace();
+            if (currentActionTrace != null)
             {
-                const string warningMessage = "The process http command action has returned non-success status code.";
-
-                var currentActionTrace = context.GetCurrentActionTrace();
-                if (currentActionTrace == null)
-                {
-                    return;
-                }
-
                 currentActionTrace.Warning = warningMessage;
-
-                if (currentActionTrace.ParsedSettings != null)
-                {
-                    currentActionTrace.ParsedSettings["responseStatusCode"] = statusCode.ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "An error occurred while pushing status code warning");
             }
         }
 
