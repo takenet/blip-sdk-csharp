@@ -14,19 +14,6 @@ using Esprima;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
-    public class InternalJavaScriptException: Exception
-    {
-        public Location Location { get; set; }
-        public string CallStack { get; set; }
-
-
-        /// <summary>
-        /// inheritdoc
-        /// </summary>
-        /// <param name="message"></param>
-        public InternalJavaScriptException(string message): base(message) { }
-    }
-
     public class ExecuteScriptAction : ActionBase<ExecuteScriptSettings>
     {
         private const string DEFAULT_FUNCTION = "run";
