@@ -19,7 +19,7 @@ namespace Take.Blip.Builder
             {
                 ex => ex is ActionProcessingException && ex?.InnerException is ArgumentException,
                 ex => ex is ActionProcessingException && ex?.InnerException is ValidationException,
-                ex => ex is ActionProcessingException && ex?.InnerException is JavaScriptException,
+                ex => ex is ActionProcessingException && ex?.InnerException is InternalJavaScriptException,
                 ex => ex is OutputProcessingException
             };
         }

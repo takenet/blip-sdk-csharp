@@ -250,7 +250,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 });
 
             // Act
-            using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(10)))
+            using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(5)))
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), cts.Token);
 
             //Assert

@@ -294,10 +294,34 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
                 throw new Exception("The script was executed");
             }
-            catch (JavaScriptException ex)
+            catch (InternalJavaScriptException ex)
             {
                 ex.Message.ShouldBe("XMLHttpRequest is not defined");
             }
+        }
+
+        [Fact]
+        public async Task ExecuteScripWithInvalidScriptShouldFail()
+        {
+            // Arrange
+            var settings = new ExecuteScriptSettings()
+            {
+                Source = @"
+                    function run() {
+                        return ""test"".toError();
+                    }
+                    ",
+                OutputVariable = "result"
+            };
+            var target = GetTarget();
+
+            // Act
+            var exception = await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken).ShouldThrowAsync<InternalJavaScriptException>();
+
+            // Assert
+            exception.Message.ShouldBe("Object has no method 'toError'");
+            exception.Location.ShouldNotBeNull();
+            exception.CallStack.ShouldNotBeNullOrEmpty();
         }
 
         [Fact]
