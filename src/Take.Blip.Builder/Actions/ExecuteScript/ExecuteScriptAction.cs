@@ -14,6 +14,19 @@ using Esprima;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
+    public class InternalJavaScriptException: Exception
+    {
+        public Location Location { get; set; }
+        public string CallStack { get; set; }
+
+
+        /// <summary>
+        /// inheritdoc
+        /// </summary>
+        /// <param name="message"></param>
+        public InternalJavaScriptException(string message): base(message) { }
+    }
+
     public class ExecuteScriptAction : ActionBase<ExecuteScriptSettings>
     {
         private const string DEFAULT_FUNCTION = "run";
@@ -67,13 +80,19 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 Tolerant = true
             };
 
-            engine = engine.Execute(settings.Source, DefaultParserOptions);
+            try
+            {
+                engine = engine.Execute(settings.Source, DefaultParserOptions);
 
-            var result = arguments != null
-               ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
-               : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
+                var result = arguments != null
+                   ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
+                   : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
 
-            await SetScriptResultAsync(context, settings, result, cancellationToken);
+                await SetScriptResultAsync(context, settings, result, cancellationToken);
+            } catch (Exception ex)
+            {
+                throw TransformJavascriptException(ex);
+            }
         }
 
         protected async Task<object[]> GetScriptArgumentsAsync(
@@ -126,6 +145,23 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                     currentActionTrace.Warning = $"The script memory allocation ({debugInformation.CurrentMemoryUsage:N0} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning:N0} bytes";
                 }
             }
+        }
+        private static Exception TransformJavascriptException(Exception ex)
+        {
+            if (ex is JavaScriptException)
+            {
+                var jIntException = (ex as JavaScriptException);
+
+                //It's needed because the Error property of JavascriptException is very large and later it's added to application log
+                return new InternalJavaScriptException(ex.Message)
+                {
+                    CallStack = jIntException.CallStack,
+                    Location = jIntException.Location,
+                    Source = "Jint"
+                };
+            }
+
+            return ex;
         }
     }
 }
