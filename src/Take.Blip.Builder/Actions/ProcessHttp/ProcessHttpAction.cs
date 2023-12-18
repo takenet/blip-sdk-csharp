@@ -35,6 +35,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             string responseBody = null;
             try
             {
+                bool isSuccessStatusCode;
+
                 using (var httpRequestMessage =
                     new HttpRequestMessage(new HttpMethod(settings.Method), settings.Uri))
                 {
@@ -70,6 +72,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     using (var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, linkedCts.Token).ConfigureAwait(false))
                     {
                         responseStatus = (int)httpResponseMessage.StatusCode;
+                        isSuccessStatusCode = httpResponseMessage.IsSuccessStatusCode;
+
                         if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
                         {
                             responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -89,6 +93,11 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 {
                     await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
                 }
+
+                if (!isSuccessStatusCode)
+                {
+                    PushStatusCodeWarning(context, responseStatus);
+                }
             }
             catch (Exception ex)
             {
@@ -103,8 +112,18 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private void PushTimeoutWarning(IContext context)
         {
-            var warningMessage =
-                $"The process http command action has timed out.";
+            const string warningMessage = "The process http command action has timed out.";
+
+            var currentActionTrace = context.GetCurrentActionTrace();
+            if (currentActionTrace != null)
+            {
+                currentActionTrace.Warning = warningMessage;
+            }
+        }
+
+        private void PushStatusCodeWarning(IContext context, int statusCode)
+        {
+            var warningMessage = $"Process http command action code response: {statusCode}";
 
             var currentActionTrace = context.GetCurrentActionTrace();
             if (currentActionTrace != null)
