@@ -47,9 +47,11 @@ namespace Take.Blip.Builder
         private readonly Node _applicationNode;
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
         private readonly IInputMessageHandler _inputMessageHandlerAggregator;
+        private readonly ISensisitveInfoReplacer _sensisitveInfoReplacer;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
+        private const string SEND_BOT_KEY_TO_TRACE_COLLECTOR = "sendBotKeyToTraceCollector";
 
         public FlowManager(
             IConfiguration configuration,
@@ -69,7 +71,8 @@ namespace Take.Blip.Builder
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager,
             IAnalyzeBuilderExceptions analyzeBuilderExceptions,
-            IInputMessageHandlerAggregator inputMessageHandlerAggregator
+            IInputMessageHandlerAggregator inputMessageHandlerAggregator,
+            ISensisitveInfoReplacer sensisitveInfoReplacer
             )
         {
             _configuration = configuration;
@@ -90,6 +93,7 @@ namespace Take.Blip.Builder
             _flowSessionManager = flowSessionManager;
             _analyzeBuilderExceptions = analyzeBuilderExceptions;
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
+            _sensisitveInfoReplacer = sensisitveInfoReplacer;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -555,7 +559,10 @@ namespace Take.Blip.Builder
 
                         if (actionTrace != null)
                         {
-                            actionTrace.ParsedSettings = new JRaw(stringifySetting);
+                            actionTrace.ParsedSettings = context.Flow.ConfigurationFlagIsEnabled(SEND_BOT_KEY_TO_TRACE_COLLECTOR)
+                                ? new JRaw(stringifySetting)
+                                : new JRaw(_sensisitveInfoReplacer.ReplaceCredentials(stringifySetting));
+
                         }
 
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
