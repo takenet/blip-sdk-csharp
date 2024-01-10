@@ -559,9 +559,9 @@ namespace Take.Blip.Builder
 
                         if (actionTrace != null)
                         {
-                            actionTrace.ParsedSettings = context.Flow.ConfigurationFlagIsEnabled(SEND_BOT_KEY_TO_TRACE_COLLECTOR)
-                                ? new JRaw(stringifySetting)
-                                : new JRaw(_sensisitveInfoReplacer.ReplaceCredentials(stringifySetting));
+                            actionTrace.ParsedSettings = action.Type.Equals(nameof(Actions.ProcessHttp)) && !context.Flow.ConfigurationFlagIsEnabled(SEND_BOT_KEY_TO_TRACE_COLLECTOR)
+                                ? new JRaw(_sensisitveInfoReplacer.ReplaceCredentials(stringifySetting))
+                                : new JRaw(stringifySetting);
 
                         }
 
