@@ -4,6 +4,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Take.Blip.Builder.Actions.ProcessHttp;
+using Take.Blip.Builder.Models;
+using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Builder.Utils
 {
@@ -12,7 +17,6 @@ namespace Take.Blip.Builder.Utils
     /// </summary>
     public class SensisitveInfoReplacer : ISensisitveInfoReplacer
     {
-        private static readonly Regex KeyHeadersRegex = new Regex(@"Key (((\r?\n|\s)*[A-Za-z0-9+\/]){4})*(((\r?\n|\s)*[A-Za-z0-9+\/]){2}(=(\r?\n|\s)*){2}|((\r?\n|\s)*[A-Za-z0-9+\/]){3}(=(\r?\n|\s)*))?", RegexOptions.Compiled, Constants.REGEX_TIMEOUT);
         private const string DEFAULT_VALUE_FOR_SUPRESSED_STRING = "***";
 
         /// <summary>
@@ -22,8 +26,25 @@ namespace Take.Blip.Builder.Utils
         /// <returns></returns>
         public string ReplaceCredentials(string value)
         {
-            value = KeyHeadersRegex.Replace(value, DEFAULT_VALUE_FOR_SUPRESSED_STRING);
-            return value;
+            if (value == null)
+            {
+                return value;
+            }
+
+            var httpSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(value, OrderedJsonSerializerSettingsContainer.Settings);
+
+            if (httpSettings.Headers == null)
+            {
+                return value;
+            }
+
+            foreach (var item in httpSettings.Headers.Keys)
+            {
+                httpSettings.Headers[item] = DEFAULT_VALUE_FOR_SUPRESSED_STRING;
+            }
+
+            var adjustedValue = JsonConvert.SerializeObject(httpSettings, OrderedJsonSerializerSettingsContainer.Settings);
+            return adjustedValue;
         }
     }
 }
