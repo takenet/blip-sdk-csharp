@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
 using Take.Blip.Builder.Hosting;
@@ -15,18 +17,22 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
     {
         private const string ADD_USER_KEY = "processHttpAddUserToRequestHeader";
         private const string ADD_BOT_KEY = "processHttpAddBotIdentityToRequestHeader";
+        private const string SEND_BOT_KEY_TO_TRACE_COLLECTOR = "sendBotKeyToTraceCollector";
+
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
 
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
+        private readonly ISensisitveInfoReplacer _sensisitveInfoReplacer;
 
-        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration, ISensisitveInfoReplacer sensisitveInfoReplacer)
             : base(nameof(ProcessHttp))
         {
             _httpClient = httpClient;
             _logger = logger;
             _configuration = configuration;
+            _sensisitveInfoReplacer = sensisitveInfoReplacer;
         }
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
@@ -55,7 +61,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                         httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
                             contentType ?? "application/json");
                     }
-                    
+
                     if (CheckInternalUris(settings.Uri.AbsoluteUri))
                     {
                         AddHeadersToCommandRequest(httpRequestMessage, settings.currentStateId, context.OwnerIdentity);
@@ -63,8 +69,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     else
                     {
                         AddBotIdentityToHeaders(httpRequestMessage, context);
-                    }                    
-                    
+                    }
+
                     AddUserToHeaders(httpRequestMessage, context);
 
                     using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
@@ -106,6 +112,10 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 {
                     PushTimeoutWarning(context);
                 }
+            }
+            finally
+            {
+                SanitizeHeaders(context);
             }
 
         }
@@ -175,6 +185,25 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             var uriList = _configuration.InternalUris.Split(";");
 
             return uriList.Any((uri) => absoluteUri.Contains(uri));
+        }
+
+        private void SanitizeHeaders(IContext context)
+        {
+            if (context.Flow.ConfigurationFlagIsEnabled(SEND_BOT_KEY_TO_TRACE_COLLECTOR))
+            {
+                return;
+            }
+
+            var currentActionTrace = context.GetCurrentActionTrace();
+
+            if (currentActionTrace != null)
+            {
+                var parsedSettings = currentActionTrace.ParsedSettings?.ToString(Formatting.None);
+                var sanitizedSettings = _sensisitveInfoReplacer.ReplaceCredentials(parsedSettings);
+
+                currentActionTrace.ParsedSettings = new JRaw(sanitizedSettings);
+
+            }
         }
 
         public void Dispose()
