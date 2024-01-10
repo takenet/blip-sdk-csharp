@@ -13,7 +13,7 @@ namespace Take.Blip.Builder.Utils
     public class SensisitveInfoReplacer : ISensisitveInfoReplacer
     {
         private static readonly Regex KeyHeadersRegex = new Regex(@"Key (((\r?\n|\s)*[A-Za-z0-9+\/]){4})*(((\r?\n|\s)*[A-Za-z0-9+\/]){2}(=(\r?\n|\s)*){2}|((\r?\n|\s)*[A-Za-z0-9+\/]){3}(=(\r?\n|\s)*))?", RegexOptions.Compiled, Constants.REGEX_TIMEOUT);
-        private const string DEFAULT_VALUE_FOR_SUPRESSED_STRING = "<Supressed Value>";
+        private const string DEFAULT_VALUE_FOR_SUPRESSED_STRING = "***";
 
         /// <summary>
         /// Method to allow remove credentials from trace collector, avoiding store authorization keys externally
