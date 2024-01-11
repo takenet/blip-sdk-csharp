@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
     {
         private const string ADD_USER_KEY = "processHttpAddUserToRequestHeader";
         private const string ADD_BOT_KEY = "processHttpAddBotIdentityToRequestHeader";
-        private const string SEND_BOT_KEY_TO_TRACE_COLLECTOR = "sendBotKeyToTraceCollector";
+        private const string SEND_HEADERS_TO_TRACE_COLLECTOR = "sendHeadersToTraceCollector";
 
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
 
@@ -189,7 +189,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private void SanitizeHeaders(IContext context)
         {
-            if (context.Flow.ConfigurationFlagIsEnabled(SEND_BOT_KEY_TO_TRACE_COLLECTOR))
+            if (context.Flow.ConfigurationFlagIsEnabled(SEND_HEADERS_TO_TRACE_COLLECTOR))
             {
                 return;
             }

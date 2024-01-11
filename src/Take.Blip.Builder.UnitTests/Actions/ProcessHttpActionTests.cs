@@ -9,11 +9,13 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Serilog;
 using Shouldly;
 using Take.Blip.Builder.Actions.ProcessHttp;
+using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
 using Xunit;
@@ -27,7 +29,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             HttpClient = Substitute.For<IHttpClient>();
             Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
             configuration = Substitute.For<IConfiguration>();
-            sensisitveInfoReplacer = Substitute.For<ISensisitveInfoReplacer>();
+            sensisitveInfoReplacer = new SensisitveInfoReplacer();
         }
 
         public IHttpClient HttpClient { get; set; }
@@ -193,7 +195,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-                
+
             };
 
             var target = GetTarget();
@@ -216,7 +218,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
             requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(botIdentity);
-           
+
 
             await HttpClient.Received(1).SendAsync(
                 Arg.Is<HttpRequestMessage>(
@@ -337,7 +339,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 ResponseStatusVariable = "httpResultStatus",
 
             };
-            
+
             var target = GetTarget();
 
             var httpResponseMessage = new HttpResponseMessage()
@@ -492,8 +494,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            
-            requestMessage.Headers.GetValues("X-Blip-Bot").Count().ShouldBe(1); 
+
+            requestMessage.Headers.GetValues("X-Blip-Bot").Count().ShouldBe(1);
 
             await HttpClient.Received(1).SendAsync(
               Arg.Is<HttpRequestMessage>(
@@ -544,6 +546,157 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await HttpClient.Received(1).SendAsync(
               Arg.Is<HttpRequestMessage>(
                   h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessAction_ChangeHttpTraceHeadersSucceed()
+        {
+            // Arrange
+            const string userIdentity = "user@domain.local";
+            const string botIdentity = "papagaio@msging.net";
+            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
+            Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
+            Context.UserIdentity.Returns(Identity.Parse(userIdentity));
+            Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
+
+            var actionTrace = new ActionTrace
+            {
+                Order = 1,
+                Type = "ProcessHttp",
+                ContinueOnError = true,
+                ParsedSettings = new JRaw(@"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}")
+            };
+
+            Context.InputContext.TryGetValue("current-action-trace", out Arg.Any<object>()).Returns(x =>
+            {
+                x[1] = actionTrace;
+                return true;
+            });
+
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri("https://test.msging.net"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"BotKey", "Key AAAAAAAAAAAAA"},
+                    {"OtherHeader", "OtherValue" }
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+                Content = new StringContent("Some result")
+            };
+
+            HttpRequestMessage requestMessage = null;
+            HttpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
+            requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
+            requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(botIdentity);
+
+            var parsedSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(Context.GetCurrentActionTrace().ParsedSettings.ToString());
+
+            parsedSettings.Headers.ShouldNotBeNull();
+            parsedSettings.Headers.ShouldContainKeyAndValue("Content-Type", "***");
+            parsedSettings.Headers.ShouldContainKeyAndValue("BotKey", "***");
+            parsedSettings.Headers.ShouldContainKeyAndValue("OtherHeader", "***");
+
+            await HttpClient.Received(1).SendAsync(
+                Arg.Is<HttpRequestMessage>(
+                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessAction_FlowConfiguredWithSendHeadersToTraceShouldSucceed()
+        {
+            // Arrange
+            const string userIdentity = "user@domain.local";
+            const string botIdentity = "papagaio@msging.net";
+            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
+            const string sendHeadersToTraceCollectorVariableName = "sendHeadersToTraceCollector";
+            Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
+            Context.Flow.Configuration.Add(sendHeadersToTraceCollectorVariableName, "true");
+
+            Context.UserIdentity.Returns(Identity.Parse(userIdentity));
+            Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
+
+            var actionTrace = new ActionTrace
+            {
+                Order = 1,
+                Type = "ProcessHttp",
+                ContinueOnError = true,
+                ParsedSettings = new JRaw(@"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}")
+            };
+
+            Context.InputContext.TryGetValue("current-action-trace", out Arg.Any<object>()).Returns(x =>
+            {
+                x[1] = actionTrace;
+                return true;
+            });
+
+            var settings = new ProcessHttpSettings
+            {
+                Uri = new Uri("https://test.msging.net"),
+                Method = HttpMethod.Post.ToString(),
+                Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
+                Headers = new Dictionary<string, string>()
+                {
+                    {"Content-Type", "application/json"},
+                    {"BotKey", "Key AAAAAAAAAAAAA"},
+                    {"OtherHeader", "OtherValue" }
+                },
+                ResponseBodyVariable = "httpResultBody",
+                ResponseStatusVariable = "httpResultStatus",
+
+            };
+
+            var target = GetTarget();
+
+            var httpResponseMessage = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+                Content = new StringContent("Some result")
+            };
+
+            HttpRequestMessage requestMessage = null;
+            HttpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
+            requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
+            requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(botIdentity);
+
+            var parsedSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(Context.GetCurrentActionTrace().ParsedSettings.ToString());
+
+            parsedSettings.Headers.ShouldNotBeNull();
+            parsedSettings.Headers.ShouldContainKeyAndValue("Content-Type", "application/json");
+            parsedSettings.Headers.ShouldContainKeyAndValue("BotKey", "Key AAAAAAAAAAAAA");
+            parsedSettings.Headers.ShouldContainKeyAndValue("OtherHeader", "OtherValue");
+
+            await HttpClient.Received(1).SendAsync(
+                Arg.Is<HttpRequestMessage>(
+                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
         }
     }
 }
