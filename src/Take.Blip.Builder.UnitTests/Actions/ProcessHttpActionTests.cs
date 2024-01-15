@@ -24,6 +24,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
 {
     public class ProcessHttpActionTests : ActionTestsBase
     {
+        private const string USER_IDENTITY = "user@domain.local";
+        private const string BOT_IDENTITY = "papagaio@msging.net";
+        private const string BOT_IDENTIFIER_CONFIG_VARIABLE_NAME = "processHttpAddBotIdentityToRequestHeader";
+        private const string SEND_HEADERS_TO_TRACE_COLLECTOR_VARIABLE_NAME = "sendHeadersToTraceCollector";
+
         public ProcessHttpActionTests()
         {
             HttpClient = Substitute.For<IHttpClient>();
@@ -552,12 +557,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task ProcessAction_ChangeHttpTraceHeadersSucceed()
         {
             // Arrange
-            const string userIdentity = "user@domain.local";
-            const string botIdentity = "papagaio@msging.net";
-            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
-            Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
-            Context.UserIdentity.Returns(Identity.Parse(userIdentity));
-            Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
+            Context.Flow.Configuration.Add(BOT_IDENTIFIER_CONFIG_VARIABLE_NAME, "true");
+            Context.UserIdentity.Returns(Identity.Parse(USER_IDENTITY));
+            Context.OwnerIdentity.Returns(Identity.Parse(BOT_IDENTITY));
 
             var actionTrace = new ActionTrace
             {
@@ -608,7 +610,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
-            requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(botIdentity);
+            requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(BOT_IDENTITY);
 
             var parsedSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(Context.GetCurrentActionTrace().ParsedSettings.ToString());
 
@@ -626,15 +628,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task ProcessAction_FlowConfiguredWithSendHeadersToTraceShouldSucceed()
         {
             // Arrange
-            const string userIdentity = "user@domain.local";
-            const string botIdentity = "papagaio@msging.net";
-            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
-            const string sendHeadersToTraceCollectorVariableName = "sendHeadersToTraceCollector";
-            Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
-            Context.Flow.Configuration.Add(sendHeadersToTraceCollectorVariableName, "true");
+            Context.Flow.Configuration.Add(BOT_IDENTIFIER_CONFIG_VARIABLE_NAME, "true");
+            Context.Flow.Configuration.Add(SEND_HEADERS_TO_TRACE_COLLECTOR_VARIABLE_NAME, "true");
 
-            Context.UserIdentity.Returns(Identity.Parse(userIdentity));
-            Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
+            Context.UserIdentity.Returns(Identity.Parse(USER_IDENTITY));
+            Context.OwnerIdentity.Returns(Identity.Parse(BOT_IDENTITY));
 
             var actionTrace = new ActionTrace
             {
@@ -685,7 +683,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
-            requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(botIdentity);
+            requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(BOT_IDENTITY);
 
             var parsedSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(Context.GetCurrentActionTrace().ParsedSettings.ToString());
 
