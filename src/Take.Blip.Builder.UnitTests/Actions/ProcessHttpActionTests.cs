@@ -29,16 +29,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
             HttpClient = Substitute.For<IHttpClient>();
             Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
             configuration = Substitute.For<IConfiguration>();
-            sensisitveInfoReplacer = new SensitiveInfoReplacer();
+            sensitiveInfoReplacer = new SensitiveInfoReplacer();
         }
 
         public IHttpClient HttpClient { get; set; }
         public IConfiguration configuration { get; set; }
-        public ISensitiveInfoReplacer sensisitveInfoReplacer { get; set; }
+        public ISensitiveInfoReplacer sensitiveInfoReplacer { get; set; }
 
         private ProcessHttpAction GetTarget()
         {
-            return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>(), configuration, sensisitveInfoReplacer);
+            return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>(), configuration, sensitiveInfoReplacer);
         }
 
         [Fact]

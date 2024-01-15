@@ -24,15 +24,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        private readonly ISensitiveInfoReplacer _sensisitveInfoReplacer;
+        private readonly ISensitiveInfoReplacer _sensitiveInfoReplacer;
 
-        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration, ISensitiveInfoReplacer sensisitveInfoReplacer)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration, ISensitiveInfoReplacer sensitiveInfoReplacer)
             : base(nameof(ProcessHttp))
         {
             _httpClient = httpClient;
             _logger = logger;
             _configuration = configuration;
-            _sensisitveInfoReplacer = sensisitveInfoReplacer;
+            _sensitiveInfoReplacer = sensitiveInfoReplacer;
         }
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
@@ -199,7 +199,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             if (currentActionTrace != null)
             {
                 var parsedSettings = currentActionTrace.ParsedSettings?.ToString(Formatting.None);
-                var sanitizedSettings = _sensisitveInfoReplacer.ReplaceCredentials(parsedSettings);
+                var sanitizedSettings = _sensitiveInfoReplacer.ReplaceCredentials(parsedSettings);
 
                 currentActionTrace.ParsedSettings = new JRaw(sanitizedSettings);
 

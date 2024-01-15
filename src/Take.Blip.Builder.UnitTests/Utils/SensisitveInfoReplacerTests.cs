@@ -10,11 +10,11 @@ namespace Take.Blip.Builder.UnitTests.Utils
 {
     public class SensisitveInfoReplacerTests : FlowManagerTestsBase
     {
-        private readonly ISensitiveInfoReplacer _sensisitveInfoReplacer;
+        private readonly ISensitiveInfoReplacer _sensitiveInfoReplacer;
 
         public SensisitveInfoReplacerTests()
         {
-            _sensisitveInfoReplacer = new SensitiveInfoReplacer();
+            _sensitiveInfoReplacer = new SensitiveInfoReplacer();
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace Take.Blip.Builder.UnitTests.Utils
             var expectedContent = @"{""headers"":{""BotKey"":""***"",""OtherHeader"":""***"",""Content-Type"":""***""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
 
             //Act
-            var content = _sensisitveInfoReplacer.ReplaceCredentials(contentToSubstitute);
+            var content = _sensitiveInfoReplacer.ReplaceCredentials(contentToSubstitute);
 
             //Assert
             content.ShouldBe(expectedContent);
@@ -39,7 +39,7 @@ namespace Take.Blip.Builder.UnitTests.Utils
             var expectedContent = @"{""headers"":{},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
 
             //Act
-            var content = _sensisitveInfoReplacer.ReplaceCredentials(contentToSubstitute);
+            var content = _sensitiveInfoReplacer.ReplaceCredentials(contentToSubstitute);
 
             //Assert
             content.ShouldBe(expectedContent);
