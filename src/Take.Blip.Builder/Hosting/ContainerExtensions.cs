@@ -129,7 +129,7 @@ namespace Take.Blip.Builder.Hosting
         private static Container RegisterBuilderUtils(this Container container)
         {
             container.RegisterSingleton<IVariableReplacer, VariableReplacer>();
-            container.RegisterSingleton<ISensisitveInfoReplacer, SensisitveInfoReplacer>();
+            container.RegisterSingleton<ISensitiveInfoReplacer, SensitiveInfoReplacer>();
             container.RegisterSingleton<IHttpClient, HttpClientWrapper>();
             container.RegisterSingleton<IAnalyzeBuilderExceptions, AnalyzeBuilderExceptions>();
 

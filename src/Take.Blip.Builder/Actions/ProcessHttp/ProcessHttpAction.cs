@@ -24,9 +24,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        private readonly ISensisitveInfoReplacer _sensisitveInfoReplacer;
+        private readonly ISensitiveInfoReplacer _sensisitveInfoReplacer;
 
-        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration, ISensisitveInfoReplacer sensisitveInfoReplacer)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration, ISensitiveInfoReplacer sensisitveInfoReplacer)
             : base(nameof(ProcessHttp))
         {
             _httpClient = httpClient;

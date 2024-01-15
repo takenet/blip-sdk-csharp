@@ -10,11 +10,11 @@ namespace Take.Blip.Builder.UnitTests.Utils
 {
     public class SensisitveInfoReplacerTests : FlowManagerTestsBase
     {
-        private readonly ISensisitveInfoReplacer _sensisitveInfoReplacer;
+        private readonly ISensitiveInfoReplacer _sensisitveInfoReplacer;
 
         public SensisitveInfoReplacerTests()
         {
-            _sensisitveInfoReplacer = new SensisitveInfoReplacer();
+            _sensisitveInfoReplacer = new SensitiveInfoReplacer();
         }
 
         [Fact]

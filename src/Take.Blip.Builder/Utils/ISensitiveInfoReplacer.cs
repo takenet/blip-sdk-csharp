@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Take.Blip.Builder.Utils
 {
-    public interface ISensisitveInfoReplacer
+    public interface ISensitiveInfoReplacer
     {
         string ReplaceCredentials(string value);
     }

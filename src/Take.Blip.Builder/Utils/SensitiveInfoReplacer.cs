@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.Utils
     /// <summary>
     /// Class to allow replacements of sensistive informations
     /// </summary>
-    public class SensisitveInfoReplacer : ISensisitveInfoReplacer
+    public class SensitiveInfoReplacer : ISensitiveInfoReplacer
     {
         private const string DEFAULT_VALUE_FOR_SUPRESSED_STRING = "***";
 
