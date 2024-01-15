@@ -11,6 +11,7 @@ namespace Take.Blip.Builder.UnitTests.Utils
     public class SensisitveInfoReplacerTests : FlowManagerTestsBase
     {
         private readonly ISensitiveInfoReplacer _sensitiveInfoReplacer;
+        private const string SETTINGS_HEADER_WITHOUT_VALUES = @"{""headers"":{},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
 
         public SensisitveInfoReplacerTests()
         {
@@ -21,8 +22,8 @@ namespace Take.Blip.Builder.UnitTests.Utils
         public void HeadersSubstitutionShouldSucceed()
         {
             //Arrange
-            const string contentToSubstitute = @"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
-            const string expectedContent = @"{""headers"":{""BotKey"":""***"",""OtherHeader"":""***"",""Content-Type"":""***""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
+            var contentToSubstitute = @"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
+            var expectedContent = @"{""headers"":{""BotKey"":""***"",""OtherHeader"":""***"",""Content-Type"":""***""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
 
             //Act
             var content = _sensitiveInfoReplacer.ReplaceCredentials(contentToSubstitute);
@@ -33,15 +34,12 @@ namespace Take.Blip.Builder.UnitTests.Utils
 
         [Fact]
         public void ContentWithoutHeadersReplaceShouldntChangeAnything()
-        {
-            //Arrange
-            const string contentWithoutChanges = @"{""headers"":{},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
-
+        {           
             //Act
-            var content = _sensitiveInfoReplacer.ReplaceCredentials(contentWithoutChanges);
+            var content = _sensitiveInfoReplacer.ReplaceCredentials(SETTINGS_HEADER_WITHOUT_VALUES);
 
             //Assert
-            content.ShouldBe(contentWithoutChanges);
+            content.ShouldBe(SETTINGS_HEADER_WITHOUT_VALUES);
         }
     }
 }
