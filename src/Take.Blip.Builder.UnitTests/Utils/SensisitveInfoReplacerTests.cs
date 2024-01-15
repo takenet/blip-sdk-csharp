@@ -21,8 +21,8 @@ namespace Take.Blip.Builder.UnitTests.Utils
         public void HeadersSubstitutionShouldSucceed()
         {
             //Arrange
-            var contentToSubstitute = @"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
-            var expectedContent = @"{""headers"":{""BotKey"":""***"",""OtherHeader"":""***"",""Content-Type"":""***""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
+            const string contentToSubstitute = @"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
+            const string expectedContent = @"{""headers"":{""BotKey"":""***"",""OtherHeader"":""***"",""Content-Type"":""***""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
 
             //Act
             var content = _sensitiveInfoReplacer.ReplaceCredentials(contentToSubstitute);
@@ -35,14 +35,13 @@ namespace Take.Blip.Builder.UnitTests.Utils
         public void ContentWithoutHeadersReplaceShouldntChangeAnything()
         {
             //Arrange
-            var contentToSubstitute = @"{""headers"":{},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
-            var expectedContent = @"{""headers"":{},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
+            const string contentWithoutChanges = @"{""headers"":{},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
 
             //Act
-            var content = _sensitiveInfoReplacer.ReplaceCredentials(contentToSubstitute);
+            var content = _sensitiveInfoReplacer.ReplaceCredentials(contentWithoutChanges);
 
             //Assert
-            content.ShouldBe(expectedContent);
+            content.ShouldBe(contentWithoutChanges);
         }
     }
 }
