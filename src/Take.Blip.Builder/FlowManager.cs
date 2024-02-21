@@ -190,7 +190,7 @@ namespace Take.Blip.Builder
                             return;
                         }
 
-                        await _inputMessageHandlerAggregator.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
+                        await _inputMessageHandlerAggregator.OnFlowPreProcessingAsync(state, message, _applicationNode, context, linkedCts.Token);
 
                         // Calculate the number of state transitions
                         var transitions = 0;

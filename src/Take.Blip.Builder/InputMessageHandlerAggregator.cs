@@ -44,11 +44,11 @@ namespace Take.Blip.Builder
             return true;
         }
 
-        public async Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken)
+        public async Task OnFlowPreProcessingAsync(State state, Message message, Node from, IContext context, CancellationToken cancellationToken)
         {
             foreach (var handler in _handlers)
             {
-                await handler.OnFlowPreProcessingAsync(state, message, from, cancellationToken);
+                await handler.OnFlowPreProcessingAsync(state, message, from, context, cancellationToken);
             }
         }
 

@@ -66,7 +66,7 @@ public class InputReplyHandler : IInputMessageHandler
     /// <param name="from">From of message.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
-    public Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task OnFlowPreProcessingAsync(State state, Message message, Node from, IContext context, CancellationToken cancellationToken) => Task.CompletedTask;
 
     /// <summary>
     /// Executes after the flow process. It isn't implemented yet.

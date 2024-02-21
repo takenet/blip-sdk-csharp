@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Storage;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.Scheduler;
 using Takenet.Iris.Messaging.Resources;
@@ -22,18 +24,24 @@ namespace Take.Blip.Builder
         public const string IDENTITY = "inputExpiration.identity";
         public const string CURRENT_SESSION_STATE = "inputExpiration.currentSessionState";
         private const string IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT = "isInputExpirationFromSubflowRedirect";
+        private const string STATE_ID_KEY = "stateId";
+        private const string MASTER_STATE_KEY = "masterState";
+        private const string CURRENT_STATE_KEY = "currentStatId";
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
         private readonly ILogger _logger;
-
+        private readonly IInputExpirationCountMap _inputExpirationCountMap;
+        private readonly IConfiguration _configuration;
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="schedulerExtension"></param>
-        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger)
+        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger, IInputExpirationCountMap inputExpirationCountMap, IConfiguration configuration)
         {
             _schedulerExtension = schedulerExtension;
             _logger = logger;
+            _inputExpirationCountMap = inputExpirationCountMap;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -44,11 +52,18 @@ namespace Take.Blip.Builder
         /// <param name="from"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken)
+        public async Task OnFlowPreProcessingAsync(State state, Message message, Node from, IContext context, CancellationToken cancellationToken)
         {
+            var key = new FromToIdentityInputExpirationPair()
+            {
+                FromIdentity = message.To.ToIdentity(),
+                ToIdentity = message.From.ToIdentity()
+            };
+
             // Cancel Schedule expiration time if input is configured
             if (state.HasInputExpiration() && !IsMessageFromExpiration(message))
             {
+                _inputExpirationCountMap.TryRemoveAsync(key);
                 var messageId = GetInputExirationIdMessage(message);
 
                 Schedule scheduledMessage = null;
@@ -66,6 +81,22 @@ namespace Take.Blip.Builder
                 {
                     await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
                 }
+
+            }
+            if (IsMessageFromExpiration(message) && state.Id == message.Id){
+                
+                    var inputExpirationCount  = await _inputExpirationCountMap.IncrementAsync(key);
+
+                    if (inputExpirationCount > _configuration.MaximumInputExpirationLoop)
+                    {
+
+                        context.SetVariableAsync(MASTER_STATE_KEY, null, cancellationToken);
+                        context.SetVariableAsync(STATE_ID_KEY, null, cancellationToken);
+                        context.SetVariableAsync(CURRENT_STATE_KEY, null, cancellationToken);
+
+                        _inputExpirationCountMap.TryRemoveAsync(key);
+                    }
+                
             }
         }
 
@@ -80,6 +111,7 @@ namespace Take.Blip.Builder
         /// <returns></returns>
         public async Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, CancellationToken cancellationToken)
         {
+
             // Schedule expiration time if input is configured
             if (state.HasInputExpiration())
             {
