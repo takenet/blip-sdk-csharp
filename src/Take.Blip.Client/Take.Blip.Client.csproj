@@ -17,25 +17,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lime.Messaging" Version="0.12.92" />
-    <PackageReference Include="Lime.Protocol" Version="0.12.92" />
-    <PackageReference Include="Lime.Transport.Tcp" Version="0.12.92" />
+    <PackageReference Include="Lime.Messaging" Version="0.12.60" />
+    <PackageReference Include="Lime.Protocol" Version="0.12.60" />
+    <PackageReference Include="Lime.Transport.Tcp" Version="0.10.81-beta" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SerilogAnalyzer" Version="0.15.0" />
     <PackageReference Include="SmartFormat.NET" Version="2.1.0.2" />
+    <PackageReference Include="Takenet.Iris.Messaging.Analytics" Version="21.93.7297" />
+    <PackageReference Include="Takenet.Iris.Messaging.ArtificialIntelligence" Version="21.93.7297" />
+    <PackageReference Include="Takenet.Iris.Messaging.Desk" Version="21.93.7297" />
+    <PackageReference Include="Takenet.Iris.Messaging.Media" Version="21.93.7297" />
+    <PackageReference Include="Takenet.Iris.Messaging.Portal" Version="21.93.7297" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\iris\src\Applications\Analytics\Takenet.Iris.Messaging.Analytics\Takenet.Iris.Messaging.Analytics.csproj" />
-    <ProjectReference Include="..\..\..\iris\src\Applications\ArtificialIntelligence\Takenet.Iris.Messaging.ArtificialIntelligence\Takenet.Iris.Messaging.ArtificialIntelligence.csproj" />
-    <ProjectReference Include="..\..\..\iris\src\Applications\Desk\Takenet.Iris.Messaging.Desk\Takenet.Iris.Messaging.Desk.csproj" />
-    <ProjectReference Include="..\..\..\iris\src\Applications\Media\Takenet.Iris.Messaging.Media\Takenet.Iris.Messaging.Media.csproj" />
-    <ProjectReference Include="..\..\..\iris\src\Applications\Portal\Takenet.Iris.Messaging.Portal\Takenet.Iris.Messaging.Portal.csproj" />
   </ItemGroup>
   
 </Project>
