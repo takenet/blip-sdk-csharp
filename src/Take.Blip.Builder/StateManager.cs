@@ -64,10 +64,11 @@ namespace Take.Blip.Builder
 
         public async Task ResetUserState(IContext context, CancellationToken cancellationToken)
         {
-            Task.WhenAll(
-                 DeleteMasterStateAsync(context, cancellationToken),
-                 DeleteStateIdAsync(context, cancellationToken),
-                 DeleteCurrentFlowSessionAsync(context, cancellationToken));
+            await Task.WhenAll(
+                DeleteMasterStateAsync(context, cancellationToken),
+                DeleteStateIdAsync(context, cancellationToken),
+                DeleteCurrentFlowSessionAsync(context, cancellationToken),
+                DeleteParentStateIdAsync(context, cancellationToken));
         }
 
         private static string GetStateKey(string flowId) => $"{STATE_ID_KEY}@{flowId}";
