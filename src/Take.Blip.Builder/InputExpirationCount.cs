@@ -8,18 +8,18 @@ namespace Take.Blip.Builder
     /// <inheritdoc/>
     public class InputExpirationCount : IInputExpirationCount
     {
-        private readonly ConcurrentDictionary<FromToIdentityInputExpirationPair, long> _inputExpirationCounts;
+        private readonly ConcurrentDictionary<FromToIdentityInputExpirationPair, int> _inputExpirationCounts;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public InputExpirationCount()
         {
-            _inputExpirationCounts = new ConcurrentDictionary<FromToIdentityInputExpirationPair, long>();
+            _inputExpirationCounts = new ConcurrentDictionary<FromToIdentityInputExpirationPair, int>();
         }
 
         /// <inheritdoc/>
-        public Task<long> IncrementAsync(Message message)
+        public Task<int> IncrementAsync(Message message)
         {
             var key = GetKey(message);
             var inputExpirationCount = _inputExpirationCounts.AddOrUpdate(

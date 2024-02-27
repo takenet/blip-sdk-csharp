@@ -60,7 +60,7 @@ namespace Take.Blip.Builder
         /// <summary>
         /// Clear states for the user in the flow.
         /// </summary>
-        Task ClearFlowAsync(IContext context, CancellationToken cancellationToken);
+        Task ResetUserState(IContext context, CancellationToken cancellationToken);
 
     }
 }

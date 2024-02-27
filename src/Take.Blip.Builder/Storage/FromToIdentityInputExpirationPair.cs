@@ -10,7 +10,5 @@ namespace Take.Blip.Builder.Storage
         public Identity FromIdentity { get; set; }
 
         public Identity ToIdentity { get; set; }
-
-        public override string ToString() => $"inputexpiration-loop-counter:{FromIdentity}:{ToIdentity}";
     }
 }

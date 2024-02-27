@@ -47,7 +47,7 @@ namespace Take.Blip.Builder
         private readonly Node _applicationNode;
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
         private readonly IInputMessageHandler _inputMessageHandlerAggregator;
-                private readonly IInputExpirationCount _inputExpirationCount;
+        private readonly IInputExpirationCount _inputExpirationCount;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
@@ -101,7 +101,7 @@ namespace Take.Blip.Builder
             await ProcessInputAsync(message, flow, null, cancellationToken);
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, IContext messageContext,CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -726,13 +726,15 @@ namespace Take.Blip.Builder
         }
 
         private async Task<string> GetParentStateIdAsync(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);
-        
+
         private async Task ClearInputExpirationCount(Message message)
         {
-            if (IsMessageFromExpiration(message))
+            if (!IsMessageFromExpiration(message))
             {
-                await _inputExpirationCount.TryRemoveAsync(message);
+                return;
             }
+
+            await _inputExpirationCount.TryRemoveAsync(message);
         }
         private bool IsMessageFromExpiration(Message message)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
@@ -35,7 +36,7 @@ namespace Take.Blip.Builder
 
         public Task SetStateIdAsync(IContext context, string stateId, CancellationToken cancellationToken)
         {
-            var expiration = context.Flow?.BuilderConfiguration?.StateExpiration ?? default;            
+            var expiration = context.Flow?.BuilderConfiguration?.StateExpiration ?? default;
             return context.SetVariableAsync(GetStateKey(context.Flow.Id), stateId, cancellationToken, expiration);
         }
 
@@ -44,28 +45,33 @@ namespace Take.Blip.Builder
             return context.SetVariableAsync(GetPreviousStateKey(context.Flow.Id), previousStateId, cancellationToken);
         }
 
-        public  Task DeleteStateIdAsync(IContext context, CancellationToken cancellationToken)
+        public Task DeleteStateIdAsync(IContext context, CancellationToken cancellationToken)
         {
             return context.DeleteVariableAsync(GetStateKey(context.Flow.Id), cancellationToken);
         }
+
         public Task DeleteParentStateIdAsync(IContext context, CancellationToken cancellationToken)
         {
             return context.DeleteVariableAsync(GetStateKey(context.Flow.Parent?.Id), cancellationToken);
         }
+
         public Task DeleteCurrentFlowSessionAsync(IContext context, CancellationToken cancellationToken)
         {
             return context.DeleteVariableAsync(GetCurrentFlowSessionKey(context.Flow.Parent?.Id), cancellationToken);
         }
+
         public Task DeleteMasterStateAsync(IContext context, CancellationToken cancellationToken) => context.DeleteVariableAsync(MASTER_STATE, cancellationToken);
-        public async Task ClearFlowAsync(IContext context, CancellationToken cancellationToken)
+
+        public async Task ResetUserState(IContext context, CancellationToken cancellationToken)
         {
-             await DeleteMasterStateAsync(context, cancellationToken);
-             await DeleteStateIdAsync(context, cancellationToken);
-             await DeleteCurrentFlowSessionAsync(context, cancellationToken);
-             await DeleteParentStateIdAsync(context, cancellationToken);
+            Task.WhenAll(
+                 DeleteMasterStateAsync(context, cancellationToken),
+                 DeleteStateIdAsync(context, cancellationToken),
+                 DeleteCurrentFlowSessionAsync(context, cancellationToken));
         }
 
         private static string GetStateKey(string flowId) => $"{STATE_ID_KEY}@{flowId}";
+
         private static string GetCurrentFlowSessionKey(string flowId) => $"{CURRENT_FLOW_SESSION_KEY}@{flowId}";
 
         private static string GetPreviousStateKey(string flowId) => $"{PREVIOUS_STATE_PREFIX}-{STATE_ID_KEY}@{flowId}";
