@@ -35,5 +35,6 @@ namespace Take.Blip.Builder.Hosting
 
         public string InternalUris => "http.msging.net";
         public int MaximumInputExpirationLoop => 50;
+
     }
 }

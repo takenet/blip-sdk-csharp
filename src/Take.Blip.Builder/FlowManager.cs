@@ -47,9 +47,11 @@ namespace Take.Blip.Builder
         private readonly Node _applicationNode;
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
         private readonly IInputMessageHandler _inputMessageHandlerAggregator;
+                private readonly IInputExpirationCount _inputExpirationCount;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
+        public const string STATE_ID = "inputExpiration.stateId";
 
         public FlowManager(
             IConfiguration configuration,
@@ -69,7 +71,8 @@ namespace Take.Blip.Builder
             IFlowLoader flowLoader,
             IFlowSessionManager flowSessionManager,
             IAnalyzeBuilderExceptions analyzeBuilderExceptions,
-            IInputMessageHandlerAggregator inputMessageHandlerAggregator
+            IInputMessageHandlerAggregator inputMessageHandlerAggregator,
+            IInputExpirationCount inputExpirationCount
             )
         {
             _configuration = configuration;
@@ -90,6 +93,7 @@ namespace Take.Blip.Builder
             _flowSessionManager = flowSessionManager;
             _analyzeBuilderExceptions = analyzeBuilderExceptions;
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
+            _inputExpirationCount = inputExpirationCount;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -97,7 +101,7 @@ namespace Take.Blip.Builder
             await ProcessInputAsync(message, flow, null, cancellationToken);
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Message message, Flow flow, IContext messageContext,CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -113,7 +117,7 @@ namespace Take.Blip.Builder
             {
                 throw new ArgumentNullException(nameof(flow));
             }
-
+            ClearInputExpirationCount(message);
             var (messageHasChanged, newMessage) = _inputMessageHandlerAggregator.HandleMessage(message);
 
             // If the message has changedm the old context can't be used because it has the old message.
@@ -190,7 +194,7 @@ namespace Take.Blip.Builder
                             return;
                         }
 
-                        await _inputMessageHandlerAggregator.OnFlowPreProcessingAsync(state, message, _applicationNode, context, linkedCts.Token);
+                        await _inputMessageHandlerAggregator.OnFlowPreProcessingAsync(state, message, _applicationNode, linkedCts.Token);
 
                         // Calculate the number of state transitions
                         var transitions = 0;
@@ -331,7 +335,7 @@ namespace Take.Blip.Builder
 
                         await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
 
-                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state, flow, message, _applicationNode, linkedCts.Token);
+                        await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state, flow, message, _applicationNode, context, linkedCts.Token);
                     }
                     finally
                     {
@@ -722,6 +726,18 @@ namespace Take.Blip.Builder
         }
 
         private async Task<string> GetParentStateIdAsync(IContext context, Queue<string> parentStateIdQueue, CancellationToken cancellationToken) => parentStateIdQueue.Count > 0 ? parentStateIdQueue.Dequeue() : await _stateManager.GetParentStateIdAsync(context, cancellationToken);
+        
+        private async Task ClearInputExpirationCount(Message message)
+        {
+            if (IsMessageFromExpiration(message))
+            {
+                await _inputExpirationCount.TryRemoveAsync(message);
+            }
+        }
+        private bool IsMessageFromExpiration(Message message)
+        {
+            return message.Metadata?.ContainsKey(STATE_ID) ?? false;
+        }
     }
 
     static class StateExtensions

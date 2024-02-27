@@ -41,5 +41,26 @@ namespace Take.Blip.Builder
         /// Deletes the current state for the user in the flow.
         /// </summary>
         Task DeleteStateIdAsync(IContext context, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Deletes the current master state for the user in the flow.
+        /// </summary>
+        Task DeleteMasterStateAsync(IContext context, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Deletes the current flow session for the user in the flow.
+        /// </summary>
+        Task DeleteCurrentFlowSessionAsync(IContext context, CancellationToken cancellationToken);
+        
+        /// <summary>
+        /// Deletes the current master state for the user in the flow.
+        /// </summary>
+        Task DeleteParentStateIdAsync(IContext context, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Clear states for the user in the flow.
+        /// </summary>
+        Task ClearFlowAsync(IContext context, CancellationToken cancellationToken);
+
     }
 }

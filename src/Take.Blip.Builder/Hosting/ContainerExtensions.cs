@@ -69,7 +69,7 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IInputMessageHandlerAggregator, InputMessageHandlerAggregator>();
 
             container.RegisterSingleton<IFlowLoader, FlowLoader>();
-
+            container.RegisterSingleton<IInputExpirationCount, InputExpirationCount>();
             return container;
         }
 
