@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Content;
@@ -26,6 +27,9 @@ namespace Take.Blip.Builder.UnitTests
 
         private readonly ISchedulerExtension Scheduler;
         private readonly ILogger Logger;
+        private readonly IInputExpirationCount _inputExpirationCount;
+        private readonly IConfiguration _configuration;
+        private readonly IStateManager _stateManager;
 
         public InputExpirationHandlerTests()
         {
@@ -44,8 +48,10 @@ namespace Take.Blip.Builder.UnitTests
 
             Scheduler = Substitute.For<ISchedulerExtension>();
             Logger = Substitute.For<ILogger>();
-
-            InputHandler = new InputExpirationHandler(Scheduler, Logger);
+            _inputExpirationCount = Substitute.For<IInputExpirationCount>();
+            _configuration = Substitute.For<IConfiguration>();
+            _stateManager = Substitute.For<IStateManager>();
+            InputHandler = new InputExpirationHandler(Scheduler, Logger, _inputExpirationCount, _stateManager, _configuration);
         }
 
         [Fact]
@@ -110,7 +116,7 @@ namespace Take.Blip.Builder.UnitTests
             var flow = new Flow();
 
             // Act
-            await InputHandler.OnFlowProcessedAsync(state, flow, Message, null, default(CancellationToken));
+            await InputHandler.OnFlowProcessedAsync(state, flow, Message, null, null, default(CancellationToken));
 
             // Assert
             Scheduler
