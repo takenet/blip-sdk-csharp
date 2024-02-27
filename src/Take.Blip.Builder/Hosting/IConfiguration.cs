@@ -35,5 +35,7 @@ namespace Take.Blip.Builder.Hosting
         long ExecuteScriptLimitMemoryWarning { get; }
 
         TimeSpan ExecuteScriptTimeout { get; }
+
+        int MaximumInputExpirationLoop { get; }
     }
 }

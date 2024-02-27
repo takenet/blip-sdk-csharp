@@ -34,5 +34,7 @@ namespace Take.Blip.Builder.Hosting
         public TimeSpan ExecuteScriptTimeout => TimeSpan.FromSeconds(5);
 
         public string InternalUris => "http.msging.net";
+        
+        public int MaximumInputExpirationLoop => 50;
     }
 }

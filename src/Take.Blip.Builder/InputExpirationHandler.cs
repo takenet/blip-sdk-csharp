@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Storage;
+using Take.Blip.Client;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.Scheduler;
 using Takenet.Iris.Messaging.Resources;
@@ -22,18 +25,26 @@ namespace Take.Blip.Builder
         public const string IDENTITY = "inputExpiration.identity";
         public const string CURRENT_SESSION_STATE = "inputExpiration.currentSessionState";
         private const string IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT = "isInputExpirationFromSubflowRedirect";
+
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
         private readonly ILogger _logger;
+        private readonly IInputExpirationCount _inputExpirationCount;
+        private readonly IConfiguration _configuration;
+        private readonly IStateManager _stateManager;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="schedulerExtension"></param>
-        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger)
+        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger, IInputExpirationCount inputExpirationCount, IStateManager stateManager, IConfiguration configuration)
         {
             _schedulerExtension = schedulerExtension;
             _logger = logger;
+            _inputExpirationCount = inputExpirationCount;
+            _configuration = configuration;
+            _stateManager = stateManager;
+
         }
 
         /// <summary>
@@ -46,6 +57,11 @@ namespace Take.Blip.Builder
         /// <returns></returns>
         public async Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken)
         {
+            if (!IsMessageFromExpiration(message))
+            {
+                _inputExpirationCount.TryRemoveAsync(message);
+            }
+
             // Cancel Schedule expiration time if input is configured
             if (state.HasInputExpiration() && !IsMessageFromExpiration(message))
             {
@@ -66,6 +82,7 @@ namespace Take.Blip.Builder
                 {
                     await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
                 }
+
             }
         }
 
@@ -78,14 +95,13 @@ namespace Take.Blip.Builder
         /// <param name="from"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, CancellationToken cancellationToken)
+        public async Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, IContext context, CancellationToken cancellationToken)
         {
+
             // Schedule expiration time if input is configured
-            if (state.HasInputExpiration())
+            if (state.HasInputExpiration() && await ValidateInputExirationCountAsync(state, message, from, context, cancellationToken))
             {
-                var scheduleMessage = CreateInputExirationMessage(message, state.Id, flow.SessionState);
-                var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes);
-                await _schedulerExtension.ScheduleMessageAsync(scheduleMessage, scheduleTime, from, cancellationToken);
+                await ScheduleInputExpirationAsync(state, flow, message, from, context, cancellationToken);
             }
         }
 
@@ -96,8 +112,10 @@ namespace Take.Blip.Builder
         /// <returns></returns>
         public (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message)
         {
+
             if (message.Content is InputExpiration inputExpiration)
             {
+
                 if (string.IsNullOrWhiteSpace(inputExpiration?.Identity?.ToString()))
                 {
                     throw new ArgumentException("Message content 'Identity' must be present", nameof(InputExpiration.Identity));
@@ -186,6 +204,30 @@ namespace Take.Blip.Builder
         private string GetInputExirationIdMessage(Message message)
         {
             return $"{message.From.ToIdentity()}-inputexpirationtime";
+        }
+
+        private async Task ScheduleInputExpirationAsync(State state, Flow flow, Message message, Node from, IContext context, CancellationToken cancellationToken)
+        {
+            var scheduleMessage = CreateInputExirationMessage(message, state.Id, flow.SessionState);
+            var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes);
+            await _schedulerExtension.ScheduleMessageAsync(scheduleMessage, scheduleTime, from, cancellationToken);
+        }
+        private async Task<bool> ValidateInputExirationCountAsync(State state, Message message, Node from, IContext context, CancellationToken cancellationToken)
+        {
+            message.Metadata.TryGetValue(STATE_ID, out string stateIdInputExpiration);
+            if (stateIdInputExpiration != null && stateIdInputExpiration == state.Id)
+            {
+                var inputExpirationCount = await _inputExpirationCount.IncrementAsync(message);
+                if (inputExpirationCount > _configuration.MaximumInputExpirationLoop)
+                {
+                    await _stateManager.ResetUserState(context, cancellationToken);
+                    await _inputExpirationCount.TryRemoveAsync(message);
+                    _logger.Warning("[{Source}] [FlowConstruction] Max input expiration transitions of {MaximumInputExpirationLoop} was reached",
+                     nameof(InputExpirationHandler), _configuration.MaximumInputExpirationLoop);
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

@@ -52,11 +52,11 @@ namespace Take.Blip.Builder
             }
         }
 
-        public async Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, CancellationToken cancellationToken)
+        public async Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, IContext context, CancellationToken cancellationToken)
         {
             foreach (var handler in _handlers)
             {
-                await handler.OnFlowProcessedAsync(state, flow, message, from, cancellationToken);
+                await handler.OnFlowProcessedAsync(state, flow, message, from, context, cancellationToken);
             }
         }
     }

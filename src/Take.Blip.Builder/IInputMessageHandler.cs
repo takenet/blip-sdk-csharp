@@ -10,6 +10,6 @@ namespace Take.Blip.Builder
         (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message);
         bool IsValidateState(State state, Message message, Flow flow);
         Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken);
-        Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, CancellationToken cancellationToken);
+        Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, IContext context, CancellationToken cancellationToken);
     }
 }
