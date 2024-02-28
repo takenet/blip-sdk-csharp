@@ -1,5 +1,6 @@
 ﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.ObjectModel;
 using NSubstitute;
 using Serilog;
 using System;
@@ -173,6 +174,112 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Is<string>(s => s.Equals($"{UserIdentity}-inputexpirationtime")),
                     Arg.Any<Node>(),
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+        }
+
+        [Fact]
+        public async Task WhenUserSendsMessage_WithoutInputExpiration()
+        {
+            // Arrange
+            Message.Content = new PlainText() { Text = "Teste" };
+
+            var state = new State
+            {
+                Id = "ping",
+                Input = new Builder.Models.Input()
+                {
+                    Expiration = TimeSpan.FromMinutes(1)
+                }
+            };
+
+
+            // Act
+            await InputHandler.OnFlowPreProcessingAsync(state, Message, null, default(CancellationToken));
+
+            // Assert
+            await _inputExpirationCount
+                .Received(1)
+                .TryRemoveAsync(Message);
+        }
+
+        [Fact]
+        public async Task WhenUserSendsMessage_InputExpirationExceedingLimit()
+        {
+            // Arrange
+            Message.Content = new InputExpiration() { Identity = UserIdentity, StateId = "Teste" };
+
+            var state = new State
+            {
+                Id = "inputexpirationstateid",
+                Input = new Builder.Models.Input()
+                {
+                    Expiration = TimeSpan.FromMinutes(1)
+                }
+            };
+
+            var flow = new Flow();
+
+            Message.Metadata = new Dictionary<string, string>
+            {
+                { InputExpirationHandler.STATE_ID, "inputexpirationstateid" },
+
+            };
+
+            _inputExpirationCount.IncrementAsync(Message).Returns(4);
+            _configuration.MaximumInputExpirationLoop.Returns(3);
+            
+            // Act
+            await InputHandler.OnFlowProcessedAsync(state, flow, Message, null, null, default(CancellationToken));
+
+            // Assert
+           await Scheduler
+                 .DidNotReceive()
+                 .ScheduleMessageAsync(
+                     Arg.Any<Message>(),
+                     Arg.Any<DateTimeOffset>(),
+                     Arg.Any<Node>(),
+                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+            await _stateManager.Received(1).ResetUserState(null, default(CancellationToken));
+            await _inputExpirationCount.Received(1).TryRemoveAsync(Message);
+        }
+        
+        [Fact]
+        public async Task WhenUserSendsMessage_InputExpirationWithLimit_Accept()
+        {
+            // Arrange
+            Message.Content = new InputExpiration() { Identity = UserIdentity, StateId = "Teste" };
+
+            var state = new State
+            {
+                Id = "inputexpirationstateid",
+                Input = new Builder.Models.Input()
+                {
+                    Expiration = TimeSpan.FromMinutes(1)
+                }
+            };
+
+            var flow = new Flow();
+
+            Message.Metadata = new Dictionary<string, string>
+            {
+                { InputExpirationHandler.STATE_ID, "inputexpirationstateid" },
+
+            };
+
+            _inputExpirationCount.IncrementAsync(Message).Returns(3);
+            _configuration.MaximumInputExpirationLoop.Returns(3);
+
+            // Act
+            await InputHandler.OnFlowProcessedAsync(state, flow, Message, null, null, default(CancellationToken));
+
+            // Assert
+            await Scheduler
+                  .Received(1)
+                  .ScheduleMessageAsync(
+                      Arg.Is<Message>(c=> c.Content is InputExpiration),
+                      Arg.Any<DateTimeOffset>(),
+                      Arg.Any<Node>(),
+                      Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+            await _inputExpirationCount.Received(1).IncrementAsync(Message);
         }
     }
 }
