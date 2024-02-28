@@ -140,7 +140,7 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
-        public async Task WhenUserSendMessageCancelInputExpirationScheduled()
+        public async Task WhenUserSendsMessage_WithoutInputExpiration()
         {
             // Arrange
             Message.Content = new PlainText() { Text = "Teste" };
@@ -174,31 +174,9 @@ namespace Take.Blip.Builder.UnitTests
                     Arg.Is<string>(s => s.Equals($"{UserIdentity}-inputexpirationtime")),
                     Arg.Any<Node>(),
                     Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
-        }
-
-        [Fact]
-        public async Task WhenUserSendsMessage_WithoutInputExpiration()
-        {
-            // Arrange
-            Message.Content = new PlainText() { Text = "Teste" };
-
-            var state = new State
-            {
-                Id = "ping",
-                Input = new Builder.Models.Input()
-                {
-                    Expiration = TimeSpan.FromMinutes(1)
-                }
-            };
-
-
-            // Act
-            await InputHandler.OnFlowPreProcessingAsync(state, Message, null, default(CancellationToken));
-
-            // Assert
             await _inputExpirationCount
-                .Received(1)
-                .TryRemoveAsync(Message);
+              .Received(1)
+              .TryRemoveAsync(Message);
         }
 
         [Fact]
