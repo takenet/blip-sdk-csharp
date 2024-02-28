@@ -19,6 +19,6 @@ namespace Take.Blip.Builder
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        Task<int> IncrementAsync(Message message);
+        Task<long> IncrementAsync(Message message);
     }
 }
