@@ -42,7 +42,7 @@ namespace Take.Blip.Builder
 
         public IDictionary<string, object> InputContext { get; }
 
-        public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken, string stateActionType = null)
         {
             var variable = VariableName.Parse(name);
 
@@ -59,7 +59,7 @@ namespace Take.Blip.Builder
                     throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
                 }
 
-                variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
+                variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken, stateActionType);
             }
 
             if (string.IsNullOrWhiteSpace(variableValue) ||

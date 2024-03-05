@@ -552,7 +552,7 @@ namespace Take.Blip.Builder
 
                         if (stringifySetting != null)
                         {
-                            stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken);
+                            stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken, stateAction.Type);
                             jObjectSettings = JObject.Parse(stringifySetting);
                             AddStateIdToSettings(action.Type, jObjectSettings, state.Id);
                         }

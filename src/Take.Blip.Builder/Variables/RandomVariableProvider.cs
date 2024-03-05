@@ -18,7 +18,7 @@ namespace Take.Blip.Builder.Variables
 
         public VariableSource Source => VariableSource.Random;
 
-        public Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken) 
+        public Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken, string stateActionType = null) 
             => GetVariable(name).AsCompletedTask();
 
         private string GetVariable(string name)
