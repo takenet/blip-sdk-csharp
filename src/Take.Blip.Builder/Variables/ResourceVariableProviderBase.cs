@@ -17,15 +17,17 @@ namespace Take.Blip.Builder.Variables
         private readonly IDocumentSerializer _documentSerializer;
         private readonly string _resourceName;
         private readonly ILogger _logger;
+        private readonly Node _commandDestination;
 
         public abstract VariableSource Source { get; }
 
-        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName, ILogger logger)
+        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName, ILogger logger, string commandDestination = "postmaster@msging.net")
         {
             _sender = sender;
             _documentSerializer = documentSerializer;
             _logger = logger;
             _resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
+            _commandDestination = commandDestination;
         }
 
 
@@ -62,6 +64,7 @@ namespace Take.Blip.Builder.Variables
             {
                 Uri = new LimeUri($"/{_resourceName}/{Uri.EscapeDataString(name)}"),
                 Method = CommandMethod.Get,
+                To = _commandDestination
             };
 
             var resourceCommandResult = await _sender.ProcessCommandAsync(

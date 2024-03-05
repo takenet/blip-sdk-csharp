@@ -14,7 +14,7 @@ namespace Take.Blip.Builder.Variables
     {
         private readonly string[] _actionsToBlock = { nameof(Actions.SendMessage), nameof(Actions.SetVariable), nameof(Actions.SetBucket) };
 
-        public SecretVariableProvider(ISender sender, IDocumentSerializer documentSerializer, ILogger logger) : base(sender, documentSerializer, "secrets", logger) { }
+        public SecretVariableProvider(ISender sender, IDocumentSerializer documentSerializer, ILogger logger) : base(sender, documentSerializer, "secrets", logger, "postmaster@builder.msging.net") { }
 
         public override VariableSource Source => VariableSource.Secret;
 
