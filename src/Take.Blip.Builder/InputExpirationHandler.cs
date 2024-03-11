@@ -219,8 +219,7 @@ namespace Take.Blip.Builder
             {
                 var inputExpirationCount = await _inputExpirationCount.IncrementAsync(message);
                 if (inputExpirationCount > _configuration.MaximumInputExpirationLoop)
-                {
-                    await _stateManager.ResetUserState(context, cancellationToken);
+                { 
                     await _inputExpirationCount.TryRemoveAsync(message);
                     _logger.Warning("[{Source}] [FlowConstruction] Max input expiration transitions of {MaximumInputExpirationLoop} was reached",
                      nameof(InputExpirationHandler), _configuration.MaximumInputExpirationLoop);
