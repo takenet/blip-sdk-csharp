@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Variables
 
         public override async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken, string stateActionType = null)
         {
-            if (_actionsToBlock.Contains(stateActionType))
+            if (stateActionType is null || (_actionsToBlock.Contains(stateActionType)))
             {
                 return null;
             }
