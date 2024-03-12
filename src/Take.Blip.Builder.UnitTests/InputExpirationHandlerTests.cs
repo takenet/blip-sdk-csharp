@@ -30,7 +30,6 @@ namespace Take.Blip.Builder.UnitTests
         private readonly ILogger Logger;
         private readonly IInputExpirationCount _inputExpirationCount;
         private readonly IConfiguration _configuration;
-        private readonly IStateManager _stateManager;
 
         public InputExpirationHandlerTests()
         {
@@ -51,8 +50,7 @@ namespace Take.Blip.Builder.UnitTests
             Logger = Substitute.For<ILogger>();
             _inputExpirationCount = Substitute.For<IInputExpirationCount>();
             _configuration = Substitute.For<IConfiguration>();
-            _stateManager = Substitute.For<IStateManager>();
-            InputHandler = new InputExpirationHandler(Scheduler, Logger, _inputExpirationCount, _stateManager, _configuration);
+            InputHandler = new InputExpirationHandler(Scheduler, Logger, _inputExpirationCount, _configuration);
         }
 
         [Fact]
