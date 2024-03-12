@@ -31,7 +31,6 @@ namespace Take.Blip.Builder
         private readonly ILogger _logger;
         private readonly IInputExpirationCount _inputExpirationCount;
         private readonly IConfiguration _configuration;
-        private readonly IStateManager _stateManager;
 
         /// <summary>
         /// Constructor
@@ -43,8 +42,6 @@ namespace Take.Blip.Builder
             _logger = logger;
             _inputExpirationCount = inputExpirationCount;
             _configuration = configuration;
-            _stateManager = stateManager;
-
         }
 
         /// <summary>
@@ -219,7 +216,7 @@ namespace Take.Blip.Builder
             {
                 var inputExpirationCount = await _inputExpirationCount.IncrementAsync(message);
                 if (inputExpirationCount > _configuration.MaximumInputExpirationLoop)
-                { 
+                {
                     await _inputExpirationCount.TryRemoveAsync(message);
                     _logger.Warning("[{Source}] [FlowConstruction] Max input expiration transitions of {MaximumInputExpirationLoop} was reached",
                      nameof(InputExpirationHandler), _configuration.MaximumInputExpirationLoop);

@@ -216,7 +216,6 @@ namespace Take.Blip.Builder.UnitTests
                      Arg.Any<DateTimeOffset>(),
                      Arg.Any<Node>(),
                      Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
-            await _stateManager.Received(1).ResetUserState(null, default(CancellationToken));
             await _inputExpirationCount.Received(1).TryRemoveAsync(Message);
         }
         
