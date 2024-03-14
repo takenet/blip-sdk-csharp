@@ -100,7 +100,7 @@ namespace Take.Blip.Builder.UnitTests
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -172,7 +172,7 @@ namespace Take.Blip.Builder.UnitTests
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "{\"propertyName1\":\"propertyValue1\",\"propertyName2\":2}";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -840,7 +840,7 @@ namespace Take.Blip.Builder.UnitTests
             var messageType = "text/plain";
             var pongMessageContent = "Pong!";
             var poloMessageContent = "Polo!";
-            Context.GetVariableAsync("Word", Arg.Any<CancellationToken>()).Returns(Task.FromResult(input.Text));
+            Context.GetVariableAsync("Word", Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult(input.Text));
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
