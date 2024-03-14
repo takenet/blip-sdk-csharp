@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
@@ -56,7 +57,8 @@ namespace Take.Blip.Builder.UnitTests
             Message = new Message()
             {
                 From = UserIdentity.ToNode(),
-                To = ApplicationIdentity.ToNode()
+                To = ApplicationIdentity.ToNode(),
+                Metadata = new Dictionary<string, string>()
             };
             Context.UserIdentity.Returns(UserIdentity);
             Input = new LazyInput(
@@ -66,7 +68,7 @@ namespace Take.Blip.Builder.UnitTests
                 Substitute.For<IDocumentSerializer>(),
                 Substitute.For<IEnvelopeSerializer>(),
                 ArtificialIntelligenceExtension,
-                CancellationToken); 
+                CancellationToken);
             Context.Input.Returns(Input);
 
             TraceProcessor = Substitute.For<ITraceProcessor>();
@@ -101,8 +103,8 @@ namespace Take.Blip.Builder.UnitTests
         public IBroadcastExtension BroadcastExtension { get; set; }
 
         public IContactExtension ContactExtension { get; set; }
-        
-        public IHelpDeskExtension HelpDeskExtension { get; set; }        
+
+        public IHelpDeskExtension HelpDeskExtension { get; set; }
 
         public ITunnelExtension TunnelExtension { get; set; }
 

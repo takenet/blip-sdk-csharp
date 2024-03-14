@@ -948,8 +948,8 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInputContextConditionsSatisfiedShouldKeepStateAndWaitNextInput()
         {
             // Arrange
-            var inputOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "OK!" } };
-            var inputNOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" } };
+            var inputOk = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "OK!" } };
+            var inputNOk = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" } };
             var messageType = "text/plain";
             var okMessageContent = "OK";
             var nokMessageContent = "NOK";
@@ -1135,8 +1135,8 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInputContextConditionsNotSatisfiedShouldChangeStateAndSendMessage()
         {
             // Arrange
-            var inputOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "OK!" } };
-            var inputNOk = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" } };
+            var inputOk = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "OK!" } };
+            var inputNOk = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" } };
             var messageType = "text/plain";
             var okMessageContent = "OK";
             var nokMessageContent = "NOK";
@@ -1327,7 +1327,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithConditionsAndMultipleInputsShouldChangeStatesAndSendMessages()
         {
             // Arrange
-            var input1 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Ping!" } };
+            var input1 = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "Ping!" } };
             var context1 = Substitute.For<IContext>();
             var lazyInput1 = new LazyInput(input1,
                 UserIdentity,
@@ -1337,7 +1337,7 @@ namespace Take.Blip.Builder.UnitTests
                 ArtificialIntelligenceExtension,
                 CancellationToken);
             context1.Input.Returns(lazyInput1);
-            var input2 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Marco!" } };
+            var input2 = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "Marco!" } };
             var context2 = Substitute.For<IContext>();
             var lazyInput2 = new LazyInput(input2,
                 UserIdentity,
