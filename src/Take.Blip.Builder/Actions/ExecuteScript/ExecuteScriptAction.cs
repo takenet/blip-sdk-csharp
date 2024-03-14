@@ -86,7 +86,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 for (int i = 0; i < arguments.Length; i++)
                 {
                     arguments[i] =
-                        await context.GetVariableAsync(settings.InputVariables[i], cancellationToken);
+                        await context.GetVariableAsync(settings.InputVariables[i], cancellationToken, Type);
                 }
             }
 

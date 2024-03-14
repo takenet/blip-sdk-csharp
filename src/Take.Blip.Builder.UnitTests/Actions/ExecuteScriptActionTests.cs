@@ -48,8 +48,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var number1 = "100";
             var number2 = "250";
-            Context.GetVariableAsync(nameof(number1), CancellationToken).Returns(number1);
-            Context.GetVariableAsync(nameof(number2), CancellationToken).Returns(number2);
+            Context.GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>()).Returns(number1);
+            Context.GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>()).Returns(number2);
             var result = "";
 
             var settings = new ExecuteScriptSettings()
@@ -82,8 +82,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var number1 = "100";
             var number2 = "250";
-            Context.GetVariableAsync(nameof(number1), CancellationToken).Returns(number1);
-            Context.GetVariableAsync(nameof(number2), CancellationToken).Returns(number2);
+            Context.GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>()).Returns(number1);
+            Context.GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>()).Returns(number2);
             var result = "";
 
             var settings = new ExecuteScriptSettings()
@@ -147,8 +147,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var number1 = "100";
             var number2 = "250";
-            Context.GetVariableAsync(nameof(number1), CancellationToken).Returns(number1);
-            Context.GetVariableAsync(nameof(number2), CancellationToken).Returns(number2);
+            Context.GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>()).Returns(number1);
+            Context.GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>()).Returns(number2);
             var result = "";
 
             var settings = new ExecuteScriptSettings()

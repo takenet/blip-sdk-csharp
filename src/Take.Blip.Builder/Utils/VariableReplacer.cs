@@ -10,14 +10,14 @@ namespace Take.Blip.Builder.Utils
     {
         private static readonly Regex TextVariablesRegex = new Regex(@"{{([a-zA-Z0-9\.@_-]+)}}", RegexOptions.Compiled, Constants.REGEX_TIMEOUT);
 
-        public async Task<string> ReplaceAsync(string value, IContext context, CancellationToken cancellationToken)
+        public async Task<string> ReplaceAsync(string value, IContext context, CancellationToken cancellationToken, string stateActionType = null)
         {
             var variableValues = new Dictionary<string, string>();
             foreach (Match match in TextVariablesRegex.Matches(value))
             {
                 var variableName = match.Groups[1].Value;
                 if (variableValues.ContainsKey(variableName)) continue;
-                var variableValue = await context.GetVariableAsync(variableName, cancellationToken);
+                var variableValue = await context.GetVariableAsync(variableName, cancellationToken, stateActionType);
                 variableValues.Add(variableName, EscapeString(variableValue));
             }
             

@@ -152,6 +152,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(TunnelVariableProvider),
                     typeof(TicketVariableProvider),
                     typeof(ResourceVariableProvider),
+                    typeof(SecretVariableProvider)
                 });
 
             return container;

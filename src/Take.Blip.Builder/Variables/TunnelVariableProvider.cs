@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Variables
         
         public VariableSource Source => VariableSource.Tunnel;
         
-        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken, string stateActionType = null)
         {
             var tunnel = await _tunnelExtension.TryGetTunnelAsync(context.Input.Message, cancellationToken);
             if (tunnel == null) return null;
