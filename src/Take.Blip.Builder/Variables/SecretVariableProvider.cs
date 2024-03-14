@@ -10,9 +10,12 @@ using System.Linq;
 
 namespace Take.Blip.Builder.Variables
 {
+    /// <summary>
+    /// Variable replacer that only will allow variable substitution on Process Http Action, since that with other actions, you can send the secret to other variables and see the value explicitly
+    /// </summary>
     public class SecretVariableProvider : ResourceVariableProviderBase, IVariableProvider
     {
-        private readonly string[] _actionsToBlock = { nameof(Actions.SendMessage), nameof(Actions.SetVariable), nameof(Actions.SetBucket) };
+        private readonly string[] _actionsToAllow = { nameof(Actions.ProcessHttp) };
 
         public SecretVariableProvider(ISender sender, IDocumentSerializer documentSerializer, ILogger logger) : base(sender, documentSerializer, "secrets", logger, "postmaster@builder.msging.net") { }
 
@@ -20,7 +23,7 @@ namespace Take.Blip.Builder.Variables
 
         public override async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken, string stateActionType = null)
         {
-            if (stateActionType is null || (_actionsToBlock.Contains(stateActionType)))
+            if (stateActionType is null || !_actionsToAllow.Contains(stateActionType))
             {
                 return null;
             }
