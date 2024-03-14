@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Storage;
-using Take.Blip.Client;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.Scheduler;
 using Takenet.Iris.Messaging.Resources;
@@ -31,20 +29,17 @@ namespace Take.Blip.Builder
         private readonly ILogger _logger;
         private readonly IInputExpirationCount _inputExpirationCount;
         private readonly IConfiguration _configuration;
-        private readonly IStateManager _stateManager;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="schedulerExtension"></param>
-        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger, IInputExpirationCount inputExpirationCount, IStateManager stateManager, IConfiguration configuration)
+        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger, IInputExpirationCount inputExpirationCount, IConfiguration configuration)
         {
             _schedulerExtension = schedulerExtension;
             _logger = logger;
             _inputExpirationCount = inputExpirationCount;
             _configuration = configuration;
-            _stateManager = stateManager;
-
         }
 
         /// <summary>
@@ -220,7 +215,6 @@ namespace Take.Blip.Builder
                 var inputExpirationCount = await _inputExpirationCount.IncrementAsync(message);
                 if (inputExpirationCount > _configuration.MaximumInputExpirationLoop)
                 {
-                    await _stateManager.ResetUserState(context, cancellationToken);
                     await _inputExpirationCount.TryRemoveAsync(message);
                     _logger.Warning("[{Source}] [FlowConstruction] Max input expiration transitions of {MaximumInputExpirationLoop} was reached",
                      nameof(InputExpirationHandler), _configuration.MaximumInputExpirationLoop);
