@@ -1,12 +1,10 @@
-﻿using Lime.Protocol;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Lime.Protocol;
 using Lime.Protocol.Network;
 using Lime.Protocol.Serialization;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Variables
@@ -17,11 +15,11 @@ namespace Take.Blip.Builder.Variables
         private readonly IDocumentSerializer _documentSerializer;
         private readonly string _resourceName;
         private readonly ILogger _logger;
-        private readonly Node _commandDestination;
+        private readonly string _commandDestination;
 
         public abstract VariableSource Source { get; }
 
-        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName, ILogger logger, string commandDestination = "postmaster@msging.net")
+        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName, ILogger logger, string commandDestination = "")
         {
             _sender = sender;
             _documentSerializer = documentSerializer;
@@ -60,18 +58,28 @@ namespace Take.Blip.Builder.Variables
         private async Task<Command> ExecuteGetResourceCommandAsync(string name, CancellationToken cancellationToken)
         {
             // We are sending the command directly here because the Extension requires us to know the type.
-            var getResourceCommand = new Command()
-            {
-                Uri = new LimeUri($"/{_resourceName}/{Uri.EscapeDataString(name)}"),
-                Method = CommandMethod.Get,
-                To = _commandDestination
-            };
+            var getResourceCommand = GenerateResourceCommand(name);
 
             var resourceCommandResult = await _sender.ProcessCommandAsync(
                 getResourceCommand,
                 cancellationToken);
 
             return resourceCommandResult;
+        }
+
+        private Command GenerateResourceCommand(string name)
+        {
+            var command = new Command()
+            {
+                Uri = new LimeUri($"/{_resourceName}/{Uri.EscapeDataString(name)}"),
+                Method = CommandMethod.Get
+            };
+
+            if (!string.IsNullOrEmpty(_commandDestination))
+            {
+                command.To = _commandDestination;
+            }
+            return command;
         }
     }
 }
