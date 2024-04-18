@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Variables
             _documentSerializer = documentSerializer;
         }
 
-        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken, string stateActionType = null)
+        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
             var input = context.Input;
             if (input == null) return null;
