@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
+using Takenet.Iris.Messaging;
 
 namespace Take.Blip.Builder
 {
@@ -64,8 +65,8 @@ namespace Take.Blip.Builder
                     .GetType()
                     .GetCustomAttribute(typeof(VariableProviderRestrictionAttribute)) as VariableProviderRestrictionAttribute;
 
-                if (restrictionAttributes.AllowedActions.Contains(stateActionType) ||
-                    !restrictionAttributes.DeniedActions.Contains(stateActionType))
+                if ((restrictionAttributes.AllowedActions.IsNullOrEmpty() && restrictionAttributes.AllowedActions.IsNullOrEmpty()) 
+                    || restrictionAttributes.AllowedActions.Contains(stateActionType) || !restrictionAttributes.DeniedActions.Contains(stateActionType))
                 {
                     variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
                 }
