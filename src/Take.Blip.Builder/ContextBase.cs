@@ -9,7 +9,6 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
 using Takenet.Iris.Messaging;
 
@@ -65,8 +64,7 @@ namespace Take.Blip.Builder
                     .GetType()
                     .GetCustomAttribute(typeof(VariableProviderRestrictionAttribute)) as VariableProviderRestrictionAttribute;
 
-                if ((restrictionAttributes.AllowedActions.IsNullOrEmpty() && restrictionAttributes.AllowedActions.IsNullOrEmpty()) 
-                    || restrictionAttributes.AllowedActions.Contains(stateActionType) || !restrictionAttributes.DeniedActions.Contains(stateActionType))
+                if (IsAllowedVariableProviderRestriction(restrictionAttributes, stateActionType))
                 {
                     variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
                 }
@@ -106,6 +104,12 @@ namespace Take.Blip.Builder
             {
                 return null;
             }
+        }
+
+        private bool IsAllowedVariableProviderRestriction(VariableProviderRestrictionAttribute restrictionAttributes, string stateActionType)
+        {
+            return restrictionAttributes is null || (restrictionAttributes.AllowedActions.IsNullOrEmpty() && restrictionAttributes.AllowedActions.IsNullOrEmpty())
+                    || restrictionAttributes.AllowedActions.Contains(stateActionType) || !restrictionAttributes.DeniedActions.Contains(stateActionType);
         }
 
         private struct VariableName
