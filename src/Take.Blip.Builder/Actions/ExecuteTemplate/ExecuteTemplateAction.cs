@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using HandlebarsDotNet;
 using HandlebarsDotNet.Extension.Json;
@@ -23,14 +24,24 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
-        { 
+        {
+            string result;
             var jObject = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-            var template = _handlebars.Compile(settings.Template);
-            if (template == null)
+            try
             {
-                return;
+                var template = _handlebars.Compile(settings.Template);
+                if (template == null)
+                {
+                    return;
+                }
+                result = template(jObject);
             }
-            var result = template(jObject);
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Unexpected error while trying to execute Handlebars template");
+                throw;
+            }
+            
             await SetScriptResultAsync(context, settings, result, cancellationToken);
         }
 
