@@ -8,12 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Handlebars.Net.Extension.Json" Version="1.0.0" />
     <PackageReference Include="SimpleInjector" Version="5.4.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.10.0" />
     <PackageReference Include="Take.Elephant" Version="0.10.2" />
     <PackageReference Include="Take.Jint.Unnoficial" Version="4.0.4" />
     <PackageReference Include="TimeZoneConverter" Version="3.4.0" />
+    <PackageReference Include="Handlebars.Net" Version="2.1.6" />
   </ItemGroup>
 
   <ItemGroup>
