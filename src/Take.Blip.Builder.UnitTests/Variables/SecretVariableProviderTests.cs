@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
@@ -13,7 +13,6 @@ using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
-using Takenet.Iris.Messaging.Resources;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Variables
@@ -68,7 +67,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
 
         public IDocumentSerializer DocumentSerializer { get; }
 
-        public SecretVariableProvider GetTarget()
+        public IVariableProvider GetTarget()
         {
             return new SecretVariableProvider(Sender, DocumentSerializer, Logger);
         }
@@ -80,23 +79,26 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             //Act
-            var actual = await target.GetVariableAsync(SECRET_KEY, Context, CancellationToken, "ProcessHttp");
+            var actual = await target.GetVariableAsync(SECRET_KEY, Context, CancellationToken);
 
             //Assert
             actual.ShouldBe(SECRET_VALUE_DECODED);
         }
 
         [Fact]
-        public async Task GetSecretValueWithSendMessageActionShouldReturnNull()
+        public void GetSecretValueWithSendMessageShouldBeDeniedByRestriction()
         {
             //Arrange
             var target = GetTarget();
 
             //Act
-            var actual = await target.GetVariableAsync(SECRET_KEY, Context, CancellationToken, "SendMessage");
+            var attributeRestriction = target.GetType()
+                    .GetCustomAttribute(typeof(VariableProviderRestrictionAttribute)) as VariableProviderRestrictionAttribute;
 
+            var allowed = ContextBase.IsAllowedVariableProviderRestriction(attributeRestriction, "SendMessage");
+            
             //Assert
-            actual.ShouldBeNull();
+            allowed.ShouldBeFalse();
         }
 
     }

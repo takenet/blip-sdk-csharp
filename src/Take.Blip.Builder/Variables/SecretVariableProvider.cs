@@ -14,8 +14,6 @@ namespace Take.Blip.Builder.Variables
     [VariableProviderRestriction(AllowedActions =  new [] { nameof(Actions.ProcessHttp) })]
     public class SecretVariableProvider : ResourceVariableProviderBase, IVariableProvider
     {
-        private readonly string[] _actionsToAllow = { nameof(Actions.ProcessHttp) };
-
         public SecretVariableProvider(ISender sender, IDocumentSerializer documentSerializer, ILogger logger) : base(sender, documentSerializer, "secrets", logger, "postmaster@builder.msging.net") { }
 
         public override VariableSource Source => VariableSource.Secret;

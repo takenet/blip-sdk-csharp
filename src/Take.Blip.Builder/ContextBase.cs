@@ -106,10 +106,10 @@ namespace Take.Blip.Builder
             }
         }
 
-        private bool IsAllowedVariableProviderRestriction(VariableProviderRestrictionAttribute restrictionAttributes, string stateActionType)
+        public static bool IsAllowedVariableProviderRestriction(VariableProviderRestrictionAttribute restrictionAttributes, string stateActionType)
         {
-            return restrictionAttributes is null || (restrictionAttributes.AllowedActions.IsNullOrEmpty() && restrictionAttributes.AllowedActions.IsNullOrEmpty())
-                    || restrictionAttributes.AllowedActions.Contains(stateActionType) || !restrictionAttributes.DeniedActions.Contains(stateActionType);
+            return restrictionAttributes is null || restrictionAttributes.AllowedActions.IsEmpty()
+                    || restrictionAttributes.AllowedActions.Contains(stateActionType);
         }
 
         private struct VariableName
