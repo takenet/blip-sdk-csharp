@@ -29,7 +29,7 @@ namespace Take.Blip.Builder.Variables
         }
 
 
-        public virtual async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken, string stateActionType = null)
+        public virtual async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
             try
             {

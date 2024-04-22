@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
+using Takenet.Iris.Messaging;
 
 namespace Take.Blip.Builder
 {
@@ -46,7 +48,7 @@ namespace Take.Blip.Builder
         {
             var variable = VariableName.Parse(name);
 
-            string variableValue;
+            string variableValue = string.Empty;
 
             if (variable.Source == VariableSource.Context)
             {
@@ -59,7 +61,15 @@ namespace Take.Blip.Builder
                     throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
                 }
 
-                variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken, stateActionType);
+                var restrictionAttributes = provider
+                    .GetType()
+                    .GetCustomAttribute(typeof(VariableProviderRestrictionAttribute)) as VariableProviderRestrictionAttribute;
+
+                if ((restrictionAttributes.AllowedActions.IsNullOrEmpty() && restrictionAttributes.AllowedActions.IsNullOrEmpty()) 
+                    || restrictionAttributes.AllowedActions.Contains(stateActionType) || !restrictionAttributes.DeniedActions.Contains(stateActionType))
+                {
+                    variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
+                }
             }
 
             if (string.IsNullOrWhiteSpace(variableValue) ||
