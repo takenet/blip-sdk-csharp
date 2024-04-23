@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HandlebarsDotNet;
 using HandlebarsDotNet.Extension.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using Take.Blip.Builder.Hosting;
@@ -28,16 +29,16 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
             try
             {
-                if (settings?.Handlebars == null)
+                if (settings.Handlebars == null)
                 {
                     return;
                 }
                 foreach (var property in arguments.Properties())
                 {
-                    if (IsJsonFormat(property.Value.ToString()))
+                    var success = TryParseJson<JObject>(property.Value.ToString(), out var jObject);
+                    if (success)
                     {
-                        var data = JObject.Parse(property.Value.ToString());
-                        foreach (var item in data)
+                        foreach (var item in jObject)
                         {
                             obj[item.Key] = item.Value;
                         }
@@ -89,11 +90,16 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             }
         }
         
-        private bool IsJsonFormat(string strInput)
+        private bool TryParseJson<T>(string json, out T result)
         {
-            strInput = strInput.Trim();
-            return (strInput.StartsWith("{") && strInput.EndsWith("}")) ||
-                   (strInput.StartsWith("[") && strInput.EndsWith("]"));
+            bool success = true;
+            var settings = new JsonSerializerSettings
+            {
+                Error = (sender, args) => { success = false; args.ErrorContext.Handled = true; },
+                MissingMemberHandling = MissingMemberHandling.Error
+            };
+            result = JsonConvert.DeserializeObject<T>(json, settings);
+            return success;
         }
     }
 }
