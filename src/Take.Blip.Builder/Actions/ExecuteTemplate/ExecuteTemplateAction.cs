@@ -17,24 +17,39 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         
         public ExecuteTemplateAction(IConfiguration configuration, ILogger logger) : base(nameof(ExecuteTemplateAction))
         {
-            configuration = _configuration;
-            logger = _logger;
-            _handlebars = Handlebars.Create();
-            _handlebars.Configuration.UseJson();
+            _configuration = configuration;
+            _logger = logger;
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
         {
             string result;
-            var jObject = await GetScriptArgumentsAsync(context, settings, cancellationToken);
+            var obj = new JObject();
+            var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
             try
             {
-                var template = _handlebars.Compile(settings.Template);
-                if (template == null)
+                if (settings?.Handlebars == null)
                 {
                     return;
                 }
-                result = template(jObject);
+                foreach (var property in arguments.Properties())
+                {
+                    if (IsJsonFormat(property.Value.ToString()))
+                    {
+                        var data = JObject.Parse(property.Value.ToString());
+                        foreach (var item in data)
+                        {
+                            obj[item.Key] = item.Value;
+                        }
+                    }
+                    else
+                    {
+                        obj = arguments;
+                    }
+                }
+                settings.Handlebars.Configuration.UseJson();
+                var template = settings.Handlebars.Compile(settings.Template);
+                result = template(obj);
             }
             catch (Exception ex)
             {
@@ -72,6 +87,13 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             {
                 await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
             }
+        }
+        
+        private bool IsJsonFormat(string strInput)
+        {
+            strInput = strInput.Trim();
+            return (strInput.StartsWith("{") && strInput.EndsWith("}")) ||
+                   (strInput.StartsWith("[") && strInput.EndsWith("]"));
         }
     }
 }

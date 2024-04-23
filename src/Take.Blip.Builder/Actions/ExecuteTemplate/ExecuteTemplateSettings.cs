@@ -1,15 +1,33 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using HandlebarsDotNet;
 using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Actions.ExecuteTemplate
 {
+    /// <summary>
+    /// Settings to Execute Template Action
+    /// </summary>
     public class ExecuteTemplateSettings : IValidable
     {
+        /// <summary>
+        /// Input Variables
+        /// </summary>
         public string[] InputVariables { get; set; }
 
+        /// <summary>
+        /// Output Variable
+        /// </summary>
         public string OutputVariable { get; set; }
         
+        /// <summary>
+        /// Template that will be transformed
+        /// </summary>
         public string Template { get; set; }
+        
+        /// <summary>
+        /// Instance of Handlebars
+        /// </summary>
+        public IHandlebars Handlebars { get; set; }
 
         public void Validate()
         {
