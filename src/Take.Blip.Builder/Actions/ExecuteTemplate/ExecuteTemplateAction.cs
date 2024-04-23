@@ -25,7 +25,6 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
         {
             string result;
-            var obj = new JObject();
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
             try
             {
@@ -33,22 +32,9 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                 {
                     return;
                 }
-                foreach (var property in arguments.Properties())
-                {
-                    var success = TryParseJson<JObject>(property.Value.ToString(), out var jObject);
-                    if (success)
-                    {
-                        foreach (var item in jObject)
-                        {
-                            obj[item.Key] = item.Value;
-                        }
-                    }
-                    else
-                    {
-                        obj = arguments;
-                    }
-                }
-                settings.Handlebars.Configuration.UseJson();
+
+                var obj = CopyProperties(arguments);
+                
                 var template = settings.Handlebars.Compile(settings.Template);
                 result = template(obj);
             }
@@ -88,6 +74,28 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             {
                 await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
             }
+        }
+        
+        private JObject CopyProperties(JObject arguments)
+        {
+            var obj = new JObject();
+            foreach (var property in arguments.Properties())
+            {
+                var success = TryParseJson<JObject>(property.Value.ToString(), out var jObject);
+                if (success)
+                {
+                    foreach (var item in jObject)
+                    {
+                        obj[item.Key] = item.Value;
+                    }
+                }
+                else
+                {
+                    obj[property.Name] = property.Value;
+                }
+            }
+
+            return obj;
         }
         
         private bool TryParseJson<T>(string json, out T result)

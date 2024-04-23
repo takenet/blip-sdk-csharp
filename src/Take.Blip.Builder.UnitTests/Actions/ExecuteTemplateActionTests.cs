@@ -45,12 +45,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task ExecuteTemplateWithObjectAsPropertyShouldSuccess()
         {
             //Arrange
-            var variableName = "{ \"people\": [{\"name\": \"testName\", \"city\": \"Aracaju\"}] }";
+            var variableObj = "{ \"people\": [{\"name\": \"TestName\", \"city\": \"Aracaju\"}] }";
             var outputVariable = "";
-            Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
+            Context.GetVariableAsync(nameof(variableObj), CancellationToken).Returns(variableObj);
             var settings = new ExecuteTemplateSettings
             {
-                InputVariables = new []{ nameof(variableName) },
+                InputVariables = new []{ nameof(variableObj) },
                 Template = "Names: {{#each people}}{{name}} living in {{city}}{{/each}}",
                 OutputVariable = outputVariable,
                 Handlebars = Handlebars.Create()
@@ -62,7 +62,33 @@ namespace Take.Blip.Builder.UnitTests.Actions
             
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(outputVariable, "Names: testName living in Aracaju", CancellationToken);
+            await Context.Received(1).SetVariableAsync(outputVariable, "Names: TestName living in Aracaju", CancellationToken);
+        }
+        
+        [Fact]
+        public async Task ExecuteTemplateWithObjectAndStringVariablesAsPropertyShouldSuccess()
+        {
+            //Arrange
+            var variableName = "Peoples:";
+            var variableObj = "{ \"people\": [{\"name\": \"Carlos\", \"city\": \"Aracaju\"}] }";
+            var outputVariable = "";
+            Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
+            Context.GetVariableAsync(nameof(variableObj), CancellationToken).Returns(variableObj);
+            var settings = new ExecuteTemplateSettings
+            {
+                InputVariables = new []{ nameof(variableName), nameof(variableObj) },
+                Template = $"{{{{{nameof(variableName)}}}}} {{{{#each people}}}}{{{{name}}}} living in {{{{city}}}}{{{{/each}}}}",
+                OutputVariable = outputVariable,
+                Handlebars = Handlebars.Create()
+            };
+            
+            //Act
+            var action = GetTarget();
+            await action.ExecuteAsync(Context, settings, CancellationToken);
+            
+            // Assert
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(outputVariable, "Peoples: Carlos living in Aracaju", CancellationToken);
         }
         
         
