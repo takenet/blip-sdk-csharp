@@ -29,7 +29,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
             try
             {
-                var obj = CopyProperties(arguments);
+                var obj = CopyPropertiesToObject(arguments);
                 var template = _handlebars.Compile(settings.Template);
                 result = template(obj);
             }
@@ -52,7 +52,6 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                 {
                     var variableValue = await context.GetVariableAsync(settings.InputVariables[i], cancellationToken);
                     obj[settings.InputVariables[i]] = variableValue;
-
                 }
             }
             return obj;
@@ -71,7 +70,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             }
         }
         
-        private JObject CopyProperties(JObject arguments)
+        private JObject CopyPropertiesToObject(JObject arguments)
         {
             var obj = new JObject();
             foreach (var property in arguments.Properties())
