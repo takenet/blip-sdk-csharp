@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using HandlebarsDotNet;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Serilog;
 using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Take.Blip.Builder.Hosting;
@@ -12,9 +13,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
 {
     public class ExecuteTemplateActionTests : ActionTestsBase
     {
+        private IHandlebars Handlebars = Substitute.For<IHandlebars>();
+
         private ExecuteTemplateAction GetTarget()
         {
-            return new ExecuteTemplateAction(new ConventionsConfiguration(), Substitute.For<ILogger>());
+            return new ExecuteTemplateAction(Handlebars, new ConventionsConfiguration(), Substitute.For<ILogger>());
         }
 
         [Fact]
@@ -24,12 +27,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var variableName = "TestName";
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
+            
             var settings = new ExecuteTemplateSettings
             {
                 InputVariables = new []{ nameof(variableName) },
                 Template = $"Name: {{{{{nameof(variableName)}}}}}",
-                OutputVariable = outputVariable,
-                Handlebars = Handlebars.Create()
+                OutputVariable = outputVariable
             };
             
             //Act
@@ -37,8 +40,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await action.ExecuteAsync(Context, settings, CancellationToken);
             
             // Assert
+            Handlebars.Received(1).Compile(settings.Template);
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(outputVariable, $"Name: {variableName}", CancellationToken);
         }
         
         [Fact]
@@ -52,8 +55,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 InputVariables = new []{ nameof(variableObj) },
                 Template = "Names: {{#each people}}{{name}} living in {{city}}{{/each}}",
-                OutputVariable = outputVariable,
-                Handlebars = Handlebars.Create()
+                OutputVariable = outputVariable
             };
             
             //Act
@@ -61,8 +63,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await action.ExecuteAsync(Context, settings, CancellationToken);
             
             // Assert
+            Handlebars.Received(1).Compile(settings.Template);
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(outputVariable, "Names: TestName living in Aracaju", CancellationToken);
         }
         
         [Fact]
@@ -78,8 +80,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 InputVariables = new []{ nameof(variableName), nameof(variableObj) },
                 Template = $"{{{{{nameof(variableName)}}}}} {{{{#each people}}}}{{{{name}}}} living in {{{{city}}}}{{{{/each}}}}",
-                OutputVariable = outputVariable,
-                Handlebars = Handlebars.Create()
+                OutputVariable = outputVariable
             };
             
             //Act
@@ -87,31 +88,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await action.ExecuteAsync(Context, settings, CancellationToken);
             
             // Assert
+            Handlebars.Received(1).Compile(settings.Template);
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(outputVariable, "Peoples: Carlos living in Aracaju", CancellationToken);
-        }
-        
-        
-        [Fact]
-        public async Task ExecuteTemplateShouldReturnWithoutExecution()
-        {
-            //Arrange
-            var variableName = "TestName";
-            var outputVariable = "";
-            Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
-            var settings = new ExecuteTemplateSettings
-            {
-                InputVariables = new []{ nameof(variableName) },
-                Template = $"Name: {{{{{nameof(variableName)}}}}}",
-                OutputVariable = outputVariable,
-            };
-            
-            //Act
-            var action = GetTarget();
-            await action.ExecuteAsync(Context, settings, CancellationToken);
-            
-            // Assert
-            await Context.Received(0).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
         }
         
         [Fact]
@@ -121,12 +99,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var variableName = "TestName";
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
+            Handlebars.Compile("").ThrowsForAnyArgs(new HandlebarsCompilerException("could not be converted to an expression"));
             var settings = new ExecuteTemplateSettings
             {
                 InputVariables = new []{ nameof(variableName) },
                 Template = $"Name: {{{{nameof(variableName)}}}}",
-                OutputVariable = outputVariable,
-                Handlebars = Handlebars.Create()
+                OutputVariable = outputVariable
             };
             
             //Act
@@ -140,6 +118,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 ex.Message.ShouldContain("could not be converted to an expression");
             }
+            
+            Handlebars.Received(1).Compile(settings.Template);
+            await Context.Received(0).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
         }
     }
 }

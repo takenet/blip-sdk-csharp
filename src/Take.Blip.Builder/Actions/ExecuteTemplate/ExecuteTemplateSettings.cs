@@ -23,11 +23,6 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         /// Template that will be transformed
         /// </summary>
         public string Template { get; set; }
-        
-        /// <summary>
-        /// Instance of Handlebars
-        /// </summary>
-        public IHandlebars Handlebars { get; set; }
 
         public void Validate()
         {

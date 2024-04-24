@@ -16,10 +16,11 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         private readonly ILogger _logger;
         private readonly IHandlebars _handlebars;
         
-        public ExecuteTemplateAction(IConfiguration configuration, ILogger logger) : base(nameof(ExecuteTemplateAction))
+        public ExecuteTemplateAction(IHandlebars handlebars, IConfiguration configuration, ILogger logger) : base(nameof(ExecuteTemplateAction))
         {
             _configuration = configuration;
             _logger = logger;
+            _handlebars = handlebars;
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
@@ -28,14 +29,8 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
             try
             {
-                if (settings.Handlebars == null)
-                {
-                    return;
-                }
-
                 var obj = CopyProperties(arguments);
-                
-                var template = settings.Handlebars.Compile(settings.Template);
+                var template = _handlebars.Compile(settings.Template);
                 result = template(obj);
             }
             catch (Exception ex)
@@ -66,7 +61,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         private async Task SetScriptResultAsync(
             IContext context, ExecuteTemplateSettings settings, string result, CancellationToken cancellationToken)
         {
-            if (!string.IsNullOrEmpty(result))
+            if (result != null)
             {
                 await context.SetVariableAsync(settings.OutputVariable, result, cancellationToken);
             }
