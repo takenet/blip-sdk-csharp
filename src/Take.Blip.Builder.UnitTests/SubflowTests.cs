@@ -24,13 +24,13 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             const string subflowShortName = "subflowShortName";
-            
+
             var messageType = "text/plain";
             var messageContent = "Pong!";
             var messageContent2 = "Pong2!";
             var messageContentSubflow = "Pong Subflow!";
 
-            var input1 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Ping!" } };
+            var input1 = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "Ping!" } };
             var context1 = Substitute.For<IContext>();
             var lazyInput1 = new LazyInput(input1,
                 UserIdentity,
@@ -41,7 +41,7 @@ namespace Take.Blip.Builder.UnitTests
                 CancellationToken);
             context1.Input.Returns(lazyInput1);
 
-            var input2 = new Message() { From = UserIdentity.ToNode(), Content = new PlainText() { Text = "Ping Subflow!" } };
+            var input2 = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "Ping Subflow!" } };
             var context2 = Substitute.For<IContext>();
             var lazyInput2 = new LazyInput(input2,
                 UserIdentity,
@@ -378,7 +378,7 @@ namespace Take.Blip.Builder.UnitTests
                                 StateId = "ping2"
                             }
                         },
-                        InputActions = new[] { 
+                        InputActions = new[] {
                             new Action() {
                                 Type = "SetVariable",
                                 Settings = new JRaw(

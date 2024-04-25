@@ -53,8 +53,9 @@ namespace Take.Blip.Builder
         /// </summary>
         /// <param name="name"></param>
         /// <param name="cancellationToken"></param>
+        /// <param name="stateActionType"></param>
         /// <returns></returns>
-        Task<string> GetVariableAsync(string name, CancellationToken cancellationToken);
+        Task<string> GetVariableAsync(string name, CancellationToken cancellationToken, string stateActionType = null);
 
         /// <summary>
         /// Gets a variable directly from the context, without parsing the source and properties from variable the name.

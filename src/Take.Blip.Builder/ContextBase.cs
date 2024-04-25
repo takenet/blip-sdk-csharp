@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,8 +9,8 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
-using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Variables;
+using Takenet.Iris.Messaging;
 
 namespace Take.Blip.Builder
 {
@@ -42,11 +43,11 @@ namespace Take.Blip.Builder
 
         public IDictionary<string, object> InputContext { get; }
 
-        public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken, string stateActionType = null)
         {
             var variable = VariableName.Parse(name);
 
-            string variableValue;
+            string variableValue = string.Empty;
 
             if (variable.Source == VariableSource.Context)
             {
@@ -59,7 +60,14 @@ namespace Take.Blip.Builder
                     throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
                 }
 
-                variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
+                var restrictionAttributes = provider
+                    .GetType()
+                    .GetCustomAttribute(typeof(VariableProviderRestrictionAttribute)) as VariableProviderRestrictionAttribute;
+
+                if (IsAllowedVariableProviderRestriction(restrictionAttributes, stateActionType))
+                {
+                    variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
+                }
             }
 
             if (string.IsNullOrWhiteSpace(variableValue) ||
@@ -96,6 +104,12 @@ namespace Take.Blip.Builder
             {
                 return null;
             }
+        }
+
+        public static bool IsAllowedVariableProviderRestriction(VariableProviderRestrictionAttribute restrictionAttributes, string stateActionType)
+        {
+            return restrictionAttributes is null || restrictionAttributes.AllowedActions.IsEmpty()
+                    || restrictionAttributes.AllowedActions.Contains(stateActionType);
         }
 
         private struct VariableName
