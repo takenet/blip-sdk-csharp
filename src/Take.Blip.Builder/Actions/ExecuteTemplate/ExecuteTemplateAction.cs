@@ -12,30 +12,34 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
 {
     public class ExecuteTemplateAction : ActionBase<ExecuteTemplateSettings>
     {
-        private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
         private readonly IHandlebars _handlebars;
         
-        public ExecuteTemplateAction(IHandlebars handlebars, IConfiguration configuration, ILogger logger) : base(nameof(ExecuteTemplateAction))
+        public ExecuteTemplateAction(IHandlebars handlebars, ILogger logger) : base(nameof(ExecuteTemplateAction))
         {
-            _configuration = configuration;
             _logger = logger;
             _handlebars = handlebars;
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
         {
-            string result;
-            var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-            try
+            var result = string.Empty;
+            try 
             {
-                var obj = CopyPropertiesToObject(arguments);
+                var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
+                var obj = CopyArgumentsToObject(arguments);
                 var template = _handlebars.Compile(settings.Template);
                 result = template(obj);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Unexpected error while trying to execute Handlebars template");
+                if (ex is HandlebarsParserException)
+                {
+                    _logger.Error(ex, "Unexpected error while trying to parse Handlebars template");
+                    throw;
+                }
+
+                _logger.Error(ex, "Unexpected error while execute action Execute Template");
                 throw;
             }
             
@@ -70,7 +74,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             }
         }
         
-        private JObject CopyPropertiesToObject(JObject arguments)
+        private JObject CopyArgumentsToObject(JObject arguments)
         {
             var obj = new JObject();
             foreach (var property in arguments.Properties())
