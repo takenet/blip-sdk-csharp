@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using HandlebarsDotNet;
 using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Actions.ExecuteTemplate

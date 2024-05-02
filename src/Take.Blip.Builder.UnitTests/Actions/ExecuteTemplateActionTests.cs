@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HandlebarsDotNet;
+using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Serilog;
@@ -26,7 +27,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             //Arrange
             var variableName = "TestName";
             var outputVariable = "";
-            Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
+            Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);     
+            
+            var templateResult = "TemplateResult";
+            var handlebarsTemplate = Substitute.For<HandlebarsTemplate<object, object>>();
+            handlebarsTemplate(Arg.Any<object>()).Returns("TemplateResult");
+            Handlebars.Compile(Arg.Any<string>()).Returns(handlebarsTemplate);
             
             var settings = new ExecuteTemplateSettings
             {
@@ -41,7 +47,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             
             // Assert
             Handlebars.Received(1).Compile(settings.Template);
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Is(templateResult), CancellationToken, Arg.Any<TimeSpan>());
         }
         
         [Fact]
@@ -51,6 +57,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var variableObj = "{ \"people\": [{\"name\": \"TestName\", \"city\": \"Aracaju\"}, {\"name\": \"TestName2\", \"city\": \"Bahia\"}] }";
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableObj), CancellationToken).Returns(variableObj);
+            
+            var templateResult = "TemplateResult";
+            var handlebarsTemplate = Substitute.For<HandlebarsTemplate<object, object>>();
+            handlebarsTemplate(Arg.Any<object>()).Returns("TemplateResult");
+            Handlebars.Compile(Arg.Any<string>()).Returns(handlebarsTemplate);
+            
             var settings = new ExecuteTemplateSettings
             {
                 InputVariables = new []{ nameof(variableObj) },
@@ -64,7 +76,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             
             // Assert
             Handlebars.Received(1).Compile(settings.Template);
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Is(templateResult), CancellationToken, Arg.Any<TimeSpan>());
         }
         
         [Fact]
@@ -76,6 +88,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
             Context.GetVariableAsync(nameof(variableObj), CancellationToken).Returns(variableObj);
+            
+            var templateResult = "TemplateResult";
+            var handlebarsTemplate = Substitute.For<HandlebarsTemplate<object, object>>();
+            handlebarsTemplate(Arg.Any<object>()).Returns("TemplateResult");
+            Handlebars.Compile(Arg.Any<string>()).Returns(handlebarsTemplate);
             var settings = new ExecuteTemplateSettings
             {
                 InputVariables = new []{ nameof(variableName), nameof(variableObj) },
@@ -89,7 +106,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             
             // Assert
             Handlebars.Received(1).Compile(settings.Template);
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Is(templateResult), CancellationToken, Arg.Any<TimeSpan>());
         }
         
         [Fact]

@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using HandlebarsDotNet;
-using HandlebarsDotNet.Extension.Json;
+using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Take.Blip.Builder.Hosting;
+using Takenet.Iris.Messaging;
 
 namespace Take.Blip.Builder.Actions.ExecuteTemplate
 {
@@ -35,11 +35,11 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             {
                 if (ex is HandlebarsParserException)
                 {
-                    _logger.Error(ex, "Unexpected error while trying to parse Handlebars template");
+                    _logger.Warning(ex, "Unexpected error while trying to parse Handlebars template");
                     throw;
                 }
 
-                _logger.Error(ex, "Unexpected error while execute action Execute Template");
+                _logger.Warning(ex, "Unexpected error while execute action Execute Template");
                 throw;
             }
             
@@ -50,13 +50,16 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
         {
             var obj = new JObject();
-            if (settings.InputVariables != null && settings.InputVariables.Length > 0)
+
+            if (settings.InputVariables.IsNullOrEmpty() && settings.InputVariables.Length <= 0)
             {
-                for (int i = 0; i < settings.InputVariables.Length; i++)
-                {
-                    var variableValue = await context.GetVariableAsync(settings.InputVariables[i], cancellationToken);
-                    obj[settings.InputVariables[i]] = variableValue;
-                }
+                return obj;
+            }
+
+            foreach (var variable in settings.InputVariables)
+            {
+                var variableValue = await context.GetVariableAsync(variable, cancellationToken);
+                obj[variable] = variableValue;
             }
             return obj;
         }
@@ -64,7 +67,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         private async Task SetScriptResultAsync(
             IContext context, ExecuteTemplateSettings settings, string result, CancellationToken cancellationToken)
         {
-            if (result != null)
+            if (!result.IsNullOrEmpty())
             {
                 await context.SetVariableAsync(settings.OutputVariable, result, cancellationToken);
             }
