@@ -7,6 +7,7 @@ using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.CreateTicket;
 using Take.Blip.Builder.Actions.DeleteVariable;
 using Take.Blip.Builder.Actions.ExecuteScript;
+using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.MergeContact;
 using Take.Blip.Builder.Actions.ProcessCommand;
@@ -95,7 +96,8 @@ namespace Take.Blip.Builder.Hosting
                     typeof(CreateTicketAction),
                     typeof(DeleteVariableAction),
                     typeof(ProcessContentAssistantAction),
-                    typeof(TrackContactsJourneyAction)
+                    typeof(TrackContactsJourneyAction),
+                    typeof(ExecuteTemplateAction)
                 });
 
             return container;
