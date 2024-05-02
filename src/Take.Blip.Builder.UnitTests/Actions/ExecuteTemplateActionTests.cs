@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HandlebarsDotNet;
-using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Serilog;
 using Take.Blip.Builder.Actions.ExecuteTemplate;
-using Take.Blip.Builder.Hosting;
 using Xunit;
 using Shouldly;
 
