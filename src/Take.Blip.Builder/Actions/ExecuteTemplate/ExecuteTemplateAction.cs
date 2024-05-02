@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         private readonly ILogger _logger;
         private readonly IHandlebars _handlebars;
         
-        public ExecuteTemplateAction(IHandlebars handlebars, ILogger logger) : base(nameof(ExecuteTemplateAction))
+        public ExecuteTemplateAction(IHandlebars handlebars, ILogger logger) : base(nameof(ExecuteTemplate))
         {
             _logger = logger;
             _handlebars = handlebars;
