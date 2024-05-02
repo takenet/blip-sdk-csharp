@@ -86,10 +86,10 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             {
                 try
                 {
-                    var deserializeJson = JsonConvert.DeserializeObject<JObject>(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
-                    if (deserializeJson != null)
+                    var deserializedJson = JsonConvert.DeserializeObject<JObject>(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
+                    if (deserializedJson != null)
                     {
-                        obj.Merge(deserializeJson);
+                        obj.Merge(deserializedJson);
                     }
                 } catch (JsonReaderException)
                 {
