@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Esprima;
 using HandlebarsDotNet;
 using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using Take.Blip.Builder.Utils;
 using Takenet.Iris.Messaging;
 
 namespace Take.Blip.Builder.Actions.ExecuteTemplate
@@ -24,7 +26,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
         {
             var result = string.Empty;
-            try 
+            try
             {
                 var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
                 var obj = CopyArgumentsToObject(arguments);
@@ -51,7 +53,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         {
             var obj = new JObject();
 
-            if (settings.InputVariables.IsNullOrEmpty() && settings.InputVariables.Length <= 0)
+            if (settings.InputVariables.IsNullOrEmpty())
             {
                 return obj;
             }
@@ -67,13 +69,13 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         private async Task SetScriptResultAsync(
             IContext context, ExecuteTemplateSettings settings, string result, CancellationToken cancellationToken)
         {
-            if (!result.IsNullOrEmpty())
+            if (result.IsNullOrEmpty())
             {
-                await context.SetVariableAsync(settings.OutputVariable, result, cancellationToken);
+                await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
             }
             else
             {
-                await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
+                await context.SetVariableAsync(settings.OutputVariable, result, cancellationToken);
             }
         }
         
@@ -82,33 +84,20 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             var obj = new JObject();
             foreach (var property in arguments.Properties())
             {
-                var success = TryParseJson<JObject>(property.Value.ToString(), out var jObject);
-                if (success)
+                try
                 {
-                    foreach (var item in jObject)
+                    var deserializeJson = JsonConvert.DeserializeObject<JObject>(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
+                    if (deserializeJson != null)
                     {
-                        obj[item.Key] = item.Value;
+                        obj.Merge(deserializeJson);
                     }
-                }
-                else
+                } catch (JsonReaderException)
                 {
                     obj[property.Name] = property.Value;
-                }
+                }                
             }
 
             return obj;
-        }
-        
-        private bool TryParseJson<T>(string json, out T result)
-        {
-            bool success = true;
-            var settings = new JsonSerializerSettings
-            {
-                Error = (sender, args) => { success = false; args.ErrorContext.Handled = true; },
-                MissingMemberHandling = MissingMemberHandling.Error
-            };
-            result = JsonConvert.DeserializeObject<T>(json, settings);
-            return success;
         }
     }
 }
