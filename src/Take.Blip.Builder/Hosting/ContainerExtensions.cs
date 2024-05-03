@@ -1,4 +1,5 @@
-﻿using Lime.Messaging.Resources;
+﻿using HandlebarsDotNet;
+using Lime.Messaging.Resources;
 using Lime.Protocol.Serialization;
 using Lime.Protocol.Serialization.Newtonsoft;
 using Serilog;
@@ -170,6 +171,11 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
             container.RegisterSingleton<ILogger>(() => LoggerProvider.Logger);
+            container.RegisterSingleton<IHandlebars>(() =>
+            {
+                var handlebars = Handlebars.Create();
+                return handlebars;
+            });
 
             return container;
         }
