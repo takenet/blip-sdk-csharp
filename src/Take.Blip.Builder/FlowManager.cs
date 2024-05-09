@@ -525,7 +525,7 @@ namespace Take.Blip.Builder
                 var action = _actionProvider.Get(stateAction.Type);
 
                 // Trace infra
-                    var (actionTrace, actionStopwatch) = actionTraces != null
+                var (actionTrace, actionStopwatch) = actionTraces != null
                     ? (stateAction.ToTrace(), Stopwatch.StartNew())
                     : (null, null);
 
