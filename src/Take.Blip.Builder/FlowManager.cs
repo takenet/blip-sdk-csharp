@@ -51,6 +51,7 @@ namespace Take.Blip.Builder
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
+        private const string ACTION_EXECUTE_TEMPLATE = "ExecuteTemplate";
         public const string STATE_ID = "inputExpiration.stateId";
 
         public FlowManager(
@@ -552,8 +553,7 @@ namespace Take.Blip.Builder
 
                         if (stringifySetting != null)
                         {
-                            var isExecuteTemplate = action is ExecuteTemplateAction;
-                            if (!isExecuteTemplate)
+                            if (action.Type != ACTION_EXECUTE_TEMPLATE)
                             {
                                 stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken, stateAction.Type);
                             }
