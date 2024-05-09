@@ -10,11 +10,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -525,7 +525,7 @@ namespace Take.Blip.Builder
                 var action = _actionProvider.Get(stateAction.Type);
 
                 // Trace infra
-                var (actionTrace, actionStopwatch) = actionTraces != null
+                    var (actionTrace, actionStopwatch) = actionTraces != null
                     ? (stateAction.ToTrace(), Stopwatch.StartNew())
                     : (null, null);
 
@@ -552,7 +552,11 @@ namespace Take.Blip.Builder
 
                         if (stringifySetting != null)
                         {
-                            stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken, stateAction.Type);
+                            var isExecuteTemplate = action is ExecuteTemplateAction;
+                            if (!isExecuteTemplate)
+                            {
+                                stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken, stateAction.Type);
+                            }
                             jObjectSettings = JObject.Parse(stringifySetting);
                             AddStateIdToSettings(action.Type, jObjectSettings, state.Id);
                         }
