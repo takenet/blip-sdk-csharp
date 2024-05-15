@@ -36,7 +36,7 @@ extends:
     type: dotnet
     to: nuget
     nugetServiceConnection: Nuget.org Take
-    dotnetVersion: "8.0.x"
+    dotnetVersion: "6.0.x"
     testProjects: src/Take.Blip.Client.sln
     testPermission: true
     skipSonarBranch: false
