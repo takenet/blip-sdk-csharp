@@ -83,9 +83,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             //Arrange
             var variableName = "Peoples:";
             var variableObj = "{ \"people\": [{\"name\": \"TestName\", \"city\": \"Aracaju\"}, {\"name\": \"TestName2\", \"city\": \"Bahia\"}] }";
+            var arrayVariable = "[{\"city\": \"Aracaju\", \"street\": \"Professor\"}, {\"city\": \"Salvador\", \"street\": \"Carlos\"}]";
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
             Context.GetVariableAsync(nameof(variableObj), CancellationToken).Returns(variableObj);
+            Context.GetVariableAsync(nameof(arrayVariable), CancellationToken).Returns(arrayVariable);
             
             var templateResult = "TemplateResult";
             var handlebarsTemplate = Substitute.For<HandlebarsTemplate<object, object>>();
@@ -93,8 +95,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Handlebars.Compile(Arg.Any<string>()).Returns(handlebarsTemplate);
             var settings = new ExecuteTemplateSettings
             {
-                InputVariables = new []{ nameof(variableName), nameof(variableObj) },
-                Template = $"{{{{{nameof(variableName)}}}}} {{{{#each people}}}}{{{{name}}}} living in {{{{city}}}} {{{{/each}}}}",
+                InputVariables = new []{ nameof(variableName), nameof(variableObj), nameof(arrayVariable) },
+                Template = $"{{{{{nameof(variableName)}}}}} {{{{#each people}}}}{{{{name}}}} living in {{{{city}}}} {{{{/each}}}} {{{{{nameof(arrayVariable)}}}}}",
                 OutputVariable = outputVariable
             };
             

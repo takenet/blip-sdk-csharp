@@ -25,7 +25,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
 
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
         {
-            var result = string.Empty;
+            string result;
             try
             {
                 var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
@@ -91,9 +91,20 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                     {
                         obj.Merge(deserializedJson);
                     }
-                } catch (JsonReaderException)
+                } catch (Exception ex)
                 {
-                    obj[property.Name] = property.Value;
+                    if (ex is JsonReaderException)
+                    {
+                        obj[property.Name] = property.Value;
+                    }
+                    else if (ex is InvalidCastException)
+                    {
+                        var jToken = JsonConvert.DeserializeObject<JToken>(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
+                        if (jToken != null)
+                        {
+                            obj.Add(property.Name, jToken);
+                        }
+                    }
                 }                
             }
 
