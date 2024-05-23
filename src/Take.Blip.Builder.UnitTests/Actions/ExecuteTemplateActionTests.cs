@@ -82,8 +82,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             //Arrange
             var variableName = "Peoples:";
-            var variableObj = "{ \"people\": [{\"name\": \"TestName\", \"city\": \"Aracaju\"}, {\"name\": \"TestName2\", \"city\": \"Bahia\"}] }";
-            var arrayVariable = "[{\"city\": \"Aracaju\", \"street\": \"Professor\"}, {\"city\": \"Salvador\", \"street\": \"Carlos\"}]";
+            var variableObj = "{ \"people\": [{\"name\": \"TestName\", \"city\": \"London\"}, {\"name\": \"TestName2\", \"city\": \"Manchester\"}] }";
+            var arrayVariable = "[{\"city\": \"London\", \"street\": \"Baker Street\"},{\"city\": \"Manchester\", \"street\": \"Oxford Road\"}]";
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
             Context.GetVariableAsync(nameof(variableObj), CancellationToken).Returns(variableObj);
