@@ -86,10 +86,10 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             {
                 try
                 {
-                    var deserializedJson = JsonConvert.DeserializeObject<JObject>(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
+                    var deserializedJson = JsonConvert.DeserializeObject<JToken>(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
                     if (deserializedJson != null)
                     {
-                        obj.Merge(deserializedJson);
+                        obj.Add(property.Name, deserializedJson);
                     }
                 } catch (Exception ex)
                 {
@@ -97,17 +97,9 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                     {
                         obj[property.Name] = property.Value;
                     }
-                    else if (ex is InvalidCastException)
-                    {
-                        var jToken = JsonConvert.DeserializeObject<JToken>(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
-                        if (jToken != null)
-                        {
-                            obj.Add(property.Name, jToken);
-                        }
-                    }
                 }                
             }
-
+            
             return obj;
         }
     }
