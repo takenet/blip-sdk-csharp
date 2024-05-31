@@ -36,6 +36,12 @@ namespace Take.Blip.Builder.Hosting
 
         TimeSpan ExecuteScriptTimeout { get; }
 
+        TimeSpan ExecuteScriptV2Timeout { get; }
+
         int MaximumInputExpirationLoop { get; }
+
+        long ExecuteScriptV2MaxRuntimeHeapSize { get; }
+
+        long ExecuteScriptV2MaxRuntimeStackUsage { get; }
     }
 }

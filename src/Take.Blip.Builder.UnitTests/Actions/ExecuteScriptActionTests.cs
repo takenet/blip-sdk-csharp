@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Jint.Runtime;
 using Newtonsoft.Json.Linq;
@@ -40,6 +37,49 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
             await Context.Received(1).SetVariableAsync(variableName, variableValue, CancellationToken, default(TimeSpan));
+        }
+
+        [Fact]
+        public async Task ExecuteWithDefaultTimeZoneShouldWork()
+        {
+            // Arrange
+            var settings = new ExecuteScriptSettings
+            {
+                // Fixed date to test timezone
+                Source = "function run() { return new Date('2021-01-01T00:00:10').toLocaleString('en-US'); }",
+                OutputVariable = "test"
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            // Jint doesn't support toLocaleString, so it will return the default date format
+            await Context.Received(1).SetVariableAsync("test", "Thursday, 31 December 2020 21:00:10", CancellationToken);
+        }
+
+        [Fact]
+        public async Task ExecuteWithCustomTimeZoneShouldWork()
+        {
+            // Arrange
+            var settings = new ExecuteScriptSettings
+            {
+                // Fixed date to test timezone
+                Source = "function run() { return new Date('2021-01-01T00:00:10').toLocaleString('en-US'); }",
+                OutputVariable = "test",
+                LocalTimeZoneEnabled = true
+            };
+            var target = GetTarget();
+
+            Context.Flow.Configuration["builder:#localTimeZone"] = "Asia/Shanghai";
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            // Jint doesn't support toLocaleString, so it will return the default date format
+            await Context.Received(1).SetVariableAsync("test", "Friday, 1 January 2021 08:00:10", CancellationToken);
         }
 
         [Fact]
@@ -237,7 +277,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         [Fact]
         public async Task ExecuteWithWhileTrueShouldFail()
         {
-            // Arrange            
+            // Arrange
             var result = "";
             var settings = new ExecuteScriptSettings()
             {
@@ -254,7 +294,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
             var target = GetTarget();
 
-            // Act            
+            // Act
             try
             {
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
