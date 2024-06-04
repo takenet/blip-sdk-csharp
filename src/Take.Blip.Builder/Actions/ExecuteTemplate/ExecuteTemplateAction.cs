@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Esprima;
 using HandlebarsDotNet;
 using Lime.Protocol;
 using Newtonsoft.Json;
@@ -29,9 +29,9 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             try
             {
                 var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-                var obj = CopyArgumentsToObject(arguments);
+                var dict = CopyArgumentsToDictionary(arguments);
                 var template = _handlebars.Compile(settings.Template);
-                result = template(obj);
+                result = template(dict);
             }
             catch (Exception ex)
             {
@@ -78,20 +78,17 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                 await context.SetVariableAsync(settings.OutputVariable, result, cancellationToken);
             }
         }
-        
-        private JObject CopyArgumentsToObject(JObject arguments)
+        private Dictionary<string, object> CopyArgumentsToDictionary(JObject arguments)
         {
-            var obj = new JObject();
-            foreach (var property in arguments.Properties())
+            var obj = new Dictionary<string, object>();
+            foreach (var property in arguments.Properties())    
             {
                 try
                 {
-                    var deserializedJson = JsonConvert.DeserializeObject<JToken>(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
-                    if (deserializedJson != null)
-                    {
-                        obj.Add(property.Name, deserializedJson);
-                    }
-                } catch (Exception ex)
+                    var deserializedJson = JsonConvert.DeserializeObject(property.Value.ToString(), JsonSerializerSettingsContainer.Settings);
+                    obj[property.Name] = deserializedJson ?? property.Value.ToString();
+                }
+                catch (Exception ex)
                 {
                     if (ex is JsonReaderException)
                     {
@@ -99,7 +96,6 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                     }
                 }                
             }
-            
             return obj;
         }
     }
