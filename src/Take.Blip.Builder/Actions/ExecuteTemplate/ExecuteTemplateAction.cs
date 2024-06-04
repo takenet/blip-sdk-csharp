@@ -29,7 +29,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             try
             {
                 var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-                var dict = copyArgumentsToDictionary(arguments);
+                var dict = CopyArgumentsToDictionary(arguments);
                 var template = _handlebars.Compile(settings.Template);
                 result = template(dict);
             }
@@ -78,7 +78,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                 await context.SetVariableAsync(settings.OutputVariable, result, cancellationToken);
             }
         }
-        private Dictionary<string, object> copyArgumentsToDictionary(JObject arguments)
+        private Dictionary<string, object> CopyArgumentsToDictionary(JObject arguments)
         {
             var obj = new Dictionary<string, object>();
             foreach (var property in arguments.Properties())    
