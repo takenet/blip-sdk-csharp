@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// Initializes a new instance of the <see cref="Context"/> class.
         /// </summary>
         /// <param name="context"></param>
-        /// <param name="timeParser"></param>
+        /// <param name="time"></param>
         /// <param name="cancellationToken"></param>
         public Context(IContext context, Time time, CancellationToken cancellationToken)
         {
