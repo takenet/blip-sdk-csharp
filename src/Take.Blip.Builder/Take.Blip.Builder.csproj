@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.ClearScript.V8" Version="7.4.5" />
+    <PackageReference Include="Microsoft.ClearScript.V8.ICUData" Version="7.4.5" />
+    <PackageReference Include="Microsoft.ClearScript.V8.Native.linux-x64" Version="7.4.5" />
+    <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x64" Version="7.4.5" />
     <PackageReference Include="Handlebars.Net.Extension.Json" Version="1.0.0" />
     <PackageReference Include="SimpleInjector" Version="5.4.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />

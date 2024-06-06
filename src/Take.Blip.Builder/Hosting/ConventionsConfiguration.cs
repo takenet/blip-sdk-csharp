@@ -31,6 +31,12 @@ namespace Take.Blip.Builder.Hosting
 
         public long ExecuteScriptLimitMemoryWarning => 10_000_000; // Nearly 10MB
 
+        public long ExecuteScriptV2MaxRuntimeHeapSize => 100_000_000; // Nearly 100MB
+
+        public long ExecuteScriptV2MaxRuntimeStackUsage => 50_000_000; // Nearly 50MB
+
+        public TimeSpan ExecuteScriptV2Timeout => TimeSpan.FromSeconds(10);
+
         public TimeSpan ExecuteScriptTimeout => TimeSpan.FromSeconds(5);
 
         public string InternalUris => "http.msging.net";

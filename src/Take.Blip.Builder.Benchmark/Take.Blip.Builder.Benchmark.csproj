@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <LangVersion>latest</LangVersion>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Take.Blip.Builder\Take.Blip.Builder.csproj"/>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.12"/>
+    <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.12"/>
+    <PackageReference Include="NSubstitute" Version="4.2.1"/>
+  </ItemGroup>
+
+</Project>
