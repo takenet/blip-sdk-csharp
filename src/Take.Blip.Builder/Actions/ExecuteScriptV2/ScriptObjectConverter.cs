@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         /// Converts the data to string representation.
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="timeParser"></param>
+        /// <param name="time"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static async Task<string> ToStringAsync(object data, Time time,
@@ -46,7 +46,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         /// Converts script result to c# object.
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="timeParser"></param>
+        /// <param name="time"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static async Task<object> ConvertAsync(object data, Time time,
