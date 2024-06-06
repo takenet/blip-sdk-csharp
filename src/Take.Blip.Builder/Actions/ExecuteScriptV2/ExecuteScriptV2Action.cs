@@ -70,7 +70,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
 
                 var time = new Time(_logger, context, settings, linkedToken.Token);
 
-                engine.RegisterFunctions(settings, _httpClient, context, time,
+                engine.RegisterFunctions(settings, _httpClient, context, time, _logger,
                     linkedToken.Token);
 
                 var result = engine.ExecuteInvoke(settings.Source, settings.Function,

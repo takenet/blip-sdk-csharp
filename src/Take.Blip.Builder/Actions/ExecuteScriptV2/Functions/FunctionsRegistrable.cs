@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Microsoft.ClearScript;
+using Serilog;
 using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
@@ -18,11 +19,13 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="httpClient"></param>
         /// <param name="context"></param>
         /// <param name="time"></param>
+        /// <param name="logger"></param>
         /// <param name="cancellationToken"></param>
         public static void RegisterFunctions(this ScriptEngine engine,
             ExecuteScriptV2Settings settings,
             IHttpClient httpClient, IContext context,
             Time time,
+            ILogger logger,
             CancellationToken cancellationToken)
         {
             // Date and time manipulation
@@ -33,12 +36,12 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             _setDateTimezone(engine);
 
             // Context access
-            engine.AddHostObject("context", new Context(context, time, cancellationToken));
+            engine.AddHostObject("context", new Context(context, time, logger, cancellationToken));
             engine.AddHostType(typeof(ContextExtensions));
 
             // Fetch API
             engine.AddHostObject("request",
-                new Request(settings, httpClient, context, time, cancellationToken));
+                new Request(settings, httpClient, context, time, logger, cancellationToken));
             engine.AddHostType(typeof(RequestExtensions));
             engine.AddHostType(typeof(Request.HttpResponse));
         }

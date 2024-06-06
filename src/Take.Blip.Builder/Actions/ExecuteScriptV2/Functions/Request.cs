@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Microsoft.ClearScript;
 using Newtonsoft.Json;
+using Serilog;
 using Take.Blip.Builder.Utils;
 
 namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
@@ -24,6 +25,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         private readonly IHttpClient _httpClient;
         private readonly IContext _context;
         private readonly Time _time;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Request"/> class.
@@ -32,9 +34,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="httpClient"></param>
         /// <param name="context"></param>
         /// <param name="time"></param>
+        /// <param name="logger"></param>
         /// <param name="cancellationToken"></param>
         public Request(ExecuteScriptV2Settings settings, IHttpClient httpClient, IContext context,
             Time time,
+            ILogger logger,
             CancellationToken cancellationToken)
         {
             _cancellationToken = cancellationToken;
@@ -42,6 +46,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             _settings = settings;
             _context = context;
             _time = time;
+            _logger = logger.ForContext("OwnerIdentity", context.OwnerIdentity)
+                .ForContext("UserIdentity", context.UserIdentity);
         }
 
         /// <summary>
@@ -79,7 +85,24 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
 
             var responseStatus = (int)httpResponseMessage.StatusCode;
             var isSuccessStatusCode = httpResponseMessage.IsSuccessStatusCode;
-            var responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+
+            var responseBody = "";
+
+            try
+            {
+                responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Error reading response content");
+
+                var currentActionTrace = _context.GetCurrentActionTrace();
+                if (currentActionTrace != null)
+                {
+                    currentActionTrace.Warning =
+                        $"Request.fetchAsync: failed to read body: {ex.Message}";
+                }
+            }
 
             return new HttpResponse(
                 responseStatus,
