@@ -24,6 +24,19 @@ internal static class Settings
                                        }
                                        """;
 
+    private const string RECURSION_LOOP_SCRIPT = """
+                                                 function recursiveLoop(a) {
+                                                     if (a < 1000) {
+                                                         return recursiveLoop(a + 1);
+                                                     }
+                                                     return a;
+                                                 }
+
+                                                 function run() {
+                                                     return recursiveLoop(0);
+                                                 }
+                                                 """;
+
     private const string JSON_SCRIPT = """
                                        function run() {
                                            const json = { 'a': 1, 'b': 'c', 'd' : ['1', '2'], 'e': { 'f': 1 } };
@@ -128,5 +141,17 @@ internal static class Settings
         new ExecuteScriptV2Settings
         {
             OutputVariable = "result", Function = "run", Source = SIMPLE_SCRIPT
+        });
+
+    internal static readonly JObject _v1RecursionLoopSettings = JObject.FromObject(
+        new ExecuteScriptSettings
+        {
+            OutputVariable = "result", Function = "run", Source = RECURSION_LOOP_SCRIPT
+        });
+
+    internal static readonly JObject _v2RecursionLoopSettings = JObject.FromObject(
+        new ExecuteScriptV2Settings
+        {
+            OutputVariable = "result", Function = "run", Source = RECURSION_LOOP_SCRIPT
         });
 }

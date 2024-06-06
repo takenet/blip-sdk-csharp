@@ -37,7 +37,7 @@ namespace Take.Blip.Builder.Benchmark.Actions
 
             configuration.ExecuteScriptTimeout = TimeSpan.FromMilliseconds(300);
             configuration.ExecuteScriptLimitMemory = conventions.ExecuteScriptLimitMemory;
-            configuration.ExecuteScriptLimitRecursion = conventions.ExecuteScriptLimitRecursion;
+            configuration.ExecuteScriptLimitRecursion = 100000;
             configuration.ExecuteScriptMaxStatements = 0;
 
             _v2Action = new ExecuteScriptV2Action(configuration, Substitute.For<IHttpClient>(),
@@ -116,6 +116,26 @@ namespace Take.Blip.Builder.Benchmark.Actions
         public async Task ExecuteScriptV2SimpleScript()
         {
             await _v2Action.ExecuteAsync(Context, Settings._v2SimpleSettings, CancellationToken);
+        }
+
+        /// <summary>
+        /// Execute a recursion loop script using the V1 action.
+        /// </summary>
+        [Benchmark]
+        public async Task ExecuteScriptV1RecursionLoopScript()
+        {
+            await _v1Action.ExecuteAsync(Context, Settings._v1RecursionLoopSettings,
+                CancellationToken);
+        }
+
+        /// <summary>
+        /// Execute a recursion loop script using the V2 action.
+        /// </summary>
+        [Benchmark]
+        public async Task ExecuteScriptV2RecursionLoopScript()
+        {
+            await _v2Action.ExecuteAsync(Context, Settings._v2RecursionLoopSettings,
+                CancellationToken);
         }
     }
 }

@@ -504,6 +504,29 @@ function run() {
             await Context.Received(1).SetVariableAsync("test", "12/31/2020, 9:00:00 PM",
                 CancellationToken);
         }
+        [Fact]
+        public async Task ExecuteWithArrowFunctionOnRun()
+        {
+            // Arrange
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source =
+                    @"
+async run = () => {
+    return 'foo';
+}
+",
+                OutputVariable = "test",
+                LocalTimeZoneEnabled = true
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync("test", "foo", CancellationToken);
+        }
 
         [Fact]
         public async Task ExecuteDateToStringWithCustomTimeZoneShouldWork()
