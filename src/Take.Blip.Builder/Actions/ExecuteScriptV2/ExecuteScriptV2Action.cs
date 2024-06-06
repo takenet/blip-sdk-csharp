@@ -21,7 +21,9 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         private readonly ILogger _logger;
 
         /// <inheritdoc />
-        public ExecuteScriptV2Action(IConfiguration configuration, IHttpClient httpClient,
+        public ExecuteScriptV2Action(
+            IConfiguration configuration,
+            IHttpClient httpClient,
             ILogger logger)
             : base(nameof(ExecuteScriptV2))
         {
