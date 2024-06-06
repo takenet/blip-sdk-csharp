@@ -59,6 +59,59 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
+        public async Task ExecuteScriptParseIntWithManyChars()
+        {
+            // Arrange
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source = @"
+function run() {
+    let numberTest = new Array(100000).join('Z');
+
+    let convert = parseInt(numberTest);
+    
+    return convert;
+}
+",
+                OutputVariable = "test"
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync("test", "NaN", CancellationToken);
+        }
+
+        [Fact]
+        public async Task ExecuteScriptWithLiteralRegularExpression()
+        {
+            // Arrange
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source = @"
+const matchEmailRegex = (input) => {
+    const pattern = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/gmi;
+    return input.match(pattern, 'gmi');
+}
+
+function run() {
+    return matchEmailRegex('test@blip.ai');
+}
+",
+                OutputVariable = "test"
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync("test", "[\"test@blip.ai\"]", CancellationToken);
+        }
+
+        [Fact]
         public async Task ExecuteWithCustomTimeZoneDateStringAndTimeStringShouldWork()
         {
             // Arrange
