@@ -504,6 +504,7 @@ function run() {
             await Context.Received(1).SetVariableAsync("test", "12/31/2020, 9:00:00 PM",
                 CancellationToken);
         }
+
         [Fact]
         public async Task ExecuteWithArrowFunctionOnRun()
         {
@@ -512,7 +513,35 @@ function run() {
             {
                 Source =
                     @"
-async run = () => {
+anArrowFunction = () => {
+    return 'foo';
+}
+
+async function run() {
+    return anArrowFunction();
+}
+",
+                OutputVariable = "test",
+                LocalTimeZoneEnabled = true
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync("test", "foo", CancellationToken);
+        }
+
+        [Fact]
+        public async Task ExecuteWithArrowFunctionEntrypointShouldWork()
+        {
+            // Arrange
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source =
+                    @"
+run = async () => {
     return 'foo';
 }
 ",
