@@ -108,6 +108,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             ExecuteScriptV2Settings settings,
             CancellationToken cancellationToken, Exception ex)
         {
+            string exceptionMessage;
+
             if (ex is ScriptEngineException ||
                 ex is ScriptInterruptedException ||
                 ex is TimeoutException ||
@@ -115,22 +117,18 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 ex is ValidationException ||
                 ex is OperationCanceledException)
             {
-                if (!settings.ExceptionVariable.IsNullOrEmpty())
-                {
-                    await context.SetVariableAsync(settings.ExceptionVariable, ex.Message,
-                        cancellationToken);
-                }
-
-                return ex.Message;
+                exceptionMessage = ex.Message;
             }
+            else
+            {
+                var traceId = Activity.Current?.Id ?? Guid.NewGuid().ToString();
 
-            var traceId = Activity.Current?.Id ?? Guid.NewGuid().ToString();
+                exceptionMessage =
+                    $"Internal script error, please contact the support with the following id: {traceId}";
 
-            var exceptionMessage =
-                $"Internal script error, please contact the support with the following id: {traceId}";
-
-            _logger.Error(ex, "Internal unknown bot error, support trace id: {TraceId}",
-                traceId);
+                _logger.Error(ex, "Internal unknown bot error, support trace id: {TraceId}",
+                    traceId);
+            }
 
             if (!settings.ExceptionVariable.IsNullOrEmpty())
             {
