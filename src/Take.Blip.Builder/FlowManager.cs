@@ -668,7 +668,14 @@ namespace Take.Blip.Builder
                     {
                         if (outputTrace != null)
                         {
-                            outputTrace.Error = ex.ToString();
+                            if (ex.Source.ToLower().StartsWith(START_SOURCE))
+                            {
+                                outputTrace.Error = STATE_TRACE_ERROR_NO_BLIP_NAMESPACE;
+                            }
+                            else
+                            {
+                                outputTrace.Error = ex.ToString();
+                            }
                         }
 
                         throw new OutputProcessingException($"Failed to process output condition to state '{output.StateId}'", ex)
