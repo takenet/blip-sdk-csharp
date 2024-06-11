@@ -323,7 +323,7 @@ namespace Take.Blip.Builder
                                     }
                                     else
                                     {
-                                        stateTrace.Error = ex.Message;
+                                        stateTrace.Error = ex.ToString();
                                     }
                                 }
                                 throw;
