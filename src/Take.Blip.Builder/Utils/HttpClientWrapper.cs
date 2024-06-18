@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Security.Authentication;
 
 namespace Take.Blip.Builder.Utils
 {
@@ -9,7 +10,8 @@ namespace Take.Blip.Builder.Utils
                 new HttpClientHandler
                 {
                     UseCookies = false,
-                    ClientCertificateOptions = ClientCertificateOption.Manual
+                    ClientCertificateOptions = ClientCertificateOption.Manual,
+                    SslProtocols = SslProtocols.None
                 })
         {
             
