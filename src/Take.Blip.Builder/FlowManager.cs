@@ -53,8 +53,8 @@ namespace Take.Blip.Builder
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
         private const string ACTION_EXECUTE_TEMPLATE = "ExecuteTemplate";
         public const string STATE_ID = "inputExpiration.stateId";
-        private const string START_SOURCE = "take.blip";
-        private const string STATE_TRACE_ERROR_NO_BLIP_NAMESPACE = "Internal Server Error";
+        private const string START_SOURCE_TAKE_BLIP = "take.blip";
+        private const string STATE_TRACE_INTERNAL_SERVER_ERROR = "Internal Server Error";
 
         public FlowManager(
             IConfiguration configuration,
@@ -317,9 +317,9 @@ namespace Take.Blip.Builder
                             {
                                 if (stateTrace != null)
                                 {
-                                    if (ex.InnerException != null && !ex.InnerException.Source.ToLower().StartsWith(START_SOURCE))
+                                    if (ex.InnerException != null && !ex.InnerException.Source.ToLower().StartsWith(START_SOURCE_TAKE_BLIP))
                                     {
-                                        stateTrace.Error = STATE_TRACE_ERROR_NO_BLIP_NAMESPACE;
+                                        stateTrace.Error = STATE_TRACE_INTERNAL_SERVER_ERROR;
                                     }
                                     else
                                     {
@@ -668,9 +668,9 @@ namespace Take.Blip.Builder
                     {
                         if (outputTrace != null)
                         {
-                            if (ex.Source.ToLower().StartsWith(START_SOURCE))
+                            if (ex.Source.ToLower().StartsWith(START_SOURCE_TAKE_BLIP))
                             {
-                                outputTrace.Error = STATE_TRACE_ERROR_NO_BLIP_NAMESPACE;
+                                outputTrace.Error = STATE_TRACE_INTERNAL_SERVER_ERROR;
                             }
                             else
                             {
