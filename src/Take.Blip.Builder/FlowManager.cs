@@ -583,7 +583,14 @@ namespace Take.Blip.Builder
                     {
                         if (actionTrace != null)
                         {
-                            actionTrace.Error = ex.ToString();
+                            if (!ex.Source.ToLower().StartsWith(START_SOURCE_TAKE_BLIP))
+                            {
+                                actionTrace.Error = STATE_TRACE_INTERNAL_SERVER_ERROR;
+                            }
+                            else
+                            {
+                                actionTrace.Error = ex.ToString();
+                            }
                         }
 
                         var message = ex is OperationCanceledException && cts.IsCancellationRequested
@@ -668,7 +675,7 @@ namespace Take.Blip.Builder
                     {
                         if (outputTrace != null)
                         {
-                            if (ex.Source.ToLower().StartsWith(START_SOURCE_TAKE_BLIP))
+                            if (!ex.Source.ToLower().StartsWith(START_SOURCE_TAKE_BLIP))
                             {
                                 outputTrace.Error = STATE_TRACE_INTERNAL_SERVER_ERROR;
                             }
