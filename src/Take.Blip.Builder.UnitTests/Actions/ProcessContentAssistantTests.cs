@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Take.Blip.Builder.Actions.ProcessContentAssistant;
 using Take.Blip.Builder.Models;
+using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
@@ -18,11 +19,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
     public class ProcessContentAssistantTests : ActionTestsBase
     {
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+        private readonly ISender _sender = Substitute.For<ISender>();
         private readonly ProcessContentAssistantAction _processContentAssistantAction;
 
         public ProcessContentAssistantTests()
         {
-            _processContentAssistantAction = new ProcessContentAssistantAction(_artificialIntelligenceExtension);
+            _processContentAssistantAction = new ProcessContentAssistantAction(_artificialIntelligenceExtension, _sender);
         }
 
         [Fact]
@@ -42,7 +44,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var contentAssistantResource = new AnalysisRequest
             {
                 Text = settings.Text,
-                Score = settings.Score.Value/100
+                Score = settings.Score.Value / 100
             };
 
             var contentResult = new ContentResult
@@ -70,16 +72,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Value = contentResult.Result.Content.ToString()
             });
 
-
             //Act
             _artificialIntelligenceExtension.GetContentResultAsync(Arg.Is<AnalysisRequest>(
-                ar => 
-                ar.Score == contentAssistantResource.Score && 
-                ar.Text == contentAssistantResource.Text), 
+                ar =>
+                ar.Score == contentAssistantResource.Score &&
+                ar.Text == contentAssistantResource.Text),
                 Arg.Any<CancellationToken>()).Returns(contentResult);
 
             await _processContentAssistantAction.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
-
 
             //Assert
             await Context.Received(1).SetVariableAsync(settings.OutputVariable, contentResultResponse, CancellationToken);
@@ -153,7 +153,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             var contentAssistantResult = new ContentResult
             {
-                Combinations = new ContentCombination[]{},
+                Combinations = new ContentCombination[] { },
                 Name = string.Empty,
                 Result = new Message
                 {
@@ -172,8 +172,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             //act
             _artificialIntelligenceExtension.GetContentResultAsync(
                 Arg.Is<AnalysisRequest>(
-                    ar=> ar.Score == contentAssistantResource.Score && 
-                    ar.Text == contentAssistantResource.Text), 
+                    ar => ar.Score == contentAssistantResource.Score &&
+                    ar.Text == contentAssistantResource.Text),
                 CancellationToken).
                 Returns(contentAssistantResult);
 
@@ -197,7 +197,6 @@ namespace Take.Blip.Builder.UnitTests.Actions
             //Assert
             Assert.Throws<ArgumentException>(functionCall);
         }
-
 
         [Fact]
         public async Task ValidContentAssistantRequestWithoutOutputVariable_ShouldFailAsync()
