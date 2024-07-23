@@ -59,6 +59,30 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
+        public async Task ExecuteWithSingleStatementScriptShouldSucceedAndDeleteVariableNotCalled()
+        {
+            // Arrange
+            const string variableName = "variable1";
+            const string variableValue = "my variable 1 value";
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source = $"function run() {{ return '{variableValue}'; }}",
+                OutputVariable = variableName
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
+                CancellationToken, Arg.Any<TimeSpan>());
+            await Context.Received(1).SetVariableAsync(variableName, variableValue,
+                CancellationToken);
+            await Context.Received(0).DeleteVariableAsync(variableName, CancellationToken);
+        }
+
+        [Fact]
         public async Task ExecuteScriptParseIntWithManyChars()
         {
             // Arrange
@@ -913,6 +937,7 @@ async function run() {
             resultMessage.RequestUri.ShouldBe(new Uri("https://mock.com"));
             resultMessage.Content.ShouldBeNull();
         }
+
 
         [Fact]
         public async Task ExecuteScriptParseIntWithExceededLengthShouldSucceed()
