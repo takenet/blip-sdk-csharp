@@ -52,10 +52,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
-                CancellationToken, Arg.Any<TimeSpan>());
             await Context.Received(1).SetVariableAsync(variableName, variableValue,
                 CancellationToken);
+            await Context.Received(0).DeleteVariableAsync(variableName, CancellationToken);
         }
 
         [Fact]
@@ -913,6 +912,7 @@ async function run() {
             resultMessage.RequestUri.ShouldBe(new Uri("https://mock.com"));
             resultMessage.Content.ShouldBeNull();
         }
+
 
         [Fact]
         public async Task ExecuteScriptParseIntWithExceededLengthShouldSucceed()

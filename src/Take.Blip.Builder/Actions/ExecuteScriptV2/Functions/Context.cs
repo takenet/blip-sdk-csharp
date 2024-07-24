@@ -54,6 +54,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
 
                 await _context.SetVariableAsync(key, result, _cancellationToken,
                     expiration: expiration);
+                return;
             }
 
             _logger.Information(
