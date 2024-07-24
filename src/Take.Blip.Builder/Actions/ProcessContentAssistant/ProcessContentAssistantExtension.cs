@@ -11,7 +11,7 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
     /// <summary>
     /// Content Assistant action
     /// </summary>
-    public static class ProcessContentAssistantExtencion
+    public static class ProcessContentAssistantExtension
     {
         /// <summary>
         /// Create command analysis

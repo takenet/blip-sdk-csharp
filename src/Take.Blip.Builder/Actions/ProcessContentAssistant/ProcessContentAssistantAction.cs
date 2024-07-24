@@ -1,11 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Lime.Protocol;
-using Take.Blip.Builder.Models;
-using Take.Blip.Client;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 
