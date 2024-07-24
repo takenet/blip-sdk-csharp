@@ -1,13 +1,10 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Lime.Protocol;
 using Newtonsoft.Json;
 using Take.Blip.Builder.Models;
+using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using Esprima.Ast;
 
 namespace Take.Blip.Builder.Actions.ProcessContentAssistant
 {
@@ -43,59 +40,29 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                 HasCombination = contentResult?.Result?.Content != null,
                 Value = contentResult?.Result?.Content?.ToString() ?? string.Empty,
                 Intent = bestCombinationFound?.Intent ?? string.Empty,
-                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>()
+                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>(),
+                V2 = false
             });
         }
 
         /// <summary>
-        /// Serialeze result v1
+        /// Serialeze result v2
         /// </summary>
         /// <param name="document"></param>
         /// <returns></returns>
-        public static string SerializeContentAssistantActionResponse(this Command document)
+        public static string SerializeContentAssistantActionResponse(this ContentAssistant contentResult)
         {
-            var contentResult = document.As<ContentAssistant>();
-
             var bestCombinationFound = contentResult.Combinations?.FirstOrDefault();  // The first combination is that has the best score
-            var result = contentResult.Results?.FirstOrDefault();
+            var result = contentResult?.Results?.FirstOrDefault();
 
             return JsonConvert.SerializeObject(new ContentAssistantActionResponse
             {
                 HasCombination = result?.Content != null,
                 Value = result?.Content?.ToString() ?? string.Empty,
                 Intent = bestCombinationFound?.Intent ?? string.Empty,
-                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>()
+                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>(),
+                V2 = true
             });
         }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public class ContentAssistant : Document
-    {
-        /// <summary>
-        /// Type document
-        /// </summary>
-        public const string MIME_TYPE = "application/vnd.iris.ai.content-assistant+json";
-
-        /// <summary>
-        /// Ctor
-        /// </summary>
-        public ContentAssistant() : base(MIME_TYPE)
-        {
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [DataMember(Name = "combinations")]
-        public ContentCombination[] Combinations { get; set; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [DataMember(Name = "results")]
-        public Message[] Results { get; set; }
     }
 }

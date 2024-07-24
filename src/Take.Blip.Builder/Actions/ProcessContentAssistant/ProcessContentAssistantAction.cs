@@ -16,16 +16,13 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
     /// </summary>
     public class ProcessContentAssistantAction : ActionBase<ProcessContentAssistantSettings>
     {
-        private readonly ISender _sender;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-        public ProcessContentAssistantAction(IArtificialIntelligenceExtension artificialIntelligenceExtension,
-            ISender sender) : base(nameof(ProcessContentAssistant))
+        public ProcessContentAssistantAction(IArtificialIntelligenceExtension artificialIntelligenceExtension) : base(nameof(ProcessContentAssistant))
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
-            _sender = sender;
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
         }
 
@@ -53,12 +50,11 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
             };
 
             var result = string.Empty;
-            bool.TryParse(settings.V2, out var v2);
 
-            if (v2)
+            if (settings.V2)
             {
-                var contentResult = await _sender.ProcessCommandAsync(
-                    contentAssistantResource.CommandAnalysis(),
+                var contentResult = await _artificialIntelligenceExtension.GetContentAssistantAsync(
+                    contentAssistantResource,
                     cancellationToken);
 
                 result = contentResult.SerializeContentAssistantActionResponse() ?? string.Empty;

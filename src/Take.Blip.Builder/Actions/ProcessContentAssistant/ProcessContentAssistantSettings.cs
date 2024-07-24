@@ -26,7 +26,7 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         /// <summary>
         /// Enable content V2
         /// </summary>
-        public string V2 { get; set; }
+        public bool V2 { get; set; }
 
         /// <summary>
         /// Minimum intent score
