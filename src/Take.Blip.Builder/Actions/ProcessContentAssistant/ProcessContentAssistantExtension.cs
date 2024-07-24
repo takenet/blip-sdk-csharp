@@ -27,7 +27,7 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
             };
 
         /// <summary>
-        /// Serialeze result v1
+        /// Serialize Result v1
         /// </summary>
         /// <param name="contentResult"></param>
         /// <returns></returns>
@@ -46,9 +46,9 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         }
 
         /// <summary>
-        /// Serialeze result v2
+        /// Serialize Result v2
         /// </summary>
-        /// <param name="document"></param>
+        /// <param name="contentResult"></param>
         /// <returns></returns>
         public static string SerializeContentAssistantActionResponse(this ContentAssistant contentResult)
         {
