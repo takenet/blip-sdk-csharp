@@ -24,7 +24,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         public ProcessContentAssistantTests()
         {
-            _processContentAssistantAction = new ProcessContentAssistantAction(_artificialIntelligenceExtension, _sender);
+            _processContentAssistantAction = new ProcessContentAssistantAction(_artificialIntelligenceExtension);
         }
 
         [Fact]
