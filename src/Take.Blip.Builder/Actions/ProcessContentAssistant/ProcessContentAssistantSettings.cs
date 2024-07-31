@@ -3,6 +3,9 @@ using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Actions.ProcessContentAssistant
 {
+    /// <summary>
+    /// Content
+    /// </summary>
     public class ProcessContentAssistantSettings : IValidable
     {
         /// <summary>
@@ -14,6 +17,16 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         /// Output variable
         /// </summary>
         public string OutputVariable { get; set; }
+
+        /// <summary>
+        /// Filter response
+        /// </summary>
+        public string Tags { get; set; }
+
+        /// <summary>
+        /// Enable content V2
+        /// </summary>
+        public bool V2 { get; set; }
 
         /// <summary>
         /// Minimum intent score

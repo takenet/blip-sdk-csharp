@@ -173,5 +173,12 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <returns></returns>
         Task SendFeedbackAsync(string analysisId, AnalysisFeedback analysisFeedback, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// Get content assistant for the analyzed user input.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ContentAssistant> GetContentAssistantAsync(Document document, CancellationToken cancellationToken = default);
     }
 }

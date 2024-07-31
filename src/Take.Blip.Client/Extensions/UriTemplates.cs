@@ -177,6 +177,7 @@ namespace Take.Blip.Client.Extensions
         /// Template for the pipeline.
         /// </summary>
         public const string PIPELINE = "/pipeline";
+
         /// <summary>
         /// Template for the pipeline senders.
         /// </summary>
@@ -203,7 +204,7 @@ namespace Take.Blip.Client.Extensions
         public const string RESOURCES = "/resources";
 
         /// <summary>
-        /// Template for the public resource storage 
+        /// Template for the public resource storage
         /// </summary>
         public const string RESOURCE = "/resources/{id}";
 
@@ -256,6 +257,11 @@ namespace Take.Blip.Client.Extensions
         /// Template for an AI content analysis.
         /// </summary>
         public const string CONTENT_ANALYSIS = "/content/analysis";
+
+        /// <summary>
+        /// Template for an AI content analysis.
+        /// </summary>
+        public const string ASSISTANT_ANALYSIS = "/assistant/analysis";
 
         /// <summary>
         /// Template for an AI models.
