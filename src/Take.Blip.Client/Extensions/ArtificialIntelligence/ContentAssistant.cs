@@ -12,7 +12,7 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
     {
         public const string MIME_TYPE = "application/vnd.iris.ai.content-assistant+json";
 
-        public static readonly MediaType MediaType = MediaType.Parse("application/vnd.iris.ai.content-assistant+json");
+        public static readonly MediaType MediaType = MediaType.Parse(MIME_TYPE);
 
         /// <summary>
         /// Name for easy content identification.
@@ -48,11 +48,35 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// The results of the content.
         /// </summary>
         [DataMember(Name = "results")]
-        public Message[] Results { get; set; }
+        public Result[] Results { get; set; }
 
         public ContentAssistant()
             : base(MediaType)
         {
         }
+    }
+
+    /// <summary>
+    /// The result of the content.
+    /// </summary>
+    public class Result
+    {
+        /// <summary>
+        /// Tags for easy content identification.
+        /// </summary>
+        [DataMember(Name = "tags")]
+        public string[] Tags { get; set; }
+
+        /// <summary>
+        /// Type content identification.
+        /// </summary>
+        [DataMember(Name = "type")]
+        public string Type { get; set; }
+
+        /// <summary>
+        /// The content.
+        /// </summary>
+        [DataMember(Name = "content")]
+        public string Content { get; set; }
     }
 }
