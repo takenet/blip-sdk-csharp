@@ -40,8 +40,7 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                 HasCombination = contentResult?.Result?.Content != null,
                 Value = contentResult?.Result?.Content?.ToString() ?? string.Empty,
                 Intent = bestCombinationFound?.Intent ?? string.Empty,
-                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>(),
-                V2 = false
+                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>()
             });
         }
 
@@ -60,8 +59,7 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                 HasCombination = result?.Content != null,
                 Value = result?.Content?.ToString() ?? string.Empty,
                 Intent = bestCombinationFound?.Intent ?? string.Empty,
-                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>(),
-                V2 = true
+                Entities = bestCombinationFound?.Entities.ToList() ?? new List<string>()
             });
         }
     }

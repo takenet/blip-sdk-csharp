@@ -26,10 +26,5 @@ namespace Take.Blip.Builder.Models
         /// Entities found
         /// </summary>
         public List<string> Entities { get; set; }
-
-        /// <summary>
-        /// Version content
-        /// </summary>
-        public bool V2 { get; set; }
     }
 }
