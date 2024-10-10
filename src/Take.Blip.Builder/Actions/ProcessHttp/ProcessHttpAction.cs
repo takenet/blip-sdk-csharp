@@ -97,7 +97,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable) &&
                     !string.IsNullOrWhiteSpace(responseBody))
                 {
-                    await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken);
+                    await context.SetVariableAsync(settings.ResponseBodyVariable, responseBody, cancellationToken, settings.ProccesHttpTimeToLive);
                 }
 
                 if (!isSuccessStatusCode)
@@ -143,7 +143,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         }
 
         /// <summary>
-        /// Add 'X-Blip-User' header to request, with current user identity as its value, if there is 
+        /// Add 'X-Blip-User' header to request, with current user identity as its value, if there is
         /// a configuration variable 'processHttpAddUserToRequestHeader' set to true
         /// </summary>
         /// <param name="httpRequestMessage"></param>
@@ -157,7 +157,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         }
 
         /// <summary>
-        /// Add 'X-Blip-Bot' header to request with the Bot's name as its value, if there is 
+        /// Add 'X-Blip-Bot' header to request with the Bot's name as its value, if there is
         /// a configuration variable 'processHttpAddBotIdentityToRequestHeader' set to true
         /// </summary>
         /// <param name="httpRequestMessage"></param>
