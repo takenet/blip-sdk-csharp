@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -57,6 +58,21 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     To = context.Input.Message.From,
                     Content = _documentSerializer.Deserialize(body, settings.MediaType)
                 };
+
+                if (context.Input.Message.From.Domain.Equals("tunnel.msging.net"))
+                {
+                    message.Metadata ??= new Dictionary<string, string>();
+
+                    if (context.Input.Message.Metadata.TryGetValue("#tunnel.owner", out string owner))
+                    {
+                        message.Metadata.Add("#tunnel.owner", owner);
+                    }
+
+                    if (context.Input.Message.Metadata.TryGetValue("#tunnel.originator", out string originator))
+                    {
+                        message.Metadata.Add("#tunnel.originator", originator);
+                    }
+                }
 
                 await _sender.SendMessageAsync(message, cancellationToken);
             }
