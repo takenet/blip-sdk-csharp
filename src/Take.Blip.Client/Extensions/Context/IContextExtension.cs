@@ -69,13 +69,6 @@ namespace Take.Blip.Client.Extensions.Context
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<DocumentCollection> GetVariablesAsync(Identity identity, int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken));
-
-        /// <summary>
-        /// Gets the identities that have stored contexts.
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<DocumentCollection> GetIdentitiesAsync(int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     public static class ContextExtensionExtensions
