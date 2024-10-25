@@ -100,11 +100,6 @@ namespace Take.Blip.Builder.UnitTests
             {
                 throw new NotImplementedException();
             }
-
-            public Task<DocumentCollection> GetIdentitiesAsync(int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken))
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

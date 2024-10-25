@@ -71,13 +71,6 @@ namespace Take.Blip.Client.Extensions.Context
                 $"{Smart.Format(CONTEXT, new { identity = Uri.EscapeDataString(identity.ToString()) })}?{nameof(skip)}={skip}&{nameof(take)}={take}");
             return ProcessCommandAsync<DocumentCollection>(requestCommand, cancellationToken);
         }
-
-        public Task<DocumentCollection> GetIdentitiesAsync(int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var requestCommand = CreateGetCommandRequest($"{CONTEXTS}?{nameof(skip)}={skip}&{nameof(take)}={take}");
-            return ProcessCommandAsync<DocumentCollection>(requestCommand, cancellationToken);
-        }
-
         private static string GetVariableRequestUri(Identity identity, string variableName) 
             => Smart.Format(
                 CONTEXT_VARIABLE,
