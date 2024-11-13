@@ -302,6 +302,48 @@ namespace Take.Blip.Builder.UnitTests
                         && m.Content.ToString() == expectedMessageContent),
                     Arg.Any<CancellationToken>());
         }
+        [Fact]
+        public async Task ProcessInputAsync_ShouldChangeActionType_WhenActionIsBlipFunction()
+        {
+            // Arrange
+            var flow = new Flow()
+            {
+                Configuration = { },
+
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
+                            {
+                                Type = "ExecuteBlipFunction",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "function", "run" },
+                                        { "source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}" },
+                                        { "outputVariable", "invalidScript" }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            BuilderExtension.Received(1).GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+
+        }
 
         [Fact]
         public async Task FlowWithEmptyActionOnTrackEventShouldReturnFlowConstructionException()
