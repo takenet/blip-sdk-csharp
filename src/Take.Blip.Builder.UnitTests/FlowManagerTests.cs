@@ -337,12 +337,12 @@ namespace Take.Blip.Builder.UnitTests
                 }
             };
             var target = GetTarget();
+            var functionDocument = new Function { FunctionContent = "function content", UserIdentity = "teste",FunctionDescription = "", FunctionId = Guid.NewGuid(), FunctionName = "",FunctionParameters = "",TenantId = ""};
 
-            // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
+            BuilderExtension.GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(functionDocument);
 
-            BuilderExtension.Received(1).GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
-
+            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
+            exception.Message.ShouldContain("The processing of the action 'ExecuteScriptV2' has failed");
         }
 
         [Fact]
