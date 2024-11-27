@@ -3,6 +3,8 @@ using System.Threading;
 using Lime.Protocol.Serialization;
 using Serilog;
 using Take.Blip.Client;
+using Lime.Protocol;
+using System;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -11,6 +13,11 @@ namespace Take.Blip.Builder.Variables
     /// </summary>
     public class BlipFunctionVariableProvider : ResourceVariableProviderBase, IVariableProvider
     {
+        private ISender _sender;
+        private string APPLICATION_NAME = "functions";
+        private static readonly Node BuilderAddress = Node.Parse($"postmaster@builder.msging.net");
+        private readonly ILogger _logger;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BlipFunctionVariableProvider"/> class.
         /// </summary>
@@ -18,8 +25,12 @@ namespace Take.Blip.Builder.Variables
         /// <param name="documentSerializer">The document serializer to use.</param>
         /// <param name="logger">The logger to use for logging.</param>
         public BlipFunctionVariableProvider(ISender sender, IDocumentSerializer documentSerializer, ILogger logger)
-            : base(sender, documentSerializer, "blipFunction", logger, "postmaster@builder.msging.net") { }
+            : base(sender, documentSerializer, "functions", logger, "postmaster@builder.msging.net") {
+            _sender = sender;
+            _logger = logger;
+        }
 
+        
         /// <summary>
         /// Gets the source of the variable.
         /// </summary>
@@ -34,9 +45,37 @@ namespace Take.Blip.Builder.Variables
         /// <returns>The value of the variable.</returns>
         public override async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
-            var variableValue = await base.GetVariableAsync(name, context, cancellationToken);
+            var getFunctionCommand = GenerateFunctionCommand(name);
 
-            return variableValue;
+            var resourceCommandResult = await _sender.ProcessCommandAsync(
+                getFunctionCommand,
+                cancellationToken);
+
+            if (resourceCommandResult.Status != CommandStatus.Success)
+            {
+                _logger.Warning("Variable {VariableName} from {ResourceName} not found", name, APPLICATION_NAME);
+                return null;
+            }
+
+            if (!resourceCommandResult.Resource.GetMediaType().IsJson)
+            {
+                return resourceCommandResult.Resource.ToString();
+            }
+
+            return "resourceCommandResult";
+        }
+
+
+        private Command GenerateFunctionCommand(string name)
+        {
+            var command = new Command()
+            {
+                Uri = new LimeUri($"/{APPLICATION_NAME}&functionName={name}"),
+                To = BuilderAddress,
+                Method = CommandMethod.Get
+            };
+
+            return command;
         }
     }
 }
