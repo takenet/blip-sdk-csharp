@@ -5,6 +5,8 @@ using Serilog;
 using Take.Blip.Client;
 using Lime.Protocol;
 using System;
+using Take.Blip.Builder.Utils;
+using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -46,23 +48,26 @@ namespace Take.Blip.Builder.Variables
         public override async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
         {
             var getFunctionCommand = GenerateFunctionCommand(name);
-
-            var resourceCommandResult = await _sender.ProcessCommandAsync(
+            try
+            {
+                var resourceCommandResult = await _sender.ProcessCommandAsync(
                 getFunctionCommand,
                 cancellationToken);
 
-            if (resourceCommandResult.Status != CommandStatus.Success)
-            {
-                _logger.Warning("Variable {VariableName} from {ResourceName} not found", name, APPLICATION_NAME);
-                return null;
-            }
+                if (resourceCommandResult.Status != CommandStatus.Success)
+                {
+                    _logger.Warning("Variable {VariableName} from {ResourceName} not found", name, APPLICATION_NAME);
+                    return null;
+                }
 
-            if (!resourceCommandResult.Resource.GetMediaType().IsJson)
-            {
-                return resourceCommandResult.Resource.ToString();
-            }
+                var function = ((DocumentCollection)resourceCommandResult.Resource).Items[0].ToObject<Function>();
 
-            return "resourceCommandResult";
+                return !string.IsNullOrEmpty(function.FunctionContent) ? function.FunctionContent : null;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
 
@@ -70,7 +75,7 @@ namespace Take.Blip.Builder.Variables
         {
             var command = new Command()
             {
-                Uri = new LimeUri($"/{APPLICATION_NAME}&functionName={name}"),
+                Uri = new LimeUri($"/{APPLICATION_NAME}?functionName={name}"),
                 To = BuilderAddress,
                 Method = CommandMethod.Get
             };
