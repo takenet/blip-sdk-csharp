@@ -56,7 +56,7 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The user who created this function
         /// </summary>
-        [DataMember(Name = "userIdentity", EmitDefaultValue = false, IsRequired = true)]
+        [DataMember(Name = "userIdentity")]
         public string UserIdentity { get; set; }
     }
 }

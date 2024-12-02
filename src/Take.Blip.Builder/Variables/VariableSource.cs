@@ -70,6 +70,11 @@
         /// <summary>
         /// Get values from secret
         /// </summary>
-        Secret
+        Secret,
+
+        /// <summary>
+        /// Get values from secret
+        /// </summary>
+        BlipFunction
     }
 }
