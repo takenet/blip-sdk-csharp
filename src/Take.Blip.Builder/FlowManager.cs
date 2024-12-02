@@ -537,6 +537,7 @@ namespace Take.Blip.Builder
                 {
                     continue;
                 }
+
                 string realAction = stateAction.Type;
 
                 if(stateAction.Type == ACTION_BLIP_FUNCTION)
