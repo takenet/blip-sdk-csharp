@@ -128,7 +128,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
                 Method = CommandMethod.Get
             };
 
-
             //Arrange
             var target = GetTarget();
 
@@ -170,7 +169,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
                 To = BuilderAddress,
                 Method = CommandMethod.Get
             };
-
 
             //Arrange
             var target = GetTarget();

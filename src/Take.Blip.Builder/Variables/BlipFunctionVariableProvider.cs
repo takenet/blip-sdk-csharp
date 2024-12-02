@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Variables
     {
         private ISender _sender;
         private string APPLICATION_NAME = "functions";
-        private static readonly Node BuilderAddress = Node.Parse($"postmaster@builder.msging.net");
+        private static readonly string BUILDER_ADDRESS = "postmaster@builder.msging.net";
         private readonly ILogger _logger;
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Take.Blip.Builder.Variables
         /// <param name="documentSerializer">The document serializer to use.</param>
         /// <param name="logger">The logger to use for logging.</param>
         public BlipFunctionVariableProvider(ISender sender, IDocumentSerializer documentSerializer, ILogger logger)
-            : base(sender, documentSerializer, "functions", logger, "postmaster@builder.msging.net") {
+            : base(sender, documentSerializer, "functions", logger, BUILDER_ADDRESS) {
             _sender = sender;
             _logger = logger;
         }
@@ -76,7 +76,7 @@ namespace Take.Blip.Builder.Variables
             var command = new Command()
             {
                 Uri = new LimeUri($"/{APPLICATION_NAME}?functionName={name}"),
-                To = BuilderAddress,
+                To = BUILDER_ADDRESS,
                 Method = CommandMethod.Get
             };
 
