@@ -14,6 +14,7 @@ using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
+using Take.Blip.Client.Extensions.Builder;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.ContactsJourney;
 using Take.Blip.Client.Extensions.EventTracker;
@@ -38,6 +39,7 @@ namespace Take.Blip.Builder.UnitTests
             ContactExtension = Substitute.For<IContactExtension>();
             HelpDeskExtension = Substitute.For<IHelpDeskExtension>();
             TunnelExtension = Substitute.For<ITunnelExtension>();
+            BuilderExtension = Substitute.For<IBuilderExtension>(); 
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
             StateSessionManager = Substitute.For<Client.Session.IStateManager>();
@@ -70,6 +72,10 @@ namespace Take.Blip.Builder.UnitTests
                 ArtificialIntelligenceExtension,
                 CancellationToken);
             Context.Input.Returns(Input);
+
+            var Flow = new Flow() { Configuration = new Dictionary<string, string> { { "builder:#localTimeZone", "America/Sao_Paulo" } } };
+
+            Context.Flow.Returns(Flow);
 
             TraceProcessor = Substitute.For<ITraceProcessor>();
             UserOwnerResolver = Substitute.For<IUserOwnerResolver>();
@@ -109,6 +115,8 @@ namespace Take.Blip.Builder.UnitTests
         public ITunnelExtension TunnelExtension { get; set; }
 
         public ISender Sender { get; set; }
+
+        public IBuilderExtension BuilderExtension { get; set; }
 
         public IStateManager StateManager { get; set; }
 
@@ -152,6 +160,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(() => TraceProcessor);
             container.RegisterSingleton(() => UserOwnerResolver);
             container.RegisterSingleton(() => FlowLoader);
+            container.RegisterSingleton(() => BuilderExtension);
 
             return container;
         }

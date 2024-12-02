@@ -5,6 +5,7 @@ using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.AttendanceForwarding;
 using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
+using Take.Blip.Client.Extensions.Builder;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.ContactsJourney;
 using Take.Blip.Client.Extensions.Context;
@@ -41,6 +42,7 @@ namespace Take.Blip.Client.Extensions
             serviceContainer.RegisterService(typeof(IResourceExtension), () => new ResourceExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(ITunnelExtension), () => new TunnelExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IArtificialIntelligenceExtension), () => new ArtificialIntelligenceExtension(senderFactory()));
+            serviceContainer.RegisterService(typeof(IBuilderExtension), () => new BuilderExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IContextExtension), () => new ContextExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IContactsJourneyExtension), () => new ContactsJourneyExtension(senderFactory()));
 

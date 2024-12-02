@@ -22,6 +22,7 @@ using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
+using Take.Blip.Client.Extensions.Builder;
 using Action = Take.Blip.Builder.Models.Action;
 
 namespace Take.Blip.Builder
@@ -40,6 +41,7 @@ namespace Take.Blip.Builder
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
+        private readonly IBuilderExtension _builderExtension;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
@@ -55,6 +57,8 @@ namespace Take.Blip.Builder
         public const string STATE_ID = "inputExpiration.stateId";
         private const string START_SOURCE_TAKE_BLIP = "take.blip";
         private const string STATE_TRACE_INTERNAL_SERVER_ERROR = "Internal Server Error";
+        private const string ACTION_BLIP_FUNCTION = "ExecuteBlipFunction";
+        private const string ACTION_EXECUTE_SCRIPT_V2 = "ExecuteScriptV2";
 
         public FlowManager(
             IConfiguration configuration,
@@ -75,7 +79,8 @@ namespace Take.Blip.Builder
             IFlowSessionManager flowSessionManager,
             IAnalyzeBuilderExceptions analyzeBuilderExceptions,
             IInputMessageHandlerAggregator inputMessageHandlerAggregator,
-            IInputExpirationCount inputExpirationCount
+            IInputExpirationCount inputExpirationCount,
+            IBuilderExtension builderExtension
             )
         {
             _configuration = configuration;
@@ -97,6 +102,7 @@ namespace Take.Blip.Builder
             _analyzeBuilderExceptions = analyzeBuilderExceptions;
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
+            _builderExtension = builderExtension;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -532,6 +538,13 @@ namespace Take.Blip.Builder
                     continue;
                 }
 
+                string realAction = stateAction.Type;
+
+                if(stateAction.Type == ACTION_BLIP_FUNCTION)
+                {
+                    stateAction.Type = ACTION_EXECUTE_SCRIPT_V2;
+                }
+
                 var action = _actionProvider.Get(stateAction.Type);
 
                 // Trace infra
@@ -567,6 +580,12 @@ namespace Take.Blip.Builder
                                 stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken, stateAction.Type);
                             }
                             jObjectSettings = JObject.Parse(stringifySetting);
+                            if (realAction == ACTION_BLIP_FUNCTION)
+                            {
+                                var functionOnBlipFunction = await _builderExtension.GetFunctionOnBlipFunctionAsync(jObjectSettings["source"].ToString(), linkedCts.Token);
+                                var function = functionOnBlipFunction.ToObject<Function>();
+                                jObjectSettings["source"] = function.FunctionContent;
+                            }
                             AddStateIdToSettings(action.Type, jObjectSettings, state.Id);
                         }
 

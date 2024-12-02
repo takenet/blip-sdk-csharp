@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 using Lime.Protocol;
 
 namespace Take.Blip.Builder.Models
 {
+    /// <summary>
+    /// Represents a function document in the system.
+    /// </summary>
     public class Function : Document
     {
         public const string MIME_TYPE = "application/vnd.iris.builder.functions.functions+json";
