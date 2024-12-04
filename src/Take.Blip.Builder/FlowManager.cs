@@ -633,6 +633,11 @@ namespace Take.Blip.Builder
                     }
                     finally
                     {
+                        if (realAction == ACTION_BLIP_FUNCTION)
+                        {
+                            stateAction.Type = ACTION_BLIP_FUNCTION;
+                        }
+
                         actionStopwatch?.Stop();
 
                         if (actionTrace != null &&
