@@ -137,5 +137,49 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             await Context.Received(1).SetVariableAsync(variable, JsonConvert.SerializeObject(responseCommand, LimeSerializerContainer.Serializer.Converters.ToArray()), Arg.Any<CancellationToken>());
         }
+
+        [Fact]
+        public async Task ProcessGetActionWithMetadataShouldSuceed()
+        {
+            // Arrange
+            var command = new Command()
+            {
+                Id = EnvelopeId.NewId(),
+                Method = CommandMethod.Get,
+                Uri = new LimeUri("/contacts"),
+                To = new Node("postmaster", "crm.msging.net", null)
+            };
+
+            var settings = JObject.FromObject(command, LimeSerializerContainer.Serializer);
+
+            var variable = "responseBody";
+            settings.TryAdd(nameof(variable), variable);
+
+            var target = GetTarget();
+
+            var responseCommand = new Command()
+            {
+                Method = CommandMethod.Get,
+                Status = CommandStatus.Success,
+                Resource = new JsonDocument()
+            };
+
+            BlipClient.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(responseCommand);
+
+            // Act
+            await target.ExecuteAsync(Context, settings, CancellationToken);
+
+            // Assert
+            await BlipClient
+                .Received(1)
+                .ProcessCommandAsync(Arg.Is<Command>(c => c.Uri.Equals(command.Uri) && (c.Metadata != null && c.Metadata.ContainsKey(Client.Constants.ENVELOPE_MUST_BE_ROUTED_TO_SERVER_KEY))), 
+                                     Arg.Any<CancellationToken>());
+
+            await Context
+                .Received(1)
+                .SetVariableAsync(variable, 
+                                  JsonConvert.SerializeObject(responseCommand, LimeSerializerContainer.Serializer.Converters.ToArray()), 
+                                  Arg.Any<CancellationToken>());
+        }
     }
 }
