@@ -19,7 +19,5 @@ namespace Take.Blip.Client
         public const string DEFAULT_STATE = "default";
 
         public const string ORIGINAL_SUBFLOW_REDIRECT_FROM = "originalSubflowRedirectFrom";
-
-        public const string ENVELOPE_MUST_BE_ROUTED_TO_SERVER_KEY = "#envelope.sendToServerRequired";
     }
 }

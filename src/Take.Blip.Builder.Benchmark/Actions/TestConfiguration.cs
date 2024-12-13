@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Take.Blip.Builder.Hosting;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -28,5 +29,6 @@ namespace Take.Blip.Builder.Benchmark.Actions
         public int MaximumInputExpirationLoop { get; set; }
         public long ExecuteScriptV2MaxRuntimeHeapSize { get; set; }
         public long ExecuteScriptV2MaxRuntimeStackUsage { get; set; }
+        public Dictionary<string, string> ProcessCommandMetadatasToInsert { get; set; }
     }
 }

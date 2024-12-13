@@ -3,9 +3,11 @@ using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.ProcessCommand
@@ -14,13 +16,15 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
     {
         private readonly ISender _sender;
         private readonly IEnvelopeSerializer _envelopeSerializer;
+        private readonly IConfiguration _configuration;
 
         private const string SERIALIZABLE_PATTERN = @".+[/|\+]json$";
 
-        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer)
+        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer, IConfiguration configuration)
         {
             _sender = sender;
             _envelopeSerializer = envelopeSerializer;
+            _configuration = configuration;
         }
 
         public string Type => nameof(ProcessCommand);
@@ -62,20 +66,25 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
             }
 
             var command = settings.ToObject<Command>(LimeSerializerContainer.Serializer);
-            InsertMetadataToRouteCommandProperly(command);
+            InsertMetadatasOnCommand(command);
 
             return command;
         }
 
-        private void InsertMetadataToRouteCommandProperly(Command command)
+        private void InsertMetadatasOnCommand(Command command)
         {
-            if (command.Metadata is null)
-                command.Metadata = new Dictionary<string, string>();
+            if (_configuration.ProcessCommandMetadatasToInsert != null && _configuration.ProcessCommandMetadatasToInsert.Count > 0)
+            {
+                if (command.Metadata is null)
+                    command.Metadata = new Dictionary<string, string>();
 
-            if (command.Metadata.ContainsKey(Client.Constants.ENVELOPE_MUST_BE_ROUTED_TO_SERVER_KEY))
-                command.Metadata[Client.Constants.ENVELOPE_MUST_BE_ROUTED_TO_SERVER_KEY] = "true";
-            else
-                command.Metadata.Add(Client.Constants.ENVELOPE_MUST_BE_ROUTED_TO_SERVER_KEY, "true");
+                var result = command.Metadata
+                                    .Concat(_configuration.ProcessCommandMetadatasToInsert)
+                                    .GroupBy(kv => kv.Key)
+                                    .ToDictionary(k => k.Key, v => v.Last().Value);
+
+                command.Metadata = result;
+            }
         }
     }
 }
