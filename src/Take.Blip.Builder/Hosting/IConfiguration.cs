@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Take.Blip.Builder.Hosting
@@ -23,7 +24,7 @@ namespace Take.Blip.Builder.Hosting
         int TraceQueueMaxDegreeOfParallelism { get; }
 
         TimeSpan TraceTimeout { get; }
-        
+
         TimeSpan DefaultActionExecutionTimeout { get; }
 
         int ExecuteScriptLimitRecursion { get; }
@@ -43,5 +44,7 @@ namespace Take.Blip.Builder.Hosting
         long ExecuteScriptV2MaxRuntimeHeapSize { get; }
 
         long ExecuteScriptV2MaxRuntimeStackUsage { get; }
+
+        Dictionary<string, string> ProcessCommandMetadatasToInsert { get; }
     }
 }
