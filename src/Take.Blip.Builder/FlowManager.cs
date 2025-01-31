@@ -585,6 +585,8 @@ namespace Take.Blip.Builder
                                 var functionOnBlipFunction = await _builderExtension.GetFunctionOnBlipFunctionAsync(jObjectSettings["source"].ToString(), linkedCts.Token);
                                 var function = functionOnBlipFunction.ToObject<Function>();
                                 jObjectSettings["source"] = function.FunctionContent;
+                                var function2 = await context.GetVariableAsync(function.FunctionContent, cancellationToken, stateAction.Type);
+                                jObjectSettings["source"] = function2.ToString();
                             }
                             AddStateIdToSettings(action.Type, jObjectSettings, state.Id);
                         }
