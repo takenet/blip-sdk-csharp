@@ -59,6 +59,7 @@ namespace Take.Blip.Builder
         private const string STATE_TRACE_INTERNAL_SERVER_ERROR = "Internal Server Error";
         private const string ACTION_BLIP_FUNCTION = "ExecuteBlipFunction";
         private const string ACTION_EXECUTE_SCRIPT_V2 = "ExecuteScriptV2";
+        private const string WORD_START_BLIP_FUNCTION = "{{";
 
         public FlowManager(
             IConfiguration configuration,
@@ -585,8 +586,12 @@ namespace Take.Blip.Builder
                                 var functionOnBlipFunction = await _builderExtension.GetFunctionOnBlipFunctionAsync(jObjectSettings["source"].ToString(), linkedCts.Token);
                                 var function = functionOnBlipFunction.ToObject<Function>();
                                 jObjectSettings["source"] = function.FunctionContent;
-                                var function2 = await context.GetVariableAsync(function.FunctionContent, cancellationToken, stateAction.Type);
-                                jObjectSettings["source"] = function2.ToString();
+                                if (function.FunctionContent.StartsWith(WORD_START_BLIP_FUNCTION))
+                                {
+                                    var stringJobectSettings = JsonConvert.SerializeObject(jObjectSettings);
+                                    var newStringifySetting = await _variableReplacer.ReplaceAsync(stringJobectSettings, context, cancellationToken, stateAction.Type);
+                                    jObjectSettings = JObject.Parse(newStringifySetting);
+                                }
                             }
                             AddStateIdToSettings(action.Type, jObjectSettings, state.Id);
                         }
