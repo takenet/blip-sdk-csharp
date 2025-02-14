@@ -75,6 +75,11 @@
         /// <summary>
         /// Get values from secret
         /// </summary>
-        BlipFunction
+        BlipFunction,
+
+        /// <summary>
+        /// get values from aiAgent
+        /// </summary>
+        AiAgent
     }
 }
