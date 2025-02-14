@@ -20,8 +20,8 @@
     <PackageReference Include="Lime.Messaging" Version="0.12.60" />
     <PackageReference Include="Lime.Protocol" Version="0.12.60" />
     <PackageReference Include="Lime.Transport.Tcp" Version="0.12.60" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SerilogAnalyzer" Version="0.15.0" />
@@ -34,5 +34,5 @@
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
-  
+
 </Project>
