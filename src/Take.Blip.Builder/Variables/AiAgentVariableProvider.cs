@@ -34,6 +34,7 @@ namespace Take.Blip.Builder.Variables
                                                       { "parameters", "parameters" },
                                                       { "userMessage", "user_message" },
                                                       { "userMessage_id", "user_message_id" },
+                                                      { "agentResponse", "agent_response" },
                                                       { "errorCode", "error_code" },
                                                       { "message", "" },
             };
