@@ -158,6 +158,7 @@ namespace Take.Blip.Builder.Hosting
                     typeof(TicketVariableProvider),
                     typeof(ResourceVariableProvider),
                     typeof(BlipFunctionVariableProvider),
+                    typeof(AiAgentVariableProvider),
                     typeof(SecretVariableProvider)
                 });
 
