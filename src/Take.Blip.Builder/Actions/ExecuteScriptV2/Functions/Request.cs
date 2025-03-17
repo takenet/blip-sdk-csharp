@@ -26,6 +26,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         private readonly IContext _context;
         private readonly Time _time;
         private readonly ILogger _logger;
+        private const string APPLICATION_JSON = "application/json";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Request"/> class.
@@ -112,26 +113,37 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
                     h => h.Key.ToLower(),
                     h => h.Value.ToArray()));
         }
+        private bool _isOnlyJsonContentType(string contentType)
+        {
+            return contentType.Split(',').Length == 1 && contentType.IsContentType(APPLICATION_JSON);
+        }
 
         private async Task _setBodyAsync(IScriptObject options,
-            HttpRequestMessage httpRequestMessage,
-            string contentType)
+           HttpRequestMessage httpRequestMessage,
+           string contentType)
         {
             var body = options?.GetProperty("body");
             if (body != null)
             {
-                var requestBody =
-                    await ScriptObjectConverter.ToStringAsync(body, _time, _cancellationToken);
+                var requestBody = await ScriptObjectConverter.ToStringAsync(body, _time, _cancellationToken);
 
-                httpRequestMessage.Content = new StringContent(requestBody, Encoding.UTF8,
-                    contentType ?? "application/json");
+                if (_isOnlyJsonContentType(contentType))
+                {
+                    httpRequestMessage.Content = new StringContent(contentType, Encoding.UTF8, contentType ?? APPLICATION_JSON);
+                }
+                else
+                {
+                    var byteArrayContent = new ByteArrayContent(Encoding.UTF8.GetBytes(contentType));
+                    byteArrayContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType ?? APPLICATION_JSON);
+                    httpRequestMessage.Content = byteArrayContent;
+                }
             }
         }
 
         private async Task<string> _setHeadersAsync(IScriptObject options,
             HttpRequestMessage httpRequestMessage)
         {
-            string contentType = "application/json";
+            string contentType = APPLICATION_JSON;
             if (!(options?.GetProperty("headers") is IScriptObject headers))
             {
                 return contentType;
