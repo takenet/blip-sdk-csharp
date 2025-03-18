@@ -812,6 +812,80 @@ async function run() {
 
         [Fact]
         [SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments")]
+        public async Task ExecuteScriptWithFormUrlEncodedContentTypeShouldSucceed()
+        {
+            // Arrange
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source = @"
+                async function run() {
+                    var response = await request.fetchAsync('https://mock.com', {
+                        'method': 'POST',
+                        'body': 'key1=value1&key2=value2',
+                        'headers': {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    });
+
+                    return response;
+                }",
+                OutputVariable = "result"
+            };
+
+            using var response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+            response.Content = new StringContent("{\"result\": \"form-response\"}");
+
+            var httpClient = Substitute.For<IHttpClient>();
+
+            HttpRequestMessage resultMessage = null;
+            httpClient.SendAsync(Arg.Do<HttpRequestMessage>(message =>
+            {
+                resultMessage = new HttpRequestMessage
+                {
+                    Method = message.Method,
+                    RequestUri = message.RequestUri,
+                    Content = new ByteArrayContent(Encoding.UTF8.GetBytes(message.Content!.ReadAsStringAsync()
+                        .GetAwaiter()
+                        .GetResult()))
+                };
+
+                foreach (var header in message.Headers)
+                {
+                    resultMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                }
+
+                resultMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+            }), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+            var target = GetTarget(httpClient);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await Context.Received(1).SetVariableAsync("result",
+                Arg.Is<string>(s => s.Contains("\"status\":200") &&
+                                    s.Contains("\"success\":true") &&
+                                    s.Contains("\"body\":\"{\\\"result\\\": \\\"form-response\\\"}\"")),
+                CancellationToken);
+
+            resultMessage.ShouldNotBeNull();
+            resultMessage.Method.ShouldBe(HttpMethod.Post);
+            resultMessage.RequestUri.ShouldBe(new Uri("https://mock.com"));
+
+            var requestBody = await resultMessage.Content!.ReadAsStringAsync();
+            requestBody.ShouldBe("key1=value1&key2=value2");
+
+            resultMessage.Content.Headers.ContentType!.ToString().ShouldContain("application/x-www-form-urlencoded");
+            resultMessage.Content.Headers.ContentType!.ToString().ShouldNotContain("charset=utf-8");
+
+            resultMessage.Content.ShouldBeOfType<ByteArrayContent>();
+        }
+
+        [Fact]
+        [SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments")]
         public async Task ExecuteScriptWithRequestParseJsonResponse()
         {
             // Arrange
