@@ -119,8 +119,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         }
 
         private async Task _setBodyAsync(IScriptObject options,
-           HttpRequestMessage httpRequestMessage,
-           string contentType)
+            HttpRequestMessage httpRequestMessage,
+            string contentType)
         {
             var body = options?.GetProperty("body");
             if (body != null)
@@ -129,11 +129,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
 
                 if (_isOnlyJsonContentType(contentType))
                 {
-                    httpRequestMessage.Content = new StringContent(contentType, Encoding.UTF8, contentType ?? APPLICATION_JSON);
+                    httpRequestMessage.Content = new StringContent(requestBody, Encoding.UTF8, contentType ?? APPLICATION_JSON);
                 }
                 else
                 {
-                    var byteArrayContent = new ByteArrayContent(Encoding.UTF8.GetBytes(contentType));
+                    var byteArrayContent = new ByteArrayContent(Encoding.UTF8.GetBytes(requestBody));
                     byteArrayContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType ?? APPLICATION_JSON);
                     httpRequestMessage.Content = byteArrayContent;
                 }
