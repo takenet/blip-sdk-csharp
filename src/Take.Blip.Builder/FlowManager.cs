@@ -576,7 +576,7 @@ namespace Take.Blip.Builder
 
                         if (stringifySetting != null)
                         {
-                            if (action.Type != ACTION_EXECUTE_TEMPLATE)
+                            if (action.Type != ACTION_EXECUTE_TEMPLATE && action.Type != ACTION_PROCESS_HTTP)
                             {
                                 stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken, stateAction.Type);
                             }
@@ -600,7 +600,7 @@ namespace Take.Blip.Builder
                         {
                             actionTrace.ParsedSettings = new JRaw(stringifySetting);
                         }
-
+                        
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), jObjectSettings, true))
                             await action.ExecuteAsync(context, jObjectSettings, linkedCts.Token);
