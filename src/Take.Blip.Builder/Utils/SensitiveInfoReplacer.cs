@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Actions.ProcessHttp;
-using Take.Blip.Builder.Models;
-using Take.Blip.Client.Activation;
 
 namespace Take.Blip.Builder.Utils
 {
@@ -19,6 +12,7 @@ namespace Take.Blip.Builder.Utils
     public class SensitiveInfoReplacer : ISensitiveInfoReplacer
     {
         private const string DEFAULT_VALUE_FOR_SUPRESSED_STRING = "***";
+        private const string PATTERN = @"\{\{secret\..*?\}\}";
 
         /// <summary>
         /// Method to allow remove credentials from trace collector, avoiding store authorization keys externally
@@ -42,6 +36,12 @@ namespace Take.Blip.Builder.Utils
             foreach (var item in httpSettings.Headers.Keys.ToList())
             {
                 httpSettings.Headers[item] = DEFAULT_VALUE_FOR_SUPRESSED_STRING;
+            }
+
+            if(httpSettings.Body != null)
+            {
+                var maskedBody = Regex.Replace(httpSettings.Body, PATTERN, DEFAULT_VALUE_FOR_SUPRESSED_STRING);
+                httpSettings.Body = maskedBody;
             }
 
             var adjustedValue = JsonConvert.SerializeObject(httpSettings, OrderedJsonSerializerSettingsContainer.Settings);

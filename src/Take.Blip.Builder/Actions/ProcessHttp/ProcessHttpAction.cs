@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Serilog.Context;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
 
@@ -18,21 +17,24 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         private const string ADD_USER_KEY = "processHttpAddUserToRequestHeader";
         private const string ADD_BOT_KEY = "processHttpAddBotIdentityToRequestHeader";
         private const string SEND_HEADERS_TO_TRACE_COLLECTOR = "sendHeadersToTraceCollector";
+        private const string ACTION_PROCESS_HTTP = "ProcessHttp";
 
         public static readonly TimeSpan DefaultRequestTimeout = TimeSpan.FromSeconds(60);
 
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
+        private readonly IVariableReplacer _variableReplacer;
         private readonly ISensitiveInfoReplacer _sensitiveInfoReplacer;
 
-        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration, ISensitiveInfoReplacer sensitiveInfoReplacer)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration,  ISensitiveInfoReplacer sensitiveInfoReplacer, IVariableReplacer variableReplacer)
             : base(nameof(ProcessHttp))
         {
             _httpClient = httpClient;
             _logger = logger;
             _configuration = configuration;
             _sensitiveInfoReplacer = sensitiveInfoReplacer;
+            _variableReplacer = variableReplacer;
         }
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
@@ -50,16 +52,26 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     {
                         foreach (var header in settings.Headers)
                         {
-                            httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                            var secret = await _variableReplacer.ReplaceAsync(header.Value, context, cancellationToken, ACTION_PROCESS_HTTP);
+                            if (string.IsNullOrEmpty(secret))
+                            {
+                                httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                            }
+                            else
+                            {
+                                httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, secret);
+                            }
                         }
                     }
 
                     if (!string.IsNullOrWhiteSpace(settings.Body))
                     {
                         string contentType = null;
-                        settings.Headers?.TryGetValue("Content-Type", out contentType);
-                        httpRequestMessage.Content = new StringContent(settings.Body, Encoding.UTF8,
-                            contentType ?? "application/json");
+                        var body = await _variableReplacer.ReplaceAsync(settings.Body, context, cancellationToken, ACTION_PROCESS_HTTP);
+
+                            settings.Headers?.TryGetValue("Content-Type", out contentType);
+                            httpRequestMessage.Content = new StringContent(body, Encoding.UTF8,
+                                contentType ?? "application/json");
                     }
 
                     if (CheckInternalUris(settings.Uri.AbsoluteUri))

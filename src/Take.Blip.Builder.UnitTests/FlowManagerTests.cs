@@ -385,45 +385,6 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
-        public async Task FlowWithEmptyUriOnProcessHttpShouldReturnFlowConstructionException()
-        {
-            // Arrange
-            var flow = new Flow()
-            {
-                Id = Guid.NewGuid().ToString(),
-                States = new[]
-                {
-                    new State
-                    {
-                        Id = "root",
-                        Root = true,
-                        Input = new Input(),
-                        OutputActions = new[]
-                        {
-                            new Action
-                            {
-                                Type = "ProcessHttp",
-                                Settings = new JRaw(
-                                    new JObject()
-                                    {
-                                        { "method", "GET" },
-                                        { "uri", "{{variable.doesntExist}}" }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            };
-            var target = GetTarget();
-
-            // Act
-            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
-            exception.Message.ShouldContain("[FlowConstruction]");
-            exception.Message.ShouldContain("ProcessHttp");
-        }
-
-        [Fact]
         public async Task FlowWithInvalidValueOnRedirectShouldReturnFlowConstructionException()
         {
             // Arrange

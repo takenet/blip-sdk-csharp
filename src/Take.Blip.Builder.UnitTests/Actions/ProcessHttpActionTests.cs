@@ -4,8 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
@@ -34,16 +32,18 @@ namespace Take.Blip.Builder.UnitTests.Actions
             HttpClient = Substitute.For<IHttpClient>();
             Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
             configuration = Substitute.For<IConfiguration>();
+            variableReplacer = Substitute.For<IVariableReplacer>();
             sensitiveInfoReplacer = new SensitiveInfoReplacer();
         }
 
         public IHttpClient HttpClient { get; set; }
         public IConfiguration configuration { get; set; }
         public ISensitiveInfoReplacer sensitiveInfoReplacer { get; set; }
+        public IVariableReplacer variableReplacer { get; set; }
 
         private ProcessHttpAction GetTarget()
         {
-            return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>(), configuration, sensitiveInfoReplacer);
+            return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>(), configuration, sensitiveInfoReplacer, variableReplacer);
         }
 
         [Fact]
