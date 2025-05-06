@@ -11,7 +11,7 @@ trigger:
     - hotfix/*
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: ubuntu-22.04
 
 variables:
   sonarQubeTags: 'Flow Building'

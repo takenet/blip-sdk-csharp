@@ -573,10 +573,11 @@ namespace Take.Blip.Builder
                     {
                         JObject jObjectSettings = null;
                         var stringifySetting = stateAction.Settings?.ToString(Formatting.None);
+                        var stringfySettingsCopy = stringifySetting;
 
                         if (stringifySetting != null)
                         {
-                            if (action.Type != ACTION_EXECUTE_TEMPLATE && action.Type != ACTION_PROCESS_HTTP)
+                            if (action.Type != ACTION_EXECUTE_TEMPLATE)
                             {
                                 stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken, stateAction.Type);
                             }
@@ -598,7 +599,17 @@ namespace Take.Blip.Builder
 
                         if (actionTrace != null)
                         {
+                            if(action.Type == ACTION_PROCESS_HTTP)
+                            {
+                                var result = RestoreBodyStringWithSecrets(stringfySettingsCopy, stringifySetting);
+                                actionTrace.ParsedSettings = new JRaw(string.IsNullOrEmpty(result) ? stringifySetting : result);
+                                jObjectSettings = JObject.Parse(result);
+                            }
+                            else
+                            {
                             actionTrace.ParsedSettings = new JRaw(stringifySetting);
+
+                            }
                         }
                         
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
@@ -657,6 +668,46 @@ namespace Take.Blip.Builder
                     }
                 }
             }
+        }
+
+        private string RestoreBodyStringWithSecrets(string original, string executed)
+        {
+            var originalObj = JObject.Parse(original);
+            var executedObj = JObject.Parse(executed);
+            var regexMatch = @"{{secret\.([a-zA-Z0-9_]+)}}";
+
+            var originalBodyRaw = originalObj["body"]?.ToString();
+            var executedBodyRaw = executedObj["body"]?.ToString();
+
+            if (string.IsNullOrWhiteSpace(originalBodyRaw) || string.IsNullOrWhiteSpace(executedBodyRaw))
+                return executed;
+
+            var originalBody = JObject.Parse(originalBodyRaw);
+            var executedBody = JObject.Parse(executedBodyRaw);
+
+            foreach (var prop in originalBody.Properties())
+            {
+                var value = prop.Value?.ToString();
+
+                // Restore only if value is exactly a secret placeholder
+                if (!string.IsNullOrEmpty(value) && Regex.IsMatch(value, $"^({regexMatch})$"))
+                {
+                    executedBody[prop.Name] = value;
+                }
+            }
+
+            // Check if original URI contains a secret placeholder
+            var originalUri = originalObj["uri"]?.ToString();
+            var secretUriMatch = Regex.Match(originalUri ?? "", regexMatch);
+
+            if (secretUriMatch.Success)
+            {
+                executedObj["secretUrlBlip"] = true;
+            }
+
+            executedObj["body"] = executedBody.ToString(Formatting.None);
+
+            return executedObj.ToString(Formatting.Indented);
         }
 
         private Boolean IsContextVariable(string stateId)

@@ -22,7 +22,7 @@ namespace Take.Blip.Builder.UnitTests.Utils
         public void HeadersSubstitutionShouldSucceed()
         {
             //Arrange
-            var contentToSubstitute = @"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
+            var contentToSubstitute = @"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net"",""secretUrlBlip"":false}";
             var expectedContent = @"{""headers"":{""BotKey"":""***"",""OtherHeader"":""***"",""Content-Type"":""***""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}";
 
             //Act
