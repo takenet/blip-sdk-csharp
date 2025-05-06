@@ -702,7 +702,7 @@ namespace Take.Blip.Builder
 
             if (secretUriMatch.Success)
             {
-                executedObj["secretUrlBlip"] = true;
+                executedObj["SecretUrlBlip"] = true;
             }
 
             executedObj["body"] = executedBody.ToString(Formatting.None);

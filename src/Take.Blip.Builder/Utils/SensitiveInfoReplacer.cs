@@ -44,7 +44,7 @@ namespace Take.Blip.Builder.Utils
                 httpSettings.Body = maskedBody;
             }
 
-            if (httpSettings.SecretUrlBlip)
+            if (httpSettings.SecretUrlBlip != null  && httpSettings.SecretUrlBlip == true)
             {
                 httpSettings.Uri = new Uri(DEFAULT_VALUE_FOR_SUPRESSED_STRING, UriKind.RelativeOrAbsolute);
             }
