@@ -19,9 +19,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         public string ResponseBodyVariable { get; set; }
 
         public string ResponseStatusVariable { get; set; }
-        
-        [JsonIgnore]
-        public bool SecretUrlBlip { get; set; }
+
+        public bool? SecretUrlBlip { get; set; }
 
         public TimeSpan? RequestTimeout { get; set; }
 
