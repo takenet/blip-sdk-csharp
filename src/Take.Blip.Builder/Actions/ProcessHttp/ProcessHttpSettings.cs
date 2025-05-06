@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Actions.ProcessHttp
@@ -18,6 +19,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         public string ResponseBodyVariable { get; set; }
 
         public string ResponseStatusVariable { get; set; }
+        
+        [JsonIgnore]
+        public bool SecretUrlBlip { get; set; }
 
         public TimeSpan? RequestTimeout { get; set; }
 

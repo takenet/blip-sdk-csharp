@@ -44,6 +44,11 @@ namespace Take.Blip.Builder.Utils
                 httpSettings.Body = maskedBody;
             }
 
+            if (httpSettings.SecretUrlBlip)
+            {
+                httpSettings.Uri = new Uri(DEFAULT_VALUE_FOR_SUPRESSED_STRING, UriKind.RelativeOrAbsolute);
+            }
+
             var adjustedValue = JsonConvert.SerializeObject(httpSettings, OrderedJsonSerializerSettingsContainer.Settings);
             return adjustedValue;
         }
