@@ -599,7 +599,7 @@ namespace Take.Blip.Builder
 
                         if (actionTrace != null)
                         {
-                            if(action.Type == ACTION_PROCESS_HTTP)
+                            if(realAction == ACTION_PROCESS_HTTP)
                             {
                                 var result = RestoreBodyStringWithSecrets(stringfySettingsCopy, stringifySetting);
                                 actionTrace.ParsedSettings = new JRaw(string.IsNullOrEmpty(result) ? stringifySetting : result);
@@ -672,9 +672,10 @@ namespace Take.Blip.Builder
 
         private string RestoreBodyStringWithSecrets(string original, string executed)
         {
+            var regexMatch = @"{{secret\.([a-zA-Z0-9_]+)}}";
+
             var originalObj = JObject.Parse(original);
             var executedObj = JObject.Parse(executed);
-            var regexMatch = @"{{secret\.([a-zA-Z0-9_]+)}}";
 
             var originalBodyRaw = originalObj["body"]?.ToString();
             var executedBodyRaw = executedObj["body"]?.ToString();
@@ -682,32 +683,108 @@ namespace Take.Blip.Builder
             if (string.IsNullOrWhiteSpace(originalBodyRaw) || string.IsNullOrWhiteSpace(executedBodyRaw))
                 return executed;
 
-            var originalBody = JObject.Parse(originalBodyRaw);
-            var executedBody = JObject.Parse(executedBodyRaw);
-
-            foreach (var prop in originalBody.Properties())
+            try
             {
-                var value = prop.Value?.ToString();
+                var originalBodyToken = TryParseJson(originalBodyRaw);
+                var executedBodyToken = TryParseJson(executedBodyRaw);
 
-                // Restore only if value is exactly a secret placeholder
-                if (!string.IsNullOrEmpty(value) && Regex.IsMatch(value, $"^({regexMatch})$"))
+                if (originalBodyToken != null && executedBodyToken != null)
                 {
-                    executedBody[prop.Name] = value;
+                    var originalLeaves = originalBodyToken.SelectTokens("$..*").ToList();
+                    var executedLeaves = executedBodyToken.SelectTokens("$..*").ToList();
+
+                    for (int i = 0; i < originalLeaves.Count && i < executedLeaves.Count; i++)
+                    {
+                        var origVal = originalLeaves[i];
+                        if (origVal.Type == JTokenType.String)
+                        {
+                            var val = origVal.ToString();
+                            if (Regex.IsMatch(val, $"^({regexMatch})$"))
+                            {
+                                executedLeaves[i].Replace(val);
+                            }
+                        }
+                    }
+
+                    executedObj["body"] = executedBodyToken.ToString(Formatting.None);
+                }
+                else
+                {
+                    executedObj["body"] = RestoreStringSecrets(originalBodyRaw, executedBodyRaw, regexMatch);
                 }
             }
+            catch
+            {
+                executedObj["body"] = RestoreStringSecrets(originalBodyRaw, executedBodyRaw, regexMatch);
+            }
 
-            // Check if original URI contains a secret placeholder
             var originalUri = originalObj["uri"]?.ToString();
-            var secretUriMatch = Regex.Match(originalUri ?? "", regexMatch);
-
-            if (secretUriMatch.Success)
+            if (Regex.IsMatch(originalUri ?? "", regexMatch))
             {
                 executedObj["SecretUrlBlip"] = true;
             }
 
-            executedObj["body"] = executedBody.ToString(Formatting.None);
-
             return executedObj.ToString(Formatting.Indented);
+        }
+
+        private static JToken? TryParseJson(string input)
+        {
+            try
+            {
+                return JToken.Parse(input);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string RestoreStringSecrets(string original, string executed, string regexPattern)
+        {
+            if (original.Contains("=") && original.Contains("&"))
+            {
+                var originalParams = ParseFormEncoded(original);
+                var executedParams = ParseFormEncoded(executed);
+
+                foreach (var key in originalParams.Keys)
+                {
+                    var origVal = originalParams[key];
+                    if (Regex.IsMatch(origVal, $"^({regexPattern})$"))
+                    {
+                        executedParams[key] = origVal;
+                    }
+                }
+
+                return string.Join("&", executedParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+            }
+            else
+            {
+                var matches = Regex.Matches(original, regexPattern);
+                foreach (Match match in matches)
+                {
+                    var placeholder = match.Value;
+                    if (executed.Contains(placeholder))
+                        continue;
+
+                    var base64LikeMatch = Regex.Match(executed, @"[a-zA-Z0-9+/=]{10,}");
+                    if (base64LikeMatch.Success)
+                    {
+                        executed = executed.Replace(base64LikeMatch.Value, placeholder);
+                    }
+                }
+                return executed;
+            }
+        }
+
+        private static Dictionary<string, string> ParseFormEncoded(string formEncoded)
+        {
+            return formEncoded
+                .Split('&')
+                .Select(part => part.Split('='))
+                .Where(pair => pair.Length == 2)
+                .ToDictionary(
+                    pair => Uri.UnescapeDataString(pair[0]),
+                    pair => Uri.UnescapeDataString(pair[1]));
         }
 
         private Boolean IsContextVariable(string stateId)
