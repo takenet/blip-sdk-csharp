@@ -11,15 +11,24 @@ trigger:
     - hotfix/*
 
 pool:
-  vmImage: ubuntu-22.04
-
+  vmImage: ubuntu-latest
 variables:
-  sonarQubeTags: 'Flow Building'
-  sonarQubeKey: 'Blip_SDK_CSharp'
-  sonarQubeName: 'BLiP SDK CSharp'
-  checkmarxName: 'BLiP SDK'
-  framework: dotnet
-
+- group: 'Nuget Org Test'
+- name: sonarQubeTags
+  value: 'Flow Building'
+- name: sonarQubeKey
+  value: 'Blip_SDK_CSharp'
+- name: sonarQubeName
+  value: 'BLiP SDK CSharp'
+- name: checkmarxName
+  value: 'BLiP SDK'
+- name: framework
+  value: dotnet
+- name: nugetAuthenticate
+  value: true
+- name: useCache
+  value: false
+  
 name: 0.7$(Rev:.r)
 
 resources:
@@ -27,7 +36,8 @@ resources:
   - repository: templates
     type: git
     name: Operações/template-take-blip
-    ref: refs/tags/v1.4.43
+    ref: feature/update-dotnet-task
+    #ref: refs/tags/latest
 
 extends:
   template: template-pipeline.yml@templates    
@@ -38,6 +48,9 @@ extends:
     nugetServiceConnection: Nuget.org Take
     dotnetVersion: "8.0.x"
     testProjects: src/Take.Blip.Client.sln
+    solution: src/Take.Blip.Client.sln
+    nugetAuthenticate: true
+    useCache: false
     testPermission: true
     skipSonarBranch: false
     skipSast: false
