@@ -90,7 +90,7 @@ namespace Take.Blip.Builder.UnitTests
             var expectedUri = "/ping";
 
 
-            // Use reflection se for m�todo privado
+            // Use reflection se for método privado
             var method = typeof(FlowManager)
                 .GetMethod("RestoreBodyStringWithSecrets", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
