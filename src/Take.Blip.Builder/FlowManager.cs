@@ -541,7 +541,7 @@ namespace Take.Blip.Builder
 
                 string realAction = stateAction.Type;
 
-                if(stateAction.Type == ACTION_BLIP_FUNCTION)
+                if (stateAction.Type == ACTION_BLIP_FUNCTION)
                 {
                     stateAction.Type = ACTION_EXECUTE_SCRIPT_V2;
                 }
@@ -599,7 +599,7 @@ namespace Take.Blip.Builder
 
                         if (actionTrace != null)
                         {
-                            if(realAction == ACTION_PROCESS_HTTP)
+                            if (realAction == ACTION_PROCESS_HTTP)
                             {
                                 var result = RestoreBodyStringWithSecrets(stringfySettingsCopy, stringifySetting);
                                 actionTrace.ParsedSettings = new JRaw(string.IsNullOrEmpty(result) ? stringifySetting : result);
@@ -607,11 +607,11 @@ namespace Take.Blip.Builder
                             }
                             else
                             {
-                            actionTrace.ParsedSettings = new JRaw(stringifySetting);
+                                actionTrace.ParsedSettings = new JRaw(stringifySetting);
 
                             }
                         }
-                        
+
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), jObjectSettings, true))
                             await action.ExecuteAsync(context, jObjectSettings, linkedCts.Token);
@@ -778,13 +778,22 @@ namespace Take.Blip.Builder
 
         private static Dictionary<string, string> ParseFormEncoded(string formEncoded)
         {
+            if (string.IsNullOrEmpty(formEncoded))
+            {
+                return new Dictionary<string, string>();
+            }
+
             return formEncoded
                 .Split('&')
-                .Select(part => part.Split('='))
-                .Where(pair => pair.Length == 2)
-                .ToDictionary(
-                    pair => Uri.UnescapeDataString(pair[0]),
-                    pair => Uri.UnescapeDataString(pair[1]));
+                .Where(pairString => !string.IsNullOrWhiteSpace(pairString))
+                .Select(pairString =>
+                {
+                    string[] keyValue = pairString.Split(new[] { '=' }, 2);
+                    var key = Uri.UnescapeDataString(keyValue[0]);
+                    var value = keyValue.Length == 2 ? Uri.UnescapeDataString(keyValue[1]) : string.Empty;
+                    return new { Key = key, Value = value };
+                })
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         private Boolean IsContextVariable(string stateId)

@@ -90,7 +90,7 @@ namespace Take.Blip.Builder.UnitTests
             var expectedUri = "/ping";
 
 
-            // Use reflection se for método privado
+            // Use reflection se for mï¿½todo privado
             var method = typeof(FlowManager)
                 .GetMethod("RestoreBodyStringWithSecrets", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
@@ -99,7 +99,7 @@ namespace Take.Blip.Builder.UnitTests
 
             // Assert
             var resultObj = JObject.Parse(result);
-            resultObj["secretUrlBlip"].Value<bool>().ShouldBeTrue();
+            resultObj["SecretUrlBlip"].Value<bool>().ShouldBeTrue();
 
             var body = JObject.Parse(resultObj["body"].ToString());
             body["secret"].Value<string>().ShouldBe(expectedSecret);
@@ -490,7 +490,7 @@ namespace Take.Blip.Builder.UnitTests
                 }
             };
             var target = GetTarget();
-            var functionDocument = new Function { FunctionContent = "function content", UserIdentity = "teste",FunctionDescription = "", FunctionId = Guid.NewGuid(), FunctionName = "",FunctionParameters = "",TenantId = ""};
+            var functionDocument = new Function { FunctionContent = "function content", UserIdentity = "teste", FunctionDescription = "", FunctionId = Guid.NewGuid(), FunctionName = "", FunctionParameters = "", TenantId = "" };
 
             BuilderExtension.GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(functionDocument);
 
