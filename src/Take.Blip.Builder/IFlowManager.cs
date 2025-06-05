@@ -17,9 +17,10 @@ namespace Take.Blip.Builder
         /// <param name="message">The input message.</param>
         /// <param name="flow">The builder flow.</param>
         /// <param name="cancellationToken">The operation cancellation token.</param>
+        /// <param name="isActiveLogger"></param>
         /// <param name="messageContext">Context from Message Receiver. Its not mandatory.</param>
         /// <returns></returns>
-        Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken);
-        Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken);
+        Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken, bool isActiveLogger = false);
+        Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, bool isActiveLogger = false);
     }
 }

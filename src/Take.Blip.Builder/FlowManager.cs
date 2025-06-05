@@ -106,12 +106,12 @@ namespace Take.Blip.Builder
             _builderExtension = builderExtension;
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken, bool isActiveLogger = false)
         {
-            await ProcessInputAsync(message, flow, null, cancellationToken);
+            await ProcessInputAsync(message, flow, null, cancellationToken, isActiveLogger);
         }
 
-        public async Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken)
+        public async Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken, bool isActiveLogger)
         {
             if (message == null)
             {
@@ -138,10 +138,20 @@ namespace Take.Blip.Builder
                 message = newMessage;
             }
 
+            if (isActiveLogger)
+            {
+                _logger.Warning("logger: {0}, message: {1}", messageHasChanged, newMessage.ToString());
+            }
+
             flow.Validate();
 
             // Determine the user / owner pair
             var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
+
+            if (isActiveLogger)
+            {
+                _logger.Warning("logger userIdentity: {0}, ownerIdentity: {1}", userIdentity.ToString(), ownerIdentity.ToString());
+            }
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
@@ -155,6 +165,11 @@ namespace Take.Blip.Builder
             else
             {
                 traceSettings = flow.TraceSettings;
+            }
+
+            if (isActiveLogger)
+            {
+                _logger.Warning("logger traceSettings: {0}", traceSettings.ToString());
             }
 
             if (traceSettings != null &&
@@ -198,9 +213,18 @@ namespace Take.Blip.Builder
 
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
 
+                        if (isActiveLogger)
+                        {
+                            _logger.Warning("logger stateId: {0}, state: {1}", stateId, state);
+                        }
+
                         // If current stateId of user is different of inputExpiration stop processing
                         if (!_inputMessageHandlerAggregator.IsValidateState(state, message, flow))
                         {
+                            if (isActiveLogger)
+                            {
+                                _logger.Warning("logger IsValidateState: false, state: {0}", state);
+                            }
                             return;
                         }
 
@@ -215,6 +239,11 @@ namespace Take.Blip.Builder
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
+                            if (isActiveLogger)
+                            {
+                                _logger.Warning("logger ProcessActionsAsync, lazyInput: {0}, context :{1},  flow.InputActions: {2}", lazyInput, context, flow.InputActions);
+                            }
+
                             await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, state, linkedCts.Token);
                         }
 
@@ -231,6 +260,10 @@ namespace Take.Blip.Builder
                                 {
                                     if (!await ValidateInputAsync(message, state, lazyInput, context, linkedCts))
                                     {
+                                        if (isActiveLogger)
+                                        {
+                                            _logger.Warning("logger ValidateInputAsync: false, message: {0}", message.ToString());
+                                        }
                                         break;
                                     }
 
@@ -254,6 +287,10 @@ namespace Take.Blip.Builder
 
                                 if (!state.End)
                                 {
+                                    if (isActiveLogger)
+                                    {
+                                        _logger.Warning("logger !state.End");
+                                    }
                                     // Determine the next state
                                     state = await ProcessOutputsAsync(lazyInput, context, flow, state, stateTrace?.Outputs, linkedCts.Token);
 
@@ -265,10 +302,19 @@ namespace Take.Blip.Builder
                                     {
                                         await ProcessAfterStateChangedActionsAsync(previousState, lazyInput, context, stateTrace, linkedCts.Token);
                                         await ProcessGlobalAfterStateChangedActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
+                                        if (isActiveLogger)
+                                        {
+                                            _logger.Warning("previousState.Id != state?.Id");
+                                        }
                                     }
                                 }
                                 else
                                 {
+                                    if (isActiveLogger)
+                                    {
+                                        _logger.Warning("RedirectToParentFlowAsync");
+                                    }
+
                                     (flow, state, stateTrace, stateStopwatch) = await RedirectToParentFlowAsync(
                                         context,
                                         userIdentity,
@@ -284,6 +330,11 @@ namespace Take.Blip.Builder
                                 if (IsSubflowState(state))
                                 {
                                     parentStateIdQueue.Enqueue(state.Id);
+
+                                    if (isActiveLogger)
+                                    {
+                                        _logger.Warning("IsSubflowState(state)");
+                                    }
 
                                     (flow, state, stateTrace, stateStopwatch) = await RedirectToSubflowAsync(
                                         context,
@@ -304,16 +355,31 @@ namespace Take.Blip.Builder
                                 // Store the next state
                                 if (state != null)
                                 {
+                                    if (isActiveLogger)
+                                    {
+                                        _logger.Warning(" Store the next state ");
+                                    }
+
                                     await _stateManager.SetStateIdAsync(context, state.Id, linkedCts.Token);
                                 }
                                 else
                                 {
+                                    if (isActiveLogger)
+                                    {
+                                        _logger.Warning("else Store the next state ");
+                                    }
                                     await _stateManager.DeleteStateIdAsync(context, linkedCts.Token);
+                                }
+
+                                if (isActiveLogger)
+                                {
+                                    _logger.Warning("Process the next state input actions");
                                 }
 
                                 // Process the next state input actions
                                 await ProcessStateInputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
 
+                                
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
@@ -337,6 +403,10 @@ namespace Take.Blip.Builder
                             }
                             finally
                             {
+                                if (isActiveLogger)
+                                {
+                                    _logger.Warning("finally 408");
+                                }
                                 // Continue processing if the next state do not expect the user input
                                 var inputConditionIsValid = state?.Input?.Conditions == null ||
                                                             await state.Input.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken);
@@ -347,12 +417,21 @@ namespace Take.Blip.Builder
                                     // Create a new trace if the next state waits for an input or the state without an input throws an error     
                                     (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state, stateTrace, stateStopwatch);
                                 }
+                                if (isActiveLogger)
+                                {
+                                    _logger.Warning("Continue processing if the next state do not expect the user input");
+                                }
                             }
                         } while (!stateWaitForInput);
 
                         await ProcessGlobalOutputActionsAsync(context, flow, lazyInput, inputTrace, state, linkedCts.Token);
 
                         await _inputMessageHandlerAggregator.OnFlowProcessedAsync(state, flow, message, _applicationNode, context, linkedCts.Token);
+
+                        if (isActiveLogger)
+                        {
+                            _logger.Warning("OnFlowProcessedAsync");
+                        }
                     }
                     finally
                     {
@@ -383,6 +462,10 @@ namespace Take.Blip.Builder
                 using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
                 {
                     await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                }
+                if (isActiveLogger)
+                {
+                    _logger.Warning("ProcessTraceAsync");
                 }
 
                 ownerContext.Dispose();
