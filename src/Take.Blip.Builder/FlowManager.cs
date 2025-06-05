@@ -140,7 +140,7 @@ namespace Take.Blip.Builder
 
             if (isActiveLogger)
             {
-                _logger.Warning("logger: {0}, message: {1}", messageHasChanged, newMessage.ToString());
+                _logger.Warning("logger: messageHasChanged, message: newMessage");
             }
 
             flow.Validate();
@@ -150,7 +150,7 @@ namespace Take.Blip.Builder
 
             if (isActiveLogger)
             {
-                _logger.Warning("logger userIdentity: {0}, ownerIdentity: {1}", userIdentity.ToString(), ownerIdentity.ToString());
+                _logger.Warning("logger userIdentity, ownerIdentity");
             }
 
             // Input tracing infrastructure
@@ -169,7 +169,7 @@ namespace Take.Blip.Builder
 
             if (isActiveLogger)
             {
-                _logger.Warning("logger traceSettings: {0}", traceSettings.ToString());
+                _logger.Warning("logger traceSettings");
             }
 
             if (traceSettings != null &&
@@ -241,7 +241,7 @@ namespace Take.Blip.Builder
                         {
                             if (isActiveLogger)
                             {
-                                _logger.Warning("logger ProcessActionsAsync, lazyInput: {0}, context :{1},  flow.InputActions: {2}", lazyInput, context, flow.InputActions);
+                                _logger.Warning("logger 244 ProcessActionsAsync, context,  flow.InputActions");
                             }
 
                             await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, state, linkedCts.Token);
@@ -262,7 +262,7 @@ namespace Take.Blip.Builder
                                     {
                                         if (isActiveLogger)
                                         {
-                                            _logger.Warning("logger ValidateInputAsync: false, message: {0}", message.ToString());
+                                            _logger.Warning("logger ValidateInputAsync: false");
                                         }
                                         break;
                                     }
