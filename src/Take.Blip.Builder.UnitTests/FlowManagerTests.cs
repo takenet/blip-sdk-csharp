@@ -1,16 +1,28 @@
+using Jint.Native;
 using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using Serilog;
 using Shouldly;
+using SmartFormat.Core.Parsing;
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Builder.Actions;
+using Take.Blip.Builder.Diagnostics;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils;
+using Take.Blip.Client.Activation;
 using Take.Blip.Client.Content;
+using Take.Blip.Client.Extensions.ArtificialIntelligence;
+using Take.Blip.Client.Extensions.Builder;
+using Takenet.Iris.Messaging.Contents;
 using Takenet.Iris.Messaging.Resources;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
@@ -24,6 +36,147 @@ namespace Take.Blip.Builder.UnitTests
 {
     public class FlowManagerTests : FlowManagerTestsBase, IDisposable
     {
+        [Fact]
+        public void RestoreBodyStringWithSecrets_ShouldRestoreSecretFields_AndSetSecretUrlBlipFlag()
+        {
+            var configuration = Substitute.For<IConfiguration>();
+            var stateManager = Substitute.For<IStateManager>();
+            var contextProvider = Substitute.For<IContextProvider>();
+            var flowSemaphore = Substitute.For<IFlowSemaphore>();
+            var actionProvider = Substitute.For<IActionProvider>();
+            var sender = Substitute.For<ISender>();
+            var documentSerializer = Substitute.For<IDocumentSerializer>();
+            var envelopeSerializer = Substitute.For<IEnvelopeSerializer>();
+            var artificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+            var variableReplacer = Substitute.For<IVariableReplacer>();
+            var logger = Substitute.For<ILogger>();
+            var traceManager = Substitute.For<ITraceManager>();
+            var userOwnerResolver = Substitute.For<IUserOwnerResolver>();
+            var application = Substitute.For<Application>();
+            var flowLoader = Substitute.For<IFlowLoader>();
+            var flowSessionManager = Substitute.For<IFlowSessionManager>();
+            var builderExceptions = Substitute.For<IAnalyzeBuilderExceptions>();
+            var inputHandler = Substitute.For<IInputMessageHandlerAggregator>();
+            var inputExpiration = Substitute.For<IInputExpirationCount>();
+            var builderExtension = Substitute.For<IBuilderExtension>();
+
+            var flowManager = new FlowManager(
+                configuration,
+                stateManager,
+                contextProvider,
+                flowSemaphore,
+                actionProvider,
+                sender,
+                documentSerializer,
+                envelopeSerializer,
+                artificialIntelligenceExtension,
+                variableReplacer,
+                logger,
+                traceManager,
+                userOwnerResolver,
+                application,
+                flowLoader,
+                flowSessionManager,
+                builderExceptions,
+                inputHandler,
+                inputExpiration,
+                builderExtension
+            );
+            var originalSettings = "{\"headers\":{\"Authorization\":\"{{secret.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"secret\\\":\\\"{{secret.mySecret}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{secret.url}}\"}";
+            var executedSettings = "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"secret\\\":\\\"***\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
+
+
+            var expectedSecret = "{{secret.mySecret}}";
+            var expectedUri = "/ping";
+
+
+            // Use reflection se for método privado
+            var method = typeof(FlowManager)
+                .GetMethod("RestoreBodyStringWithSecrets", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            // Act
+            var result = method.Invoke(flowManager, new object[] { originalSettings, executedSettings }) as string;
+
+            // Assert
+            var resultObj = JObject.Parse(result);
+            resultObj["SecretUrlBlip"].Value<bool>().ShouldBeTrue();
+
+            var body = JObject.Parse(resultObj["body"].ToString());
+            body["secret"].Value<string>().ShouldBe(expectedSecret);
+            body["uri"].Value<string>().ShouldBe(expectedUri);
+            body["normal"].Value<string>().ShouldBe("real-value");
+        }
+
+        [Fact]
+        public void RestoreBodyStringWithSecrets_ShouldNotChange_WhenNoSecretsOrHttp()
+        {
+            // Arrange
+            var originalSettings = "{\"headers\":{\"Authorization\":\"{{resource.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{resource.url}}\"}";
+
+            var executedSettings = "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
+
+            var configuration = Substitute.For<IConfiguration>();
+            var stateManager = Substitute.For<IStateManager>();
+            var contextProvider = Substitute.For<IContextProvider>();
+            var flowSemaphore = Substitute.For<IFlowSemaphore>();
+            var actionProvider = Substitute.For<IActionProvider>();
+            var sender = Substitute.For<ISender>();
+            var documentSerializer = Substitute.For<IDocumentSerializer>();
+            var envelopeSerializer = Substitute.For<IEnvelopeSerializer>();
+            var artificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+            var variableReplacer = Substitute.For<IVariableReplacer>();
+            var logger = Substitute.For<ILogger>();
+            var traceManager = Substitute.For<ITraceManager>();
+            var userOwnerResolver = Substitute.For<IUserOwnerResolver>();
+            var application = Substitute.For<Application>();
+            var flowLoader = Substitute.For<IFlowLoader>();
+            var flowSessionManager = Substitute.For<IFlowSessionManager>();
+            var builderExceptions = Substitute.For<IAnalyzeBuilderExceptions>();
+            var inputHandler = Substitute.For<IInputMessageHandlerAggregator>();
+            var inputExpiration = Substitute.For<IInputExpirationCount>();
+            var builderExtension = Substitute.For<IBuilderExtension>();
+
+            var flowManager = new FlowManager(
+                configuration,
+                stateManager,
+                contextProvider,
+                flowSemaphore,
+                actionProvider,
+                sender,
+                documentSerializer,
+                envelopeSerializer,
+                artificialIntelligenceExtension,
+                variableReplacer,
+                logger,
+                traceManager,
+                userOwnerResolver,
+                application,
+                flowLoader,
+                flowSessionManager,
+                builderExceptions,
+                inputHandler,
+                inputExpiration,
+                builderExtension
+            );
+
+            var method = typeof(FlowManager)
+                .GetMethod("RestoreBodyStringWithSecrets", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            // Act
+            var result = method.Invoke(flowManager, new object[] { originalSettings, executedSettings }) as string;
+
+            // Assert
+            var resultObj = JObject.Parse(result);
+
+            // secretUrlBlip should not be set
+            resultObj.ContainsKey("secretUrlBlip").ShouldBeFalse();
+
+            // body should not change from executed
+            var body = JObject.Parse(resultObj["body"].ToString());
+            body["normal"].Value<string>().ShouldBe("real-value");
+            body["uri"].Value<string>().ShouldBe("/ping");
+        }
+
 
         [Fact]
         public async Task FlowWithoutConditionsShouldChangeStateAndSendMessage()
@@ -337,7 +490,7 @@ namespace Take.Blip.Builder.UnitTests
                 }
             };
             var target = GetTarget();
-            var functionDocument = new Function { FunctionContent = "function content", UserIdentity = "teste",FunctionDescription = "", FunctionId = Guid.NewGuid(), FunctionName = "",FunctionParameters = "",TenantId = ""};
+            var functionDocument = new Function { FunctionContent = "function content", UserIdentity = "teste", FunctionDescription = "", FunctionId = Guid.NewGuid(), FunctionName = "", FunctionParameters = "", TenantId = "" };
 
             BuilderExtension.GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(functionDocument);
 
