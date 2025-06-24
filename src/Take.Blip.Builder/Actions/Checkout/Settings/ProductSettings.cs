@@ -6,7 +6,9 @@ namespace Take.Blip.Builder.Actions.Checkout.Settings
     public class ProductSettings : IValidable
     {
         public string Description { get; set; }
+
         public int Quantity { get; set; }
+
         public decimal Price { get; set; }
 
         public void Validate()

@@ -6,13 +6,24 @@ namespace Take.Blip.Builder.Actions.Checkout.Settings
     public class CheckoutSettings : IValidable
     {
         public CustomerSettings Customer { get; set; }
+
         public ProductSettings[] Products { get; set; }
+
+        public string Merchant { get; set; }
+
         public string Currency { get; set; }
+
         public string Channel { get; set; }
+
         public string Source { get; set; }
+
+        public string Message { get; set; }
 
         public void Validate()
         {
+            if (Merchant == null)
+                throw new ValidationException($"The '{nameof(Merchant)}' setting value is required for '{nameof(Checkout)}' action");
+
             if (Customer == null)
                 throw new ValidationException($"The '{nameof(Customer)}' setting value is required for '{nameof(Checkout)}' action");
 
@@ -26,12 +37,10 @@ namespace Take.Blip.Builder.Actions.Checkout.Settings
                 throw new ValidationException($"The '{nameof(Channel)}' setting value is required for '{nameof(Checkout)}' action");
 
             if (Source == null)
-                throw new ValidationException($"The '{nameof(Source)}' setting value is required for '{nameof(Source)}' action");
+                throw new ValidationException($"The '{nameof(Source)}' setting value is required for '{nameof(Checkout)}' action");
 
+            if (Message == null)
+                throw new ValidationException($"The '{nameof(Message)}' setting value is required for '{nameof(Checkout)}' action");
         }
-
-        
-
-
     }
 }
