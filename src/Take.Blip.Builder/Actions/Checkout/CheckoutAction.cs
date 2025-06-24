@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
@@ -56,16 +57,20 @@ namespace Take.Blip.Builder.Actions.Checkout
 
             var checkoutLink = await _checkoutExtension.CreateCheckOutLinkAsync(checkout, cancellationToken);
 
-            await CreateMessageAsync(context, checkoutLink.ToString(), cancellationToken);
+            await CreateMessageAsync(context, settings.Message, checkoutLink.ToString(), cancellationToken);
         }
 
-        private async Task CreateMessageAsync(IContext context, string checkoutLink, CancellationToken cancellationToken)
+        private async Task CreateMessageAsync(IContext context, string mediaText, string checkoutLink, CancellationToken cancellationToken)
         {
             var message = new Message()
             {
                 Id = EnvelopeId.NewId(),
                 To = context.Input.Message.From,
-                Content = PlainText.Parse($"Aqui está seu link de pagamento: {checkoutLink}")
+                Content = new MediaLink
+                {
+                    Text = mediaText,
+                    Uri = new Uri(checkoutLink)
+                }
             };
 
             if (context.Input.Message.From.Domain.Equals("tunnel.msging.net"))

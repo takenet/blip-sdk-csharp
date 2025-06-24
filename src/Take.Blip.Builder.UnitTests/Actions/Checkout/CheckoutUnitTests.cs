@@ -71,10 +71,13 @@ namespace Take.Blip.Builder.Actions.Checkout.Tests
                    },
                 Channel = "WhatsApp",
                 Currency = "BRL",
-                Source = "TestSource"
+                Source = "TestSource",
+                Message = "Mensagem de Teste",
+                Merchant = "1234"
             };
+
             var cancellationToken = CancellationToken.None;
-            var checkoutLink = new PlainText();
+            var checkoutLink = "https://teste-media.msging.net";
 
             _checkoutExtension.CreateCheckOutLinkAsync(Arg.Any<CheckoutDocument>(), cancellationToken)
                 .Returns(checkoutLink);
@@ -109,8 +112,7 @@ namespace Take.Blip.Builder.Actions.Checkout.Tests
             await _sender
                 .Received(1)
                 .SendMessageAsync(Arg.Is<Message>(m =>
-                        m.Content.ToString()
-                                 .Contains("Aqui está seu link de pagamento:")), cancellationToken);
+                    m.Content.GetMediaType().Equals(MediaLink.MediaType)), cancellationToken);
         }
     }
 }
