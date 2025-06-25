@@ -10,6 +10,6 @@ namespace Take.Blip.Client.Extensions.Builder.Checkout
 {
     public interface ICheckoutExtension
     {
-        Task<Document> CreateCheckOutLinkAsync(CheckoutDocument document, CancellationToken cancellationToken);
+        Task<Document> CreateCheckOutLinkAsync(string merchant, CheckoutDocument document, CancellationToken cancellationToken);
     }
 }

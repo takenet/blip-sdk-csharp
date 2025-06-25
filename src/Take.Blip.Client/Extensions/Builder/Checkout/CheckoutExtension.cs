@@ -11,12 +11,12 @@ namespace Take.Blip.Client.Extensions.Builder.Checkout
     public class CheckoutExtension : ExtensionBase, ICheckoutExtension
     {
         private static readonly Node BuilderAddress = Node.Parse($"postmaster@builder.{Constants.DEFAULT_DOMAIN}");
-
+        private const string CHECKOUT_LINK_CREATION = "/checkout/link/{0}";
         public CheckoutExtension(ISender sender) : base(sender)
         {
         }
 
-        public async Task<Document> CreateCheckOutLinkAsync(CheckoutDocument document, CancellationToken cancellationToken)
+        public async Task<Document> CreateCheckOutLinkAsync(string merchant, CheckoutDocument document, CancellationToken cancellationToken)
         {
             //TODO: Insert the LimeUri
             var requestCommand = new Command()
@@ -24,7 +24,7 @@ namespace Take.Blip.Client.Extensions.Builder.Checkout
                 Id = EnvelopeId.NewId(),
                 To = BuilderAddress,
                 Method = CommandMethod.Set,
-                Uri = new LimeUri(""),
+                Uri = new LimeUri(string.Format(CHECKOUT_LINK_CREATION, merchant)),
                 Resource = document
             };
 

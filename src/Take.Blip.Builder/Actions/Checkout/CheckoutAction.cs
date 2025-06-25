@@ -55,7 +55,7 @@ namespace Take.Blip.Builder.Actions.Checkout
                 });
             }
 
-            var checkoutLink = await _checkoutExtension.CreateCheckOutLinkAsync(checkout, cancellationToken);
+            var checkoutLink = await _checkoutExtension.CreateCheckOutLinkAsync(settings.Merchant, checkout, cancellationToken);
 
             await CreateMessageAsync(context, settings.Message, checkoutLink.ToString(), cancellationToken);
         }
