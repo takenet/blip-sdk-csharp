@@ -33,6 +33,7 @@ using Take.Blip.Client;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions;
 using Take.Elephant;
+using Take.Blip.Builder.Actions.Checkout;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -100,7 +101,8 @@ namespace Take.Blip.Builder.Hosting
                     typeof(DeleteVariableAction),
                     typeof(ProcessContentAssistantAction),
                     typeof(TrackContactsJourneyAction),
-                    typeof(ExecuteTemplateAction)
+                    typeof(ExecuteTemplateAction),
+                    typeof(CheckoutAction)
                 });
 
             return container;
