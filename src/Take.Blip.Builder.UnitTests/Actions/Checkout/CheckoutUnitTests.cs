@@ -79,7 +79,7 @@ namespace Take.Blip.Builder.Actions.Checkout.Tests
             var cancellationToken = CancellationToken.None;
             var checkoutLink = "https://teste-media.msging.net";
 
-            _checkoutExtension.CreateCheckOutLinkAsync(Arg.Any<CheckoutDocument>(), cancellationToken)
+            _checkoutExtension.CreateCheckOutLinkAsync(Arg.Is(settings.Merchant), Arg.Any<CheckoutDocument>(), cancellationToken)
                 .Returns(checkoutLink);
 
             var node = new Node("teste", "wa.gw.msging.net", "#instance");
@@ -107,7 +107,7 @@ namespace Take.Blip.Builder.Actions.Checkout.Tests
             // Assert  
             await _checkoutExtension
                 .Received(1)
-                .CreateCheckOutLinkAsync(Arg.Any<CheckoutDocument>(), cancellationToken);
+                .CreateCheckOutLinkAsync(Arg.Any<string>(), Arg.Any<CheckoutDocument>(), cancellationToken);
 
             await _sender
                 .Received(1)
