@@ -6,6 +6,7 @@ using Lime.Protocol;
 
 namespace Take.Blip.Client.Extensions.Builder.Checkout.Documents
 {
+    [DataContract]
     public class CheckoutDocument : Document
     {
         public const string MIME_TYPE = "application/vnd.iris.builder.checkout+json";
