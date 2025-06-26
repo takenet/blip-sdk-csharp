@@ -18,7 +18,6 @@ namespace Take.Blip.Client.Extensions.Builder.Checkout
 
         public async Task<Document> CreateCheckOutLinkAsync(string merchant, CheckoutDocument document, CancellationToken cancellationToken)
         {
-            //TODO: Insert the LimeUri
             var requestCommand = new Command()
             {
                 Id = EnvelopeId.NewId(),
