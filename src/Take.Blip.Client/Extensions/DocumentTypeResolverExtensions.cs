@@ -1,6 +1,7 @@
 ﻿using Lime.Messaging;
 using Lime.Protocol.Serialization;
 using Take.Blip.Client.Content;
+using Take.Blip.Client.Extensions.Builder.Checkout.Documents;
 using Takenet.Iris.Messaging.Contents;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.Desk;
@@ -21,6 +22,7 @@ namespace Take.Blip.Client.Extensions
             documentTypeResolver.RegisterAssemblyDocuments(typeof(Application).Assembly);
             documentTypeResolver.RegisterAssemblyDocuments(typeof(InputExpiration).Assembly);
             documentTypeResolver.RegisterAssemblyDocuments(typeof(DocumentTypeResolverExtensions).Assembly);
+            documentTypeResolver.RegisterAssemblyDocuments(typeof(CheckoutDocument).Assembly);
             return documentTypeResolver;
         }
     }

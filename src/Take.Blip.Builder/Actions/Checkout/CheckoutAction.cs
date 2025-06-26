@@ -66,7 +66,7 @@ namespace Take.Blip.Builder.Actions.Checkout
             {
                 Id = EnvelopeId.NewId(),
                 To = context.Input.Message.From,
-                Content = new MediaLink
+                Content = new WebLink
                 {
                     Text = mediaText,
                     Uri = new Uri(checkoutLink)
