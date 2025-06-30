@@ -1,4 +1,6 @@
-﻿using Lime.Messaging.Contents;
+﻿using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
@@ -42,6 +44,7 @@ namespace Take.Blip.Builder
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
         private readonly IBuilderExtension _builderExtension;
+        private readonly IBlipLogger _blipMonitoringLogger;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
@@ -50,6 +53,7 @@ namespace Take.Blip.Builder
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
         private readonly IInputMessageHandler _inputMessageHandlerAggregator;
         private readonly IInputExpirationCount _inputExpirationCount;
+        private readonly IBlipLogger _BlipMonitoringLogger;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
@@ -81,7 +85,8 @@ namespace Take.Blip.Builder
             IAnalyzeBuilderExceptions analyzeBuilderExceptions,
             IInputMessageHandlerAggregator inputMessageHandlerAggregator,
             IInputExpirationCount inputExpirationCount,
-            IBuilderExtension builderExtension
+            IBuilderExtension builderExtension,
+            IBlipLogger blipMonitoringLogger
             )
         {
             _configuration = configuration;
@@ -104,6 +109,7 @@ namespace Take.Blip.Builder
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
             _builderExtension = builderExtension;
+            _blipMonitoringLogger = blipMonitoringLogger;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -630,6 +636,23 @@ namespace Take.Blip.Builder
                                 actionTrace.Error = ex.ToString();
                             }
                         }
+                        _blipMonitoringLogger.ErrorEvents(new LogInput()
+                        {
+                            Data = new JObject
+                            {
+                                ["actionType"] = stateAction.Type,
+                                ["actionSettings"] = stateAction.Settings?.ToString(Formatting.None),
+                                ["actionOrder"] = stateAction.Order,
+                                ["actionContinueOnError"] = stateAction.ContinueOnError,
+                                ["errorMessage"] = ex.Message,
+                                ["errorStackTrace"] = ex.StackTrace
+                            },
+                            IdMessage = Guid.NewGuid().ToString(),
+                            From = context.UserIdentity,
+                            To = context.OwnerIdentity,
+                            Title = "Action Execution Error"
+                        },
+                        ex);
 
                         var message = ex is OperationCanceledException && cts.IsCancellationRequested
                             ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
@@ -652,6 +675,22 @@ namespace Take.Blip.Builder
                     }
                     finally
                     {
+                        _blipMonitoringLogger.ActionExecution(new LogInput()
+                        {
+                            Data = new JObject
+                            {
+                                ["actionType"] = stateAction.Type,
+                                ["actionSettings"] = stateAction.Settings?.ToString(Formatting.None),
+                                ["actionOrder"] = stateAction.Order,
+                                ["actionContinueOnError"] = stateAction.ContinueOnError,
+                                ["actionExecutionTime"] = actionStopwatch?.ElapsedMilliseconds ?? 0,
+                            },
+                            IdMessage = Guid.NewGuid().ToString(),
+                            From = context.UserIdentity,
+                            To = context.OwnerIdentity,
+                            Title = "Action Execution"
+                        });
+
                         if (realAction == ACTION_BLIP_FUNCTION)
                         {
                             stateAction.Type = ACTION_BLIP_FUNCTION;
