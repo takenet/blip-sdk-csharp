@@ -1,3 +1,4 @@
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Jint.Native;
 using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
@@ -59,6 +60,7 @@ namespace Take.Blip.Builder.UnitTests
             var inputHandler = Substitute.For<IInputMessageHandlerAggregator>();
             var inputExpiration = Substitute.For<IInputExpirationCount>();
             var builderExtension = Substitute.For<IBuilderExtension>();
+            var monitoring = Substitute.For<IBlipLogger>();
 
             var flowManager = new FlowManager(
                 configuration,
@@ -80,7 +82,8 @@ namespace Take.Blip.Builder.UnitTests
                 builderExceptions,
                 inputHandler,
                 inputExpiration,
-                builderExtension
+                builderExtension,
+                monitoring
             );
             var originalSettings = "{\"headers\":{\"Authorization\":\"{{secret.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"secret\\\":\\\"{{secret.mySecret}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{secret.url}}\"}";
             var executedSettings = "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"secret\\\":\\\"***\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
@@ -135,6 +138,7 @@ namespace Take.Blip.Builder.UnitTests
             var inputHandler = Substitute.For<IInputMessageHandlerAggregator>();
             var inputExpiration = Substitute.For<IInputExpirationCount>();
             var builderExtension = Substitute.For<IBuilderExtension>();
+            var monitoring = Substitute.For<IBlipLogger>();
 
             var flowManager = new FlowManager(
                 configuration,
@@ -156,7 +160,8 @@ namespace Take.Blip.Builder.UnitTests
                 builderExceptions,
                 inputHandler,
                 inputExpiration,
-                builderExtension
+                builderExtension,
+                monitoring
             );
 
             var method = typeof(FlowManager)
