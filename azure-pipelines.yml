@@ -27,7 +27,7 @@ resources:
   - repository: templates
     type: git
     name: Operações/template-take-blip
-    ref: refs/fix/823373-nuget-variable-usage
+    ref: fix/823373-nuget-variable-usage
 
 extends:
   template: template-pipeline.yml@templates    
