@@ -27,11 +27,13 @@ resources:
   - repository: templates
     type: git
     name: Operações/template-take-blip
-    ref: refs/tags/v1.4.43
+    ref: refs/tags/v1.4.75
 
 extends:
   template: template-pipeline.yml@templates    
-  parameters:    
+  parameters:
+    nugetAuthenticate: true
+    vstsFeed: "BlipNuget"    
     packagename: blip-sdk-csharp    
     type: dotnet
     to: nuget
