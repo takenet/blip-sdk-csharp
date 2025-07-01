@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using Take.Blip.Client.Extensions.Builder.Checkout.Documents;
+using Takenet.Iris.Messaging.Resources.Checkout;
 
 namespace Take.Blip.Client.Extensions.Builder.Checkout
 {

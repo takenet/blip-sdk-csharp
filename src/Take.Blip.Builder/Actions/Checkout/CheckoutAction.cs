@@ -8,7 +8,7 @@ using Serilog;
 using Take.Blip.Builder.Actions.Checkout.Settings;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.Builder.Checkout;
-using Take.Blip.Client.Extensions.Builder.Checkout.Documents;
+using Takenet.Iris.Messaging.Resources.Checkout;
 
 namespace Take.Blip.Builder.Actions.Checkout
 {

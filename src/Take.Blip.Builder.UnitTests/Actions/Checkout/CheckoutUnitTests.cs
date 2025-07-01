@@ -10,13 +10,13 @@ using Take.Blip.Client;
 using Serilog;
 using NSubstitute;
 using Take.Blip.Builder.Actions.Checkout.Settings;
-using Take.Blip.Client.Extensions.Builder.Checkout.Documents;
 using Lime.Protocol;
 using System.Threading;
 using Lime.Messaging.Contents;
 using Take.Blip.Builder.Models;
 using Lime.Protocol.Serialization;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
+using Takenet.Iris.Messaging.Resources.Checkout;
 
 namespace Take.Blip.Builder.Actions.Checkout.Tests
 {
