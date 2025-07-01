@@ -1,9 +1,4 @@
 ﻿using Xunit;
-using Take.Blip.Builder.Actions.Checkout;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Take.Blip.Client.Extensions.Builder.Checkout;
 using Take.Blip.Client;
