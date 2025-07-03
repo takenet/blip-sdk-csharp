@@ -33,6 +33,8 @@ extends:
   template: template-pipeline.yml@templates    
   parameters:    
     packagename: blip-sdk-csharp    
+    nugetAuthenticate: true
+    vstsFeed: "BlipNuget"
     type: dotnet
     to: nuget
     nugetServiceConnection: Nuget.org Take
