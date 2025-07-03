@@ -11,7 +11,7 @@ using Lime.Messaging.Contents;
 using Take.Blip.Builder.Models;
 using Lime.Protocol.Serialization;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
-using Takenet.Iris.Messaging.Resources.Checkout;
+using Lime.Messaging.Resources.Checkout;
 
 namespace Take.Blip.Builder.Actions.Checkout.Tests
 {

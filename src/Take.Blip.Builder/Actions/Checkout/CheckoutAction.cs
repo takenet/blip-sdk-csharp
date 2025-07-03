@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
+using Lime.Messaging.Resources.Checkout;
 using Lime.Protocol;
 using Serilog;
 using Take.Blip.Builder.Actions.Checkout.Settings;
 using Take.Blip.Client;
 using Take.Blip.Client.Extensions.Builder.Checkout;
-using Takenet.Iris.Messaging.Resources.Checkout;
 
 namespace Take.Blip.Builder.Actions.Checkout
 {
