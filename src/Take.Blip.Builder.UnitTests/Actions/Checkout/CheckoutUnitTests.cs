@@ -109,5 +109,74 @@ namespace Take.Blip.Builder.Actions.Checkout.Tests
                 .SendMessageAsync(Arg.Is<Message>(m =>
                     m.Content.GetMediaType().Equals(WebLink.MediaType)), cancellationToken);
         }
+
+
+        [Fact]
+        public async Task ExecuteAsync_ShouldNotCreateCheckoutLinkAndSendMessage()
+        {
+            // Arrange  
+            var context = Substitute.For<IContext>();
+            var settings = new CheckoutSettings
+            {
+                Customer = new CustomerSettings
+                {
+                    Identity = "customer@domain.com",
+                    Phone = "123456789",
+                    Name = "John",
+                    Surname = "Doe",
+                    Email = "john.doe@domain.com",
+                    Document = "123456789",
+                    DocumentType = "CPF"
+                },
+                Products = new[]
+                {
+                       new ProductSettings { Description = "Product 1", Price = 10.0m, Quantity = 1 },
+                       new ProductSettings { Description = "Product 2", Price = 20.0m, Quantity = 2 }
+                   },
+                Channel = "WhatsApp",
+                Currency = "BRL",
+                Source = "TestSource",
+                Message = "Mensagem de Teste",
+                Merchant = "1234"
+            };
+
+            var cancellationToken = CancellationToken.None;
+            var checkoutLink = "https://teste-media.msging.net";
+
+            _checkoutExtension.CreateCheckOutLinkAsync(Arg.Is(settings.Merchant), Arg.Any<CheckoutDocument>(), cancellationToken)
+                .Returns(checkoutLink);
+
+            var node = new Node("teste", "wa.gw.msging.net", "#instance");
+
+            var message = new Message()
+            {
+                From = new Node("teste", "wa.gw.msging.net", "#instance"),
+                To = new Node("mybot", "msging.net", null),
+                Content = new PlainText { Text = "Hello BLiP" }
+            };
+
+            var input = new LazyInput(message,
+                message.From,
+                _builderConfiguration,
+                _documentSerializer,
+                _envelopeSerializer,
+                _artificialIntelligenceExtension,
+                cancellationToken);
+
+            context.Input.Returns(input);
+            context.GetCheckoutGeneratedLinkStatusAsync(Arg.Any<CancellationToken>()).Returns("Success");
+
+            // Act  
+            await _checkoutAction.ExecuteAsync(context, settings, cancellationToken);
+
+            // Assert  
+            await _checkoutExtension
+                .Received(0)
+                .CreateCheckOutLinkAsync(Arg.Any<string>(), Arg.Any<CheckoutDocument>(), cancellationToken);
+
+            await _sender
+                .Received(0)
+                .SendMessageAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
+        }
     }
 }
