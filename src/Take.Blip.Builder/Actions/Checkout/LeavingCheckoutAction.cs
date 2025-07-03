@@ -15,7 +15,7 @@ namespace Take.Blip.Builder.Actions.Checkout
 
         private const string LEAVING_CHECKOUT_ACTION_NAME = "LeavingCheckout";
 
-        public LeavingCheckoutAction(ILogger logger): base(nameof(LEAVING_CHECKOUT_ACTION_NAME))
+        public LeavingCheckoutAction(ILogger logger): base(LEAVING_CHECKOUT_ACTION_NAME)
         {
             _logger = logger;
         }

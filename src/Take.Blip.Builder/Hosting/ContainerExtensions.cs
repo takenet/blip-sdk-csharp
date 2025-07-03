@@ -102,7 +102,8 @@ namespace Take.Blip.Builder.Hosting
                     typeof(ProcessContentAssistantAction),
                     typeof(TrackContactsJourneyAction),
                     typeof(ExecuteTemplateAction),
-                    typeof(CheckoutAction)
+                    typeof(CheckoutAction),
+                    typeof(LeavingCheckoutAction)
                 });
 
             return container;
