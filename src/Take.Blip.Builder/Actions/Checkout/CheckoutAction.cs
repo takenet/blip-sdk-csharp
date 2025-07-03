@@ -12,6 +12,9 @@ using Take.Blip.Client.Extensions.Builder.Checkout;
 
 namespace Take.Blip.Builder.Actions.Checkout
 {
+    /// <summary>
+    /// Action that handles the checkout process by generating a checkout link and sending it to the user.
+    /// </summary>
     public class CheckoutAction : ActionBase<CheckoutSettings>
     {
         private readonly ICheckoutExtension _checkoutExtension;
