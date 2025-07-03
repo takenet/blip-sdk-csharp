@@ -1,4 +1,5 @@
-﻿using Blip.Ai.Bot.Monitoring.Logging.Interface;
+﻿using Blip.Ai.Bot.Monitoring.Logging.Enums;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
@@ -217,6 +218,22 @@ namespace Take.Blip.Builder
 
                         // Create trace instances, if required
                         var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
+
+                        _blipMonitoringLogger.MessageProcessing(new LogInput()
+                        {
+                            Data = new JObject
+                            {
+                                ["flowId"] = flow.Id,
+                                ["stateId"] = state.Id,
+                                ["userIdentity"] = userIdentity.ToString(),
+                                ["ownerIdentity"] = ownerIdentity.ToString(),
+                                ["messageId"] = message.Id,
+                            },
+                            IdMessage = message.Id,
+                            From = userIdentity,
+                            To = ownerIdentity,
+                            Title = "Message Processing"
+                        });
 
                         // Process the global input actions
                         if (flow.InputActions != null)
@@ -536,7 +553,6 @@ namespace Take.Blip.Builder
 
         private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, State state, CancellationToken cancellationToken)
         {
-
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
@@ -622,6 +638,24 @@ namespace Take.Blip.Builder
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), jObjectSettings, true))
                             await action.ExecuteAsync(context, jObjectSettings, linkedCts.Token);
+
+                        _blipMonitoringLogger.ActionExecution(new LogInput()
+                        {
+                            Data = new JObject
+                            {
+                                ["actionType"] = stateAction.Type,
+                                ["actionSettings"] = stateAction.Settings?.ToString(Formatting.None),
+                                ["actionOrder"] = stateAction.Order,
+                                ["actionContinueOnError"] = stateAction.ContinueOnError,
+                                ["actionExecutionTimeout"] = executionTimeout.TotalMilliseconds,
+                                ["actionExecutionTime"] = actionStopwatch?.ElapsedMilliseconds ?? 0,
+                                ["jObjectSettings"] = jObjectSettings?.ToString(Formatting.None)
+                            },
+                            IdMessage = lazyInput.Message.Id,
+                            From = context.UserIdentity,
+                            To = context.OwnerIdentity,
+                            Title = "Action Execution"
+                        });
                     }
                     catch (Exception ex)
                     {
@@ -647,7 +681,7 @@ namespace Take.Blip.Builder
                                 ["errorMessage"] = ex.Message,
                                 ["errorStackTrace"] = ex.StackTrace
                             },
-                            IdMessage = Guid.NewGuid().ToString(),
+                            IdMessage = lazyInput.Message.Id,
                             From = context.UserIdentity,
                             To = context.OwnerIdentity,
                             Title = "Action Execution Error"
@@ -675,22 +709,6 @@ namespace Take.Blip.Builder
                     }
                     finally
                     {
-                        _blipMonitoringLogger.ActionExecution(new LogInput()
-                        {
-                            Data = new JObject
-                            {
-                                ["actionType"] = stateAction.Type,
-                                ["actionSettings"] = stateAction.Settings?.ToString(Formatting.None),
-                                ["actionOrder"] = stateAction.Order,
-                                ["actionContinueOnError"] = stateAction.ContinueOnError,
-                                ["actionExecutionTime"] = actionStopwatch?.ElapsedMilliseconds ?? 0,
-                            },
-                            IdMessage = Guid.NewGuid().ToString(),
-                            From = context.UserIdentity,
-                            To = context.OwnerIdentity,
-                            Title = "Action Execution"
-                        });
-
                         if (realAction == ACTION_BLIP_FUNCTION)
                         {
                             stateAction.Type = ACTION_BLIP_FUNCTION;
