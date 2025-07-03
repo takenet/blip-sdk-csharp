@@ -107,7 +107,7 @@ namespace Take.Blip.Builder.Actions.Checkout.Tests
             await _sender
                 .Received(1)
                 .SendMessageAsync(Arg.Is<Message>(m =>
-                    m.Content.GetMediaType().Equals(MediaLink.MediaType)), cancellationToken);
+                    m.Content.GetMediaType().Equals(WebLink.MediaType)), cancellationToken);
         }
     }
 }
