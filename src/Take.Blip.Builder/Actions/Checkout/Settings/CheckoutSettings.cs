@@ -19,6 +19,8 @@ namespace Take.Blip.Builder.Actions.Checkout.Settings
 
         public string Message { get; set; }
 
+        public string ReminderContent { get; set; }
+
         public void Validate()
         {
             if (Merchant == null)
@@ -41,6 +43,10 @@ namespace Take.Blip.Builder.Actions.Checkout.Settings
 
             if (Message == null)
                 throw new ValidationException($"The '{nameof(Message)}' setting value is required for '{nameof(Checkout)}' action");
+
+            if (ReminderContent == null)
+                throw new ValidationException($"The '{nameof(ReminderContent)}' setting value is required for '{nameof(Checkout)}' action");
+
         }
     }
 }

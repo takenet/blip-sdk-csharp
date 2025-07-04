@@ -31,8 +31,10 @@ namespace Take.Blip.Builder.Actions.Checkout
         public override async Task ExecuteAsync(IContext context, CheckoutSettings settings, CancellationToken cancellationToken)
         {
             if (await CheckIfCheckoutLinkWasAlrearyCreatedAsync(context, cancellationToken))
-                // TODO: Send the default message if the link was already created and we didn´t got the response from API
+            {
+                await SendReminderContentAsync(context, settings.ReminderContent, cancellationToken);
                 return;
+            }
 
             try
             {
@@ -45,6 +47,7 @@ namespace Take.Blip.Builder.Actions.Checkout
                 await context.SetCheckoutGeneratedLinkStatusAsync(Constants.CHECKOUT_GENERATED_LINK_FAILED_VALUE, cancellationToken);
             }
         }
+
 
         private async Task<bool> CheckIfCheckoutLinkWasAlrearyCreatedAsync(IContext context, CancellationToken cancellationToken)
         {
@@ -89,6 +92,20 @@ namespace Take.Blip.Builder.Actions.Checkout
 
         }
 
+        private async Task SendReminderContentAsync(IContext context, string reminderContent, CancellationToken cancellationToken)
+        {
+
+            var message = new Message()
+            {
+                Id = EnvelopeId.NewId(),
+                To = context.Input.Message.From,
+                Content = PlainText.Parse(reminderContent)
+            };
+
+            await SendMessageWithTunnelMetadataAsync(context, message, cancellationToken);
+        }
+
+
         private async Task CreateMessageAsync(IContext context, string mediaText, string checkoutLink, CancellationToken cancellationToken)
         {
             //TODO: Change generated type to deliver the Component Order properly
@@ -103,6 +120,11 @@ namespace Take.Blip.Builder.Actions.Checkout
                 }
             };
 
+            await SendMessageWithTunnelMetadataAsync(context, message, cancellationToken);
+        }
+
+        private async Task SendMessageWithTunnelMetadataAsync(IContext context, Message message, CancellationToken cancellationToken)
+        {
             if (context.Input.Message.From.Domain.Equals("tunnel.msging.net"))
             {
                 message.Metadata ??= new Dictionary<string, string>();
