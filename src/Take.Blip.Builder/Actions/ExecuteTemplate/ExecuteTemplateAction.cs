@@ -16,8 +16,10 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
     {
         private readonly ILogger _logger;
         private readonly IHandlebars _handlebars;
-        
-        public ExecuteTemplateAction(IHandlebars handlebars, ILogger logger) : base(nameof(ExecuteTemplate))
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteTemplateSettings.OutputVariable) };
+
+        public ExecuteTemplateAction(IHandlebars handlebars, ILogger logger) 
+            : base(nameof(ExecuteTemplate), OUTPUT_PARAMETERS_NAME)
         {
             _logger = logger;
             _handlebars = handlebars;
@@ -44,7 +46,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                 _logger.Warning(ex, "Unexpected error while execute action Execute Template");
                 throw;
             }
-            
+
             await SetScriptResultAsync(context, settings, result, cancellationToken);
         }
 
@@ -65,7 +67,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             }
             return obj;
         }
-        
+
         private async Task SetScriptResultAsync(
             IContext context, ExecuteTemplateSettings settings, string result, CancellationToken cancellationToken)
         {
@@ -81,7 +83,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         private Dictionary<string, object> CopyArgumentsToDictionary(JObject arguments)
         {
             var obj = new Dictionary<string, object>();
-            foreach (var property in arguments.Properties())    
+            foreach (var property in arguments.Properties())
             {
                 try
                 {
@@ -94,7 +96,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                     {
                         obj[property.Name] = property.Value;
                     }
-                }                
+                }
             }
             return obj;
         }

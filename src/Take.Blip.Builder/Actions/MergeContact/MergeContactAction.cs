@@ -21,6 +21,8 @@ namespace Take.Blip.Builder.Actions.MergeContact
 
         public string Type => nameof(MergeContact);
 
+        public string[]? OutputVariables => null;
+
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

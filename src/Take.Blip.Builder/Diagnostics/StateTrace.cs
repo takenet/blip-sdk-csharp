@@ -26,6 +26,9 @@ namespace Take.Blip.Builder.Diagnostics
         [DataMember(Name = "afterStateChangedActions")]
         public ICollection<ActionTrace> AfterStateChangedActions { get; set; }
 
+        [DataMember(Name = "localCustomActions")]
+        public ICollection<ActionTrace> LocalCustomActions { get; set; }
+
         [DataMember(Name = "outputs")]
         public ICollection<OutputTrace> Outputs { get; set; }
 

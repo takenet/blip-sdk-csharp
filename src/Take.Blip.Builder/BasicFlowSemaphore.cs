@@ -7,7 +7,7 @@ using Take.Blip.Builder.Storage;
 
 namespace Take.Blip.Builder
 {
-    class BasicFlowSemaphore: IFlowSemaphore
+    class BasicFlowSemaphore : IFlowSemaphore
     {
         private readonly INamedSemaphore _namedSemaphore;
 
@@ -19,6 +19,11 @@ namespace Take.Blip.Builder
         }
 
         public Task<IAsyncDisposable> WaitAsync(Flow flow, Message message, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken)
+        {
+            return _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", timeout, cancellationToken);
+        }
+
+        public Task<IAsyncDisposable> WaitAsync(Flow flow, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken)
         {
             return _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", timeout, cancellationToken);
         }

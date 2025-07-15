@@ -19,6 +19,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
         private readonly IConfiguration _configuration;
 
         private const string SERIALIZABLE_PATTERN = @".+[/|\+]json$";
+        private const string OUTPUT_VARIABLE_PROPERTY = "variable";
 
         public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer, IConfiguration configuration)
         {
@@ -29,6 +30,8 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         public string Type => nameof(ProcessCommand);
 
+        public string[]? OutputVariables => new[] { OUTPUT_VARIABLE_PROPERTY };
+
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null)
@@ -38,7 +41,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
             string variable = null;
 
-            if (settings.TryGetValue(nameof(variable), out var variableToken))
+            if (settings.TryGetValue(OUTPUT_VARIABLE_PROPERTY, out var variableToken))
             {
                 variable = variableToken.ToString().Trim('"');
             }

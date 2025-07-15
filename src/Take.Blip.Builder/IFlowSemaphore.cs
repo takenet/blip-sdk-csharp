@@ -22,5 +22,15 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
         Task<IAsyncDisposable> WaitAsync(Flow flow, Message message, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Do semaphore lock to block the processing of two actions from the same contact and bot
+        /// </summary>
+        /// <param name="flow"></param>
+        /// <param name="userIdentity"></param>
+        /// <param name="timeout"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IAsyncDisposable> WaitAsync(Flow flow, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken);
     }
 }

@@ -56,12 +56,16 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         public Output[] Outputs { get; set; }
 
-
         /// <summary>
         /// Stores additional JSON attributes that are not mapped in the type.
         /// </summary>
         [JsonExtensionData]
         public IDictionary<string, JToken> ExtensionData { get; set; }
+
+        /// <summary>
+        /// Determines the local custom actions that should be executed when the state is activated.
+        /// </summary>
+        public Action[] LocalCustomActions { get; set; }
 
         public void Validate()
         {

@@ -13,10 +13,10 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
     public class ProcessContentAssistantAction : ActionBase<ProcessContentAssistantSettings>
     {
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
-
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ProcessContentAssistantSettings.OutputVariable) };
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-        public ProcessContentAssistantAction(IArtificialIntelligenceExtension artificialIntelligenceExtension) : base(nameof(ProcessContentAssistant))
+        public ProcessContentAssistantAction(IArtificialIntelligenceExtension artificialIntelligenceExtension) : base(nameof(ProcessContentAssistant), OUTPUT_PARAMETERS_NAME)
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
