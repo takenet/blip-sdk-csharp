@@ -9,6 +9,7 @@ using SimpleInjector;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
@@ -46,6 +47,7 @@ namespace Take.Blip.Builder.UnitTests
             ContextProvider = Substitute.For<IContextProvider>();
             Context = Substitute.For<IContext>();
             Logger = new LoggerConfiguration().CreateLogger();
+            HttpClient = Substitute.For<IHttpClient>();
             ContextProvider
                 .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
@@ -81,6 +83,9 @@ namespace Take.Blip.Builder.UnitTests
             UserOwnerResolver = Substitute.For<IUserOwnerResolver>();
             UserOwnerResolver
                 .GetUserOwnerIdentitiesAsync(Arg.Any<Message>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
+                .Returns(new UserOwner(UserIdentity, ApplicationIdentity));
+            UserOwnerResolver
+                .GetUserOwnerIdentitiesAsync(Arg.Any<Command>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
                 .Returns(new UserOwner(UserIdentity, ApplicationIdentity));
 
             FlowLoader = Substitute.For<IFlowLoader>();
@@ -134,6 +139,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IFlowLoader FlowLoader { get; set; }
 
+        public IHttpClient HttpClient { get; set; }
+
         public virtual Container CreateContainer()
         {
             var container = new Container();
@@ -161,6 +168,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(() => UserOwnerResolver);
             container.RegisterSingleton(() => FlowLoader);
             container.RegisterSingleton(() => BuilderExtension);
+            container.RegisterSingleton(() => HttpClient);
 
             return container;
         }

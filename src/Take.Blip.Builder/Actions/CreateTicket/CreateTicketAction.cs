@@ -12,7 +12,7 @@ namespace Take.Blip.Builder.Actions.CreateTicket
         private readonly IHelpDeskExtension _helpDeskExtension;
         private readonly Application _application;
 
-        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(CreateTicketSettings.Variable) };
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(CreateTicketSettings.Variable).ToCamelCase() };
 
         public CreateTicketAction(IHelpDeskExtension helpDeskExtension, Application application)
             : base(nameof(CreateTicket), OUTPUT_PARAMETERS_NAME)

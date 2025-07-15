@@ -30,7 +30,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         public string Type => nameof(ProcessCommand);
 
-        public string[]? OutputVariables => new[] { OUTPUT_VARIABLE_PROPERTY };
+        public string[]? OutputVariables => new[] { OUTPUT_VARIABLE_PROPERTY.ToCamelCase() };
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {

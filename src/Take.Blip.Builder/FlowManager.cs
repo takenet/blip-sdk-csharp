@@ -954,7 +954,7 @@ namespace Take.Blip.Builder
             flow.Validate();
 
             //TODO: Validate on template hosting logic who: from and to
-            
+
             // Determine the user / owner pair
             // on new action command we need to create a command similar to the message to identity properly
             var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(command, flow.BuilderConfiguration, cancellationToken);
@@ -1067,7 +1067,7 @@ namespace Take.Blip.Builder
         /// <param name="actionId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<string[]> ProcessStateLocalCustomActionAsync(State state, IContext context, StateTrace stateTrace, string actionId, CancellationToken cancellationToken)
+        private async Task<IEnumerable<string>> ProcessStateLocalCustomActionAsync(State state, IContext context, StateTrace stateTrace, string actionId, CancellationToken cancellationToken)
         {
             // Validating if the state has local custom actions to be executed
             if (state?.LocalCustomActions == null)
@@ -1085,10 +1085,16 @@ namespace Take.Blip.Builder
             if (outputVariablesProperties == null || outputVariablesProperties.Length == 0)
                 return null;
 
-            //TODO: analyze how can retrieve the properly variable names from settings object in the executed action
-            var t = actionToExecute.Settings;
+            // Deserializing the action settings to allow the retrieval of the output variables names properties
+            var actionInformations = JsonConvert.DeserializeObject<IDictionary<string, string>>(actionToExecute.Settings?.ToString() ?? string.Empty);
 
-            return null;
+            // Search in the dictionary what output variables we have configured on executed action
+            var variableNames = outputVariablesProperties
+                .Where(variable => actionInformations?.ContainsKey(variable) == true &&
+                                  !string.IsNullOrWhiteSpace(actionInformations[variable]))
+                .Select(name => actionInformations[name]);
+
+            return variableNames;
         }
 
         /// <summary>
@@ -1230,25 +1236,27 @@ namespace Take.Blip.Builder
         }
 
         /// <summary>
-        /// Retrieves the context variables from the action execution.
+        /// Retrieves the context variables from the action execution. Create the task approach since the HttpAction return two variables
         /// </summary>
         /// <param name="outputVariablesProperties"></param>
         /// <param name="context"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<Dictionary<string, string>> GetContextVariablesFromActionExecutionAsync(string[] outputVariablesProperties, IContext context, CancellationToken cancellationToken)
+        private async Task<Dictionary<string, string>> GetContextVariablesFromActionExecutionAsync(IEnumerable<string> outputVariablesProperties, IContext context, CancellationToken cancellationToken)
         {
-            var variableNameValue = new Dictionary<string, string>();
+            var tasks = outputVariablesProperties
+                .Select(async variableName =>
+                                    new
+                                    {
+                                        Key = variableName,
+                                        Value = await context.GetVariableAsync(variableName, cancellationToken)
+                                    });
 
-            foreach (var variable in outputVariablesProperties)
-            {
-                var variableValue = await context.GetVariableAsync(variable, cancellationToken);
+            var results = await Task.WhenAll(tasks);
 
-                if (variableValue != null)
-                    variableNameValue.Add(variable, variableValue);
-            }
-
-            return variableNameValue;
+            return results
+                .Where(result => result.Value != null)
+                .ToDictionary(result => result.Key, result => result.Value);
         }
 
         #endregion

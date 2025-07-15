@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
@@ -29,8 +30,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[]
         {
-            nameof(ProcessHttpSettings.ResponseStatusVariable),
-            nameof(ProcessHttpSettings.ResponseBodyVariable)
+            nameof(ProcessHttpSettings.ResponseStatusVariable).ToCamelCase(),
+            nameof(ProcessHttpSettings.ResponseBodyVariable).ToCamelCase()
         };
 
         public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration,  ISensitiveInfoReplacer sensitiveInfoReplacer, IVariableReplacer variableReplacer)

@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
     {
         private readonly ILogger _logger;
         private readonly IHandlebars _handlebars;
-        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteTemplateSettings.OutputVariable) };
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteTemplateSettings.OutputVariable).ToCamelCase() };
 
         public ExecuteTemplateAction(IHandlebars handlebars, ILogger logger) 
             : base(nameof(ExecuteTemplate), OUTPUT_PARAMETERS_NAME)
