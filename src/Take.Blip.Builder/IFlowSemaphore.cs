@@ -27,10 +27,11 @@ namespace Take.Blip.Builder
         /// Do semaphore lock to block the processing of two actions from the same contact and bot
         /// </summary>
         /// <param name="flow"></param>
+        /// <param name="actionId"></param>
         /// <param name="userIdentity"></param>
         /// <param name="timeout"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IAsyncDisposable> WaitAsync(Flow flow, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken);
+        Task<IAsyncDisposable> WaitAsync(Flow flow, string actionId, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken);
     }
 }

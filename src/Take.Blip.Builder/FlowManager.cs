@@ -996,7 +996,7 @@ namespace Take.Blip.Builder
                 {
                     // Synchronize to avoid concurrency issues on multiple running instances
                     // Creating this semaphore to avoid to instances executing the same local custom action and avoid context dirty reads
-                    var handle = await _flowSemaphore.WaitAsync(flow, userIdentity, _configuration.DefaultActionExecutionTimeout, cancellationToken);
+                    var handle = await _flowSemaphore.WaitAsync(flow, actionId, userIdentity, _configuration.DefaultActionExecutionTimeout, cancellationToken);
 
                     try
                     {
