@@ -27,10 +27,5 @@ namespace Take.Blip.Builder
         {
             return _namedSemaphore.WaitAsync($"{flow.Id}:{actionId}:{userIdentity}", timeout, cancellationToken);
         }
-
-        //public Task<IAsyncDisposable> WaitAsync(Flow flow, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken)
-        //{
-        //    return _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", timeout, cancellationToken);
-        //}
     }
 }
