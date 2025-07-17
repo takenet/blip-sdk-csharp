@@ -2276,7 +2276,7 @@ namespace Take.Blip.Builder.UnitTests
                 From = "fromaccountagent@msging.net",
             };
 
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(desiredScriptReturn);
+            Context.GetContextVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(desiredScriptReturn);
 
             // Act
             var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
@@ -2348,8 +2348,8 @@ namespace Take.Blip.Builder.UnitTests
                 From = "fromaccountagent@msging.net",
             };
 
-            Context.GetVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(httpBodyReponseVariableValue);
-            Context.GetVariableAsync(statusCodeVariableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(statusCodeVariableValue);
+            Context.GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>()).Returns(httpBodyReponseVariableValue);
+            Context.GetContextVariableAsync(statusCodeVariableName, Arg.Any<CancellationToken>()).Returns(statusCodeVariableValue);
 
             HttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m =>
                 m.Method == HttpMethod.Get &&
@@ -2435,7 +2435,7 @@ namespace Take.Blip.Builder.UnitTests
                 From = "fromaccountagent@msging.net",
             };
 
-            Context.GetVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(httpBodyReponseVariableValue);
+            Context.GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>()).Returns(httpBodyReponseVariableValue);
 
             HttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m =>
                 m.Method == HttpMethod.Get &&

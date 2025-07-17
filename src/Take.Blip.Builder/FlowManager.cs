@@ -1240,7 +1240,7 @@ namespace Take.Blip.Builder
         }
 
         /// <summary>
-        /// Retrieves the context variables from the action execution. Create the task approach since the HttpAction return two variables
+        /// Retrieves the context variables from the action execution.
         /// </summary>
         /// <param name="outputVariablesProperties"></param>
         /// <param name="context"></param>
@@ -1253,14 +1253,12 @@ namespace Take.Blip.Builder
                                     new
                                     {
                                         Key = variableName,
-                                        Value = await context.GetVariableAsync(variableName, cancellationToken)
+                                        Value = await context.GetContextVariableAsync(variableName, cancellationToken)
                                     });
 
             var results = await Task.WhenAll(tasks);
 
-            return results
-                .Where(result => result.Value != null)
-                .ToDictionary(result => result.Key, result => result.Value);
+            return results.ToDictionary(result => result.Key, result => result.Value);
         }
 
         /// <summary>
