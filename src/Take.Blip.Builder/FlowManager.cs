@@ -987,6 +987,10 @@ namespace Take.Blip.Builder
                 ? Stopwatch.StartNew()
                 : null;
 
+            // Allow execution be under the properly ownerIdentity
+            // This is important to make the contexts be stored on router context instead of subbot
+            var ownerContext = OwnerContext.Create(ownerIdentity);
+
             State state = default;
 
             try
