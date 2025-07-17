@@ -943,13 +943,13 @@ namespace Take.Blip.Builder
         /// <summary>
         /// Processes a command input for a specific local custom action in a flow.
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="message"></param>
         /// <param name="flow"></param>
         /// <param name="stateId"></param>
         /// <param name="actionId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>A dictionary with variable names and values given a local custom action</returns>
-        public async Task<Dictionary<string, string>> ProcessCommandInputAsync(Command command, Flow flow, string stateId, string actionId, CancellationToken cancellationToken)
+        public async Task<Dictionary<string, string>> ProcessCommandInputAsync(Message message, Flow flow, string stateId, string actionId, CancellationToken cancellationToken)
         {
             flow.Validate();
 
@@ -957,15 +957,15 @@ namespace Take.Blip.Builder
 
             // Determine the user / owner pair
             // on new action command we need to create a command similar to the message to identity properly
-            var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(command, flow.BuilderConfiguration, cancellationToken);
+            var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
             TraceSettings traceSettings;
 
-            if (command.Metadata != null && command.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET_TYPE))
+            if (message.Metadata != null && message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET_TYPE))
             {
-                traceSettings = new TraceSettings(command.Metadata);
+                traceSettings = new TraceSettings(message.Metadata);
             }
             else
             {
@@ -979,7 +979,7 @@ namespace Take.Blip.Builder
                     Owner = ownerIdentity,
                     FlowId = flow.Id,
                     User = userIdentity,
-                    Input = command.Resource.ToString()
+                    Input = message.Content.ToString()
                 };
             }
 
@@ -1000,8 +1000,12 @@ namespace Take.Blip.Builder
 
                     try
                     {
+                        // Create the input evaluator
+                        var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
+                            _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
+
                         // Load the user context
-                        var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, null, flow);
+                        var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
 
                         // Get the state object based on received state id
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
@@ -1041,7 +1045,7 @@ namespace Take.Blip.Builder
                 }
 
                 var builderException = ex is BuilderException be ? be :
-                    new BuilderException($"Error processing single action input with command id '{command.Id}' for user '{userIdentity}' in state '{state?.Id}'", ex);
+                    new BuilderException($"Error processing single action input with custom message id '{message.Id}' for user '{userIdentity}' in state '{state?.Id}'", ex);
 
                 builderException.StateId = stateId;
                 builderException.UserId = userIdentity;
@@ -1086,13 +1090,13 @@ namespace Take.Blip.Builder
                 return null;
 
             // Deserializing the action settings to allow the retrieval of the output variables names properties
-            var actionInformations = JsonConvert.DeserializeObject<IDictionary<string, string>>(actionToExecute.Settings?.ToString() ?? string.Empty);
+            var actionInformations = DeserializeActionSettings(actionToExecute.Settings);
 
             // Search in the dictionary what output variables we have configured on executed action
             var variableNames = outputVariablesProperties
                 .Where(variable => actionInformations?.ContainsKey(variable) == true &&
-                                  !string.IsNullOrWhiteSpace(actionInformations[variable]))
-                .Select(name => actionInformations[name]);
+                                  !string.IsNullOrWhiteSpace(actionInformations[variable].ToString()))
+                .Select(name => actionInformations[name].ToString());
 
             return variableNames;
         }
@@ -1257,6 +1261,36 @@ namespace Take.Blip.Builder
             return results
                 .Where(result => result.Value != null)
                 .ToDictionary(result => result.Key, result => result.Value);
+        }
+
+        /// <summary>
+        /// Deserializes the action settings from a JToken to a dictionary. The object value occurs due some types with custom types, like ProcessHttp headers
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="actionId"></param>
+        /// <returns></returns>
+        private IDictionary<string, object> DeserializeActionSettings(JToken settings, string actionId = null)
+        {
+            if (settings == null)
+                return new Dictionary<string, object>();
+
+            try
+            {
+                // Handle both JObject and string cases
+                var settingsObject = settings as JObject ?? JObject.Parse(settings.ToString());
+                return settingsObject.ToObject<Dictionary<string, object>>() ?? new Dictionary<string, object>();
+            }
+            catch (JsonException ex)
+            {
+                _logger.Warning(ex, "Failed to deserialize action settings for action {ActionId}. Settings: {Settings}",
+                               actionId, settings.ToString());
+                return new Dictionary<string, object>();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Unexpected error deserializing action settings for action {ActionId}", actionId);
+                return new Dictionary<string, object>();
+            }
         }
 
         #endregion

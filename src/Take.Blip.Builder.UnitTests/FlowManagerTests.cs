@@ -2269,7 +2269,7 @@ namespace Take.Blip.Builder.UnitTests
 
             var target = GetTarget();
 
-            var command = new Command
+            var message = new Message
             {
                 Id = Guid.NewGuid().ToString(),
                 To = "botidentity@msging.net",
@@ -2279,7 +2279,7 @@ namespace Take.Blip.Builder.UnitTests
             Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(desiredScriptReturn);
 
             // Act
-            var processCommandReturn = await target.ProcessCommandInputAsync(command, flow, stateId, actionId, CancellationToken.None);
+            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
 
             // Assert
             Context.Received(1).SetVariableAsync(Arg.Is(variableName), Arg.Is(desiredScriptReturn), Arg.Any<CancellationToken>());
@@ -2299,6 +2299,12 @@ namespace Take.Blip.Builder.UnitTests
 
             var httpBodyReponseVariableName = "customerApiResponse";
             var httpBodyReponseVariableValue = "{}";
+
+            var headers = new JObject
+            {
+                { "header1", "value1" },
+                { "header2", "value2" }
+            };
 
             var flow = new Flow()
             {
@@ -2324,6 +2330,7 @@ namespace Take.Blip.Builder.UnitTests
                                         { "responseBodyVariable", httpBodyReponseVariableName },
                                         { "method", "GET" },
                                         { "uri", "https://example.com/api/test" },
+                                        { "headers", headers }
                                     }
                                 )
                             }
@@ -2334,7 +2341,7 @@ namespace Take.Blip.Builder.UnitTests
 
             var target = GetTarget();
 
-            var command = new Command
+            var message = new Message
             {
                 Id = Guid.NewGuid().ToString(),
                 To = "botidentity@msging.net",
@@ -2355,7 +2362,7 @@ namespace Take.Blip.Builder.UnitTests
                 });
 
             // Act
-            var processCommandReturn = await target.ProcessCommandInputAsync(command, flow, stateId, actionId, CancellationToken.None);
+            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
 
             // Assert
             Context
@@ -2383,6 +2390,9 @@ namespace Take.Blip.Builder.UnitTests
             var httpBodyReponseVariableName = "customerApiResponse";
             var httpBodyReponseVariableValue = "{}";
 
+            // Representing empty headers
+            var headers = new JObject();
+
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
@@ -2407,6 +2417,7 @@ namespace Take.Blip.Builder.UnitTests
                                         { "responseBodyVariable", httpBodyReponseVariableName },
                                         { "method", "GET" },
                                         { "uri", "https://example.com/api/test" },
+                                        { "headers", headers }
                                     }
                                 )
                             }
@@ -2417,7 +2428,7 @@ namespace Take.Blip.Builder.UnitTests
 
             var target = GetTarget();
 
-            var command = new Command
+            var message = new Message
             {
                 Id = Guid.NewGuid().ToString(),
                 To = "botidentity@msging.net",
@@ -2437,7 +2448,7 @@ namespace Take.Blip.Builder.UnitTests
                 });
 
             // Act
-            var processCommandReturn = await target.ProcessCommandInputAsync(command, flow, stateId, actionId, CancellationToken.None);
+            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
 
             // Assert
             Context
@@ -2490,7 +2501,7 @@ namespace Take.Blip.Builder.UnitTests
 
             var target = GetTarget();
 
-            var command = new Command
+            var message = new Message
             {
                 Id = Guid.NewGuid().ToString(),
                 To = "botidentity@msging.net",
@@ -2498,7 +2509,7 @@ namespace Take.Blip.Builder.UnitTests
             };
 
             // Act
-            var processCommandReturn = await target.ProcessCommandInputAsync(command, flow, stateId, actionId, CancellationToken.None);
+            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
 
             // Assert
             processCommandReturn.ShouldBeNull();
