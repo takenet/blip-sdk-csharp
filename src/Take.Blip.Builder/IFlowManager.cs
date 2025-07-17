@@ -26,12 +26,12 @@ namespace Take.Blip.Builder
         /// <summary>
         /// Process given an input command trigger
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="message"></param>
         /// <param name="flow"></param>
         /// <param name="stateId"></param>
         /// <param name="actionId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Dictionary<string, string>> ProcessCommandInputAsync(Command command, Flow flow, string stateId, string actionId, CancellationToken cancellationToken);
+        Task<Dictionary<string, string>> ProcessCommandInputAsync(Message message, Flow flow, string stateId, string actionId, CancellationToken cancellationToken);
     }
 }
