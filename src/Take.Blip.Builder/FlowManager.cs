@@ -1062,6 +1062,8 @@ namespace Take.Blip.Builder
                 {
                     await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
                 }
+
+                ownerContext.Dispose();
             }
         }
 
