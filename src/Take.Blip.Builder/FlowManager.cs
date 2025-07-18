@@ -953,8 +953,6 @@ namespace Take.Blip.Builder
         {
             flow.Validate();
 
-            //TODO: Validate on template hosting logic who: from and to
-
             // Determine the user / owner pair
             // on new action command we need to create a command similar to the message to identity properly
             var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
@@ -1010,6 +1008,12 @@ namespace Take.Blip.Builder
 
                         // Load the user context
                         var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
+
+                        // Validate if the user are in the informed state
+                        var currentState = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
+
+                        if (!currentState.Equals(stateId, StringComparison.InvariantCultureIgnoreCase))
+                            throw new BuilderException("user not in the informed state");
 
                         // Get the state object based on received state id
                         state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
