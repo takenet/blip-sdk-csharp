@@ -1012,7 +1012,7 @@ namespace Take.Blip.Builder
                         // Validate if the user are in the informed state
                         var currentState = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
 
-                        if (!currentState.Equals(stateId, StringComparison.InvariantCultureIgnoreCase))
+                        if (currentState is null || !currentState.Equals(stateId, StringComparison.InvariantCultureIgnoreCase))
                             throw new BuilderException("user not in the informed state");
 
                         // Get the state object based on received state id
@@ -1053,7 +1053,7 @@ namespace Take.Blip.Builder
                 }
 
                 var builderException = ex is BuilderException be ? be :
-                    new BuilderException($"Error processing single action input with custom message id '{message.Id}' for user '{userIdentity}' in state '{state?.Id}'", ex);
+                    new BuilderException($"Error processing single action input with custom message id '{message.Id}' for user '{userIdentity}' in state '{stateId}'", ex);
 
                 builderException.StateId = stateId;
                 builderException.UserId = userIdentity;
