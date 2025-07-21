@@ -20,12 +20,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
 
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteScriptV2Settings.OutputVariable).ToCamelCase() };
+
         /// <inheritdoc />
         public ExecuteScriptV2Action(
             IConfiguration configuration,
             IHttpClient httpClient,
             ILogger logger)
-            : base(nameof(ExecuteScriptV2))
+            : base(nameof(ExecuteScriptV2), OUTPUT_PARAMETERS_NAME)
         {
             HostSettings.CustomAttributeLoader = new LowerCaseMembersLoader();
 

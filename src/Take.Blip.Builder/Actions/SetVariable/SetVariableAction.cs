@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 
 namespace Take.Blip.Builder.Actions.SetVariable
 {
     public class SetVariableAction : ActionBase<SetVariableSettings>
     {
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(SetVariableSettings.Variable).ToCamelCase() };
+
         public SetVariableAction()
-            : base(nameof(SetVariable))
+            : base(nameof(SetVariable), OUTPUT_PARAMETERS_NAME)
         {
             
         }

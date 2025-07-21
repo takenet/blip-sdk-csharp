@@ -20,6 +20,8 @@ namespace Take.Blip.Builder.Actions.Redirect
 
         public string Type => nameof(Redirect);
 
+        public string[]? OutputVariables => null;
+
         public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

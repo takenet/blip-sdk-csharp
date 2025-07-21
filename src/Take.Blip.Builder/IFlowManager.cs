@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
@@ -17,10 +18,20 @@ namespace Take.Blip.Builder
         /// <param name="message">The input message.</param>
         /// <param name="flow">The builder flow.</param>
         /// <param name="cancellationToken">The operation cancellation token.</param>
-        /// <param name="isActiveLogger"></param>
         /// <param name="messageContext">Context from Message Receiver. Its not mandatory.</param>
         /// <returns></returns>
         Task ProcessInputAsync(Message message, Flow flow, IContext messageContext, CancellationToken cancellationToken);
         Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Process given an input command trigger
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="flow"></param>
+        /// <param name="stateId"></param>
+        /// <param name="actionId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Dictionary<string, string>> ProcessCommandInputAsync(Message message, Flow flow, string stateId, string actionId, CancellationToken cancellationToken);
     }
 }

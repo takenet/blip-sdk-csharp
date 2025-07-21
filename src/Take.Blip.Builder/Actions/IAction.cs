@@ -9,6 +9,8 @@ namespace Take.Blip.Builder.Actions
     {
         string Type { get; }
 
+        string[]? OutputVariables { get; }
+
         Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken);
     }
 }

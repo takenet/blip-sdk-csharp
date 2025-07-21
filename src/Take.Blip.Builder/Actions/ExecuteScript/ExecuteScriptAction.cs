@@ -11,6 +11,7 @@ using Take.Blip.Builder.Hosting;
 using System;
 using TimeZoneConverter;
 using Esprima;
+using Lime.Protocol;
 
 namespace Take.Blip.Builder.Actions.ExecuteScript
 {
@@ -22,8 +23,10 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         const string BRAZIL_TIMEZONE = "E. South America Standard Time";
         const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
 
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteScriptSettings.OutputVariable).ToCamelCase() };
+
         public ExecuteScriptAction(IConfiguration configuration, ILogger logger)
-            : base(nameof(ExecuteScript))
+            : base(nameof(ExecuteScript), OUTPUT_PARAMETERS_NAME)
         {
             _configuration = configuration;
             _logger = logger;
