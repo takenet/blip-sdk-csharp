@@ -959,16 +959,10 @@ namespace Take.Blip.Builder
 
             // Input tracing infrastructure
             InputTrace inputTrace = null;
-            TraceSettings traceSettings;
 
-            if (message.Metadata != null && message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET_TYPE))
-            {
-                traceSettings = new TraceSettings(message.Metadata);
-            }
-            else
-            {
-                traceSettings = flow.TraceSettings;
-            }
+            var traceSettings = message.Metadata != null && message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET_TYPE)
+                ? new TraceSettings(message.Metadata)
+                : flow.TraceSettings;
 
             if (traceSettings != null && traceSettings.Mode != TraceMode.Disabled)
             {

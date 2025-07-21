@@ -16,7 +16,10 @@ namespace Take.Blip.Builder.Actions
             Type = type;
 
             if (outputVariables != null)
+            {
                 OutputVariables = outputVariables;
+            }
+
         }
 
         public string Type { get; }
@@ -26,9 +29,14 @@ namespace Take.Blip.Builder.Actions
         public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null)
+            {
                 throw new ArgumentNullException(nameof(context));
+            }
+
             if (settings == null)
+            {
                 throw new ArgumentNullException(nameof(settings));
+            }
 
             var validableSettings = settings.ToObject<TSettings>();
             validableSettings.Validate();
