@@ -890,7 +890,7 @@ namespace Take.Blip.Builder
             // If there's any output in the current state
             if (outputs != null)
             {
-                // Evalute each output conditions
+                // Evaluate each output conditions
                 foreach (var output in outputs.OrderBy(o => o.Order))
                 {
                     var (outputTrace, outputStopwatch) = outputTraces != null
@@ -914,11 +914,27 @@ namespace Take.Blip.Builder
                             {
                                 await _stateManager.DeleteStateIdAsync(context, cancellationToken);
 
-                                throw new InvalidOperationException($"Failed to process output condition, bacause the output context variable '{output.StateId}' is undefined or does not exist in the context.");
+                                throw new InvalidOperationException($"Failed to process output condition, because the output context variable '{output.StateId}' is undefined or does not exist in the context.");
                             }
 
                             break;
                         }
+
+                        _blipMonitoringLogger.UserInput(new LogInput
+                        {
+                            Data = new JObject
+                            {
+                                ["outputStateId"] = output.StateId,
+                                ["outputConditions"] = output.Conditions != null ? JToken.FromObject(output.Conditions) : null,
+                                ["outputOrder"] = output.Order,
+                                ["outputExecutionTime"] = outputStopwatch?.ElapsedMilliseconds ?? 0,
+                                ["outputTrace"] = JToken.FromObject(output) // Fix: Convert 'output' to JToken using JToken.FromObject
+                            },
+                            IdMessage = lazyInput.Message.Id,
+                            From = context.UserIdentity,
+                            To = context.OwnerIdentity,
+                            Title = "Output Processing"
+                        });
                     }
                     catch (Exception ex)
                     {
