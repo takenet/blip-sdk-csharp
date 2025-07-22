@@ -65,6 +65,8 @@ namespace Take.Blip.Builder
         private const string ACTION_BLIP_FUNCTION = "ExecuteBlipFunction";
         private const string ACTION_EXECUTE_SCRIPT_V2 = "ExecuteScriptV2";
         private const string WORD_START_BLIP_FUNCTION = "{{";
+        private const string TYPE_ACTION_INPUT = "inputActions";
+        private const string TYPE_ACTION_OUTPUT = "outputActions";
 
         public FlowManager(
             IConfiguration configuration,
@@ -238,7 +240,7 @@ namespace Take.Blip.Builder
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
-                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, state, linkedCts.Token);
+                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, state,TYPE_ACTION_INPUT, linkedCts.Token);
                         }
 
                         var stateWaitForInput = true;
@@ -439,7 +441,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, state, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, state, TYPE_ACTION_INPUT, cancellationToken);
         }
 
         private async Task ProcessStateOutputActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
@@ -449,7 +451,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, state, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, state,TYPE_ACTION_OUTPUT, cancellationToken);
         }
 
         private async Task ProcessAfterStateChangedActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
@@ -459,14 +461,14 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, state, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, state,TYPE_ACTION_INPUT, cancellationToken);
         }
 
         private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, State state, CancellationToken cancellationToken)
         {
             if (flow.OutputActions != null)
             {
-                await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, state, cancellationToken);
+                await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, state, TYPE_ACTION_OUTPUT,cancellationToken);
             }
         }
 
@@ -474,7 +476,7 @@ namespace Take.Blip.Builder
         {
             if (flow.AfterStateChangedActions != null)
             {
-                await ProcessActionsAsync(lazyInput, context, flow.AfterStateChangedActions, inputTrace?.AfterStateChangedActions, state, cancellationToken);
+                await ProcessActionsAsync(lazyInput, context, flow.AfterStateChangedActions, inputTrace?.AfterStateChangedActions, state, TYPE_ACTION_INPUT, cancellationToken);
             }
         }
 
@@ -570,7 +572,7 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, State state, CancellationToken cancellationToken)
+        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, State state, string typeAction, CancellationToken cancellationToken)
         {
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
@@ -668,7 +670,8 @@ namespace Take.Blip.Builder
                                 ["actionContinueOnError"] = stateAction.ContinueOnError,
                                 ["actionExecutionTimeout"] = executionTimeout.TotalMilliseconds,
                                 ["actionExecutionTime"] = actionStopwatch?.ElapsedMilliseconds ?? 0,
-                                ["jObjectSettings"] = jObjectSettings?.ToString(Formatting.None)
+                                ["jObjectSettings"] = jObjectSettings?.ToString(Formatting.None),
+                                ["ActionExecuteType"] = typeAction
                             },
                             IdMessage = lazyInput.Message.Id,
                             From = context.UserIdentity,
@@ -698,7 +701,8 @@ namespace Take.Blip.Builder
                                 ["actionOrder"] = stateAction.Order,
                                 ["actionContinueOnError"] = stateAction.ContinueOnError,
                                 ["errorMessage"] = ex.Message,
-                                ["errorStackTrace"] = ex.StackTrace
+                                ["errorStackTrace"] = ex.StackTrace,
+                                ["ActionExecuteType"] = typeAction
                             },
                             IdMessage = lazyInput.Message.Id,
                             From = context.UserIdentity,
