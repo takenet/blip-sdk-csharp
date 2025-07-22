@@ -407,6 +407,25 @@ namespace Take.Blip.Builder
                 using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
                 {
                     await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+
+                    _blipMonitoringLogger.ActionExecution(
+                        new LogInput
+                        {
+                            Data = new JObject
+                            {
+                                ["flowId"] = flow.Id,
+                                ["stateId"] = state?.Id,
+                                ["input"] = message.Content.ToString(),
+                                ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
+                                ["error"] = inputTrace?.Error,
+                                ["inputTrace"] = inputTrace?.ToString(),
+                                ["traceSettings"] = traceSettings?.ToString()
+                            },
+                            IdMessage = message.Id,
+                            From = userIdentity,
+                            To = ownerIdentity,
+                            Title = "Input Processing"
+                        });
                 }
 
                 ownerContext.Dispose();
