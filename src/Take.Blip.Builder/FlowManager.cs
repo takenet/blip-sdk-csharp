@@ -218,22 +218,6 @@ namespace Take.Blip.Builder
                         // Create trace instances, if required
                         var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
 
-                        _blipMonitoringLogger.MessageProcessing(new LogInput()
-                        {
-                            Data = new JObject
-                            {
-                                ["flowId"] = flow.Id,
-                                ["stateId"] = state.Id,
-                                ["userIdentity"] = userIdentity.ToString(),
-                                ["ownerIdentity"] = ownerIdentity.ToString(),
-                                ["messageId"] = message.Id,
-                            },
-                            IdMessage = message.Id,
-                            From = userIdentity,
-                            To = ownerIdentity,
-                            Title = "Message Processing"
-                        });
-
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
@@ -405,9 +389,12 @@ namespace Take.Blip.Builder
             {
                 using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
                 {
-                    await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                    if (traceSettings != null && traceSettings.Mode != TraceMode.Disabled)
+                    {
+                        await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                    }
 
-                    _blipMonitoringLogger.ActionExecution(
+                        _blipMonitoringLogger.ActionExecution(
                         new LogInput
                         {
                             Data = new JObject
@@ -423,7 +410,7 @@ namespace Take.Blip.Builder
                             IdMessage = message.Id,
                             From = userIdentity,
                             To = ownerIdentity,
-                            Title = "Input Processing geral"
+                            Title = "Input Processing"
                         });
                 }
 
@@ -656,25 +643,6 @@ namespace Take.Blip.Builder
                         using (LogContext.PushProperty(nameof(BuilderException.MessageId), lazyInput?.Message?.Id))
                         using (LogContext.PushProperty(nameof(Action.Settings), jObjectSettings, true))
                             await action.ExecuteAsync(context, jObjectSettings, linkedCts.Token);
-
-                        _blipMonitoringLogger.ActionExecution(new LogInput()
-                        {
-                            Data = new JObject
-                            {
-                                ["actionType"] = stateAction.Type,
-                                ["actionSettings"] = stateAction.Settings?.ToString(Formatting.None),
-                                ["actionOrder"] = stateAction.Order,
-                                ["actionContinueOnError"] = stateAction.ContinueOnError,
-                                ["actionExecutionTimeout"] = executionTimeout.TotalMilliseconds,
-                                ["actionExecutionTime"] = actionStopwatch?.ElapsedMilliseconds ?? 0,
-                                ["jObjectSettings"] = jObjectSettings?.ToString(Formatting.None),
-                                ["ActionExecuteType"] = typeAction
-                            },
-                            IdMessage = lazyInput.Message.Id,
-                            From = context.UserIdentity,
-                            To = context.OwnerIdentity,
-                            Title = "Action Execution"
-                        });
                     }
                     catch (Exception ex)
                     {
@@ -689,24 +657,6 @@ namespace Take.Blip.Builder
                                 actionTrace.Error = ex.ToString();
                             }
                         }
-                        _blipMonitoringLogger.ErrorEvents(new LogInput()
-                        {
-                            Data = new JObject
-                            {
-                                ["actionType"] = stateAction.Type,
-                                ["actionSettings"] = stateAction.Settings?.ToString(Formatting.None),
-                                ["actionOrder"] = stateAction.Order,
-                                ["actionContinueOnError"] = stateAction.ContinueOnError,
-                                ["errorMessage"] = ex.Message,
-                                ["errorStackTrace"] = ex.StackTrace,
-                                ["ActionExecuteType"] = typeAction
-                            },
-                            IdMessage = lazyInput.Message.Id,
-                            From = context.UserIdentity,
-                            To = context.OwnerIdentity,
-                            Title = "Action Execution Error"
-                        },
-                        ex);
 
                         var message = ex is OperationCanceledException && cts.IsCancellationRequested
                             ? $"The processing of the action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
@@ -913,22 +863,6 @@ namespace Take.Blip.Builder
 
                                 throw new InvalidOperationException($"Failed to process output condition, because the output context variable '{output.StateId}' is undefined or does not exist in the context.");
                             }
-                            _blipMonitoringLogger.UserInput(new LogInput
-                            {
-                                Data = new JObject
-                                {
-                                    ["outputStateId"] = output.StateId,
-                                    ["outputConditions"] = output.Conditions != null ? JToken.FromObject(output.Conditions) : null,
-                                    ["conditionsCount"] = output.Conditions?.Count() ?? 0,
-                                    ["outputOrder"] = output.Order,
-                                    ["outputExecutionTime"] = outputStopwatch?.ElapsedMilliseconds ?? 0,
-                                    ["outputTrace"] = JToken.FromObject(output)
-                                },
-                                IdMessage = lazyInput.Message.Id,
-                                From = context.UserIdentity,
-                                To = context.OwnerIdentity,
-                                Title = "Output Processing"
-                            });
 
                             break;
                         }
@@ -946,22 +880,6 @@ namespace Take.Blip.Builder
                                 outputTrace.Error = ex.ToString();
                             }
                         }
-                        _blipMonitoringLogger.ErrorEvents(new LogInput()
-                        {
-                            Data = new JObject
-                            {
-                                ["outputStateId"] = output.StateId,
-                                ["outputConditions"] = output.Conditions != null ? JToken.FromObject(output.Conditions) : null,
-                                ["conditionsCount"] = output.Conditions?.Count() ?? 0,
-                                ["outputOrder"] = output.Order,
-                                ["errorMessage"] = ex.Message,
-                                ["errorStackTrace"] = ex.StackTrace
-                            },
-                            IdMessage = lazyInput.Message.Id,
-                            From = context.UserIdentity,
-                            To = context.OwnerIdentity,
-                            Title = "Output Processing Error"
-                        }, ex);
 
                         throw new OutputProcessingException($"Failed to process output condition to state '{output.StateId}'", ex)
                         {
