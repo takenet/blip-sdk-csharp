@@ -166,9 +166,6 @@ namespace Take.Blip.Builder
                 traceSettings = flow.TraceSettings;
             }
 
-            if (traceSettings != null &&
-                traceSettings.Mode != TraceMode.Disabled)
-            {
                 inputTrace = new InputTrace
                 {
                     Owner = ownerIdentity,
@@ -176,7 +173,7 @@ namespace Take.Blip.Builder
                     User = userIdentity,
                     Input = message.Content.ToString()
                 };
-            }
+
 
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
@@ -420,13 +417,13 @@ namespace Take.Blip.Builder
                                 ["input"] = message.Content.ToString(),
                                 ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
                                 ["error"] = inputTrace?.Error,
-                                ["inputTrace"] = inputTrace?.ToString(),
-                                ["traceSettings"] = traceSettings?.ToString()
+                                ["inputTrace"] = inputTrace != null ? JObject.FromObject(inputTrace) : null,
+                                ["traceSettings"] = traceSettings != null ? JObject.FromObject(traceSettings) : null,
                             },
                             IdMessage = message.Id,
                             From = userIdentity,
                             To = ownerIdentity,
-                            Title = "Input Processing"
+                            Title = "Input Processing geral"
                         });
                 }
 
@@ -916,25 +913,25 @@ namespace Take.Blip.Builder
 
                                 throw new InvalidOperationException($"Failed to process output condition, because the output context variable '{output.StateId}' is undefined or does not exist in the context.");
                             }
+                            _blipMonitoringLogger.UserInput(new LogInput
+                            {
+                                Data = new JObject
+                                {
+                                    ["outputStateId"] = output.StateId,
+                                    ["outputConditions"] = output.Conditions != null ? JToken.FromObject(output.Conditions) : null,
+                                    ["conditionsCount"] = output.Conditions?.Count() ?? 0,
+                                    ["outputOrder"] = output.Order,
+                                    ["outputExecutionTime"] = outputStopwatch?.ElapsedMilliseconds ?? 0,
+                                    ["outputTrace"] = JToken.FromObject(output)
+                                },
+                                IdMessage = lazyInput.Message.Id,
+                                From = context.UserIdentity,
+                                To = context.OwnerIdentity,
+                                Title = "Output Processing"
+                            });
 
                             break;
                         }
-
-                        _blipMonitoringLogger.UserInput(new LogInput
-                        {
-                            Data = new JObject
-                            {
-                                ["outputStateId"] = output.StateId,
-                                ["outputConditions"] = output.Conditions != null ? JToken.FromObject(output.Conditions) : null,
-                                ["outputOrder"] = output.Order,
-                                ["outputExecutionTime"] = outputStopwatch?.ElapsedMilliseconds ?? 0,
-                                ["outputTrace"] = JToken.FromObject(output) // Fix: Convert 'output' to JToken using JToken.FromObject
-                            },
-                            IdMessage = lazyInput.Message.Id,
-                            From = context.UserIdentity,
-                            To = context.OwnerIdentity,
-                            Title = "Output Processing"
-                        });
                     }
                     catch (Exception ex)
                     {
@@ -949,6 +946,22 @@ namespace Take.Blip.Builder
                                 outputTrace.Error = ex.ToString();
                             }
                         }
+                        _blipMonitoringLogger.ErrorEvents(new LogInput()
+                        {
+                            Data = new JObject
+                            {
+                                ["outputStateId"] = output.StateId,
+                                ["outputConditions"] = output.Conditions != null ? JToken.FromObject(output.Conditions) : null,
+                                ["conditionsCount"] = output.Conditions?.Count() ?? 0,
+                                ["outputOrder"] = output.Order,
+                                ["errorMessage"] = ex.Message,
+                                ["errorStackTrace"] = ex.StackTrace
+                            },
+                            IdMessage = lazyInput.Message.Id,
+                            From = context.UserIdentity,
+                            To = context.OwnerIdentity,
+                            Title = "Output Processing Error"
+                        }, ex);
 
                         throw new OutputProcessingException($"Failed to process output condition to state '{output.StateId}'", ex)
                         {
@@ -958,6 +971,24 @@ namespace Take.Blip.Builder
                     }
                     finally
                     {
+
+                        _blipMonitoringLogger.UserInput(new LogInput
+                        {
+                            Data = new JObject
+                            {
+                                ["outputStateId"] = output.StateId,
+                                ["outputConditions"] = output.Conditions != null ? JToken.FromObject(output.Conditions) : null,
+                                ["conditionsCount"] = output.Conditions?.Count() ?? 0,
+                                ["outputOrder"] = output.Order,
+                                ["outputTrace"] = JToken.FromObject(output)
+                            },
+                            IdMessage = lazyInput.Message.Id,
+                            From = context.UserIdentity,
+                            To = context.OwnerIdentity,
+                            Title = "Output Processing"
+                        });
+
+
                         outputStopwatch?.Stop();
 
                         if (outputTrace != null &&
