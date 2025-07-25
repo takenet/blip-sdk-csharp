@@ -1,4 +1,7 @@
-﻿using Lime.Messaging.Contents;
+﻿using Blip.Ai.Bot.Monitoring.Logging.Enums;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
@@ -42,6 +45,7 @@ namespace Take.Blip.Builder
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
         private readonly IBuilderExtension _builderExtension;
+        private readonly IBlipLogger _blipMonitoringLogger;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ILogger _logger;
         private readonly ITraceManager _traceManager;
@@ -50,6 +54,7 @@ namespace Take.Blip.Builder
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
         private readonly IInputMessageHandler _inputMessageHandlerAggregator;
         private readonly IInputExpirationCount _inputExpirationCount;
+        private readonly IBlipLogger _BlipMonitoringLogger;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
@@ -60,6 +65,8 @@ namespace Take.Blip.Builder
         private const string ACTION_BLIP_FUNCTION = "ExecuteBlipFunction";
         private const string ACTION_EXECUTE_SCRIPT_V2 = "ExecuteScriptV2";
         private const string WORD_START_BLIP_FUNCTION = "{{";
+        private const string TYPE_ACTION_INPUT = "inputActions";
+        private const string TYPE_ACTION_OUTPUT = "outputActions";
 
         public FlowManager(
             IConfiguration configuration,
@@ -81,7 +88,8 @@ namespace Take.Blip.Builder
             IAnalyzeBuilderExceptions analyzeBuilderExceptions,
             IInputMessageHandlerAggregator inputMessageHandlerAggregator,
             IInputExpirationCount inputExpirationCount,
-            IBuilderExtension builderExtension
+            IBuilderExtension builderExtension,
+            IBlipLogger blipMonitoringLogger
             )
         {
             _configuration = configuration;
@@ -104,6 +112,7 @@ namespace Take.Blip.Builder
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
             _builderExtension = builderExtension;
+            _blipMonitoringLogger = blipMonitoringLogger;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -157,9 +166,6 @@ namespace Take.Blip.Builder
                 traceSettings = flow.TraceSettings;
             }
 
-            if (traceSettings != null &&
-                traceSettings.Mode != TraceMode.Disabled)
-            {
                 inputTrace = new InputTrace
                 {
                     Owner = ownerIdentity,
@@ -167,7 +173,7 @@ namespace Take.Blip.Builder
                     User = userIdentity,
                     Input = message.Content.ToString()
                 };
-            }
+
 
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
@@ -215,7 +221,7 @@ namespace Take.Blip.Builder
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
-                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, state, linkedCts.Token);
+                            await ProcessActionsAsync(lazyInput, context, flow.InputActions, inputTrace?.InputActions, state,TYPE_ACTION_INPUT, linkedCts.Token);
                         }
 
                         var stateWaitForInput = true;
@@ -383,7 +389,30 @@ namespace Take.Blip.Builder
             {
                 using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
                 {
-                    await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                    if (traceSettings != null && traceSettings.Mode != TraceMode.Disabled)
+                    {
+                        await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                    }
+                    _logger.Warning("Artur input trace SDK: {0}", System.Text.Json.JsonSerializer.Serialize(inputTrace));
+
+                    _blipMonitoringLogger.ActionExecution(
+                        new LogInput
+                        {
+                            Data = new JObject
+                            {
+                                ["flowId"] = flow.Id,
+                                ["stateId"] = state?.Id,
+                                ["input"] = message.Content.ToString(),
+                                ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
+                                ["error"] = inputTrace?.Error,
+                                ["inputTrace"] = inputTrace != null ? System.Text.Json.JsonSerializer.Serialize(inputTrace) : null,
+                                ["traceSettings"] = traceSettings != null ? System.Text.Json.JsonSerializer.Serialize(traceSettings) : null,
+                            },
+                            IdMessage = message.Id,
+                            From = userIdentity,
+                            To = ownerIdentity,
+                            Title = "Input Processing"
+                        });
                 }
 
                 ownerContext.Dispose();
@@ -397,7 +426,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, state, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.InputActions, stateTrace?.InputActions, state, TYPE_ACTION_INPUT, cancellationToken);
         }
 
         private async Task ProcessStateOutputActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
@@ -407,7 +436,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, state, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.OutputActions, stateTrace?.OutputActions, state,TYPE_ACTION_OUTPUT, cancellationToken);
         }
 
         private async Task ProcessAfterStateChangedActionsAsync(State state, LazyInput lazyInput, IContext context, StateTrace stateTrace, CancellationToken cancellationToken)
@@ -417,14 +446,14 @@ namespace Take.Blip.Builder
                 return;
             }
 
-            await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, state, cancellationToken);
+            await ProcessActionsAsync(lazyInput, context, state.AfterStateChangedActions, stateTrace?.AfterStateChangedActions, state,TYPE_ACTION_INPUT, cancellationToken);
         }
 
         private async Task ProcessGlobalOutputActionsAsync(IContext context, Flow flow, LazyInput lazyInput, InputTrace inputTrace, State state, CancellationToken cancellationToken)
         {
             if (flow.OutputActions != null)
             {
-                await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, state, cancellationToken);
+                await ProcessActionsAsync(lazyInput, context, flow.OutputActions, inputTrace?.OutputActions, state, TYPE_ACTION_OUTPUT,cancellationToken);
             }
         }
 
@@ -432,7 +461,7 @@ namespace Take.Blip.Builder
         {
             if (flow.AfterStateChangedActions != null)
             {
-                await ProcessActionsAsync(lazyInput, context, flow.AfterStateChangedActions, inputTrace?.AfterStateChangedActions, state, cancellationToken);
+                await ProcessActionsAsync(lazyInput, context, flow.AfterStateChangedActions, inputTrace?.AfterStateChangedActions, state, TYPE_ACTION_INPUT, cancellationToken);
             }
         }
 
@@ -528,9 +557,8 @@ namespace Take.Blip.Builder
             }
         }
 
-        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, State state, CancellationToken cancellationToken)
+        private async Task ProcessActionsAsync(LazyInput lazyInput, IContext context, Action[] actions, ICollection<ActionTrace> actionTraces, State state, string typeAction, CancellationToken cancellationToken)
         {
-
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
@@ -810,7 +838,7 @@ namespace Take.Blip.Builder
             // If there's any output in the current state
             if (outputs != null)
             {
-                // Evalute each output conditions
+                // Evaluate each output conditions
                 foreach (var output in outputs.OrderBy(o => o.Order))
                 {
                     var (outputTrace, outputStopwatch) = outputTraces != null
@@ -834,7 +862,7 @@ namespace Take.Blip.Builder
                             {
                                 await _stateManager.DeleteStateIdAsync(context, cancellationToken);
 
-                                throw new InvalidOperationException($"Failed to process output condition, bacause the output context variable '{output.StateId}' is undefined or does not exist in the context.");
+                                throw new InvalidOperationException($"Failed to process output condition, because the output context variable '{output.StateId}' is undefined or does not exist in the context.");
                             }
 
                             break;
@@ -862,6 +890,24 @@ namespace Take.Blip.Builder
                     }
                     finally
                     {
+
+                        _blipMonitoringLogger.UserInput(new LogInput
+                        {
+                            Data = new JObject
+                            {
+                                ["outputStateId"] = output.StateId,
+                                ["outputConditions"] = output.Conditions != null ? JToken.FromObject(output.Conditions) : null,
+                                ["conditionsCount"] = output.Conditions?.Count() ?? 0,
+                                ["outputOrder"] = output.Order,
+                                ["outputTrace"] = JToken.FromObject(output)
+                            },
+                            IdMessage = lazyInput.Message.Id,
+                            From = context.UserIdentity,
+                            To = context.OwnerIdentity,
+                            Title = "Output Processing"
+                        });
+
+
                         outputStopwatch?.Stop();
 
                         if (outputTrace != null &&
