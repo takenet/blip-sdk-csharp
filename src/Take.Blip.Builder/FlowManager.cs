@@ -393,8 +393,9 @@ namespace Take.Blip.Builder
                     {
                         await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
                     }
+                    _logger.Warning("Artur input trace SDK: {0}", System.Text.Json.JsonSerializer.Serialize(inputTrace));
 
-                        _blipMonitoringLogger.ActionExecution(
+                    _blipMonitoringLogger.ActionExecution(
                         new LogInput
                         {
                             Data = new JObject
@@ -404,8 +405,8 @@ namespace Take.Blip.Builder
                                 ["input"] = message.Content.ToString(),
                                 ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
                                 ["error"] = inputTrace?.Error,
-                                ["inputTrace"] = inputTrace != null ? JsonConvert.SerializeObject(inputTrace) : null,
-                                ["traceSettings"] = traceSettings != null ? JsonConvert.SerializeObject(traceSettings) : null,
+                                ["inputTrace"] = inputTrace != null ? System.Text.Json.JsonSerializer.Serialize(inputTrace) : null,
+                                ["traceSettings"] = traceSettings != null ? System.Text.Json.JsonSerializer.Serialize(traceSettings) : null,
                             },
                             IdMessage = message.Id,
                             From = userIdentity,
