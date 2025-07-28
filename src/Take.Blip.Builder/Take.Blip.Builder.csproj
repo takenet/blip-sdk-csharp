@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blip.Ai.Bot.Monitoring.Logging" Version="1.5.1-feat-02-include-token-refresh.202507.58001.9" />
     <PackageReference Include="Microsoft.ClearScript.V8" Version="7.4.5" />
     <PackageReference Include="Microsoft.ClearScript.V8.ICUData" Version="7.4.5" />
     <PackageReference Include="Microsoft.ClearScript.V8.Native.linux-x64" Version="7.4.5" />

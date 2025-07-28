@@ -1,11 +1,4 @@
-﻿using Lime.Messaging.Contents;
-using Lime.Protocol;
-using Lime.Protocol.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Serilog;
-using Serilog.Context;
-using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -13,6 +6,15 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
+using Lime.Protocol.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog;
+using Serilog.Context;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Take.Blip.Builder.Diagnostics;
@@ -50,6 +52,7 @@ namespace Take.Blip.Builder
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
         private readonly IInputMessageHandler _inputMessageHandlerAggregator;
         private readonly IInputExpirationCount _inputExpirationCount;
+        private readonly IBlipLogger _blipMonitoringLogger;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
@@ -81,7 +84,8 @@ namespace Take.Blip.Builder
             IAnalyzeBuilderExceptions analyzeBuilderExceptions,
             IInputMessageHandlerAggregator inputMessageHandlerAggregator,
             IInputExpirationCount inputExpirationCount,
-            IBuilderExtension builderExtension
+            IBuilderExtension builderExtension,
+            IBlipLogger blipMonitoringLogger
             )
         {
             _configuration = configuration;
@@ -104,6 +108,7 @@ namespace Take.Blip.Builder
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
             _builderExtension = builderExtension;
+            _blipMonitoringLogger = blipMonitoringLogger;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -157,17 +162,14 @@ namespace Take.Blip.Builder
                 traceSettings = flow.TraceSettings;
             }
 
-            if (traceSettings != null &&
-                traceSettings.Mode != TraceMode.Disabled)
-            {
-                inputTrace = new InputTrace
-                {
-                    Owner = ownerIdentity,
-                    FlowId = flow.Id,
-                    User = userIdentity,
-                    Input = message.Content.ToString()
-                };
-            }
+            inputTrace = new InputTrace
+             {
+                  Owner = ownerIdentity,
+                  FlowId = flow.Id,
+                  User = userIdentity,
+                  Input = message.Content.ToString()
+             };
+
 
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
@@ -383,7 +385,32 @@ namespace Take.Blip.Builder
             {
                 using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
                 {
-                    await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                    if (traceSettings != null && traceSettings.Mode != TraceMode.Disabled)
+                    {
+                        await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                    }
+
+                    _blipMonitoringLogger.ActionExecution(
+                       new LogInput
+                       {
+                           Data = new JObject
+                           {
+                               ["flowId"] = flow.Id,
+                               ["stateId"] = state?.Id,
+                               ["input"] = message.Content.ToString(),
+                               ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
+                               ["error"] = inputTrace?.Error,
+                               ["inputTrace"] =
+                                   inputTrace != null ? JToken.FromObject(inputTrace) : null,
+                               ["traceSettings"] =
+                                   traceSettings != null ? JToken.FromObject(traceSettings) : null,
+                           },
+                           IdMessage = message.Id,
+                           From = userIdentity,
+                           To = ownerIdentity,
+                           Title = "Input Processing",
+                       }
+                   );
                 }
 
                 ownerContext.Dispose();
