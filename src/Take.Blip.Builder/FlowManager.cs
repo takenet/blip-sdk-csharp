@@ -584,30 +584,9 @@ namespace Take.Blip.Builder
                                 ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
                                 ["error"] = inputTrace?.Error,
                                 ["inputTrace"] =
-                                    inputTrace != null
-                                        ? JsonConvert.SerializeObject(
-                                            inputTrace,
-                                            Formatting.None,
-                                            new JsonSerializerSettings
-                                            {
-                                                NullValueHandling = NullValueHandling.Ignore,
-                                                DefaultValueHandling = DefaultValueHandling.Ignore,
-                                            }
-                                        )
-                                        : null,
-
+                                    inputTrace != null ? JToken.FromObject(inputTrace) : null,
                                 ["traceSettings"] =
-                                    traceSettings != null
-                                        ? JsonConvert.SerializeObject(
-                                            traceSettings,
-                                            Formatting.None,
-                                            new JsonSerializerSettings
-                                            {
-                                                NullValueHandling = NullValueHandling.Ignore,
-                                                DefaultValueHandling = DefaultValueHandling.Ignore,
-                                            }
-                                        )
-                                        : null,
+                                    traceSettings != null ? JToken.FromObject(traceSettings) : null,
                             },
                             IdMessage = message.Id,
                             From = userIdentity,
