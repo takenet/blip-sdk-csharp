@@ -569,6 +569,10 @@ namespace Take.Blip.Builder
                         System.Text.Json.JsonSerializer.Serialize(inputTrace)
                     );
 
+                    _logger.Warning("inputTrace (raw): {0}", inputTrace);
+                    _logger.Warning("inputTrace (Newtonsoft): {0}",  JsonConvert.SerializeObject(inputTrace, Formatting.Indented));
+                    _logger.Warning("inputTrace type: {0}", inputTrace?.GetType().FullName);
+
                     _blipMonitoringLogger.ActionExecution(
                         new LogInput
                         {
