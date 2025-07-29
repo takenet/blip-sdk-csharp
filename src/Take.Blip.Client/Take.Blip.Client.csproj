@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blip.Ai.Bot.Monitoring.Logging" Version="1.5.1-feat-02-include-token-refresh.202507.58001.9" />
+    <PackageReference Include="Blip.Ai.Bot.Monitoring.Logging" Version="1.7.0" />
     <PackageReference Include="Lime.Messaging" Version="0.12.60" />
     <PackageReference Include="Lime.Protocol" Version="0.12.60" />
     <PackageReference Include="Lime.Transport.Tcp" Version="0.12.60" />

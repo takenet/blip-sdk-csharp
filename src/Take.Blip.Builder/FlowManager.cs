@@ -163,11 +163,11 @@ namespace Take.Blip.Builder
             }
 
             inputTrace = new InputTrace
-             {
-                  Owner = ownerIdentity,
-                  FlowId = flow.Id,
-                  User = userIdentity,
-                  Input = message.Content.ToString()
+            {
+               Owner = ownerIdentity,
+               FlowId = flow.Id,
+               User = userIdentity,
+               Input = message.Content.ToString()
              };
 
 
@@ -389,28 +389,32 @@ namespace Take.Blip.Builder
                     {
                         await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
                     }
+                    else
+                    {
+                        await _traceManager.ProcessTraceAsync(null, traceSettings, inputStopwatch, cts.Token);
+                    }
 
-                    _blipMonitoringLogger.ActionExecution(
-                       new LogInput
-                       {
-                           Data = new JObject
+                     _blipMonitoringLogger.ActionExecution(
+                           new LogInput
                            {
-                               ["flowId"] = flow.Id,
-                               ["stateId"] = state?.Id,
-                               ["input"] = message.Content.ToString(),
-                               ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
-                               ["error"] = inputTrace?.Error,
-                               ["inputTrace"] =
-                                   inputTrace != null ? JToken.FromObject(inputTrace) : null,
-                               ["traceSettings"] =
-                                   traceSettings != null ? JToken.FromObject(traceSettings) : null,
-                           },
-                           IdMessage = message.Id,
-                           From = userIdentity,
-                           To = ownerIdentity,
-                           Title = "Input Processing",
-                       }
-                   );
+                               Data = new JObject
+                               {
+                                   ["flowId"] = flow.Id,
+                                   ["stateId"] = state?.Id,
+                                   ["input"] = message.Content.ToString(),
+                                   ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
+                                   ["error"] = inputTrace?.Error,
+                                   ["inputTrace"] =
+                                       inputTrace != null ? JToken.FromObject(inputTrace) : null,
+                                   ["traceSettings"] =
+                                       traceSettings != null ? JToken.FromObject(traceSettings) : null,
+                               },
+                               IdMessage = message.Id,
+                               From = userIdentity,
+                               To = ownerIdentity,
+                               Title = "Input Processing",
+                           }
+                       );
                 }
 
                 ownerContext.Dispose();
