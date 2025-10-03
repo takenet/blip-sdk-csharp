@@ -18,6 +18,8 @@ namespace Take.Blip.Builder.Actions.SendCommand
 
         public string Type => nameof(SendCommand);
 
+        public string[]? OutputVariables => null;
+
         public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

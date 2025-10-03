@@ -12,6 +12,11 @@ namespace Take.Blip.Builder.Models
     public class Action : IValidable
     {
         /// <summary>
+        /// The action identifier. It is used to identify the action in the conversation context and in the action trace. Required.
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
         /// The action execution order, relative to the others in the same state. Optional.
         /// </summary>
         public int Order { get; set; }
@@ -35,7 +40,7 @@ namespace Take.Blip.Builder.Models
         /// TODO: Indicates if the action should be executed asynchronously, without blocking the input processing.
         /// </summary>
         public bool ExecuteAsynchronously { get; set; }
-        
+
         /// <summary>
         /// The action type name. Required.
         /// </summary>
@@ -49,7 +54,7 @@ namespace Take.Blip.Builder.Models
 
         public void Validate()
         {
-            this.ValidateObject();           
+            this.ValidateObject();
         }
 
         public ActionTrace ToTrace()

@@ -1,11 +1,4 @@
-﻿using Lime.Messaging.Contents;
-using Lime.Protocol;
-using Lime.Protocol.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Serilog;
-using Serilog.Context;
-using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -13,6 +6,15 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
+using Lime.Protocol.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog;
+using Serilog.Context;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Take.Blip.Builder.Diagnostics;
@@ -50,6 +52,7 @@ namespace Take.Blip.Builder
         private readonly IAnalyzeBuilderExceptions _analyzeBuilderExceptions;
         private readonly IInputMessageHandler _inputMessageHandlerAggregator;
         private readonly IInputExpirationCount _inputExpirationCount;
+        private readonly IBlipLogger _blipMonitoringLogger;
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
@@ -81,7 +84,8 @@ namespace Take.Blip.Builder
             IAnalyzeBuilderExceptions analyzeBuilderExceptions,
             IInputMessageHandlerAggregator inputMessageHandlerAggregator,
             IInputExpirationCount inputExpirationCount,
-            IBuilderExtension builderExtension
+            IBuilderExtension builderExtension,
+            IBlipLogger blipMonitoringLogger
             )
         {
             _configuration = configuration;
@@ -104,6 +108,7 @@ namespace Take.Blip.Builder
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
             _builderExtension = builderExtension;
+            _blipMonitoringLogger = blipMonitoringLogger;
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
@@ -157,17 +162,14 @@ namespace Take.Blip.Builder
                 traceSettings = flow.TraceSettings;
             }
 
-            if (traceSettings != null &&
-                traceSettings.Mode != TraceMode.Disabled)
+            inputTrace = new InputTrace
             {
-                inputTrace = new InputTrace
-                {
-                    Owner = ownerIdentity,
-                    FlowId = flow.Id,
-                    User = userIdentity,
-                    Input = message.Content.ToString()
-                };
-            }
+               Owner = ownerIdentity,
+               FlowId = flow.Id,
+               User = userIdentity,
+               Input = message.Content.ToString()
+             };
+
 
             var inputStopwatch = inputTrace != null
                 ? Stopwatch.StartNew()
@@ -314,7 +316,7 @@ namespace Take.Blip.Builder
                                 // Process the next state input actions
                                 await ProcessStateInputActionsAsync(state, lazyInput, context, stateTrace, linkedCts.Token);
 
-                                
+
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
@@ -383,7 +385,36 @@ namespace Take.Blip.Builder
             {
                 using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
                 {
-                    await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                    if (traceSettings != null && traceSettings.Mode != TraceMode.Disabled)
+                    {
+                        await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                    }
+                    else
+                    {
+                        await _traceManager.ProcessTraceAsync(null, traceSettings, inputStopwatch, cts.Token);
+                    }
+
+                     _blipMonitoringLogger.ActionExecution(
+                           new LogInput
+                           {
+                               Data = new JObject
+                               {
+                                   ["flowId"] = flow.Id,
+                                   ["stateId"] = state?.Id,
+                                   ["input"] = message.Content.ToString(),
+                                   ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
+                                   ["error"] = inputTrace?.Error,
+                                   ["inputTrace"] =
+                                       inputTrace != null ? JToken.FromObject(inputTrace) : null,
+                                   ["traceSettings"] =
+                                       traceSettings != null ? JToken.FromObject(traceSettings) : null,
+                               },
+                               IdMessage = message.Id,
+                               From = userIdentity,
+                               To = ownerIdentity,
+                               Title = "Input Processing",
+                           }
+                       );
                 }
 
                 ownerContext.Dispose();
@@ -534,7 +565,7 @@ namespace Take.Blip.Builder
             // Execute all state actions
             foreach (var stateAction in actions.OrderBy(a => a.Order))
             {
-                if (stateAction.Conditions != null &&
+                if (stateAction.Conditions != null && lazyInput != null &&
                     !await stateAction.Conditions.EvaluateConditionsAsync(lazyInput, context, cancellationToken))
                 {
                     continue;
@@ -936,6 +967,367 @@ namespace Take.Blip.Builder
         {
             return message.Metadata?.ContainsKey(STATE_ID) ?? false;
         }
+
+
+        #region Builder Agent Methods
+
+        /// <summary>
+        /// Processes a command input for a specific local custom action in a flow.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="flow"></param>
+        /// <param name="stateId"></param>
+        /// <param name="actionId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>A dictionary with variable names and values given a local custom action</returns>
+        public async Task<Dictionary<string, string>> ProcessCommandInputAsync(Message message, Flow flow, string stateId, string actionId, CancellationToken cancellationToken)
+        {
+            flow.Validate();
+
+            // Determine the user / owner pair
+            // on new action command we need to create a command similar to the message to identity properly
+            var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(message, flow.BuilderConfiguration, cancellationToken);
+
+            // Input tracing infrastructure
+            InputTrace inputTrace = null;
+
+            var traceSettings = message.Metadata != null && message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET_TYPE)
+                ? new TraceSettings(message.Metadata)
+                : flow.TraceSettings;
+
+            if (traceSettings != null && traceSettings.Mode != TraceMode.Disabled)
+            {
+                inputTrace = new InputTrace
+                {
+                    Owner = ownerIdentity,
+                    FlowId = flow.Id,
+                    User = userIdentity,
+                    Input = message.Content.ToString()
+                };
+            }
+
+            var inputStopwatch = inputTrace != null
+                ? Stopwatch.StartNew()
+                : null;
+
+            // Allow execution be under the properly ownerIdentity
+            // This is important to make the contexts be stored on router context instead of subbot
+            var ownerContext = OwnerContext.Create(ownerIdentity);
+
+            State state = default;
+
+            try
+            {
+                using (var cts = new CancellationTokenSource(_configuration.InputProcessingTimeout))
+                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+                {
+                    // Synchronize to avoid concurrency issues on multiple running instances
+                    // Creating this semaphore to avoid to instances executing the same local custom action and avoid context dirty reads
+                    var handle = await _flowSemaphore.WaitAsync(flow, actionId, userIdentity, _configuration.DefaultActionExecutionTimeout, cancellationToken);
+
+                    try
+                    {
+                        // Create the input evaluator
+                        var lazyInput = new LazyInput(message, userIdentity, flow.BuilderConfiguration, _documentSerializer,
+                            _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
+
+                        // Load the user context
+                        var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
+
+                        // Validate if the user are in the informed state
+                        var currentState = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
+
+                        if (currentState is null || !currentState.Equals(stateId, StringComparison.InvariantCultureIgnoreCase))
+                            throw new BuilderException("user not in the informed state");
+
+                        // Get the state object based on received state id
+                        state = flow.States.FirstOrDefault(s => s.Id == stateId) ?? flow.States.Single(s => s.Root);
+
+                        // Create trace instances, if required
+                        var (stateTrace, stateStopwatch) = _traceManager.CreateStateTrace(inputTrace, state);
+
+                        // Process the Local Custom Action
+                        var outputVariablesProperties = await ProcessStateLocalCustomActionAsync(state, context, stateTrace, actionId, linkedCts.Token);
+
+                        // In case of desired action doesn't have values to be returned to caller
+                        if (outputVariablesProperties == null)
+                            return null;
+
+                        var outputVariables = new Dictionary<string, string>();
+
+                        // Create the dictionary based on user context to return to caller
+                        outputVariables = await GetContextVariablesFromActionExecutionAsync(outputVariablesProperties, context, linkedCts.Token);
+
+                        return outputVariables;
+                    }
+                    finally
+                    {
+                        // Dispose the semaphore handle to allow other instances to execute the same local custom action, if necessary
+                        await handle?.DisposeAsync();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ex = _analyzeBuilderExceptions.VerifyFlowConstructionException(ex);
+
+                if (inputTrace != null)
+                {
+                    inputTrace.Error = ex.ToString();
+                }
+
+                var builderException = ex is BuilderException be ? be :
+                    new BuilderException($"Error processing single action input with custom message id '{message.Id}' for user '{userIdentity}' in state '{stateId}'", ex);
+
+                builderException.StateId = stateId;
+                builderException.UserId = userIdentity;
+
+                throw builderException;
+            }
+            finally
+            {
+                using (var cts = new CancellationTokenSource(_configuration.TraceTimeout))
+                {
+                    await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                }
+
+                ownerContext.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Processes a local custom action for a given state, returning the output variables names properties.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="lazyInput"></param>
+        /// <param name="context"></param>
+        /// <param name="stateTrace"></param>
+        /// <param name="actionId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<IEnumerable<string>> ProcessStateLocalCustomActionAsync(State state, IContext context, StateTrace stateTrace, string actionId, CancellationToken cancellationToken)
+        {
+            // Validating if the state has local custom actions to be executed
+            if (state?.LocalCustomActions == null)
+                return null;
+
+            // Getting the properly action based on the actionId informed on the execution
+            var actionToExecute = state.LocalCustomActions.FirstOrDefault(action => action.Id.Equals(actionId, StringComparison.InvariantCultureIgnoreCase));
+
+            if (actionToExecute == null)
+                return null;
+
+            // Getting the output variables list to be retrieved from user context
+            var outputVariablesProperties = await ProcessSingleActionAsync(context, actionToExecute, stateTrace?.LocalCustomActions, state, cancellationToken);
+
+            if (outputVariablesProperties == null || outputVariablesProperties.Length == 0)
+                return null;
+
+            // Deserializing the action settings to allow the retrieval of the output variables names properties
+            var actionInformations = DeserializeActionSettings(actionToExecute.Settings);
+
+            // Search in the dictionary what output variables we have configured on executed action
+            var variableNames = outputVariablesProperties
+                .Where(variable => actionInformations?.ContainsKey(variable) == true &&
+                                  !string.IsNullOrWhiteSpace(actionInformations[variable].ToString()))
+                .Select(name => actionInformations[name].ToString());
+
+            return variableNames;
+        }
+
+        /// <summary>
+        /// Processes a single action in the context of a state, returning the output variables names properties.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="stateAction"></param>
+        /// <param name="actionTraces"></param>
+        /// <param name="state"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<string[]> ProcessSingleActionAsync(IContext context, Action stateAction, ICollection<ActionTrace> actionTraces, State state, CancellationToken cancellationToken)
+        {
+            // Different from message, local custom actions will not evaluate the action conditions to execute
+
+            string realAction = stateAction.Type;
+
+            if (stateAction.Type == ACTION_BLIP_FUNCTION)
+                stateAction.Type = ACTION_EXECUTE_SCRIPT_V2;
+
+            // Get action from dependency injection to execute
+            var action = _actionProvider.Get(stateAction.Type);
+
+            // Trace infra
+            var (actionTrace, actionStopwatch) = actionTraces != null
+                ? (stateAction.ToTrace(), Stopwatch.StartNew())
+                : (null, null);
+
+            if (actionTrace != null)
+                context.SetCurrentActionTrace(actionTrace);
+
+            // Configure the action timeout, that can be defined in action or flow level
+            var executionTimeoutInSeconds =
+                stateAction.Timeout ?? context.Flow?.BuilderConfiguration?.ActionExecutionTimeout;
+
+            var executionTimeout = executionTimeoutInSeconds.HasValue
+                ? TimeSpan.FromSeconds(executionTimeoutInSeconds.Value)
+                : _configuration.DefaultActionExecutionTimeout;
+
+
+            using (var cts = new CancellationTokenSource(executionTimeout))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+            {
+                try
+                {
+                    // Copy the settings to a JObject to be used by the action to allow remove sensible content
+                    JObject jObjectSettings = null;
+                    var stringifySetting = stateAction.Settings?.ToString(Formatting.None);
+                    var stringfySettingsCopy = stringifySetting;
+
+                    if (stringifySetting != null)
+                    {
+                        if (action.Type != ACTION_EXECUTE_TEMPLATE)
+                        {
+                            stringifySetting = await _variableReplacer.ReplaceAsync(stringifySetting, context, cancellationToken, stateAction.Type);
+                        }
+
+                        jObjectSettings = JObject.Parse(stringifySetting);
+
+                        if (realAction == ACTION_BLIP_FUNCTION)
+                        {
+                            var functionOnBlipFunction = await _builderExtension.GetFunctionOnBlipFunctionAsync(jObjectSettings["source"].ToString(), linkedCts.Token);
+                            var function = functionOnBlipFunction.ToObject<Function>();
+                            jObjectSettings["source"] = function.FunctionContent;
+                            if (function.FunctionContent.StartsWith(WORD_START_BLIP_FUNCTION))
+                            {
+                                var stringJobectSettings = JsonConvert.SerializeObject(jObjectSettings);
+                                var newStringifySetting = await _variableReplacer.ReplaceAsync(stringJobectSettings, context, cancellationToken, stateAction.Type);
+                                jObjectSettings = JObject.Parse(newStringifySetting);
+                            }
+                        }
+
+                        AddStateIdToSettings(action.Type, jObjectSettings, state.Id);
+                    }
+
+                    if (actionTrace != null)
+                    {
+                        if (realAction == ACTION_PROCESS_HTTP)
+                        {
+                            var result = RestoreBodyStringWithSecrets(stringfySettingsCopy, stringifySetting);
+                            actionTrace.ParsedSettings = new JRaw(string.IsNullOrEmpty(result) ? stringifySetting : result);
+                            jObjectSettings = JObject.Parse(result);
+                        }
+                        else
+                        {
+                            actionTrace.ParsedSettings = new JRaw(stringifySetting);
+
+                        }
+                    }
+
+                    using (LogContext.PushProperty(nameof(Action.Settings), jObjectSettings, true))
+                        await action.ExecuteAsync(context, jObjectSettings, linkedCts.Token);
+
+                    // Return the output variables names properties from the executed action
+                    return action.OutputVariables;
+                }
+                catch (Exception ex)
+                {
+                    if (actionTrace != null)
+                        actionTrace.Error = !ex.Source.ToLower().StartsWith(START_SOURCE_TAKE_BLIP)
+                            ? STATE_TRACE_INTERNAL_SERVER_ERROR
+                            : ex.ToString();
+
+                    var message = ex is OperationCanceledException && cts.IsCancellationRequested
+                        ? $"The processing of the single action '{stateAction.Type}' has timed out after {executionTimeout.TotalMilliseconds} ms"
+                        : $"The processing of the single action '{stateAction.Type}' has failed";
+
+                    var actionProcessingException = new ActionProcessingException(message, ex)
+                    {
+                        ActionType = stateAction.Type,
+                        ActionSettings = JsonConvert.DeserializeObject<IDictionary<string, object>>((string)stateAction.Settings)
+                    };
+
+                    if (stateAction.ContinueOnError)
+                    {
+                        _logger.Warning(actionProcessingException, "Action '{ActionType}' has failed but was forgotten", stateAction.Type);
+                        return null;
+                    }
+                    else
+                        throw actionProcessingException;
+
+                }
+                finally
+                {
+                    if (realAction == ACTION_BLIP_FUNCTION)
+                        stateAction.Type = ACTION_BLIP_FUNCTION;
+
+                    actionStopwatch?.Stop();
+
+                    if (actionTrace != null &&
+                        actionTraces != null &&
+                        actionStopwatch != null)
+                    {
+                        actionTrace.ElapsedMilliseconds = actionStopwatch.ElapsedMilliseconds;
+                        actionTraces.Add(actionTrace);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the context variables from the action execution.
+        /// </summary>
+        /// <param name="outputVariablesProperties"></param>
+        /// <param name="context"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<Dictionary<string, string>> GetContextVariablesFromActionExecutionAsync(IEnumerable<string> outputVariablesProperties, IContext context, CancellationToken cancellationToken)
+        {
+            var tasks = outputVariablesProperties
+                .Select(async variableName =>
+                                    new
+                                    {
+                                        Key = variableName,
+                                        Value = await context.GetContextVariableAsync(variableName, cancellationToken)
+                                    });
+
+            var results = await Task.WhenAll(tasks);
+
+            return results.ToDictionary(result => result.Key, result => result.Value);
+        }
+
+        /// <summary>
+        /// Deserializes the action settings from a JToken to a dictionary. The object value occurs due some types with custom types, like ProcessHttp headers
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="actionId"></param>
+        /// <returns></returns>
+        private IDictionary<string, object> DeserializeActionSettings(JToken settings, string actionId = null)
+        {
+            if (settings == null)
+                return new Dictionary<string, object>();
+
+            try
+            {
+                // Handle both JObject and string cases
+                var settingsObject = settings as JObject ?? JObject.Parse(settings.ToString());
+                return settingsObject.ToObject<Dictionary<string, object>>() ?? new Dictionary<string, object>();
+            }
+            catch (JsonException ex)
+            {
+                _logger.Warning(ex, "Failed to deserialize action settings for action {ActionId}. Settings: {Settings}",
+                               actionId, settings.ToString());
+                return new Dictionary<string, object>();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Unexpected error deserializing action settings for action {ActionId}", actionId);
+                return new Dictionary<string, object>();
+            }
+        }
+
+        #endregion
+
     }
 
     static class StateExtensions

@@ -1,3 +1,4 @@
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Jint.Native;
 using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
@@ -10,6 +11,7 @@ using Shouldly;
 using SmartFormat.Core.Parsing;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,6 +61,7 @@ namespace Take.Blip.Builder.UnitTests
             var inputHandler = Substitute.For<IInputMessageHandlerAggregator>();
             var inputExpiration = Substitute.For<IInputExpirationCount>();
             var builderExtension = Substitute.For<IBuilderExtension>();
+            var monitoring = Substitute.For<IBlipLogger>();
 
             var flowManager = new FlowManager(
                 configuration,
@@ -80,7 +83,8 @@ namespace Take.Blip.Builder.UnitTests
                 builderExceptions,
                 inputHandler,
                 inputExpiration,
-                builderExtension
+                builderExtension,
+                 monitoring
             );
             var originalSettings = "{\"headers\":{\"Authorization\":\"{{secret.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"secret\\\":\\\"{{secret.mySecret}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{secret.url}}\"}";
             var executedSettings = "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"secret\\\":\\\"***\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
@@ -135,6 +139,7 @@ namespace Take.Blip.Builder.UnitTests
             var inputHandler = Substitute.For<IInputMessageHandlerAggregator>();
             var inputExpiration = Substitute.For<IInputExpirationCount>();
             var builderExtension = Substitute.For<IBuilderExtension>();
+            var monitoring = Substitute.For<IBlipLogger>();
 
             var flowManager = new FlowManager(
                 configuration,
@@ -156,7 +161,8 @@ namespace Take.Blip.Builder.UnitTests
                 builderExceptions,
                 inputHandler,
                 inputExpiration,
-                builderExtension
+                builderExtension,
+                monitoring
             );
 
             var method = typeof(FlowManager)
@@ -2223,6 +2229,297 @@ namespace Take.Blip.Builder.UnitTests
 
             StateManager = Substitute.For<IStateManager>();
         }
+        #endregion
+
+        #region ProcessCommandInputAsync
+
+        [Fact]
+        public async Task FlowWithAgentStateWithLocalCustomActionShouldAllowExecutionAsync()
+        {
+            // Arrange
+            var stateId = "ai-agent:a64e773b-7233-4eca-90ad-321c1a42e051";
+            var actionId = "action-inside-agent-a64e773b-7233-4eca-90ad-321c1a42e051";
+            var variableName = "inputIsValid";
+            var desiredScriptReturn = "true";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = stateId,
+                        Root = true,
+                        Input = new Input(),
+                        LocalCustomActions = new[]
+                        {
+                            new Action
+                            {
+                                Id = actionId,
+                                Type = "ExecuteScript",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "function", "run" },
+                                        { "source", $"function run() {{ return {desiredScriptReturn}; }}" }, // Satisfying Input condition above
+                                        { "outputVariable", variableName }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            };
+
+            var target = GetTarget();
+
+            var message = new Message
+            {
+                Id = Guid.NewGuid().ToString(),
+                To = "botidentity@msging.net",
+                From = "fromaccountagent@msging.net",
+            };
+
+            Context.GetContextVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(desiredScriptReturn);
+
+            // Act
+            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
+
+            // Assert
+            Context.Received(1).SetVariableAsync(Arg.Is(variableName), Arg.Is(desiredScriptReturn), Arg.Any<CancellationToken>());
+            processCommandReturn.Count.ShouldBe(1);
+            processCommandReturn.ShouldContainKeyAndValue(variableName, desiredScriptReturn);
+        }
+
+        [Fact]
+        public async Task FlowWithAgentStateWithLocalCustomActionAndTwoVariablesOnOutputShouldAllowExecutionAsync()
+        {
+            // Arrange
+            var stateId = "ai-agent:a64e773b-7233-4eca-90ad-321c1a42e051";
+            var actionId = "action-inside-agent-a64e773b-7233-4eca-90ad-321c1a42e051";
+
+            var statusCodeVariableName = "customerApiStatus";
+            var statusCodeVariableValue = "202";
+
+            var httpBodyReponseVariableName = "customerApiResponse";
+            var httpBodyReponseVariableValue = "{}";
+
+            var headers = new JObject
+            {
+                { "header1", "value1" },
+                { "header2", "value2" }
+            };
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = stateId,
+                        Root = true,
+                        Input = new Input(),
+                        LocalCustomActions = new[]
+                        {
+                            new Action
+                            {
+                                Id = actionId,
+                                Type = "ProcessHttp",
+                                Settings = new JRaw
+                                (
+                                    new JObject()
+                                    {
+                                        { "responseStatusVariable", statusCodeVariableName },
+                                        { "responseBodyVariable", httpBodyReponseVariableName },
+                                        { "method", "GET" },
+                                        { "uri", "https://example.com/api/test" },
+                                        { "headers", headers }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            };
+
+            var target = GetTarget();
+
+            var message = new Message
+            {
+                Id = Guid.NewGuid().ToString(),
+                To = "botidentity@msging.net",
+                From = "fromaccountagent@msging.net",
+            };
+
+            Context.GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>()).Returns(httpBodyReponseVariableValue);
+            Context.GetContextVariableAsync(statusCodeVariableName, Arg.Any<CancellationToken>()).Returns(statusCodeVariableValue);
+
+            HttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m =>
+                m.Method == HttpMethod.Get &&
+                m.RequestUri.ToString() == "https://example.com/api/test"),
+                Arg.Any<CancellationToken>())
+                .Returns(new HttpResponseMessage
+                {
+                    StatusCode = System.Net.HttpStatusCode.Accepted,
+                    Content = new StringContent(httpBodyReponseVariableValue)
+                });
+
+            // Act
+            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
+
+            // Assert
+            Context
+                .Received(1)
+                .SetVariableAsync(Arg.Is(httpBodyReponseVariableName), Arg.Is(httpBodyReponseVariableValue), Arg.Any<CancellationToken>());
+            Context
+                .Received(1)
+                .SetVariableAsync(Arg.Is(statusCodeVariableName), Arg.Is(statusCodeVariableValue), Arg.Any<CancellationToken>());
+
+            processCommandReturn.Count.ShouldBe(2);
+            processCommandReturn.ShouldContainKeyAndValue(httpBodyReponseVariableName, httpBodyReponseVariableValue);
+            processCommandReturn.ShouldContainKeyAndValue(statusCodeVariableName, statusCodeVariableValue);
+        }
+
+        [Fact]
+        public async Task FlowWithAgentStateWithLocalCustomActionAndOneOutputVariableInActionWithTwoPossibleOutputsShouldExecuteAsync()
+        {
+            // Arrange
+            var stateId = "ai-agent:a64e773b-7233-4eca-90ad-321c1a42e051";
+            var actionId = "action-inside-agent-a64e773b-7233-4eca-90ad-321c1a42e051";
+
+            var statusCodeVariableName = "";
+            var statusCodeVariableValue = "";
+
+            var httpBodyReponseVariableName = "customerApiResponse";
+            var httpBodyReponseVariableValue = "{}";
+
+            // Representing empty headers
+            var headers = new JObject();
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = stateId,
+                        Root = true,
+                        Input = new Input(),
+                        LocalCustomActions = new[]
+                        {
+                            new Action
+                            {
+                                Id = actionId,
+                                Type = "ProcessHttp",
+                                Settings = new JRaw
+                                (
+                                    new JObject()
+                                    {
+                                        { "responseStatusVariable", statusCodeVariableName },
+                                        { "responseBodyVariable", httpBodyReponseVariableName },
+                                        { "method", "GET" },
+                                        { "uri", "https://example.com/api/test" },
+                                        { "headers", headers }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            };
+
+            var target = GetTarget();
+
+            var message = new Message
+            {
+                Id = Guid.NewGuid().ToString(),
+                To = "botidentity@msging.net",
+                From = "fromaccountagent@msging.net",
+            };
+
+            Context.GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>()).Returns(httpBodyReponseVariableValue);
+
+            HttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m =>
+                m.Method == HttpMethod.Get &&
+                m.RequestUri.ToString() == "https://example.com/api/test"),
+                Arg.Any<CancellationToken>())
+                .Returns(new HttpResponseMessage
+                {
+                    StatusCode = System.Net.HttpStatusCode.Accepted,
+                    Content = new StringContent(httpBodyReponseVariableValue)
+                });
+
+            // Act
+            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
+
+            // Assert
+            Context
+                .Received(1)
+                .SetVariableAsync(Arg.Is(httpBodyReponseVariableName), Arg.Is(httpBodyReponseVariableValue), Arg.Any<CancellationToken>());
+
+            processCommandReturn.Count.ShouldBe(1);
+            processCommandReturn.ShouldContainKeyAndValue(httpBodyReponseVariableName, httpBodyReponseVariableValue);
+        }
+
+
+        [Fact]
+        public async Task FlowWithAgentStateWithLocalCustomActionWithoutOutputVariableShouldAllowExecutionAsync()
+        {
+            // Arrange
+            var stateId = "ai-agent:a64e773b-7233-4eca-90ad-321c1a42e051";
+            var actionId = "action-inside-agent-a64e773b-7233-4eca-90ad-321c1a42e051";
+            var categoryName = "trackingA";
+            var actionName = "valueTrackingA";
+
+            var flow = new Flow()
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State
+                    {
+                        Id = stateId,
+                        Root = true,
+                        Input = new Input(),
+                        LocalCustomActions = new[]
+                        {
+                            new Action
+                            {
+                                Id = actionId,
+                                Type = "TrackEvent",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "extras", "" },
+                                        { "category", categoryName }, // Satisfying Input condition above
+                                        { "action", actionName }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            };
+
+            var target = GetTarget();
+
+            var message = new Message
+            {
+                Id = Guid.NewGuid().ToString(),
+                To = "botidentity@msging.net",
+                From = "fromaccountagent@msging.net",
+            };
+
+            // Act
+            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
+
+            // Assert
+            processCommandReturn.ShouldBeNull();
+        }
+
         #endregion
 
         public void Dispose()
