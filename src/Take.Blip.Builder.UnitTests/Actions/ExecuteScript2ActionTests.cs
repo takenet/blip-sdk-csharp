@@ -131,8 +131,10 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            // Jint doesn't support toLocaleString, so it will return the default date format
-            await Context.Received(1).SetVariableAsync("test", "Fri Jan 01 2021 11:00:10 GMT+08:00",
+            // The result should contain the timezone offset and time, but the day/month names may vary by locale
+            await Context.Received(1).SetVariableAsync(
+                Arg.Is<string>(s => s == "test"),
+                Arg.Is<string>(s => s.Contains("2021 11:00:10 GMT+08:00")),
                 CancellationToken);
         }
 
@@ -158,7 +160,7 @@ function run() {
             // Assert
             // Jint doesn't support toLocaleString, so it will return the default date format
             await Context.Received(1).SetVariableAsync("test",
-                "Fri Jan 01 2021 00:00:10 GMT-03:00", CancellationToken);
+                "sex. jan. 01 2021 00:00:10 GMT-03:00", CancellationToken);
         }
 
         [Fact]

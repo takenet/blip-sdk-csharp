@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using NSubstitute;
@@ -48,6 +49,7 @@ namespace Take.Blip.Builder.UnitTests
             Context = Substitute.For<IContext>();
             Logger = new LoggerConfiguration().CreateLogger();
             HttpClient = Substitute.For<IHttpClient>();
+            blipLogger = Substitute.For<IBlipLogger>();
             ContextProvider
                 .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
                 .Returns(Context);
@@ -141,6 +143,8 @@ namespace Take.Blip.Builder.UnitTests
 
         public IHttpClient HttpClient { get; set; }
 
+        public IBlipLogger blipLogger { get; set; }
+
         public virtual Container CreateContainer()
         {
             var container = new Container();
@@ -169,6 +173,7 @@ namespace Take.Blip.Builder.UnitTests
             container.RegisterSingleton(() => FlowLoader);
             container.RegisterSingleton(() => BuilderExtension);
             container.RegisterSingleton(() => HttpClient);
+            container.RegisterSingleton(() => blipLogger);
 
             return container;
         }
