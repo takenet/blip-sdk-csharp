@@ -465,41 +465,60 @@ namespace Take.Blip.Builder.UnitTests
         public async Task ProcessInputAsync_ShouldChangeActionType_WhenActionIsBlipFunction()
         {
             // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+
             var flow = new Flow()
             {
                 Configuration = { },
-
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State
+            new State
+            {
+                Id = "root",
+                Root = true,
+                Input = new Input(),
+                OutputActions = new[]
+                {
+                    new Action
                     {
-                        Id = "root",
-                        Root = true,
-                        Input = new Input(),
-                        OutputActions = new[]
-                        {
-                            new Action
+                        Type = "ExecuteBlipFunction",
+                        Settings = new JRaw(
+                            new JObject()
                             {
-                                Type = "ExecuteBlipFunction",
-                                Settings = new JRaw(
-                                    new JObject()
-                                    {
-                                        { "function", "run" },
-                                        { "source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}" },
-                                        { "outputVariable", "invalidScript" }
-                                    }
-                                )
+                                { "function", "run" },
+                                { "source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}" },
+                                { "outputVariable", "invalidScript" }
                             }
-                        }
+                        )
                     }
                 }
+            }
+        }
             };
+
             var target = GetTarget();
-            var functionDocument = new Function { FunctionContent = "function content", UserIdentity = "teste", FunctionDescription = "", FunctionId = Guid.NewGuid(), FunctionName = "", FunctionParameters = "", TenantId = "" };
+            var functionDocument = new Function
+            {
+                FunctionContent = "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}",
+                UserIdentity = "teste",
+                FunctionDescription = "",
+                FunctionId = Guid.NewGuid(),
+                FunctionName = "run",
+                FunctionParameters = "",
+                TenantId = ""
+            };
 
-            BuilderExtension.GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(functionDocument);
+            // Setup the BuilderExtension mock to return the function
+            BuilderExtension.GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(functionDocument);
 
+            // Setup Context mock for variable access
+            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>())
+                .Returns(Task.FromResult((string)null));
+
+            // Act & Assert
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
             exception.Message.ShouldContain("The processing of the action 'ExecuteScriptV2' has failed");
         }
@@ -508,36 +527,43 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithEmptyActionOnTrackEventShouldReturnFlowConstructionException()
         {
             // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State
+            new State
+            {
+                Id = "root",
+                Root = true,
+                Input = new Input(),
+                OutputActions = new[]
+                {
+                    new Action
                     {
-                        Id = "root",
-                        Root = true,
-                        Input = new Input(),
-                        OutputActions = new[]
-                        {
-                            new Action
+                        Type = "TrackEvent",
+                        Settings = new JRaw(
+                            new JObject()
                             {
-                                Type = "TrackEvent",
-                                Settings = new JRaw(
-                                    new JObject()
-                                    {
-                                        { "category", "Variable doesn't exist" },
-                                        { "action", "{{variable.doesntExist}}" }
-                                    }
-                                )
+                                { "category", "Variable doesn't exist" },
+                                { "action", "{{variable.doesntExist}}" }
                             }
-                        }
+                        )
                     }
                 }
+            }
+        }
             };
+
+            // Setup the context to return null for the non-existent variable
+            Context.GetVariableAsync("variable.doesntExist", Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns((string)null);
+
             var target = GetTarget();
 
-            // Act
+            // Act & Assert
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("TrackEvent");
@@ -547,35 +573,45 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInvalidValueOnRedirectShouldReturnFlowConstructionException()
         {
             // Arrange
+            var input = new PlainText() { Text = "Test" };
+            Message.Content = input;
+
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State
+            new State
+            {
+                Id = "root",
+                Root = true,
+                Input = new Input(),
+                OutputActions = new[]
+                {
+                    new Action
                     {
-                        Id = "root",
-                        Root = true,
-                        Input = new Input(),
-                        OutputActions = new[]
-                        {
-                            new Action
+                        Type = "Redirect",
+                        Settings = new JRaw(
+                            new JObject()
                             {
-                                Type = "Redirect",
-                                Settings = new JRaw(
-                                    new JObject()
-                                    {
-                                        { "address", "{{variable.doesntExist}}" }
-                                    }
-                                )
+                                { "address", "{{variable.doesntExist}}" }
                             }
-                        }
+                        )
                     }
                 }
+            }
+        }
             };
+
+            // Setup the context to return null for the non-existent variable
+            Context.GetVariableAsync("variable.doesntExist", Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult((string)null));
+
+            // Also setup the general variable retrieval to handle the parsing
+            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult((string)null));
+
             var target = GetTarget();
 
-            // Act
+            // Act & Assert
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("Redirect");
@@ -618,37 +654,44 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInvalidScriptOnExecuteScriptShouldReturnFlowConstructionException()
         {
             // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State
+            new State
+            {
+                Id = "root",
+                Root = true,
+                Input = new Input(),
+                OutputActions = new[]
+                {
+                    new Action
                     {
-                        Id = "root",
-                        Root = true,
-                        Input = new Input(),
-                        OutputActions = new[]
-                        {
-                            new Action
+                        Type = "ExecuteScript",
+                        Settings = new JRaw(
+                            new JObject()
                             {
-                                Type = "ExecuteScript",
-                                Settings = new JRaw(
-                                    new JObject()
-                                    {
-                                        { "function", "run" },
-                                        { "source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}" },
-                                        { "outputVariable", "invalidScript" }
-                                    }
-                                )
+                                { "function", "run" },
+                                { "source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}" },
+                                { "outputVariable", "invalidScript" }
                             }
-                        }
+                        )
                     }
                 }
+            }
+        }
             };
+
+            // Setup required mocks for the test to work properly
+            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns((string)null);
+
             var target = GetTarget();
 
-            // Act
+            // Act & Assert
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("ExecuteScript");
@@ -658,133 +701,140 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithTenTransitionsWithoutInterruptionsShouldReturnFlowConstructionException()
         {
             // Arrange
+            var input = new PlainText() { Text = "Ping!" };
+            Message.Content = input;
+
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State
+            new State
+            {
+                Id = "root",
+                Root = true,
+                Input = new Input(),
+                Outputs = new[]
+                {
+                    new Output
                     {
-                        Id = "root",
-                        Root = true,
-                        Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition2"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition2",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition3"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition3",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition4"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition4",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition5"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition5",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition6"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition6",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition7"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition7",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition8"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition8",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition9"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition9",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition10"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition10",
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "transition11"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "transition11"
+                        StateId = "transition2"
                     }
                 }
+            },
+            new State
+            {
+                Id = "transition2",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition3"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition3",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition4"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition4",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition5"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition5",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition6"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition6",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition7"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition7",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition8"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition8",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition9"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition9",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition10"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition10",
+                Outputs = new[]
+                {
+                    new Output
+                    {
+                        StateId = "transition11"
+                    }
+                }
+            },
+            new State
+            {
+                Id = "transition11"
+            }
+        }
             };
+
+            // Setup required mocks to prevent NullReferenceException
+            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>())
+                .Returns(Task.FromResult((string)null));
 
             var target = GetTarget();
 
-            // Act
+            // Act & Assert
             var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("Max state transitions");
@@ -2247,29 +2297,29 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State
+            new State
+            {
+                Id = stateId,
+                Root = true,
+                Input = new Input(),
+                LocalCustomActions = new[]
+                {
+                    new Action
                     {
-                        Id = stateId,
-                        Root = true,
-                        Input = new Input(),
-                        LocalCustomActions = new[]
-                        {
-                            new Action
+                        Id = actionId,
+                        Type = "ExecuteScript",
+                        Settings = new JRaw(
+                            new JObject()
                             {
-                                Id = actionId,
-                                Type = "ExecuteScript",
-                                Settings = new JRaw(
-                                    new JObject()
-                                    {
-                                        { "function", "run" },
-                                        { "source", $"function run() {{ return {desiredScriptReturn}; }}" }, // Satisfying Input condition above
-                                        { "outputVariable", variableName }
-                                    }
-                                )
+                                { "function", "run" },
+                                { "source", $"function run() {{ return {desiredScriptReturn}; }}" }, // Satisfying Input condition above
+                                { "outputVariable", variableName }
                             }
-                        }
+                        )
                     }
                 }
+            }
+        }
             };
 
             var target = GetTarget();
@@ -2280,6 +2330,9 @@ namespace Take.Blip.Builder.UnitTests
                 To = "botidentity@msging.net",
                 From = "fromaccountagent@msging.net",
             };
+
+            // Mock the StateManager to return the expected state ID
+            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns(stateId);
 
             Context.GetContextVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(desiredScriptReturn);
 
@@ -2306,42 +2359,42 @@ namespace Take.Blip.Builder.UnitTests
             var httpBodyReponseVariableValue = "{}";
 
             var headers = new JObject
-            {
-                { "header1", "value1" },
-                { "header2", "value2" }
-            };
+    {
+        { "header1", "value1" },
+        { "header2", "value2" }
+    };
 
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State
+            new State
+            {
+                Id = stateId,
+                Root = true,
+                Input = new Input(),
+                LocalCustomActions = new[]
+                {
+                    new Action
                     {
-                        Id = stateId,
-                        Root = true,
-                        Input = new Input(),
-                        LocalCustomActions = new[]
-                        {
-                            new Action
+                        Id = actionId,
+                        Type = "ProcessHttp",
+                        Settings = new JRaw
+                        (
+                            new JObject()
                             {
-                                Id = actionId,
-                                Type = "ProcessHttp",
-                                Settings = new JRaw
-                                (
-                                    new JObject()
-                                    {
-                                        { "responseStatusVariable", statusCodeVariableName },
-                                        { "responseBodyVariable", httpBodyReponseVariableName },
-                                        { "method", "GET" },
-                                        { "uri", "https://example.com/api/test" },
-                                        { "headers", headers }
-                                    }
-                                )
+                                { "responseStatusVariable", statusCodeVariableName },
+                                { "responseBodyVariable", httpBodyReponseVariableName },
+                                { "method", "GET" },
+                                { "uri", "https://example.com/api/test" },
+                                { "headers", headers }
                             }
-                        }
+                        )
                     }
                 }
+            }
+        }
             };
 
             var target = GetTarget();
@@ -2353,18 +2406,23 @@ namespace Take.Blip.Builder.UnitTests
                 From = "fromaccountagent@msging.net",
             };
 
+            // Mock the StateManager to return the expected state ID
+            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns(stateId);
+
             Context.GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>()).Returns(httpBodyReponseVariableValue);
             Context.GetContextVariableAsync(statusCodeVariableName, Arg.Any<CancellationToken>()).Returns(statusCodeVariableValue);
+
+            using var httpResponse = new HttpResponseMessage
+            {
+                StatusCode = System.Net.HttpStatusCode.Accepted,
+                Content = new StringContent(httpBodyReponseVariableValue)
+            };
 
             HttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m =>
                 m.Method == HttpMethod.Get &&
                 m.RequestUri.ToString() == "https://example.com/api/test"),
                 Arg.Any<CancellationToken>())
-                .Returns(new HttpResponseMessage
-                {
-                    StatusCode = System.Net.HttpStatusCode.Accepted,
-                    Content = new StringContent(httpBodyReponseVariableValue)
-                });
+                .Returns(httpResponse);
 
             // Act
             var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
@@ -2479,29 +2537,29 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State
+            new State
+            {
+                Id = stateId,
+                Root = true,
+                Input = new Input(),
+                LocalCustomActions = new[]
+                {
+                    new Action
                     {
-                        Id = stateId,
-                        Root = true,
-                        Input = new Input(),
-                        LocalCustomActions = new[]
-                        {
-                            new Action
+                        Id = actionId,
+                        Type = "TrackEvent",
+                        Settings = new JRaw(
+                            new JObject()
                             {
-                                Id = actionId,
-                                Type = "TrackEvent",
-                                Settings = new JRaw(
-                                    new JObject()
-                                    {
-                                        { "extras", "" },
-                                        { "category", categoryName }, // Satisfying Input condition above
-                                        { "action", actionName }
-                                    }
-                                )
+                                { "extras", "" },
+                                { "category", categoryName },
+                                { "action", actionName }
                             }
-                        }
+                        )
                     }
                 }
+            }
+        }
             };
 
             var target = GetTarget();
@@ -2512,6 +2570,9 @@ namespace Take.Blip.Builder.UnitTests
                 To = "botidentity@msging.net",
                 From = "fromaccountagent@msging.net",
             };
+
+            // Mock the StateManager to return the expected state ID
+            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns(stateId);
 
             // Act
             var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);

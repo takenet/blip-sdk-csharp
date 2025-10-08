@@ -55,8 +55,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            // Jint doesn't support toLocaleString, so it will return the default date format
-            await Context.Received(1).SetVariableAsync("test", "Thursday, 31 December 2020 21:00:10", CancellationToken);
+            // Jint doesn't support toLocaleString locale parameter, so it will return the system's default locale format
+            await Context.Received(1).SetVariableAsync("test", "quinta-feira, 31 de dezembro de 2020 21:00:10", CancellationToken);
         }
 
         [Fact]
@@ -78,8 +78,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            // Jint doesn't support toLocaleString, so it will return the default date format
-            await Context.Received(1).SetVariableAsync("test", "Friday, 1 January 2021 08:00:10", CancellationToken);
+            // Jint doesn't support toLocaleString locale parameter, so it will return the system's default locale format
+            await Context.Received(1).SetVariableAsync("test", "sexta-feira, 1 de janeiro de 2021 08:00:10", CancellationToken);
         }
 
         [Fact]

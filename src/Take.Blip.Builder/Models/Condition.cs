@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -108,6 +109,10 @@ namespace Take.Blip.Builder.Models
                     switch (Operator)
                     {
                         case ConditionOperator.Or:
+                            if (Comparison == ConditionComparison.NotEquals)
+                            {
+                                return !Values.Any(v => string.Compare(comparisonValue, v, CultureInfo.InvariantCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) == 0);
+                            }
                             return Values.Any(v => binaryComparisonFunc(comparisonValue, v));
 
                         case ConditionOperator.And:
