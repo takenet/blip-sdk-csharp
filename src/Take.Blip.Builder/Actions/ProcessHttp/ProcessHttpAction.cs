@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Security;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -124,6 +127,95 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     PushStatusCodeWarning(context, responseStatus);
                 }
             }
+            catch (HttpRequestException ex)
+            {
+                var errorDetails = new StringBuilder();
+                errorDetails.AppendLine($"Error: {ex.Message}");
+
+                // Detectar erros de certificado SSL
+                var isSslError = false;
+                var isUntrustedRoot = false;
+                
+                if (ex.InnerException != null)
+                {
+                    errorDetails.AppendLine($"Inner Exception: {ex.InnerException.Message}");
+                    
+                    // Verificar se é um erro de certificado
+                    var innerEx = ex.InnerException;
+                    while (innerEx != null)
+                    {
+                        if (innerEx is AuthenticationException)
+                        {
+                            isSslError = true;
+                            errorDetails.AppendLine("SSL/TLS authentication error detected");
+                        }
+                        
+                        var exMessage = innerEx.Message.ToLowerInvariant();
+                        if (exMessage.Contains("certificate") || 
+                            exMessage.Contains("ssl") || 
+                            exMessage.Contains("tls"))
+                        {
+                            isSslError = true;
+                            
+                            if (exMessage.Contains("untrusted") || 
+                                exMessage.Contains("trust") ||
+                                exMessage.Contains("chain"))
+                            {
+                                isUntrustedRoot = true;
+                                errorDetails.AppendLine("Certificate trust chain validation failed (Untrusted Root)");
+                            }
+                        }
+                        
+                        innerEx = innerEx.InnerException;
+                    }
+                }
+
+                // Logar informações detalhadas
+                _logger.Error(ex, "HTTP request failed for URL: {Uri}. Details: {Details}", 
+                    settings.Uri, errorDetails.ToString());
+
+                // Definir status code e response body para as variáveis
+                responseStatus = 495; // Status code 0 indica erro de conexão/SSL
+
+                var errorResponse = new
+                {
+                    error = true,
+                    message = ex.Message,
+                    url = settings.Uri.ToString(),
+                    sslError = isSslError,
+                    untrustedRoot = isUntrustedRoot,
+                    details = errorDetails.ToString()
+                };
+                
+                responseBody = JsonConvert.SerializeObject(errorResponse);
+
+                // Atualizar as variáveis de resposta
+                if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
+                {
+                    await context.SetVariableAsync(settings.ResponseStatusVariable,
+                        responseStatus.ToString(), cancellationToken);
+                }
+
+                if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
+                {
+                    await context.SetVariableAsync(settings.ResponseBodyVariable, 
+                        responseBody, cancellationToken);
+                }
+
+                // Adicionar warning específico
+                if (isUntrustedRoot)
+                {
+                    PushSslCertificateWarning(context, "Untrusted Root - Certificate chain validation failed");
+                }
+                else if (isSslError)
+                {
+                    PushSslCertificateWarning(context, "SSL/TLS error occurred");
+                }
+                else
+                {
+                    PushHttpRequestWarning(context, ex.Message);
+                }
+            }
             catch (Exception ex)
             {
                 _logger.Warning(ex, $"An exception occurred while processing HTTP action");
@@ -153,6 +245,28 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         private void PushStatusCodeWarning(IContext context, int statusCode)
         {
             var warningMessage = $"Process http command action code response: {statusCode}";
+
+            var currentActionTrace = context.GetCurrentActionTrace();
+            if (currentActionTrace != null)
+            {
+                currentActionTrace.Warning = warningMessage;
+            }
+        }
+
+        private void PushHttpRequestWarning(IContext context, string message)
+        {
+            var warningMessage = $"HTTP request error: {message}";
+
+            var currentActionTrace = context.GetCurrentActionTrace();
+            if (currentActionTrace != null)
+            {
+                currentActionTrace.Warning = warningMessage;
+            }
+        }
+
+        private void PushSslCertificateWarning(IContext context, string details)
+        {
+            var warningMessage = $"SSL Certificate error: {details}";
 
             var currentActionTrace = context.GetCurrentActionTrace();
             if (currentActionTrace != null)
