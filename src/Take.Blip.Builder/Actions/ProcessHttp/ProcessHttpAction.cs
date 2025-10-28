@@ -129,67 +129,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             }
             catch (HttpRequestException ex)
             {
-                var errorDetails = new StringBuilder();
-                errorDetails.AppendLine($"Error: {ex.Message}");
+                BuildHttpErrorMessage(settings, out responseStatus, out responseBody, ex);
 
-                // Detectar erros de certificado SSL
-                var isSslError = false;
-                var isUntrustedRoot = false;
-                
-                if (ex.InnerException != null)
-                {
-                    errorDetails.AppendLine($"Inner Exception: {ex.InnerException.Message}");
-                    
-                    // Verificar se é um erro de certificado
-                    var innerEx = ex.InnerException;
-                    while (innerEx != null)
-                    {
-                        if (innerEx is AuthenticationException)
-                        {
-                            isSslError = true;
-                            errorDetails.AppendLine("SSL/TLS authentication error detected");
-                        }
-                        
-                        var exMessage = innerEx.Message.ToLowerInvariant();
-                        if (exMessage.Contains("certificate") || 
-                            exMessage.Contains("ssl") || 
-                            exMessage.Contains("tls"))
-                        {
-                            isSslError = true;
-                            
-                            if (exMessage.Contains("untrusted") || 
-                                exMessage.Contains("trust") ||
-                                exMessage.Contains("chain"))
-                            {
-                                isUntrustedRoot = true;
-                                errorDetails.AppendLine("Certificate trust chain validation failed (Untrusted Root)");
-                            }
-                        }
-                        
-                        innerEx = innerEx.InnerException;
-                    }
-                }
-
-                // Logar informações detalhadas
-                _logger.Error(ex, "HTTP request failed for URL: {Uri}. Details: {Details}", 
-                    settings.Uri, errorDetails.ToString());
-
-                // Definir status code e response body para as variáveis
-                responseStatus = 495; // Status code 0 indica erro de conexão/SSL
-
-                var errorResponse = new
-                {
-                    error = true,
-                    message = ex.Message,
-                    url = settings.Uri.ToString(),
-                    sslError = isSslError,
-                    untrustedRoot = isUntrustedRoot,
-                    details = errorDetails.ToString()
-                };
-                
-                responseBody = JsonConvert.SerializeObject(errorResponse);
-
-                // Atualizar as variáveis de resposta
                 if (!string.IsNullOrWhiteSpace(settings.ResponseStatusVariable))
                 {
                     await context.SetVariableAsync(settings.ResponseStatusVariable,
@@ -198,23 +139,10 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
                 if (!string.IsNullOrWhiteSpace(settings.ResponseBodyVariable))
                 {
-                    await context.SetVariableAsync(settings.ResponseBodyVariable, 
+                    await context.SetVariableAsync(settings.ResponseBodyVariable,
                         responseBody, cancellationToken);
                 }
 
-                // Adicionar warning específico
-                if (isUntrustedRoot)
-                {
-                    PushSslCertificateWarning(context, "Untrusted Root - Certificate chain validation failed");
-                }
-                else if (isSslError)
-                {
-                    PushSslCertificateWarning(context, "SSL/TLS error occurred");
-                }
-                else
-                {
-                    PushHttpRequestWarning(context, ex.Message);
-                }
             }
             catch (Exception ex)
             {
@@ -231,6 +159,72 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         }
 
+        /// <summary>
+        /// Method to build a detailed error message for HttpRequestException based on errors in SSL/TLS
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="responseStatus"></param>
+        /// <param name="responseBody"></param>
+        /// <param name="ex"></param>
+        private void BuildHttpErrorMessage(ProcessHttpSettings settings, out int responseStatus, out string responseBody, HttpRequestException ex)
+        {
+            var errorDetails = new StringBuilder();
+            errorDetails.AppendLine($"Error: {ex.Message}");
+
+            var isSslError = false;
+            var isUntrustedRoot = false;
+
+            if (ex.InnerException != null)
+            {
+                errorDetails.AppendLine($"Inner Exception: {ex.InnerException.Message}");
+
+                var innerEx = ex.InnerException;
+                while (innerEx != null)
+                {
+                    if (innerEx is AuthenticationException)
+                    {
+                        isSslError = true;
+                        errorDetails.AppendLine("SSL/TLS authentication error detected");
+                    }
+
+                    var exMessage = innerEx.Message.ToLowerInvariant();
+                    if (exMessage.Contains("certificate") ||
+                        exMessage.Contains("ssl") ||
+                        exMessage.Contains("tls"))
+                    {
+                        isSslError = true;
+
+                        if (exMessage.Contains("untrusted") ||
+                            exMessage.Contains("trust") ||
+                            exMessage.Contains("chain"))
+                        {
+                            isUntrustedRoot = true;
+                            errorDetails.AppendLine("Certificate trust chain validation failed (Untrusted Root)");
+                        }
+                    }
+
+                    innerEx = innerEx.InnerException;
+                }
+            }
+
+            _logger.Error(ex, "HTTP request failed for URL: {Uri}. Details: {Details}",
+                settings.Uri, errorDetails.ToString());
+
+            responseStatus = 495;
+
+            var errorResponse = new
+            {
+                error = true,
+                message = ex.Message,
+                url = settings.Uri.ToString(),
+                sslError = isSslError,
+                untrustedRoot = isUntrustedRoot,
+                details = errorDetails.ToString()
+            };
+
+            responseBody = JsonConvert.SerializeObject(errorResponse);
+        }
+
         private void PushTimeoutWarning(IContext context)
         {
             const string warningMessage = "The process http command action has timed out.";
@@ -245,28 +239,6 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         private void PushStatusCodeWarning(IContext context, int statusCode)
         {
             var warningMessage = $"Process http command action code response: {statusCode}";
-
-            var currentActionTrace = context.GetCurrentActionTrace();
-            if (currentActionTrace != null)
-            {
-                currentActionTrace.Warning = warningMessage;
-            }
-        }
-
-        private void PushHttpRequestWarning(IContext context, string message)
-        {
-            var warningMessage = $"HTTP request error: {message}";
-
-            var currentActionTrace = context.GetCurrentActionTrace();
-            if (currentActionTrace != null)
-            {
-                currentActionTrace.Warning = warningMessage;
-            }
-        }
-
-        private void PushSslCertificateWarning(IContext context, string details)
-        {
-            var warningMessage = $"SSL Certificate error: {details}";
 
             var currentActionTrace = context.GetCurrentActionTrace();
             if (currentActionTrace != null)
