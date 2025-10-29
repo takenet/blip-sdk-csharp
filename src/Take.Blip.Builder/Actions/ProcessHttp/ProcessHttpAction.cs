@@ -210,7 +210,6 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             _logger.Error(ex, "HTTP request failed for URL: {Uri}. Details: {Details}",
                 settings.Uri, errorDetails.ToString());
 
-            responseStatus = 495;
 
             var errorResponse = new
             {
@@ -222,6 +221,9 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 details = errorDetails.ToString()
             };
 
+
+            // Use a generic service unavailable status code (503) for non-SSL errors. 495 indicates ssl error.
+            responseStatus = isSslError ? 495 : 503;
             responseBody = JsonConvert.SerializeObject(errorResponse);
         }
 
