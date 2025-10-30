@@ -6,6 +6,7 @@ using Take.Blip.Client.Extensions.AttendanceForwarding;
 using Take.Blip.Client.Extensions.Broadcast;
 using Take.Blip.Client.Extensions.Bucket;
 using Take.Blip.Client.Extensions.Builder;
+using Take.Blip.Client.Extensions.Builder.Checkout;
 using Take.Blip.Client.Extensions.Contacts;
 using Take.Blip.Client.Extensions.ContactsJourney;
 using Take.Blip.Client.Extensions.Context;
@@ -45,6 +46,7 @@ namespace Take.Blip.Client.Extensions
             serviceContainer.RegisterService(typeof(IBuilderExtension), () => new BuilderExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IContextExtension), () => new ContextExtension(senderFactory()));
             serviceContainer.RegisterService(typeof(IContactsJourneyExtension), () => new ContactsJourneyExtension(senderFactory()));
+            serviceContainer.RegisterService(typeof(ICheckoutExtension), () => new CheckoutExtension(senderFactory()));
 
             return serviceContainer;
         }

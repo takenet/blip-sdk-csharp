@@ -42,5 +42,12 @@ namespace Take.Blip.Builder
         public const int PERCENTAGE_DENOMINATOR = 100;
 
         public const string BLIP_STATEID_HEADER = "X-Blip-StateId";
+
+        public const string CHECKOUT_GENERATED_LINK_STATUS_KEY = "Checkout";
+        public const string CHECKOUT_GENERATED_LINK_RESPONSE_KEY = "checkoutUserResponse";
+
+
+        public const string CHECKOUT_GENERATED_LINK_SUCCESS_VALUE = "Success";
+        public const string CHECKOUT_GENERATED_LINK_FAILED_VALUE = "Error";
     }
 }
