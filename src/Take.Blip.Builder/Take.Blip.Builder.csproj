@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blip.Ai.Bot.Monitoring.Logging" Version="1.7.0" />
     <PackageReference Include="Microsoft.ClearScript.V8" Version="7.4.5" />
     <PackageReference Include="Microsoft.ClearScript.V8.ICUData" Version="7.4.5" />
     <PackageReference Include="Microsoft.ClearScript.V8.Native.linux-x64" Version="7.4.5" />
@@ -24,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Take.Blip.Ai.Bot.Monitoring.Abstractions\Take.Blip.Ai.Bot.Monitoring.Abstractions.csproj" />
     <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 
