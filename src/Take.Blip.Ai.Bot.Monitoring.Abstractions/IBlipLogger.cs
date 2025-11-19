@@ -1,5 +1,6 @@
 ﻿using System;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
+
 namespace Take.Blip.Ai.Bot.Monitoring.Abstractions
 {
     public interface IBlipLogger
