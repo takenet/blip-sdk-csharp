@@ -32,9 +32,7 @@ resources:
 extends:
   template: template-pipeline.yml@templates    
   parameters:    
-    packagename: blip-sdk-csharp  
-    nugetAuthenticate: true
-    vstsFeed: "BlipNuget"
+    packagename: blip-sdk-csharp
     type: dotnet
     to: nuget
     nugetServiceConnection: Nuget.org Take
@@ -50,3 +48,4 @@ extends:
     - 'Take.Blip.Client.Web.csproj'
     - 'Take.Blip.Client.Console.csproj'
     - 'Take.Blip.Client.TestKit.csproj'
+    - 'Take.Blip.Ai.Bot.Monitoring.Abstractions.csproj'

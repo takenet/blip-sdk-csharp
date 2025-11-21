@@ -1,4 +1,4 @@
-﻿    using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
@@ -15,8 +13,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Actions;
-using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -108,7 +107,7 @@ namespace Take.Blip.Builder
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
             _builderExtension = builderExtension;
-            _blipMonitoringLogger = blipMonitoringLogger;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)

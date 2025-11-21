@@ -17,7 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blip.Ai.Bot.Monitoring.Logging" Version="1.7.0" />
     <PackageReference Include="Lime.Messaging" Version="0.12.60" />
     <PackageReference Include="Lime.Protocol" Version="0.12.60" />
     <PackageReference Include="Lime.Transport.Tcp" Version="0.12.60" />

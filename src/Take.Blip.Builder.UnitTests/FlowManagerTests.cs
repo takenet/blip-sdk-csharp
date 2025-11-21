@@ -1,4 +1,3 @@
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Jint.Native;
 using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
@@ -15,6 +14,7 @@ using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;

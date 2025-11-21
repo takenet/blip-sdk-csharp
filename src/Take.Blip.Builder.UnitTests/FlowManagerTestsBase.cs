@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using NSubstitute;
 using Serilog;
 using SimpleInjector;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
