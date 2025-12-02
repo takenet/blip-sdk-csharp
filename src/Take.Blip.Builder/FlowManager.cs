@@ -84,7 +84,7 @@ namespace Take.Blip.Builder
             IInputMessageHandlerAggregator inputMessageHandlerAggregator,
             IInputExpirationCount inputExpirationCount,
             IBuilderExtension builderExtension,
-            IBlipLogger blipMonitoringLogger
+            IBlipLogger blipMonitoringLogger = null
             )
         {
             _configuration = configuration;
