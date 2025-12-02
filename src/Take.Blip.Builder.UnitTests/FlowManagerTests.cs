@@ -83,8 +83,7 @@ namespace Take.Blip.Builder.UnitTests
                 builderExceptions,
                 inputHandler,
                 inputExpiration,
-                builderExtension,
-                 monitoring
+                builderExtension
             );
             var originalSettings = "{\"headers\":{\"Authorization\":\"{{secret.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"secret\\\":\\\"{{secret.mySecret}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{secret.url}}\"}";
             var executedSettings = "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"secret\\\":\\\"***\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
@@ -161,8 +160,7 @@ namespace Take.Blip.Builder.UnitTests
                 builderExceptions,
                 inputHandler,
                 inputExpiration,
-                builderExtension,
-                monitoring
+                builderExtension
             );
 
             var method = typeof(FlowManager)
