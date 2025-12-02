@@ -64,28 +64,28 @@ namespace Take.Blip.Builder
         private const string WORD_START_BLIP_FUNCTION = "{{";
 
         public FlowManager(
-            IConfiguration configuration,
-            IStateManager stateManager,
-            IContextProvider contextProvider,
-            IFlowSemaphore flowSemaphore,
-            IActionProvider actionProvider,
-            ISender sender,
-            IDocumentSerializer documentSerializer,
-            IEnvelopeSerializer envelopeSerializer,
-            IArtificialIntelligenceExtension artificialIntelligenceExtension,
-            IVariableReplacer variableReplacer,
-            ILogger logger,
-            ITraceManager traceManager,
-            IUserOwnerResolver userOwnerResolver,
-            Application application,
-            IFlowLoader flowLoader,
-            IFlowSessionManager flowSessionManager,
-            IAnalyzeBuilderExceptions analyzeBuilderExceptions,
-            IInputMessageHandlerAggregator inputMessageHandlerAggregator,
-            IInputExpirationCount inputExpirationCount,
-            IBuilderExtension builderExtension,
-            IBlipLogger blipMonitoringLogger = null
-            )
+    IConfiguration configuration,
+    IStateManager stateManager,
+    IContextProvider contextProvider,
+    IFlowSemaphore flowSemaphore,
+    IActionProvider actionProvider,
+    ISender sender,
+    IDocumentSerializer documentSerializer,
+    IEnvelopeSerializer envelopeSerializer,
+    IArtificialIntelligenceExtension artificialIntelligenceExtension,
+    IVariableReplacer variableReplacer,
+    ILogger logger,
+    ITraceManager traceManager,
+    IUserOwnerResolver userOwnerResolver,
+    Application application,
+    IFlowLoader flowLoader,
+    IFlowSessionManager flowSessionManager,
+    IAnalyzeBuilderExceptions analyzeBuilderExceptions,
+    IInputMessageHandlerAggregator inputMessageHandlerAggregator,
+    IInputExpirationCount inputExpirationCount,
+    IBuilderExtension builderExtension,
+    IEnumerable<IBlipLogger> blipMonitoringLoggers = null
+    )
         {
             _configuration = configuration;
             _stateManager = stateManager;
@@ -107,7 +107,8 @@ namespace Take.Blip.Builder
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
             _builderExtension = builderExtension;
-            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
+            var chosen = (blipMonitoringLoggers ?? Enumerable.Empty<IBlipLogger>()).FirstOrDefault();
+            _blipMonitoringLogger = chosen ?? new NullBlipLogger();
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
