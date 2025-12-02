@@ -84,7 +84,7 @@ namespace Take.Blip.Builder
     IInputMessageHandlerAggregator inputMessageHandlerAggregator,
     IInputExpirationCount inputExpirationCount,
     IBuilderExtension builderExtension,
-    IEnumerable<IBlipLogger> blipMonitoringLoggers = null
+    IBlipLogger? blipMonitoringLogger = null
     )
         {
             _configuration = configuration;
@@ -107,7 +107,7 @@ namespace Take.Blip.Builder
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
             _builderExtension = builderExtension;
-            _blipMonitoringLogger = (blipMonitoringLoggers ?? Enumerable.Empty<IBlipLogger>()).FirstOrDefault() ?? new NullBlipLogger();
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public async Task ProcessInputAsync(Message message, Flow flow, CancellationToken cancellationToken)
