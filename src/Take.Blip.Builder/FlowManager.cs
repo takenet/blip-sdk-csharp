@@ -64,28 +64,28 @@ namespace Take.Blip.Builder
         private const string WORD_START_BLIP_FUNCTION = "{{";
 
         public FlowManager(
-            IConfiguration configuration,
-            IStateManager stateManager,
-            IContextProvider contextProvider,
-            IFlowSemaphore flowSemaphore,
-            IActionProvider actionProvider,
-            ISender sender,
-            IDocumentSerializer documentSerializer,
-            IEnvelopeSerializer envelopeSerializer,
-            IArtificialIntelligenceExtension artificialIntelligenceExtension,
-            IVariableReplacer variableReplacer,
-            ILogger logger,
-            ITraceManager traceManager,
-            IUserOwnerResolver userOwnerResolver,
-            Application application,
-            IFlowLoader flowLoader,
-            IFlowSessionManager flowSessionManager,
-            IAnalyzeBuilderExceptions analyzeBuilderExceptions,
-            IInputMessageHandlerAggregator inputMessageHandlerAggregator,
-            IInputExpirationCount inputExpirationCount,
-            IBuilderExtension builderExtension,
-            IBlipLogger blipMonitoringLogger
-            )
+        IConfiguration configuration,
+        IStateManager stateManager,
+        IContextProvider contextProvider,
+        IFlowSemaphore flowSemaphore,
+        IActionProvider actionProvider,
+        ISender sender,
+        IDocumentSerializer documentSerializer,
+        IEnvelopeSerializer envelopeSerializer,
+        IArtificialIntelligenceExtension artificialIntelligenceExtension,
+        IVariableReplacer variableReplacer,
+        ILogger logger,
+        ITraceManager traceManager,
+        IUserOwnerResolver userOwnerResolver,
+        Application application,
+        IFlowLoader flowLoader,
+        IFlowSessionManager flowSessionManager,
+        IAnalyzeBuilderExceptions analyzeBuilderExceptions,
+        IInputMessageHandlerAggregator inputMessageHandlerAggregator,
+        IInputExpirationCount inputExpirationCount,
+        IBuilderExtension builderExtension,
+        IBlipLogger? blipMonitoringLogger = null
+        )
         {
             _configuration = configuration;
             _stateManager = stateManager;
