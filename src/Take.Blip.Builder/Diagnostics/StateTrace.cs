@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
@@ -9,6 +10,19 @@ namespace Take.Blip.Builder.Diagnostics
     /// </summary>
     public class StateTrace : Trace
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateTrace"/> class, setting up collections for actions and outputs.
+        /// </summary>
+        public StateTrace()
+        {
+            Id = Guid.NewGuid().ToString();
+            InputActions = new List<ActionTrace>();
+            OutputActions = new List<ActionTrace>();
+            Outputs = new List<OutputTrace>();
+            AfterStateChangedActions = new List<ActionTrace>();
+            LocalCustomActions = new List<ActionTrace>();
+        }
+
         /// <summary>
         /// Gets or sets the unique identifier of the state.
         /// </summary>
@@ -40,9 +54,9 @@ namespace Take.Blip.Builder.Diagnostics
         public IDictionary<string, JToken> ExtensionData { get; set; }
 
         [DataMember(Name = "afterStateChangedActions")]
-        public ICollection<ActionTrace>? AfterStateChangedActions { get; set; }
+        public ICollection<ActionTrace> AfterStateChangedActions { get; set; }
 
         [DataMember(Name = "localCustomActions")]
-        public ICollection<ActionTrace>? LocalCustomActions { get; set; }
+        public ICollection<ActionTrace> LocalCustomActions { get; set; }
     }
 }
