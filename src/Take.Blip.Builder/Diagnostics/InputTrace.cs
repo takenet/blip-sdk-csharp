@@ -1,5 +1,4 @@
 ﻿using Lime.Protocol;
-using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
@@ -19,19 +18,13 @@ namespace Take.Blip.Builder.Diagnostics
         /// <summary>
         /// Initializes a new instance of the <see cref="InputTrace"/> class with the specified media type.
         /// </summary>
-        public InputTrace() : base(MediaType)
-        {
-            States = new List<StateTrace>();
-            InputActions = new List<ActionTrace>();
-            OutputActions = new List<ActionTrace>();
-            AfterStateChangedActions = new List<ActionTrace>();
-        }
+        public InputTrace() : base(MediaType) { }
 
         /// <summary>  
         /// Gets or sets the unique identifier of the input trace.  
         /// </summary>  
         [DataMember(Name = "id")]
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string? Id { get; set; }
 
         /// <summary>  
         /// Gets or sets the owner identifier associated with this trace.  
@@ -79,9 +72,9 @@ namespace Take.Blip.Builder.Diagnostics
         /// Gets or sets the type of event ("AiAgents", "Builder").
         /// </summary>
         [DataMember(Name = "eventType")]
-        public string EventType { get; set; } = "Builder";
+        public string? EventType { get; set; }
 
         [DataMember(Name = "afterStateChangedActions")]
-        public ICollection<ActionTrace> AfterStateChangedActions { get; set; }
+        public ICollection<ActionTrace>? AfterStateChangedActions { get; set; }
     }
 }

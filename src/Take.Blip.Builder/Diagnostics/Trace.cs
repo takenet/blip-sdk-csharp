@@ -1,5 +1,6 @@
 ﻿using Lime.Protocol;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 
 namespace Take.Blip.Builder.Diagnostics
