@@ -17,9 +17,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lime.Messaging" Version="0.12.60" />
-    <PackageReference Include="Lime.Protocol" Version="0.12.60" />
-    <PackageReference Include="Lime.Transport.Tcp" Version="0.12.60" />
+    <PackageReference Include="Lime.Messaging" Version="0.12.144" />
+    <PackageReference Include="Lime.Protocol" Version="0.12.144" />
+    <PackageReference Include="Lime.Transport.Tcp" Version="0.12.144" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
     <PackageReference Include="Serilog" Version="2.12.0" />

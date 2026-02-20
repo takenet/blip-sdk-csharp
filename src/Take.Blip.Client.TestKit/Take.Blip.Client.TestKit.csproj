@@ -12,6 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Lime.Messaging" Version="0.12.144" />
+    <PackageReference Include="Lime.Protocol" Version="0.12.144" />
+    <PackageReference Include="Lime.Transport.Tcp" Version="0.12.144" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 
