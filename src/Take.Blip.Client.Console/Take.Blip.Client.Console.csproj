@@ -18,9 +18,6 @@
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.1.1-beta" />
     <PackageReference Include="DasMulli.Win32.ServiceUtils" Version="1.0.1" />
-    <PackageReference Include="Lime.Messaging" Version="0.12.144" />
-    <PackageReference Include="Lime.Protocol" Version="0.12.144" />
-    <PackageReference Include="Lime.Transport.Tcp" Version="0.12.144" />
   </ItemGroup>
 
   <ItemGroup>

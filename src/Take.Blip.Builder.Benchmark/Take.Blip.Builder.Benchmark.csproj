@@ -12,9 +12,6 @@
     <ProjectReference Include="..\Take.Blip.Builder\Take.Blip.Builder.csproj" />
     <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
     <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.12" />
-    <PackageReference Include="Lime.Messaging" Version="0.12.144" />
-    <PackageReference Include="Lime.Protocol" Version="0.12.144" />
-    <PackageReference Include="Lime.Transport.Tcp" Version="0.12.144" />
     <PackageReference Include="NSubstitute" Version="4.2.1" />
   </ItemGroup>
 

@@ -5,9 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lime.Messaging" Version="0.12.144" />
-    <PackageReference Include="Lime.Protocol" Version="0.12.144" />
-    <PackageReference Include="Lime.Transport.Tcp" Version="0.12.144" />
     <PackageReference Include="System.Diagnostics.TextWriterTraceListener" Version="4.3.0" />
   </ItemGroup>
 
