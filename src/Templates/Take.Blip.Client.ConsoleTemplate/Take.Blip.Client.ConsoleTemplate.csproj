@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Version>1.0.0</Version>    
     <OutputType>Exe</OutputType>    
   </PropertyGroup>
   
   <ItemGroup>    
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
-    <PackageReference Include="Take.Blip.Client" Version="0.1.42" />
-    <PackageReference Include="Take.Blip.Client.Console" Version="0.1.42" />
+    <PackageReference Include="Take.Blip.Client" Version="0.7.537" />
+    <PackageReference Include="Take.Blip.Client.Console" Version="0.7.537" />
   </ItemGroup>
 
   <PropertyGroup>
