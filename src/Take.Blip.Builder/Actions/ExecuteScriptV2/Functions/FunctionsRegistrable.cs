@@ -1,8 +1,11 @@
 using System;
 using System.Threading;
+using Lime.Protocol.Serialization;
 using Microsoft.ClearScript;
 using Serilog;
+using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
 {
@@ -20,12 +23,18 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="context"></param>
         /// <param name="time"></param>
         /// <param name="logger"></param>
+        /// <param name="sender"></param>
+        /// <param name="envelopeSerializer"></param>
+        /// <param name="configuration"></param>
         /// <param name="cancellationToken"></param>
         public static void RegisterFunctions(this ScriptEngine engine,
             ExecuteScriptV2Settings settings,
             IHttpClient httpClient, IContext context,
             Time time,
             ILogger logger,
+            ISender sender,
+            IEnvelopeSerializer envelopeSerializer,
+            IConfiguration configuration,
             CancellationToken cancellationToken)
         {
             // Date and time manipulation
@@ -44,6 +53,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
                 new Request(settings, httpClient, context, time, logger, cancellationToken));
             engine.AddHostType(typeof(RequestExtensions));
             engine.AddHostType(typeof(Request.HttpResponse));
+
+            // Blip command processing
+            engine.AddHostObject("command",
+                new Command(sender, envelopeSerializer, configuration, context, time, logger,
+                    cancellationToken));
         }
 
         private static void _setDateTimezone(IScriptEngine engine)

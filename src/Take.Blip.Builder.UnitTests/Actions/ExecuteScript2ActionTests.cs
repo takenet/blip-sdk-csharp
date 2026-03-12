@@ -7,21 +7,26 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
+using Lime.Protocol.Serialization;
 using Microsoft.ClearScript;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Serilog;
 using Shouldly;
+using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ExecuteScriptV2;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Client;
 using Xunit;
 
 namespace Take.Blip.Builder.UnitTests.Actions
 {
     public class ExecuteScript2ActionTests : ActionTestsBase
     {
-        private static ExecuteScriptV2Action GetTarget(IHttpClient client = null)
+        private static ExecuteScriptV2Action GetTarget(IHttpClient client = null,
+            ISender sender = null, IEnvelopeSerializer envelopeSerializer = null)
         {
             var configuration = new TestConfiguration();
             var conventions = new ConventionsConfiguration();
@@ -33,7 +38,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 conventions.ExecuteScriptV2MaxRuntimeStackUsage;
 
             return new ExecuteScriptV2Action(configuration, client ?? Substitute.For<IHttpClient>(),
-                Substitute.For<ILogger>());
+                Substitute.For<ILogger>(), sender ?? Substitute.For<ISender>(),
+                envelopeSerializer ?? Substitute.For<IEnvelopeSerializer>());
         }
 
         [Fact]
@@ -1051,6 +1057,152 @@ function run (input) {
             await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
                 CancellationToken, Arg.Any<TimeSpan>());
             await Context.Received(1).SetVariableAsync("result", result, CancellationToken);
+        }
+
+        [Fact]
+        public async Task ExecuteScriptWithProcessCommandShouldSucceed()
+        {
+            // Arrange
+            var responseCommand = new Command()
+            {
+                Method = CommandMethod.Get,
+                Status = CommandStatus.Success
+            };
+
+            var sender = Substitute.For<ISender>();
+            sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .Returns(responseCommand);
+
+            var envelopeSerializer = LimeSerializerContainer.EnvelopeSerializer;
+
+            var expectedResult = envelopeSerializer.Serialize(responseCommand);
+
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source = @"
+async function run() {
+    var result = await command.processAsync({ method: 'get', uri: '/ping' });
+    return result;
+}",
+                OutputVariable = "result"
+            };
+
+            var target = GetTarget(sender: sender, envelopeSerializer: envelopeSerializer);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await sender.Received(1).ProcessCommandAsync(
+                Arg.Is<Command>(c => c.Uri.ToString() == "/ping" && c.Method == CommandMethod.Get),
+                Arg.Any<CancellationToken>());
+
+            await Context.Received(1).SetVariableAsync("result", expectedResult, CancellationToken);
+        }
+
+        [Fact]
+        public async Task ExecuteScriptWithProcessCommandNullPayloadShouldFail()
+        {
+            // Arrange
+            var sender = Substitute.For<ISender>();
+            var envelopeSerializer = LimeSerializerContainer.EnvelopeSerializer;
+
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source = @"
+async function run() {
+    var result = await command.processAsync(null);
+    return result;
+}",
+                OutputVariable = "result",
+                CaptureExceptions = true,
+                ExceptionVariable = "exception"
+            };
+
+            var target = GetTarget(sender: sender, envelopeSerializer: envelopeSerializer);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await sender.Received(0).ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(
+                Arg.Is<string>(s => s == "exception"),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ExecuteScriptWithProcessCommandInvalidPayloadShouldFail()
+        {
+            // Arrange
+            var sender = Substitute.For<ISender>();
+            var envelopeSerializer = LimeSerializerContainer.EnvelopeSerializer;
+
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source = @"
+async function run() {
+    var result = await command.processAsync('invalid-json{{}');
+    return result;
+}",
+                OutputVariable = "result",
+                CaptureExceptions = true,
+                ExceptionVariable = "exception"
+            };
+
+            var target = GetTarget(sender: sender, envelopeSerializer: envelopeSerializer);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await sender.Received(0).ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>());
+            await Context.Received(1).SetVariableAsync(
+                Arg.Is<string>(s => s == "exception"),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ExecuteScriptWithProcessCommandAndReturnResultShouldSucceed()
+        {
+            // Arrange
+            var responseCommand = new Command()
+            {
+                Method = CommandMethod.Set,
+                Status = CommandStatus.Success,
+                Uri = new LimeUri("/contacts")
+            };
+
+            var sender = Substitute.For<ISender>();
+            sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .Returns(responseCommand);
+
+            var envelopeSerializer = LimeSerializerContainer.EnvelopeSerializer;
+
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source = @"
+async function run() {
+    var resultJson = await command.processAsync({ method: 'set', uri: '/contacts', resource: { identity: 'user@domain.com' } });
+    var result = JSON.parse(resultJson);
+    return result.status;
+}",
+                OutputVariable = "status"
+            };
+
+            var target = GetTarget(sender: sender, envelopeSerializer: envelopeSerializer);
+
+            // Act
+            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+
+            // Assert
+            await sender.Received(1).ProcessCommandAsync(
+                Arg.Is<Command>(c => c.Uri.ToString() == "/contacts" && c.Method == CommandMethod.Set),
+                Arg.Any<CancellationToken>());
+
+            await Context.Received(1).SetVariableAsync("status", "success", CancellationToken);
         }
 
         [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
