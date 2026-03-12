@@ -374,3 +374,76 @@ async function run() {
     const contentType = response.getHeader('content-type');
 }
 ```
+
+# Blip Commands
+
+We added a function to process LIME/Blip commands inside the script using the same semantics as the native `ProcessCommand` action.
+
+## Process Command
+
+`command.processAsync(object payload)`
+
+An async function to process a Blip command inside the script. Should be used in an async context.
+
+It receives one parameter:
+- `payload`: The command to be processed as a JavaScript object with the following properties:
+    - `method`: The command method (e.g. `'get'`, `'set'`, `'merge'`, `'delete'`). Required.
+    - `uri`: The command URI. Required.
+    - `resource`: Optional resource body to send with the command.
+    - `type`: Optional MIME type of the resource.
+    - `to`: Optional destination node.
+    - `metadata`: Optional metadata dictionary.
+
+It returns the serialized JSON response command as a string.
+
+> The payload must not be null or empty; otherwise, an error is thrown according to the current exception handling settings.
+
+> If the command takes too long to execute, it will throw an error according to the script timeout.
+
+Examples:
+
+```js
+// Simple GET command
+async function run() {
+    const resultJson = await command.processAsync({ method: 'get', uri: '/ping' });
+    const result = JSON.parse(resultJson);
+    // result.status: 'success' or 'failure'
+}
+```
+
+```js
+// SET command to update a contact
+async function run() {
+    const resultJson = await command.processAsync({
+        method: 'set',
+        uri: '/contacts',
+        type: 'application/vnd.lime.contact+json',
+        resource: {
+            identity: 'user@domain.com',
+            name: 'John Doe',
+            email: 'john@example.com'
+        }
+    });
+
+    const result = JSON.parse(resultJson);
+    // result.status: 'success'
+}
+```
+
+```js
+// GET command with response handling
+async function run() {
+    const resultJson = await command.processAsync({
+        method: 'get',
+        uri: '/account'
+    });
+
+    const result = JSON.parse(resultJson);
+
+    if (result.status === 'success') {
+        return result.resource.fullName;
+    }
+
+    return null;
+}
+```
