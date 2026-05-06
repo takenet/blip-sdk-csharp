@@ -25,6 +25,7 @@ namespace Take.Blip.Builder.Diagnostics
             InputActions = new List<ActionTrace>();
             OutputActions = new List<ActionTrace>();
             AfterStateChangedActions = new List<ActionTrace>();
+            UserTraces = new List<UserTraceEntry>();
         }
 
         /// <summary>  
@@ -83,5 +84,13 @@ namespace Take.Blip.Builder.Diagnostics
 
         [DataMember(Name = "afterStateChangedActions")]
         public ICollection<ActionTrace> AfterStateChangedActions { get; set; }
+
+        /// <summary>
+        /// Gets or sets the collection of custom trace entries added explicitly by the flow
+        /// during execution via the <c>Trace</c> action. These entries carry application-level
+        /// diagnostic information such as API responses, business checkpoints, or exception details.
+        /// </summary>
+        [DataMember(Name = "userTraces")]
+        public IList<UserTraceEntry> UserTraces { get; set; }
     }
 }
