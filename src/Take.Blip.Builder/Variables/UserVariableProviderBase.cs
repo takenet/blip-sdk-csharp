@@ -9,10 +9,6 @@ using Serilog;
 
 namespace Take.Blip.Builder.Variables
 {
-    /// <summary>
-    /// Defines a base provider that can retrieve variables for a specific user.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
     public abstract class UserVariableProviderBase<T> : IVariableProvider
     {
         private readonly ConcurrentDictionary<string, PropertyInfo> _propertyCacheDictionary;
@@ -41,9 +37,11 @@ namespace Take.Blip.Builder.Variables
                     context.SetValue(_inputContextKey, item);
                 }
 
-                if (item == null) return null;
-                
-                return GetProperty(item, name);
+                if (item == null)
+                    return null;
+
+                // MUDANÇA: Passando o contexto para o GetProperty para acessar as configurações do fluxo
+                return GetProperty(item, name, context);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
@@ -55,16 +53,17 @@ namespace Take.Blip.Builder.Variables
 
         protected abstract Task<T> GetAsync(Identity userIdentity, CancellationToken cancellationToken);
 
-        protected virtual string GetProperty(T item, string propertyName)
+        // MUDANÇA: Adicionado IContext na assinatura
+        protected virtual string GetProperty(T item, string propertyName, IContext context)
         {
             var itemPropertyInfo = GetPropertyInfo(propertyName.ToLowerInvariant());
-            if (itemPropertyInfo != null) return itemPropertyInfo.GetValue(item)?.ToString();
+            if (itemPropertyInfo != null)
+                return itemPropertyInfo.GetValue(item)?.ToString();
             return null;
         }
 
         private PropertyInfo GetPropertyInfo(string propertyName)
         {
-            // Caches the properties to reduce the reflection overhead
             return _propertyCacheDictionary.GetOrAdd(
                 propertyName,
                 p => typeof(T).GetProperty(propertyName,

@@ -289,6 +289,141 @@ namespace Take.Blip.Builder.UnitTests
         }
 
         [Fact]
+        public async Task GetContactIdentityForWhatsAppWithoutMigrationFlagShouldReturnPhoneNumber()
+        {
+            // Arrange
+            var phoneNumber = "+5531999999999";
+            var contact = new Contact
+            {
+                Identity = new Identity("guid-12345", "wa.gw.msging.net"),
+                PhoneNumber = phoneNumber,
+                Name = "John da Silva"
+            };
+
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.identity", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(phoneNumber);
+        }
+
+        [Fact]
+        public async Task GetContactIdentityForWhatsAppWithMigrationFlagFalseShouldReturnPhoneNumber()
+        {
+            // Arrange
+            var phoneNumber = "+5531999999999";
+            var contact = new Contact
+            {
+                Identity = new Identity("guid-12345", "wa.gw.msging.net"),
+                PhoneNumber = phoneNumber,
+                Name = "John da Silva"
+            };
+
+            Flow.Configuration["MigratedToGuidIdentity"] = "false";
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.identity", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(phoneNumber);
+        }
+
+        [Fact]
+        public async Task GetContactIdentityForWhatsAppWithMigrationFlagTrueShouldReturnIdentity()
+        {
+            // Arrange
+            var identityValue = "guid-12345@wa.gw.msging.net";
+            var contact = new Contact
+            {
+                Identity = Identity.Parse(identityValue),
+                PhoneNumber = "+5531999999999",
+                Name = "John da Silva"
+            };
+
+            Flow.Configuration["MigratedToGuidIdentity"] = "true";
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.identity", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(identityValue);
+        }
+
+        [Fact]
+        public async Task GetContactIdentityForNonWhatsAppChannelShouldReturnIdentity()
+        {
+            // Arrange
+            var identityValue = "user123@messenger.gw.msging.net";
+            var contact = new Contact
+            {
+                Identity = Identity.Parse(identityValue),
+                PhoneNumber = "+5531999999999",
+                Name = "John da Silva"
+            };
+
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.identity", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(identityValue);
+        }
+
+        [Fact]
+        public async Task GetContactIdentityForWhatsAppWithoutPhoneNumberShouldReturnIdentity()
+        {
+            // Arrange
+            var identityValue = "guid-12345@wa.gw.msging.net";
+            var contact = new Contact
+            {
+                Identity = Identity.Parse(identityValue),
+                PhoneNumber = null,
+                Name = "John da Silva"
+            };
+
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.identity", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(identityValue);
+        }
+
+        [Fact]
+        public async Task GetContactIdentityForNonWhatsAppChannelWithMigrationFlagShouldReturnIdentity()
+        {
+            // Arrange
+            var identityValue = "user456@telegram.gw.msging.net";
+            var contact = new Contact
+            {
+                Identity = Identity.Parse(identityValue),
+                PhoneNumber = "+5531888888888",
+                Name = "Jane Silva"
+            };
+
+            Flow.Configuration["MigratedToGuidIdentity"] = "false";
+            ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
+            var target = GetTarget();
+
+            // Act
+            var actual = await target.GetVariableAsync("contact.identity", CancellationToken);
+
+            // Assert
+            actual.ShouldBe(identityValue);
+        }
+
+        [Fact]
         public async Task GetCalendarVariableShouldSucceed()
         {
             // Arrange
