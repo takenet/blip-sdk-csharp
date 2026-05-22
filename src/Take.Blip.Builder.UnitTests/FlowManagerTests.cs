@@ -619,6 +619,8 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInvalidStateIdOnOutputConditionsShouldReturnFlowConstructionException()
         {
             // Arrange
+            var input = new PlainText() { Text = "Test" };
+            Message.Content = input;
             var stateIdVariable = "{{variable.doesntExist}}";
             var flow = new Flow()
             {
@@ -640,6 +642,11 @@ namespace Take.Blip.Builder.UnitTests
                     }
                 }
             };
+
+            // Setup the context to return null for the non-existent variable
+            Context.GetVariableAsync("variable.doesntExist", Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult((string)null));
+            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult((string)null));
+
             var target = GetTarget();
 
             // Act
@@ -2495,6 +2502,9 @@ namespace Take.Blip.Builder.UnitTests
                 To = "botidentity@msging.net",
                 From = "fromaccountagent@msging.net",
             };
+
+            // Mock the StateManager to return the expected state ID
+            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns(stateId);
 
             Context.GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>()).Returns(httpBodyReponseVariableValue);
 
