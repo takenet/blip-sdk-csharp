@@ -1,4 +1,8 @@
-using Jint.Native;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
@@ -7,13 +11,6 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Serilog;
 using Shouldly;
-using SmartFormat.Core.Parsing;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.NetworkInformation;
-using System.Threading;
-using System.Threading.Tasks;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
@@ -24,7 +21,6 @@ using Take.Blip.Client.Activation;
 using Take.Blip.Client.Content;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Take.Blip.Client.Extensions.Builder;
-using Takenet.Iris.Messaging.Contents;
 using Takenet.Iris.Messaging.Resources;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 using Xunit;
@@ -83,7 +79,8 @@ namespace Take.Blip.Builder.UnitTests
                 builderExceptions,
                 inputHandler,
                 inputExpiration,
-                builderExtension
+                builderExtension,
+                monitoring
             );
             var originalSettings = "{\"headers\":{\"Authorization\":\"{{secret.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"secret\\\":\\\"{{secret.mySecret}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{secret.url}}\"}";
             var executedSettings = "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"secret\\\":\\\"***\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
@@ -160,7 +157,8 @@ namespace Take.Blip.Builder.UnitTests
                 builderExceptions,
                 inputHandler,
                 inputExpiration,
-                builderExtension
+                builderExtension,
+                monitoring
             );
 
             var method = typeof(FlowManager)
