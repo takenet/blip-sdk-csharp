@@ -12,9 +12,11 @@ using NSubstitute;
 using Serilog;
 using Shouldly;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
+using TraceSettings = Take.Blip.Builder.Diagnostics.TraceSettings;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client.Activation;
@@ -2585,6 +2587,242 @@ namespace Take.Blip.Builder.UnitTests
 
             // Assert
             processCommandReturn.ShouldBeNull();
+        }
+
+        #endregion
+
+        #region EnrichProcessHttpInputActionsAsync / EnrichProcessHttpActionTraceAsync
+
+        [Fact]
+        public async Task ProcessInputAsync_ShouldCallBlipMonitoringLogger_OnEveryExecution()
+        {
+            // Arrange
+            Message.Content = new PlainText { Text = "Ping!" };
+            var flow = new Flow
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State { Id = "root", Root = true, Input = new Input() }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            blipLogger.Received(1).ActionExecution(Arg.Is<LogInput>(l =>
+                l.Title == "InputProcessing" &&
+                l.EventType == "StateExecution"));
+        }
+
+        [Fact]
+        public async Task ProcessInputAsync_ShouldEnrichProcessHttpInputActions_WhenTracingEnabled()
+        {
+            // Arrange
+            Message.Content = new PlainText { Text = "test" };
+            var statusVarName = "httpStatus";
+            var statusVarValue = "200";
+
+            Message.Metadata = new Dictionary<string, string>
+            {
+            { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
+                { TraceSettings.BUILDER_TRACE_MODE, "All" },
+                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" }
+            };
+
+            Context.GetVariableAsync(statusVarName, Arg.Any<CancellationToken>(), Arg.Any<string>())
+                .Returns(statusVarValue);
+
+            var flow = new Flow
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State { Id = "root", Root = true, Input = new Input() }
+                },
+                InputActions = new[]
+                {
+                    new Action
+                    {
+                        Type = "ProcessHttp",
+                        Settings = new JRaw(new JObject
+                        {
+                            { "method", "GET" },
+                            { "uri", "https://example.com" },
+                            { "responseStatusVariable", statusVarName }
+                        })
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert: GetVariableAsync called for enrichment
+            await Context.Received().GetVariableAsync(statusVarName, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessInputAsync_ShouldSkipEnrichment_WhenActionTypeIsNotProcessHttp()
+        {
+            // Arrange
+            Message.Content = new PlainText { Text = "test" };
+            Message.Metadata = new Dictionary<string, string>
+            {
+            { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
+                { TraceSettings.BUILDER_TRACE_MODE, "All" },
+                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" }
+            };
+
+            var flow = new Flow
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State { Id = "root", Root = true, Input = new Input() }
+                },
+                InputActions = new[]
+                {
+                    new Action
+                    {
+                        Type = "SendMessage",
+                        Settings = new JRaw(new JObject
+                        {
+                            { "type", "text/plain" },
+                            { "content", "hello" }
+                        })
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert: GetVariableAsync should NOT be called for enrichment (SendMessage has no responseStatusVariable)
+            await Context.DidNotReceive().GetVariableAsync(
+                Arg.Is<string>(v => v != null),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessInputAsync_ShouldNotEnrichResponseStatus_WhenResponseStatusVariableIsEmpty()
+        {
+            // Arrange
+            Message.Content = new PlainText { Text = "test" };
+            Message.Metadata = new Dictionary<string, string>
+            {
+            { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
+                { TraceSettings.BUILDER_TRACE_MODE, "All" },
+                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" }
+            };
+
+            var flow = new Flow
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State { Id = "root", Root = true, Input = new Input() }
+                },
+                InputActions = new[]
+                {
+                    new Action
+                    {
+                        Type = "ProcessHttp",
+                        Settings = new JRaw(new JObject
+                        {
+                            { "method", "GET" },
+                            { "uri", "https://example.com" }
+                            // no responseStatusVariable
+                        })
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act — should not throw, enrichment path with no variable name is a no-op for GetVariableAsync
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert: GetVariableAsync not called for enrichment since variableName is null/empty
+            await Context.DidNotReceive().GetVariableAsync(
+                Arg.Is<string>(v => v != null),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ProcessInputAsync_ShouldNotThrow_WhenEnrichmentThrows()
+        {
+            // Arrange
+            Message.Content = new PlainText { Text = "test" };
+            var statusVarName = "httpStatus";
+            Message.Metadata = new Dictionary<string, string>
+            {
+                { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
+                { TraceSettings.BUILDER_TRACE_MODE, "All" },
+                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" }
+            };
+
+            Context.GetVariableAsync(statusVarName, Arg.Any<CancellationToken>(), Arg.Any<string>())
+                .Returns(Task.FromException<string>(new Exception("context error")));
+            Context.GetVariableAsync(statusVarName, Arg.Any<CancellationToken>())
+                .Returns(Task.FromException<string>(new Exception("context error")));
+
+            var flow = new Flow
+            {
+                Id = Guid.NewGuid().ToString(),
+                States = new[]
+                {
+                    new State { Id = "root", Root = true, Input = new Input() }
+                },
+                InputActions = new[]
+                {
+                    new Action
+                    {
+                        Type = "ProcessHttp",
+                        Settings = new JRaw(new JObject
+                        {
+                            { "method", "GET" },
+                            { "uri", "https://example.com" },
+                            { "responseStatusVariable", statusVarName }
+                        })
+                    }
+                }
+            };
+            var target = GetTarget();
+
+            // Act — enrichment errors must be swallowed; no exception should propagate
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert: blipLogger still called despite enrichment failure
+            blipLogger.Received(1).ActionExecution(Arg.Any<LogInput>());
+        }
+
+        [Fact]
+        public async Task ProcessInputAsync_ShouldCallBlipMonitoringLogger_WithCorrectFlowId()
+        {
+            // Arrange
+            Message.Content = new PlainText { Text = "Hello!" };
+            var flowId = Guid.NewGuid().ToString();
+            var flow = new Flow
+            {
+                Id = flowId,
+                States = new[]
+                {
+                    new State { Id = "root", Root = true, Input = new Input() }
+                }
+            };
+            var target = GetTarget();
+
+            // Act
+            await target.ProcessInputAsync(Message, flow, CancellationToken);
+
+            // Assert
+            blipLogger.Received(1).ActionExecution(Arg.Is<LogInput>(l =>
+                l.Data != null &&
+                ((JObject)l.Data)["flowId"].Value<string>() == flowId));
         }
 
         #endregion

@@ -996,7 +996,7 @@ namespace Take.Blip.Builder
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Warning(ex, "Failed to enrich ProcessHttp action trace");
+                    _logger.Warning(ex, "Failed to enrich ProcessHttp action trace");
                 }
             }
         }
