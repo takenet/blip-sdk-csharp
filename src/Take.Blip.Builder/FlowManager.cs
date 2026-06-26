@@ -55,6 +55,9 @@ namespace Take.Blip.Builder
 
         private const string SHORTNAME_OF_SUBFLOW_EXTENSION_DATA = "shortNameOfSubflow";
         private const string ACTION_PROCESS_HTTP = "ProcessHttp";
+        private const string RESPONSE_STATUS_VARIABLE_PROPERTY = "responseStatusVariable";
+        private const string RESPONSE_PROPERTY = "response";
+        private const string STATUS_PROPERTY = "status";
         private const string ACTION_EXECUTE_TEMPLATE = "ExecuteTemplate";
         public const string STATE_ID = "inputExpiration.stateId";
         private const string START_SOURCE_TAKE_BLIP = "take.blip";
@@ -163,11 +166,11 @@ namespace Take.Blip.Builder
 
             inputTrace = new InputTrace
             {
-               Owner = ownerIdentity,
-               FlowId = flow.Id,
-               User = userIdentity,
-               Input = message.Content.ToString()
-             };
+                Owner = ownerIdentity,
+                FlowId = flow.Id,
+                User = userIdentity,
+                Input = message.Content.ToString()
+            };
 
 
             var inputStopwatch = inputTrace != null
@@ -177,6 +180,7 @@ namespace Take.Blip.Builder
             var ownerContext = OwnerContext.Create(ownerIdentity);
 
             State state = default;
+            IContext context = messageContext;
             try
             {
                 // Create a cancellation token
@@ -192,7 +196,7 @@ namespace Take.Blip.Builder
                             _envelopeSerializer, _artificialIntelligenceExtension, linkedCts.Token);
 
                         // Load the user context
-                        var context = messageContext ?? _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
+                        context = messageContext ?? _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
@@ -387,13 +391,14 @@ namespace Take.Blip.Builder
                     if (traceSettings != null && traceSettings.Mode != TraceMode.Disabled)
                     {
                         await _traceManager.ProcessTraceAsync(inputTrace, traceSettings, inputStopwatch, cts.Token);
+                        await EnrichProcessHttpInputActionsAsync(inputTrace, context, cts.Token);
                     }
                     else
                     {
                         await _traceManager.ProcessTraceAsync(null, traceSettings, inputStopwatch, cts.Token);
                     }
 
-                     _blipMonitoringLogger.ActionExecution(
+                    _blipMonitoringLogger.ActionExecution(
                            new LogInput
                            {
                                Data = new JObject
@@ -408,10 +413,15 @@ namespace Take.Blip.Builder
                                    ["traceSettings"] =
                                        traceSettings != null ? JToken.FromObject(traceSettings) : null,
                                },
+                               FlowVersion = flow.Version,
+                               Channel = userIdentity?.Domain,
                                IdMessage = message.Id,
                                From = userIdentity,
                                To = ownerIdentity,
-                               Title = "Input Processing",
+                               EventType = "StateExecution",
+                               Title = "InputProcessing",
+                               OriginalFrom = message.From,
+                               OriginalTo = message.To
                            }
                        );
                 }
@@ -639,7 +649,6 @@ namespace Take.Blip.Builder
                             else
                             {
                                 actionTrace.ParsedSettings = new JRaw(stringifySetting);
-
                             }
                         }
 
@@ -965,6 +974,65 @@ namespace Take.Blip.Builder
         private bool IsMessageFromExpiration(Message message)
         {
             return message.Metadata?.ContainsKey(STATE_ID) ?? false;
+        }
+
+        private async Task EnrichProcessHttpInputActionsAsync(InputTrace inputTrace, IContext context, CancellationToken cancellationToken)
+        {
+            if (inputTrace?.InputActions == null || context == null)
+            {
+                return;
+            }
+
+            foreach (var actionTrace in inputTrace.InputActions)
+            {
+                if (actionTrace == null || !string.Equals(actionTrace.Type, ACTION_PROCESS_HTTP, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    await EnrichProcessHttpActionTraceAsync(actionTrace, context, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warning(ex, "Failed to enrich ProcessHttp action trace");
+                }
+            }
+        }
+
+        private static async Task EnrichProcessHttpActionTraceAsync(ActionTrace actionTrace, IContext context, CancellationToken cancellationToken)
+        {
+            var raw = actionTrace.ParsedSettings?.ToString();
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return;
+            }
+
+            JObject parsedSettings;
+            try
+            {
+                parsedSettings = JObject.Parse(raw);
+            }
+            catch (JsonException)
+            {
+                return;
+            }
+
+            var variableName = parsedSettings.Value<string>(RESPONSE_STATUS_VARIABLE_PROPERTY);
+            var responseStatus = string.IsNullOrWhiteSpace(variableName)
+                ? null
+                : await context.GetVariableAsync(variableName, cancellationToken);
+
+            if (!(parsedSettings[RESPONSE_PROPERTY] is JObject responseObject))
+            {
+                responseObject = new JObject();
+                parsedSettings[RESPONSE_PROPERTY] = responseObject;
+            }
+
+            responseObject[STATUS_PROPERTY] = responseStatus;
+
+            actionTrace.ParsedSettings = new JRaw(parsedSettings.ToString(Formatting.None));
         }
 
 
