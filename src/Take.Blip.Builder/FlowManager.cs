@@ -198,6 +198,9 @@ namespace Take.Blip.Builder
                         // Load the user context
                         context = messageContext ?? _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
 
+                        // Make the InputTrace available to actions for custom user trace entries
+                        context.SetCurrentInputTrace(inputTrace);
+
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
 
@@ -1100,6 +1103,9 @@ namespace Take.Blip.Builder
 
                         // Load the user context
                         var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, flow);
+
+                        // Make the InputTrace available to actions for custom user trace entries
+                        context.SetCurrentInputTrace(inputTrace);
 
                         // Validate if the user are in the informed state
                         var currentState = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
