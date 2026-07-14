@@ -25,12 +25,15 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         private readonly TimeZoneInfo _timeZoneInfo;
         private readonly CancellationToken _cancellationToken;
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Time"/> class.
         /// </summary>
-        public Time(ILogger logger, IContext context, ExecuteScriptV2Settings settings,
-            CancellationToken cancellationToken)
+        public Time(
+            ILogger logger,
+            IContext context,
+            ExecuteScriptV2Settings settings,
+            CancellationToken cancellationToken
+        )
         {
             _cancellationToken = cancellationToken;
 
@@ -47,9 +50,10 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         {
             var timezoneOption = options?[TIMEZONE_KEY] as string;
 
-            var timeZoneInfo = (timezoneOption?.IsNullOrEmpty() ?? true)
-                ? _timeZoneInfo
-                : TimeZoneInfo.FindSystemTimeZoneById(timezoneOption);
+            var timeZoneInfo =
+                (timezoneOption?.IsNullOrEmpty() ?? true)
+                    ? _timeZoneInfo
+                    : TimeZoneInfo.FindSystemTimeZoneById(timezoneOption);
 
             if (!(options?[FORMAT_KEY] is string format))
             {
@@ -68,17 +72,25 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             }
 
             var cultureOption = options?[CULTURE_KEY] as string;
-            var culture = new CultureInfo((cultureOption?.IsNullOrEmpty() ?? true)
-                ? DEFAULT_CULTURE_INFO
-                : cultureOption);
+            var culture = new CultureInfo(
+                (cultureOption?.IsNullOrEmpty() ?? true) ? DEFAULT_CULTURE_INFO : cultureOption
+            );
 
             // Parse the date string to a DateTimeOffset object
-            if (!DateTime.TryParseExact(date,
-                    format.IsNullOrEmpty() ? DEFAULT_TIME_FORMAT : format, culture,
-                    DateTimeStyles.None, out var parsedDateOffset))
+            if (
+                !DateTime.TryParseExact(
+                    date,
+                    format.IsNullOrEmpty() ? DEFAULT_TIME_FORMAT : format,
+                    culture,
+                    DateTimeStyles.None,
+                    out var parsedDateOffset
+                )
+            )
             {
-                throw new ArgumentException($"Invalid date format ({format}) to parse: {date}",
-                    nameof(date));
+                throw new ArgumentException(
+                    $"Invalid date format ({format}) to parse: {date}",
+                    nameof(date)
+                );
             }
 
             // Convert the parsed DateTimeOffset to the desired time zone
@@ -107,14 +119,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="date">The date to convert.</param>
         /// <param name="options">The options to parse.</param>
         /// <returns></returns>
-        public string DateOffsetToString(DateTimeOffset date,
-            IScriptObject options = null)
+        public string DateOffsetToString(DateTimeOffset date, IScriptObject options = null)
         {
             var timezoneOption = options?[TIMEZONE_KEY] as string;
 
-            var timeZoneInfo = (timezoneOption?.IsNullOrEmpty() ?? true)
-                ? _timeZoneInfo
-                : TimeZoneInfo.FindSystemTimeZoneById(timezoneOption);
+            var timeZoneInfo =
+                (timezoneOption?.IsNullOrEmpty() ?? true)
+                    ? _timeZoneInfo
+                    : TimeZoneInfo.FindSystemTimeZoneById(timezoneOption);
 
             // Convert the DateTimeOffset to the desired time zone
             var convertedDateInTimeZone = TimeZoneInfo.ConvertTime(date, timeZoneInfo);
@@ -122,9 +134,9 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             var formatOption = options?[FORMAT_KEY] as string;
 
             // Return the string representation of the converted DateTimeOffset
-            return convertedDateInTimeZone.ToString((formatOption?.IsNullOrEmpty() ?? true)
-                ? DEFAULT_TIME_FORMAT
-                : formatOption);
+            return convertedDateInTimeZone.ToString(
+                (formatOption?.IsNullOrEmpty() ?? true) ? DEFAULT_TIME_FORMAT : formatOption
+            );
         }
 
         /// <summary>

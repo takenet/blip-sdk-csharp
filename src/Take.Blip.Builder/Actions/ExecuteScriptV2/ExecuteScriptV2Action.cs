@@ -20,13 +20,17 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
 
-        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteScriptV2Settings.OutputVariable).ToCamelCase() };
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[]
+        {
+            nameof(ExecuteScriptV2Settings.OutputVariable).ToCamelCase(),
+        };
 
         /// <inheritdoc />
         public ExecuteScriptV2Action(
             IConfiguration configuration,
             IHttpClient httpClient,
-            ILogger logger)
+            ILogger logger
+        )
             : base(nameof(ExecuteScriptV2), OUTPUT_PARAMETERS_NAME)
         {
             HostSettings.CustomAttributeLoader = new LowerCaseMembersLoader();
@@ -37,48 +41,72 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         }
 
         /// <inheritdoc />
-        public override async Task ExecuteAsync(IContext context, ExecuteScriptV2Settings settings,
-            CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(
+            IContext context,
+            ExecuteScriptV2Settings settings,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
                 var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
 
                 using var engine = new V8ScriptEngine(
-                    V8ScriptEngineFlags.AddPerformanceObject |
-                    V8ScriptEngineFlags.EnableTaskPromiseConversion |
-                    V8ScriptEngineFlags.UseSynchronizationContexts |
-                    V8ScriptEngineFlags.EnableStringifyEnhancements |
-                    V8ScriptEngineFlags.EnableDateTimeConversion |
-                    V8ScriptEngineFlags.EnableValueTaskPromiseConversion |
-                    V8ScriptEngineFlags.HideHostExceptions
+                    V8ScriptEngineFlags.AddPerformanceObject
+                        | V8ScriptEngineFlags.EnableTaskPromiseConversion
+                        | V8ScriptEngineFlags.UseSynchronizationContexts
+                        | V8ScriptEngineFlags.EnableStringifyEnhancements
+                        | V8ScriptEngineFlags.EnableDateTimeConversion
+                        | V8ScriptEngineFlags.EnableValueTaskPromiseConversion
+                        | V8ScriptEngineFlags.HideHostExceptions
                 );
 
                 engine.DocumentSettings.AccessFlags |= DocumentAccessFlags.AllowCategoryMismatch;
-                engine.MaxRuntimeHeapSize =
-                    new UIntPtr((ulong)_configuration.ExecuteScriptV2MaxRuntimeHeapSize);
-                engine.MaxRuntimeStackUsage =
-                    new UIntPtr((ulong)_configuration.ExecuteScriptV2MaxRuntimeStackUsage);
+                engine.MaxRuntimeHeapSize = new UIntPtr(
+                    (ulong)_configuration.ExecuteScriptV2MaxRuntimeHeapSize
+                );
+                engine.MaxRuntimeStackUsage = new UIntPtr(
+                    (ulong)_configuration.ExecuteScriptV2MaxRuntimeStackUsage
+                );
                 engine.AllowReflection = false;
 
                 engine.RuntimeHeapSizeViolationPolicy = V8RuntimeViolationPolicy.Exception;
 
                 // Create new token cancellation token with _configuration.ExecuteScriptV2Timeout based on the current token
-                using var timeoutToken =
-                    new CancellationTokenSource(_configuration.ExecuteScriptV2Timeout);
-                using var linkedToken =
-                    CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
-                        timeoutToken.Token);
+                using var timeoutToken = new CancellationTokenSource(
+                    _configuration.ExecuteScriptV2Timeout
+                );
+                using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(
+                    cancellationToken,
+                    timeoutToken.Token
+                );
 
                 var time = new Time(_logger, context, settings, linkedToken.Token);
 
-                engine.RegisterFunctions(settings, _httpClient, context, time, _logger,
-                    linkedToken.Token);
+                engine.RegisterFunctions(
+                    settings,
+                    _httpClient,
+                    context,
+                    time,
+                    _logger,
+                    linkedToken.Token
+                );
 
-                var result = engine.ExecuteInvoke(settings.Source, settings.Function,
-                    _configuration.ExecuteScriptV2Timeout, arguments);
+                var result = engine.ExecuteInvoke(
+                    settings.Source,
+                    settings.Function,
+                    _configuration.ExecuteScriptV2Timeout,
+                    arguments
+                );
 
-                await SetScriptResultAsync(context, settings, result, time, cancellationToken);
+                await SetScriptResultAsync(
+                    context,
+                    settings,
+                    result,
+                    time,
+                    engine,
+                    cancellationToken
+                );
             }
             catch (Exception ex)
             {
@@ -91,33 +119,42 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
 
                 try
                 {
-                    exceptionMessage =
-                        await _captureException(context, settings, cancellationToken, ex);
+                    exceptionMessage = await _captureException(
+                        context,
+                        settings,
+                        cancellationToken,
+                        ex
+                    );
                 }
                 finally
                 {
                     var trace = context.GetCurrentActionTrace();
                     if (trace != null)
                     {
-                        trace.Warning = exceptionMessage ??
-                                        "An error occurred while executing the script.";
+                        trace.Warning =
+                            exceptionMessage ?? "An error occurred while executing the script.";
                     }
                 }
             }
         }
 
-        private async Task<string> _captureException(IContext context,
+        private async Task<string> _captureException(
+            IContext context,
             ExecuteScriptV2Settings settings,
-            CancellationToken cancellationToken, Exception ex)
+            CancellationToken cancellationToken,
+            Exception ex
+        )
         {
             string exceptionMessage;
 
-            if (ex is ScriptEngineException ||
-                ex is ScriptInterruptedException ||
-                ex is TimeoutException ||
-                ex is ArgumentException ||
-                ex is ValidationException ||
-                ex is OperationCanceledException)
+            if (
+                ex is ScriptEngineException
+                || ex is ScriptInterruptedException
+                || ex is TimeoutException
+                || ex is ArgumentException
+                || ex is ValidationException
+                || ex is OperationCanceledException
+            )
             {
                 exceptionMessage = ex.Message;
             }
@@ -128,22 +165,30 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 exceptionMessage =
                     $"Internal script error, please contact the support with the following id: {traceId}";
 
-                _logger.Error(ex, "Internal unknown bot error, support trace id: {TraceId}",
-                    traceId);
+                _logger.Error(
+                    ex,
+                    "Internal unknown bot error, support trace id: {TraceId}",
+                    traceId
+                );
             }
 
             if (!settings.ExceptionVariable.IsNullOrEmpty())
             {
-                await context.SetVariableAsync(settings.ExceptionVariable,
+                await context.SetVariableAsync(
+                    settings.ExceptionVariable,
                     exceptionMessage,
-                    cancellationToken);
+                    cancellationToken
+                );
             }
 
             return exceptionMessage;
         }
 
         private static async Task<object[]> GetScriptArgumentsAsync(
-            IContext context, ExecuteScriptV2Settings settings, CancellationToken cancellationToken)
+            IContext context,
+            ExecuteScriptV2Settings settings,
+            CancellationToken cancellationToken
+        )
         {
             if (settings.InputVariables == null || settings.InputVariables.Length <= 0)
             {
@@ -153,19 +198,30 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             object[] arguments = new object[settings.InputVariables.Length];
             for (int i = 0; i < arguments.Length; i++)
             {
-                arguments[i] =
-                    await context.GetVariableAsync(settings.InputVariables[i],
-                        cancellationToken);
+                arguments[i] = await context.GetVariableAsync(
+                    settings.InputVariables[i],
+                    cancellationToken
+                );
             }
 
             return arguments;
         }
 
         private static async Task SetScriptResultAsync(
-            IContext context, ExecuteScriptV2Settings settings, object result, Time time,
-            CancellationToken cancellationToken)
+            IContext context,
+            ExecuteScriptV2Settings settings,
+            object result,
+            Time time,
+            ScriptEngine engine,
+            CancellationToken cancellationToken
+        )
         {
-            var data = await ScriptObjectConverter.ToStringAsync(result, time, cancellationToken);
+            var data = await ScriptObjectConverter.ToStringAsync(
+                result,
+                time,
+                engine,
+                cancellationToken
+            );
 
             if (data != null)
             {

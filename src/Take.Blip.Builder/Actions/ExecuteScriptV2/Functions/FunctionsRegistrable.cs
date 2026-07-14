@@ -21,12 +21,15 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="time"></param>
         /// <param name="logger"></param>
         /// <param name="cancellationToken"></param>
-        public static void RegisterFunctions(this ScriptEngine engine,
+        public static void RegisterFunctions(
+            this ScriptEngine engine,
             ExecuteScriptV2Settings settings,
-            IHttpClient httpClient, IContext context,
+            IHttpClient httpClient,
+            IContext context,
             Time time,
             ILogger logger,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             // Date and time manipulation
             engine.AddHostObject("time", time);
@@ -40,15 +43,18 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             engine.AddHostType(typeof(ContextExtensions));
 
             // Fetch API
-            engine.AddHostObject("request",
-                new Request(settings, httpClient, context, time, logger, cancellationToken));
+            engine.AddHostObject(
+                "request",
+                new Request(settings, httpClient, context, time, logger, cancellationToken)
+            );
             engine.AddHostType(typeof(RequestExtensions));
             engine.AddHostType(typeof(Request.HttpResponse));
         }
 
         private static void _setDateTimezone(IScriptEngine engine)
         {
-            engine.Execute(@"
+            engine.Execute(
+                @"
 Date.prototype.toDateString = function () {
     return time.dateToString(this, {format: 'ddd MMM dd yyyy'});
 };
@@ -60,7 +66,8 @@ Date.prototype.toTimeString = function () {
 Date.prototype.toString = function () {
     return this.toDateString() + ' ' + this.toTimeString();
 };
-");
+"
+            );
         }
     }
 }

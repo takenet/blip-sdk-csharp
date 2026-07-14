@@ -21,22 +21,29 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         /// <param name="args">The arguments.</param>
         /// <returns></returns>
         /// <exception cref="TimeoutException"></exception>
-        public static object ExecuteInvoke(this ScriptEngine engine, string code,
+        public static object ExecuteInvoke(
+            this ScriptEngine engine,
+            string code,
             string function = "run",
-            TimeSpan? timeout = null, params object[] args)
+            TimeSpan? timeout = null,
+            params object[] args
+        )
         {
             using var timer = new Timer(_ => engine.Interrupt());
 
             try
             {
-                timer.Change(timeout ?? TimeSpan.FromSeconds(5),
-                    TimeSpan.FromMilliseconds(Timeout.Infinite));
+                timer.Change(
+                    timeout ?? TimeSpan.FromSeconds(5),
+                    TimeSpan.FromMilliseconds(Timeout.Infinite)
+                );
 
                 engine.Execute(code);
 
-                var result = args != null
-                    ? engine.Invoke(function ?? DEFAULT_FUNCTION, args)
-                    : engine.Invoke(function ?? DEFAULT_FUNCTION);
+                var result =
+                    args != null
+                        ? engine.Invoke(function ?? DEFAULT_FUNCTION, args)
+                        : engine.Invoke(function ?? DEFAULT_FUNCTION);
 
                 return result;
             }

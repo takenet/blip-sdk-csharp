@@ -21,12 +21,17 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         /// </summary>
         /// <param name="data"></param>
         /// <param name="time"></param>
+        /// <param name="engine"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static async Task<string> ToStringAsync(object data, Time time,
-            CancellationToken cancellationToken)
+        public static async Task<string> ToStringAsync(
+            object data,
+            Time time,
+            ScriptEngine engine,
+            CancellationToken cancellationToken
+        )
         {
-            var resultData = await ConvertAsync(data, time, cancellationToken);
+            var resultData = await ConvertAsync(data, time, engine, cancellationToken);
 
             return resultData switch
             {
@@ -38,7 +43,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 int @int => @int.ToString(),
                 float @float => @float.ToString("R"),
                 bool @bool => @bool ? "true" : "false",
-                _ => JsonConvert.SerializeObject(resultData)
+                _ => JsonConvert.SerializeObject(resultData),
             };
         }
 
@@ -47,10 +52,15 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         /// </summary>
         /// <param name="data"></param>
         /// <param name="time"></param>
+        /// <param name="engine"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static async Task<object> ConvertAsync(object data, Time time,
-            CancellationToken cancellationToken)
+        public static async Task<object> ConvertAsync(
+            object data,
+            Time time,
+            ScriptEngine engine,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -63,39 +73,59 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                         return time.DateOffsetToString(dateTimeOffset);
 
                     case ScriptObject scriptObject when scriptObject.PropertyNames.Any():
-                        return await ToDictionary(scriptObject, time,
-                            cancellationToken);
+                        return await ToDictionary(scriptObject, time, engine, cancellationToken);
 
                     case ScriptObject scriptObject:
                         return scriptObject.PropertyIndices.Any()
-                            ? await ToList(scriptObject, time, cancellationToken)
+                            ? await ToList(scriptObject, time, engine, cancellationToken)
                             : data;
 
                     case Task<dynamic> task:
                     {
                         var delayTask = Task.Delay(Timeout.Infinite, cancellationToken);
                         var completedTask = await Task.WhenAny(task, delayTask);
+
                         if (completedTask == delayTask)
                         {
-                            // The delay task completed first because the cancellation token was triggered.
+                            // Correção #1: interrompe o V8 e AGUARDA a task original
+                            // terminar antes de propagar o cancelamento — nunca abandona.
+                            engine.Interrupt();
+
+                            try
+                            {
+                                await task.ConfigureAwait(false);
+                            }
+                            catch
+                            {
+                                // Já vamos propagar OperationCanceledException abaixo;
+                                // aqui só garantimos que a task foi observada e que o
+                                // engine não será descartado com ela ainda pendente.
+                            }
+
                             throw new OperationCanceledException(cancellationToken);
                         }
 
                         if (completedTask.IsFaulted)
                         {
                             throw new ScriptEngineException(
-                                "An error occurred while executing the script.", task.Exception);
+                                "An error occurred while executing the script.",
+                                task.Exception
+                            );
                         }
 
                         if (completedTask.IsCanceled)
                         {
                             throw new OperationCanceledException(
-                                "The script execution was canceled.");
+                                "The script execution was canceled."
+                            );
                         }
 
-                        return await ConvertAsync(((Task<dynamic>)completedTask).Result,
+                        return await ConvertAsync(
+                            ((Task<dynamic>)completedTask).Result,
                             time,
-                            cancellationToken);
+                            engine,
+                            cancellationToken
+                        );
                     }
                     default:
                         return data;
@@ -107,39 +137,48 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             }
         }
 
-        private static async Task<List<object>> ToList(ScriptObject scriptObject,
+        private static async Task<List<object>> ToList(
+            ScriptObject scriptObject,
             Time time,
-            CancellationToken cancellationToken)
+            ScriptEngine engine,
+            CancellationToken cancellationToken
+        )
         {
             var indexes = scriptObject.PropertyIndices.ToList();
             var results = new List<object>();
 
             foreach (var index in indexes)
             {
-                var result = await ConvertAsync(scriptObject.GetProperty(index),
-                    time,
-                    cancellationToken);
-
-                results.Add(result);
+                results.Add(
+                    await ConvertAsync(
+                        scriptObject.GetProperty(index),
+                        time,
+                        engine,
+                        cancellationToken
+                    )
+                );
             }
 
             return results;
         }
 
         private static async Task<Dictionary<string, object>> ToDictionary(
-            ScriptObject scriptObject, Time time,
-            CancellationToken cancellationToken)
+            ScriptObject scriptObject,
+            Time time,
+            ScriptEngine engine,
+            CancellationToken cancellationToken
+        )
         {
-            var propertyNames = scriptObject.PropertyNames;
-
             var dictionary = new Dictionary<string, object>();
 
-            foreach (var propertyName in propertyNames)
+            foreach (var propertyName in scriptObject.PropertyNames)
             {
                 dictionary[propertyName] = await ConvertAsync(
                     scriptObject.GetProperty(propertyName),
                     time,
-                    cancellationToken);
+                    engine,
+                    cancellationToken
+                );
             }
 
             return dictionary;

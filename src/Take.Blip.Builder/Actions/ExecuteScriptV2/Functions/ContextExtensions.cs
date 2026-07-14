@@ -13,8 +13,12 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
     public static class ContextExtensions
     {
         /// <inheritdoc cref="Context.SetVariableAsync(string, object, TimeSpan)"/>
-        public static Task SetVariableAsync(this Context context, string key, object value,
-            Undefined _)
+        public static Task SetVariableAsync(
+            this Context context,
+            string key,
+            object value,
+            Undefined _
+        )
         {
             return context.SetVariableAsync(key, value);
         }

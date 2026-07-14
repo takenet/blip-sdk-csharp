@@ -37,17 +37,22 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="time"></param>
         /// <param name="logger"></param>
         /// <param name="cancellationToken"></param>
-        public Request(ExecuteScriptV2Settings settings, IHttpClient httpClient, IContext context,
+        public Request(
+            ExecuteScriptV2Settings settings,
+            IHttpClient httpClient,
+            IContext context,
             Time time,
             ILogger logger,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             _cancellationToken = cancellationToken;
             _httpClient = httpClient;
             _settings = settings;
             _context = context;
             _time = time;
-            _logger = logger.ForContext("OwnerIdentity", context.OwnerIdentity)
+            _logger = logger
+                .ForContext("OwnerIdentity", context.OwnerIdentity)
                 .ForContext("UserIdentity", context.UserIdentity);
         }
 
@@ -57,9 +62,10 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <returns></returns>
         public async Task<HttpResponse> FetchAsync(string uri, IScriptObject options = default)
         {
-            using var httpRequestMessage =
-                new HttpRequestMessage(
-                    new HttpMethod(options?.GetProperty("method").ToString() ?? "GET"), uri);
+            using var httpRequestMessage = new HttpRequestMessage(
+                new HttpMethod(options?.GetProperty("method").ToString() ?? "GET"),
+                uri
+            );
 
             var contentType = await _setHeadersAsync(options, httpRequestMessage);
 
@@ -72,8 +78,10 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
 
             if (!_settings.currentStateId.IsNullOrEmpty())
             {
-                httpRequestMessage.Headers.Add(Constants.BLIP_STATEID_HEADER,
-                    _settings.currentStateId);
+                httpRequestMessage.Headers.Add(
+                    Constants.BLIP_STATEID_HEADER,
+                    _settings.currentStateId
+                );
             }
 
             if (_context.UserIdentity != null && !((string)_context.UserIdentity).IsNullOrEmpty())
@@ -81,8 +89,10 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
                 httpRequestMessage.Headers.Add(Constants.BLIP_USER_HEADER, _context.UserIdentity);
             }
 
-            using var httpResponseMessage =
-                await _httpClient.SendAsync(httpRequestMessage, _cancellationToken);
+            using var httpResponseMessage = await _httpClient.SendAsync(
+                httpRequestMessage,
+                _cancellationToken
+            );
 
             var responseStatus = (int)httpResponseMessage.StatusCode;
             var isSuccessStatusCode = httpResponseMessage.IsSuccessStatusCode;
@@ -111,37 +121,58 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
                 responseBody,
                 httpResponseMessage.Headers.ToDictionary(
                     h => h.Key.ToLower(),
-                    h => h.Value.ToArray()));
-        }
-        private bool _isOnlyJsonContentType(string contentType)
-        {
-            return contentType.Split(',').Length == 1 && contentType.IsContentType(APPLICATION_JSON);
+                    h => h.Value.ToArray()
+                )
+            );
         }
 
-        private async Task _setBodyAsync(IScriptObject options,
+        private bool _isOnlyJsonContentType(string contentType)
+        {
+            return contentType.Split(',').Length == 1
+                && contentType.IsContentType(APPLICATION_JSON);
+        }
+
+        private async Task _setBodyAsync(
+            IScriptObject options,
             HttpRequestMessage httpRequestMessage,
-            string contentType)
+            string contentType
+        )
         {
             var body = options?.GetProperty("body");
             if (body != null)
             {
-                var requestBody = await ScriptObjectConverter.ToStringAsync(body, _time, _cancellationToken);
+                var requestBody = await ScriptObjectConverter.ToStringAsync(
+                    body,
+                    _time,
+                    _cancellationToken
+                );
 
                 if (_isOnlyJsonContentType(contentType))
                 {
-                    httpRequestMessage.Content = new StringContent(requestBody, Encoding.UTF8, contentType ?? APPLICATION_JSON);
+                    httpRequestMessage.Content = new StringContent(
+                        requestBody,
+                        Encoding.UTF8,
+                        contentType ?? APPLICATION_JSON
+                    );
                 }
                 else
                 {
-                    var byteArrayContent = new ByteArrayContent(Encoding.UTF8.GetBytes(requestBody));
-                    byteArrayContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType ?? APPLICATION_JSON);
+                    var byteArrayContent = new ByteArrayContent(
+                        Encoding.UTF8.GetBytes(requestBody)
+                    );
+                    byteArrayContent.Headers.ContentType =
+                        new System.Net.Http.Headers.MediaTypeHeaderValue(
+                            contentType ?? APPLICATION_JSON
+                        );
                     httpRequestMessage.Content = byteArrayContent;
                 }
             }
         }
 
-        private async Task<string> _setHeadersAsync(IScriptObject options,
-            HttpRequestMessage httpRequestMessage)
+        private async Task<string> _setHeadersAsync(
+            IScriptObject options,
+            HttpRequestMessage httpRequestMessage
+        )
         {
             string contentType = APPLICATION_JSON;
             if (!(options?.GetProperty("headers") is IScriptObject headers))
@@ -152,14 +183,17 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             foreach (var header in headers.PropertyNames)
             {
                 var headerValue = await ScriptObjectConverter.ConvertAsync(
-                    headers.GetProperty(header), _time,
-                    _cancellationToken);
+                    headers.GetProperty(header),
+                    _time,
+                    _cancellationToken
+                );
 
                 switch (headerValue)
                 {
                     case string value:
-                        if (header.Equals("content-type",
-                                StringComparison.CurrentCultureIgnoreCase))
+                        if (
+                            header.Equals("content-type", StringComparison.CurrentCultureIgnoreCase)
+                        )
                         {
                             contentType = value;
                         }
@@ -167,15 +201,18 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
                         httpRequestMessage.Headers.TryAddWithoutValidation(header, value);
                         break;
                     case List<object> values:
-                        if (header.Equals("content-type",
-                                StringComparison.CurrentCultureIgnoreCase) &&
-                            values.Count > 0)
+                        if (
+                            header.Equals("content-type", StringComparison.CurrentCultureIgnoreCase)
+                            && values.Count > 0
+                        )
                         {
                             contentType = values[0].ToString();
                         }
 
-                        httpRequestMessage.Headers.TryAddWithoutValidation(header,
-                            values.Select(v => v.ToString()).ToArray());
+                        httpRequestMessage.Headers.TryAddWithoutValidation(
+                            header,
+                            values.Select(v => v.ToString()).ToArray()
+                        );
                         break;
                 }
             }
@@ -219,8 +256,12 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             /// <param name="success"></param>
             /// <param name="body"></param>
             /// <param name="headers"></param>
-            public HttpResponse(int status, bool success, string body,
-                Dictionary<string, string[]> headers)
+            public HttpResponse(
+                int status,
+                bool success,
+                string body,
+                Dictionary<string, string[]> headers
+            )
             {
                 Status = status;
                 Success = success;
@@ -244,8 +285,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             /// <returns></returns>
             public string[] GetHeader(string key)
             {
-                return Headers.TryGetValue(key.ToLower(), out var value)
-                    ? value
+                return Headers.TryGetValue(key.ToLower(), out var value) ? value
 #pragma warning disable S1168 - Return null to diferentiate from empty array
                     : null;
 #pragma warning restore S1168
