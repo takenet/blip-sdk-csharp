@@ -414,7 +414,7 @@ namespace Take.Blip.Builder
                                        traceSettings != null ? JToken.FromObject(traceSettings) : null,
                                },
                                FlowVersion = flow.Version,
-                               Channel = message.From.ToNode().Domain,
+                               Channel = message.From?.ToNode().Domain,
                                IdMessage = message.Id,
                                From = userIdentity,
                                To = ownerIdentity,
