@@ -135,7 +135,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
 
             // Return the string representation of the converted DateTimeOffset
             return convertedDateInTimeZone.ToString(
-                (formatOption?.IsNullOrEmpty() ?? true) ? DEFAULT_TIME_FORMAT : formatOption
+                (formatOption?.IsNullOrEmpty() ?? true) ? DEFAULT_TIME_FORMAT : formatOption,
+                new CultureInfo(DEFAULT_CULTURE_INFO)
             );
         }
 

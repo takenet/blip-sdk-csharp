@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Jint.Runtime;
 using Newtonsoft.Json.Linq;
@@ -15,7 +16,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
     {
         private ExecuteScriptAction GetTarget()
         {
-            return new ExecuteScriptAction(new ConventionsConfiguration(), Substitute.For<ILogger>());
+            return new ExecuteScriptAction(
+                new ConventionsConfiguration(),
+                Substitute.For<ILogger>()
+            );
         }
 
         [Fact]
@@ -27,7 +31,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new ExecuteScriptSettings()
             {
                 Source = $"function run() {{ return '{variableValue}'; }}",
-                OutputVariable = variableName
+                OutputVariable = variableName,
             };
             var target = GetTarget();
 
@@ -35,8 +39,22 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(variableName, variableValue, CancellationToken, default(TimeSpan));
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    variableName,
+                    variableValue,
+                    CancellationToken,
+                    default(TimeSpan)
+                );
         }
 
         [Fact]
@@ -46,17 +64,33 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new ExecuteScriptSettings
             {
                 // Fixed date to test timezone
-                Source = "function run() { return new Date('2021-01-01T00:00:10').toLocaleString('en-US'); }",
-                OutputVariable = "test"
+                Source =
+                    "function run() { return new Date('2021-01-01T00:00:10').toLocaleString('en-US'); }",
+                OutputVariable = "test",
             };
             var target = GetTarget();
 
-            // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            // Jint ignores toLocaleString locale parameter and uses Thread.CurrentCulture; set explicitly for determinism
+            var prevCulture = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = new CultureInfo("pt-BR");
+            try
+            {
+                // Act
+                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
-            // Assert
-            // Jint doesn't support toLocaleString locale parameter, so it will return the system's default locale format
-            await Context.Received(1).SetVariableAsync("test", "quinta-feira, 31 de dezembro de 2020 21:00:10", CancellationToken);
+                // Assert
+                await Context
+                    .Received(1)
+                    .SetVariableAsync(
+                        "test",
+                        "quinta-feira, 31 de dezembro de 2020 21:00:10",
+                        CancellationToken
+                    );
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = prevCulture;
+            }
         }
 
         [Fact]
@@ -66,20 +100,36 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new ExecuteScriptSettings
             {
                 // Fixed date to test timezone
-                Source = "function run() { return new Date('2021-01-01T00:00:10').toLocaleString('en-US'); }",
+                Source =
+                    "function run() { return new Date('2021-01-01T00:00:10').toLocaleString('en-US'); }",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
             Context.Flow.Configuration["builder:#localTimeZone"] = "Asia/Shanghai";
 
-            // Act
-            await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            // Jint ignores toLocaleString locale parameter and uses Thread.CurrentCulture; set explicitly for determinism
+            var prevCulture = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = new CultureInfo("pt-BR");
+            try
+            {
+                // Act
+                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
-            // Assert
-            // Jint doesn't support toLocaleString locale parameter, so it will return the system's default locale format
-            await Context.Received(1).SetVariableAsync("test", "sexta-feira, 1 de janeiro de 2021 08:00:10", CancellationToken);
+                // Assert
+                await Context
+                    .Received(1)
+                    .SetVariableAsync(
+                        "test",
+                        "sexta-feira, 1 de janeiro de 2021 08:00:10",
+                        CancellationToken
+                    );
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = prevCulture;
+            }
         }
 
         [Fact]
@@ -88,23 +138,23 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var number1 = "100";
             var number2 = "250";
-            Context.GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>()).Returns(number1);
-            Context.GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>()).Returns(number2);
+            Context
+                .GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>())
+                .Returns(number1);
+            Context
+                .GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>())
+                .Returns(number2);
             var result = "";
 
             var settings = new ExecuteScriptSettings()
             {
-                InputVariables = new[]
-                {
-                    nameof(number1),
-                    nameof(number2)
-
-                },
-                Source = @"
+                InputVariables = new[] { nameof(number1), nameof(number2) },
+                Source =
+                    @"
                     function run(number1, number2) {
                         return parseInt(number1) + parseInt(number2);
                     }",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
             var target = GetTarget();
 
@@ -112,8 +162,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(nameof(result), "350", CancellationToken, default(TimeSpan));
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(nameof(result), "350", CancellationToken, default(TimeSpan));
         }
 
         [Fact]
@@ -122,23 +181,23 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var number1 = "100";
             var number2 = "250";
-            Context.GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>()).Returns(number1);
-            Context.GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>()).Returns(number2);
+            Context
+                .GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>())
+                .Returns(number1);
+            Context
+                .GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>())
+                .Returns(number2);
             var result = "";
 
             var settings = new ExecuteScriptSettings()
             {
-                InputVariables = new[]
-                {
-                    nameof(number1),
-                    nameof(number2)
-
-                },
-                Source = @"
+                InputVariables = new[] { nameof(number1), nameof(number2) },
+                Source =
+                    @"
                     function run(number1, number2, number3) {
                         return parseInt(number1) + parseInt(number2) + (number3 || 150);
                     }",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
             var target = GetTarget();
 
@@ -146,8 +205,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(nameof(result), "500", CancellationToken, default(TimeSpan));
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(nameof(result), "500", CancellationToken, default(TimeSpan));
         }
 
         [Fact]
@@ -159,7 +227,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new ExecuteScriptSettings()
             {
                 InputVariables = Array.Empty<string>(),
-                Source = @"
+                Source =
+                    @"
                     function scopedFunc() {
                         let x = 1;
                         const y = 'my value';
@@ -170,7 +239,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         var scopedReturn = scopedFunc();
                         return typeof x === 'undefined' && typeof y === 'undefined' && scopedReturn.x === 1 && scopedReturn.y === 'my value';
                     }",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
             var target = GetTarget();
 
@@ -178,7 +247,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(nameof(result), bool.TrueString.ToLowerInvariant(), CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    nameof(result),
+                    bool.TrueString.ToLowerInvariant(),
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -187,24 +262,24 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var number1 = "100";
             var number2 = "250";
-            Context.GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>()).Returns(number1);
-            Context.GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>()).Returns(number2);
+            Context
+                .GetVariableAsync(nameof(number1), CancellationToken, Arg.Any<string>())
+                .Returns(number1);
+            Context
+                .GetVariableAsync(nameof(number2), CancellationToken, Arg.Any<string>())
+                .Returns(number2);
             var result = "";
 
             var settings = new ExecuteScriptSettings()
             {
                 Function = "executeFunc",
-                InputVariables = new[]
-                {
-                    nameof(number1),
-                    nameof(number2)
-
-                },
-                Source = @"
+                InputVariables = new[] { nameof(number1), nameof(number2) },
+                Source =
+                    @"
                     function executeFunc(number1, number2) {
                         return parseInt(number1) + parseInt(number2);
                     }",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
             var target = GetTarget();
 
@@ -212,25 +287,36 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(nameof(result), "350", CancellationToken, default(TimeSpan));
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(nameof(result), "350", CancellationToken, default(TimeSpan));
         }
 
         [Fact]
         public async Task ExecuteWithJsonReturnValueShouldSucceed()
         {
             // Arrange
-            var result = "{\"id\":1.0,\"valid\":true,\"options\":[1.0,2.0,3.0],\"names\":[\"a\",\"b\",\"c\"],\"others\":[{\"a\":\"value1\"},{\"b\":\"value2\"}],\"content\":{\"uri\":\"https://server.com/image.jpeg\",\"type\":\"image/jpeg\"}}";
+            var result =
+                "{\"id\":1.0,\"valid\":true,\"options\":[1.0,2.0,3.0],\"names\":[\"a\",\"b\",\"c\"],\"others\":[{\"a\":\"value1\"},{\"b\":\"value2\"}],\"content\":{\"uri\":\"https://server.com/image.jpeg\",\"type\":\"image/jpeg\"}}";
             var settings = new ExecuteScriptSettings()
             {
-                Source = @"
+                Source =
+                    @"
                     function run() {
                         return {
                             id: 1,
                             valid: true,
                             options: [ 1, 2, 3 ],
                             names: [ 'a', 'b', 'c' ],
-                            others: [{ a: 'value1' }, { b: 'value2' }],                        
+                            others: [{ a: 'value1' }, { b: 'value2' }],
                             content: {
                                 uri: 'https://server.com/image.jpeg',
                                 type: 'image/jpeg'
@@ -238,7 +324,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         };
                     }
                     ",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
             var target = GetTarget();
 
@@ -246,8 +332,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
         }
 
         [Fact]
@@ -257,12 +352,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var result = "[1.0,2.0,3.0]";
             var settings = new ExecuteScriptSettings()
             {
-                Source = @"
+                Source =
+                    @"
                     function run() {
                         return [1, 2, 3];
                     }
                     ",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
             var target = GetTarget();
 
@@ -270,8 +366,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
         }
 
         [Fact]
@@ -281,7 +386,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var result = "";
             var settings = new ExecuteScriptSettings()
             {
-                Source = @"
+                Source =
+                    @"
                     function run() {
                         var value = 0;
                         while (true) {
@@ -290,7 +396,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         return value;
                     }
                     ",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
             var target = GetTarget();
 
@@ -312,7 +418,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var settings = new ExecuteScriptSettings()
             {
-                Source = @"
+                Source =
+                    @"
                     function run() {
                         var xhr = new XMLHttpRequest();
                         xhr.onreadystatechange = function() {
@@ -321,10 +428,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
                             }
                         }
                         xhr.open('GET', 'http://example.com', true);
-                        xhr.send(null);                    
+                        xhr.send(null);
                     }
                     ",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -347,14 +454,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var result = "NaN";
             var settings = new ExecuteScriptSettings()
             {
-                Source = @"
+                Source =
+                    @"
                     function run() {
                         let numberTest = new Array(100000).join('Z');
                         let convert = parseInt(numberTest);
                         return convert;
                     }
                 ",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
             var target = GetTarget();
 
@@ -362,8 +470,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
         }
 
         [Fact]
@@ -371,17 +488,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             // Arrange
             var invalidCharacter = "?";
-            Context.GetVariableAsync(nameof(invalidCharacter), CancellationToken).Returns(invalidCharacter);
+            Context
+                .GetVariableAsync(nameof(invalidCharacter), CancellationToken)
+                .Returns(invalidCharacter);
             var result = "{\"value\":\"\"}";
 
             var settings = new ExecuteScriptSettings()
             {
-                InputVariables = new[]
-                {
-                    nameof(invalidCharacter)
-
-                },
-                Source = @"
+                InputVariables = new[] { nameof(invalidCharacter) },
+                Source =
+                    @"
                     function run (input) {
                         try {
                             return JSON.parse(input);
@@ -392,7 +508,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         }
                     }
                 ",
-                OutputVariable = nameof(result)
+                OutputVariable = nameof(result),
             };
 
             var target = GetTarget();
@@ -401,8 +517,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
-            await Context.Received(1).SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(nameof(result), result, CancellationToken, default(TimeSpan));
         }
     }
 }
