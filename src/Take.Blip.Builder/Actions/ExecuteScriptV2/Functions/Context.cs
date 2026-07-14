@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.ClearScript;
 using Serilog;
 
 namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
@@ -16,6 +17,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         private readonly IContext _context;
         private readonly Time _time;
         private readonly ILogger _logger;
+        private readonly ScriptEngine _engine;
         private readonly CancellationToken _cancellationToken;
 
         /// <summary>
@@ -23,12 +25,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// </summary>
         /// <param name="context"></param>
         /// <param name="time"></param>
+        /// <param name="engine"></param>
         /// <param name="logger"></param>
         /// <param name="cancellationToken"></param>
         public Context(
             IContext context,
             Time time,
             ILogger logger,
+            ScriptEngine engine,
             CancellationToken cancellationToken
         )
         {
@@ -37,6 +41,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             _logger = logger
                 .ForContext("OwnerIdentity", context.OwnerIdentity)
                 .ForContext("UserIdentity", context.UserIdentity);
+            _engine = engine;
             _cancellationToken = cancellationToken;
         }
 
@@ -52,6 +57,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             var result = await ScriptObjectConverter.ToStringAsync(
                 value,
                 _time,
+                _engine,
                 _cancellationToken
             );
 

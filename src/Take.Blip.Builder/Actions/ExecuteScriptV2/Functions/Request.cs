@@ -25,6 +25,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         private readonly IHttpClient _httpClient;
         private readonly IContext _context;
         private readonly Time _time;
+        private readonly ScriptEngine _engine;
         private readonly ILogger _logger;
         private const string APPLICATION_JSON = "application/json";
 
@@ -35,6 +36,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="httpClient"></param>
         /// <param name="context"></param>
         /// <param name="time"></param>
+        /// <param name="engine"></param>
         /// <param name="logger"></param>
         /// <param name="cancellationToken"></param>
         public Request(
@@ -42,6 +44,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             IHttpClient httpClient,
             IContext context,
             Time time,
+            ScriptEngine engine,
             ILogger logger,
             CancellationToken cancellationToken
         )
@@ -51,6 +54,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             _settings = settings;
             _context = context;
             _time = time;
+            _engine = engine;
             _logger = logger
                 .ForContext("OwnerIdentity", context.OwnerIdentity)
                 .ForContext("UserIdentity", context.UserIdentity);
@@ -144,6 +148,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
                 var requestBody = await ScriptObjectConverter.ToStringAsync(
                     body,
                     _time,
+                    _engine,
                     _cancellationToken
                 );
 
@@ -185,6 +190,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
                 var headerValue = await ScriptObjectConverter.ConvertAsync(
                     headers.GetProperty(header),
                     _time,
+                    _engine,
                     _cancellationToken
                 );
 

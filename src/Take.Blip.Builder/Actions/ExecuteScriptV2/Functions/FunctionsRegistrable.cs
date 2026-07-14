@@ -39,13 +39,16 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
             _setDateTimezone(engine);
 
             // Context access
-            engine.AddHostObject("context", new Context(context, time, logger, cancellationToken));
+            engine.AddHostObject(
+                "context",
+                new Context(context, time, logger, engine, cancellationToken)
+            );
             engine.AddHostType(typeof(ContextExtensions));
 
             // Fetch API
             engine.AddHostObject(
                 "request",
-                new Request(settings, httpClient, context, time, logger, cancellationToken)
+                new Request(settings, httpClient, context, time, engine, logger, cancellationToken)
             );
             engine.AddHostType(typeof(RequestExtensions));
             engine.AddHostType(typeof(Request.HttpResponse));
