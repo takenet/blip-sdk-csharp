@@ -21,12 +21,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
 {
     public class ExecuteScript2ActionTests : ActionTestsBase
     {
-        private static ExecuteScriptV2Action GetTarget(IHttpClient client = null)
+        private static ExecuteScriptV2Action GetTarget(
+            IHttpClient client = null,
+            TimeSpan timeout = default
+        )
         {
             var configuration = new TestConfiguration();
             var conventions = new ConventionsConfiguration();
 
-            configuration.ExecuteScriptV2Timeout = TimeSpan.FromMilliseconds(300);
+            configuration.ExecuteScriptV2Timeout =
+                timeout == default ? TimeSpan.FromMilliseconds(300) : timeout;
             configuration.ExecuteScriptV2MaxRuntimeHeapSize =
                 conventions.ExecuteScriptV2MaxRuntimeHeapSize;
             configuration.ExecuteScriptV2MaxRuntimeStackUsage =
@@ -59,7 +63,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await Context
                 .Received(1)
                 .SetVariableAsync(variableName, variableValue, Arg.Any<CancellationToken>());
-            await Context.Received(0).DeleteVariableAsync(variableName, Arg.Any<CancellationToken>());
+            await Context
+                .Received(0)
+                .DeleteVariableAsync(variableName, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -172,7 +178,11 @@ function run() {
             // toDateString uses en-US culture (DEFAULT_CULTURE_INFO) for locale-dependent format tokens
             await Context
                 .Received(1)
-                .SetVariableAsync("test", "Fri Jan 01 2021 00:00:10 GMT-03:00", Arg.Any<CancellationToken>());
+                .SetVariableAsync(
+                    "test",
+                    "Fri Jan 01 2021 00:00:10 GMT-03:00",
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -201,7 +211,9 @@ function run() {
 
             // Assert
             // Jint doesn't support toLocaleString, so it will return the default date format
-            await Context.Received(1).SetVariableAsync("test", "true", Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync("test", "true", Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -259,7 +271,9 @@ function run(number1, number2) {
                     Arg.Any<CancellationToken>(),
                     Arg.Any<TimeSpan>()
                 );
-            await Context.Received(1).SetVariableAsync("result", "350", Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync("result", "350", Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -366,7 +380,9 @@ function run(number1, number2, number3) {
                     Arg.Any<CancellationToken>(),
                     Arg.Any<TimeSpan>()
                 );
-            await Context.Received(1).SetVariableAsync("result", "500", Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync("result", "500", Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -396,7 +412,9 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("result", "true", Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync("result", "true", Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -433,7 +451,9 @@ function executeFunc(number1, number2) {
                     Arg.Any<CancellationToken>(),
                     Arg.Any<TimeSpan>()
                 );
-            await Context.Received(1).SetVariableAsync("result", "350", Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync("result", "350", Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -476,7 +496,9 @@ function run() {
                     Arg.Any<CancellationToken>(),
                     Arg.Any<TimeSpan>()
                 );
-            await Context.Received(1).SetVariableAsync("result", result, Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync("result", result, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -508,7 +530,9 @@ function run() {
                     Arg.Any<CancellationToken>(),
                     Arg.Any<TimeSpan>()
                 );
-            await Context.Received(1).SetVariableAsync("result", result, Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync("result", result, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -696,7 +720,11 @@ run = async () => {
             // Assert
             await Context
                 .Received(1)
-                .SetVariableAsync("test", "2021-01-01T08:00:00.0000000+08:00", Arg.Any<CancellationToken>());
+                .SetVariableAsync(
+                    "test",
+                    "2021-01-01T08:00:00.0000000+08:00",
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -1155,7 +1183,7 @@ function run (input) {
                 OutputVariable = "result",
             };
 
-            var target = GetTarget();
+            var target = GetTarget(timeout: TimeSpan.FromMilliseconds(5000));
 
             // Act
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
@@ -1169,7 +1197,45 @@ function run (input) {
                     Arg.Any<CancellationToken>(),
                     Arg.Any<TimeSpan>()
                 );
-            await Context.Received(1).SetVariableAsync("result", result, Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync("result", result, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ExecuteScriptV2_CancellationPromise_ShouldBe_Canceled()
+        {
+            // Arrange
+            var settings = new ExecuteScriptV2Settings
+            {
+                Source =
+                    @"
+            async function run() {
+                return await request.fetchAsync('https://mock.com');
+            }",
+                OutputVariable = "result",
+            };
+
+            var httpClient = Substitute.For<IHttpClient>();
+            httpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(async callInfo =>
+                {
+                    var ct = callInfo.Arg<CancellationToken>();
+                    await Task.Delay(Timeout.Infinite, ct); // blocks until cancellation
+                    return new HttpResponseMessage();
+                });
+
+            // Act
+            var target = GetTarget(httpClient, timeout: TimeSpan.FromMilliseconds(5000));
+            var executeTask = target.ExecuteAsync(
+                Context,
+                JObject.FromObject(settings),
+                CancellationToken
+            );
+
+            // Assert
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await executeTask);
         }
 
         [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]

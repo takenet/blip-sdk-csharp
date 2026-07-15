@@ -84,44 +84,26 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
 
                     case Task<dynamic> task:
                     {
-                        var delayTask = Task.Delay(Timeout.Infinite, cancellationToken);
-                        var completedTask = await Task.WhenAny(task, delayTask);
+                        try
+                        {
+                            var result = await task.WaitAsync(cancellationToken)
+                                .ConfigureAwait(false);
 
-                        if (completedTask == delayTask)
+                            return await ConvertAsync(result, time, engine, cancellationToken);
+                        }
+                        catch (OperationCanceledException)
+                            when (cancellationToken.IsCancellationRequested)
                         {
                             engine.Interrupt();
 
                             try
                             {
-                                await task.WaitAsync(TimeSpan.FromSeconds(GRACE_PERIOD_SECONDS))
-                                    .ConfigureAwait(false);
+                                await task.ConfigureAwait(false);
                             }
                             catch { }
 
                             throw new OperationCanceledException(cancellationToken);
                         }
-
-                        if (completedTask.IsFaulted)
-                        {
-                            throw new ScriptEngineException(
-                                "An error occurred while executing the script.",
-                                task.Exception
-                            );
-                        }
-
-                        if (completedTask.IsCanceled)
-                        {
-                            throw new OperationCanceledException(
-                                "The script execution was canceled."
-                            );
-                        }
-
-                        return await ConvertAsync(
-                            ((Task<dynamic>)completedTask).Result,
-                            time,
-                            engine,
-                            cancellationToken
-                        );
                     }
                     default:
                         return data;
@@ -145,6 +127,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
 
             foreach (var index in indexes)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 results.Add(
                     await ConvertAsync(
                         scriptObject.GetProperty(index),
@@ -169,6 +153,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
 
             foreach (var propertyName in scriptObject.PropertyNames)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 dictionary[propertyName] = await ConvertAsync(
                     scriptObject.GetProperty(propertyName),
                     time,
