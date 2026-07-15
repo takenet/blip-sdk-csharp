@@ -105,7 +105,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                     result,
                     time,
                     engine,
-                    cancellationToken
+                    linkedToken.Token
                 );
             }
             catch (Exception ex)

@@ -16,6 +16,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
     public static class ScriptObjectConverter
     {
+        private const int GRACE_PERIOD_SECONDS = 10;
+
         /// <summary>
         /// Converts the data to string representation.
         /// </summary>
@@ -87,20 +89,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
 
                         if (completedTask == delayTask)
                         {
-                            // Correção #1: interrompe o V8 e AGUARDA a task original
-                            // terminar antes de propagar o cancelamento — nunca abandona.
                             engine.Interrupt();
 
                             try
                             {
-                                await task.ConfigureAwait(false);
+                                await task.WaitAsync(TimeSpan.FromSeconds(GRACE_PERIOD_SECONDS))
+                                    .ConfigureAwait(false);
                             }
-                            catch
-                            {
-                                // Já vamos propagar OperationCanceledException abaixo;
-                                // aqui só garantimos que a task foi observada e que o
-                                // engine não será descartado com ela ainda pendente.
-                            }
+                            catch { }
 
                             throw new OperationCanceledException(cancellationToken);
                         }

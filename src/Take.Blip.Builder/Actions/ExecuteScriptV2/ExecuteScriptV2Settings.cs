@@ -56,14 +56,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             if (string.IsNullOrEmpty(Source))
             {
                 throw new ValidationException(
-                    $"The '{nameof(Source)}' settings value is required for '{nameof(ExecuteScriptSettings)}' action"
+                    $"The '{nameof(Source)}' settings value is required for '{nameof(ExecuteScriptV2Settings)}' action"
                 );
             }
 
             if (string.IsNullOrEmpty(OutputVariable))
             {
                 throw new ValidationException(
-                    $"The '{nameof(OutputVariable)}' settings value is required for '{nameof(ExecuteScriptSettings)}' action"
+                    $"The '{nameof(OutputVariable)}' settings value is required for '{nameof(ExecuteScriptV2Settings)}' action"
                 );
             }
         }
