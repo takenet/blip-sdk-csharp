@@ -16,8 +16,6 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
     public static class ScriptObjectConverter
     {
-        private const int GRACE_PERIOD_SECONDS = 10;
-
         /// <summary>
         /// Converts the data to string representation.
         /// </summary>

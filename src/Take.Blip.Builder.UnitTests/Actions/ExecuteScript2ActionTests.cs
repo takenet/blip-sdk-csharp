@@ -1203,16 +1203,17 @@ function run (input) {
         }
 
         [Fact]
-        public async Task ExecuteScriptV2_CancellationPromise_ShouldBe_Canceled()
+        public async Task ExecuteScriptV2_CancellationPromise_TaskShouldCompleteBeforeExecuteAsyncReturns()
         {
             // Arrange
+            var taskCompleted = false;
             var settings = new ExecuteScriptV2Settings
             {
                 Source =
                     @"
-            async function run() {
-                return await request.fetchAsync('https://mock.com');
-            }",
+        async function run() {
+            return await request.fetchAsync('https://mock.com');
+        }",
                 OutputVariable = "result",
             };
 
@@ -1222,20 +1223,84 @@ function run (input) {
                 .Returns(async callInfo =>
                 {
                     var ct = callInfo.Arg<CancellationToken>();
-                    await Task.Delay(Timeout.Infinite, ct); // blocks until cancellation
-                    return new HttpResponseMessage();
+                    try
+                    {
+                        await Task.Delay(Timeout.Infinite, ct);
+                        return new HttpResponseMessage();
+                    }
+                    finally
+                    {
+                        taskCompleted = true;
+                    }
                 });
 
+            var target = GetTarget(httpClient, timeout: TimeSpan.FromMilliseconds(500));
+
             // Act
-            var target = GetTarget(httpClient, timeout: TimeSpan.FromMilliseconds(5000));
-            var executeTask = target.ExecuteAsync(
-                Context,
-                JObject.FromObject(settings),
-                CancellationToken
+            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+                await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken)
             );
 
+            taskCompleted.ShouldBeTrue(
+                "The task should have completed before ExecuteAsync returns."
+            );
+        }
+
+        [Fact]
+        public async Task ExecuteScriptV2_CancellationPromise_ShouldNotLeakUnobservedTaskException()
+        {
+            // Arrange
+            Exception unobservedException = null;
+            void Handler(object _, UnobservedTaskExceptionEventArgs e)
+            {
+                unobservedException = e.Exception;
+                e.SetObserved();
+            }
+            TaskScheduler.UnobservedTaskException += Handler;
+
+            try
+            {
+                var settings = new ExecuteScriptV2Settings
+                {
+                    Source =
+                        @"
+            async function run() {
+                return await request.fetchAsync('https://mock.com');
+            }",
+                    OutputVariable = "result",
+                };
+
+                var httpClient = Substitute.For<IHttpClient>();
+                httpClient
+                    .SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                    .Returns(async callInfo =>
+                    {
+                        var ct = callInfo.Arg<CancellationToken>();
+                        await Task.Delay(Timeout.Infinite, ct);
+                        return new HttpResponseMessage();
+                    });
+
+                var target = GetTarget(httpClient, timeout: TimeSpan.FromMilliseconds(500));
+
+                await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+                    await target.ExecuteAsync(
+                        Context,
+                        JObject.FromObject(settings),
+                        CancellationToken
+                    )
+                );
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                await Task.Delay(100);
+            }
+            finally
+            {
+                TaskScheduler.UnobservedTaskException -= Handler;
+            }
+
             // Assert
-            await Assert.ThrowsAsync<OperationCanceledException>(async () => await executeTask);
+            unobservedException.ShouldBeNull();
         }
 
         [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
