@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
 
@@ -17,15 +19,17 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
         private readonly ISender _sender;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IConfiguration _configuration;
+        private readonly IBlipLogger _blipMonitoringLogger;
 
         private const string SERIALIZABLE_PATTERN = @".+[/|\+]json$";
         private const string OUTPUT_VARIABLE_PROPERTY = "variable";
 
-        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer, IConfiguration configuration)
+        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer, IConfiguration configuration, IBlipLogger? blipMonitoringLogger = null)
         {
             _sender = sender;
             _envelopeSerializer = envelopeSerializer;
             _configuration = configuration;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public string Type => nameof(ProcessCommand);
@@ -39,23 +43,69 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(ProcessCommandAction)}' action");
 
-            string variable = null;
-
-            if (settings.TryGetValue(OUTPUT_VARIABLE_PROPERTY, out var variableToken))
+            try
             {
-                variable = variableToken.ToString().Trim('"');
+                string variable = null;
+
+                if (settings.TryGetValue(OUTPUT_VARIABLE_PROPERTY, out var variableToken))
+                {
+                    variable = variableToken.ToString().Trim('"');
+                }
+
+                var command = ConvertToCommand(settings);
+                command.Id = EnvelopeId.NewId();
+
+                var resultCommand = await _sender.ProcessCommandAsync(command, cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(variable))
+                {
+                    var resultCommandJson = _envelopeSerializer.Serialize(resultCommand);
+                    await context.SetVariableAsync(variable, resultCommandJson, cancellationToken);
+                }
+
+                _blipMonitoringLogger.ActionExecution(new LogInput
+                {
+                    Title = "ProcessCommand",
+                    EventType = "ActionExecution",
+                    Data = new JObject
+                    {
+                        ["flowId"] = context.Flow?.Id,
+                        ["uri"] = command.Uri?.ToString(),
+                        ["method"] = command.Method.ToString(),
+                        ["outputVariable"] = variable,
+                        ["success"] = true,
+                    },
+                    FlowVersion = context.Flow?.Version,
+                    Channel = context.Input.Message?.From?.Domain,
+                    IdMessage = context.Input.Message?.Id,
+                    From = context.UserIdentity?.ToString(),
+                    To = context.OwnerIdentity?.ToString(),
+                    OriginalFrom = context.Input.Message?.From,
+                    OriginalTo = context.Input.Message?.To,
+                });
             }
-
-            var command = ConvertToCommand(settings);
-            command.Id = EnvelopeId.NewId();
-
-            var resultCommand = await _sender.ProcessCommandAsync(command, cancellationToken);
-
-            if (string.IsNullOrWhiteSpace(variable))
-                return;
-
-            var resultCommandJson = _envelopeSerializer.Serialize(resultCommand);
-            await context.SetVariableAsync(variable, resultCommandJson, cancellationToken);
+            catch (Exception ex)
+            {
+                _blipMonitoringLogger.ActionExecution(new LogInput
+                {
+                    Title = "ProcessCommand",
+                    EventType = "ActionExecution",
+                    Data = new JObject
+                    {
+                        ["flowId"] = context.Flow?.Id,
+                        ["success"] = false,
+                        ["error"] = ex.ToString(),
+                    },
+                    FlowVersion = context.Flow?.Version,
+                    Channel = context.Input.Message?.From?.Domain,
+                    IdMessage = context.Input.Message?.Id,
+                    From = context.UserIdentity?.ToString(),
+                    To = context.OwnerIdentity?.ToString(),
+                    OriginalFrom = context.Input.Message?.From,
+                    OriginalTo = context.Input.Message?.To,
+                });
+                throw;
+            }
         }
 
         private Command ConvertToCommand(JObject settings)

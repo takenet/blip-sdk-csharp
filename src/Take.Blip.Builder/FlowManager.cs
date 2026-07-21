@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
+using SmartFormat.Core.Output;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Actions;
@@ -844,7 +845,11 @@ namespace Take.Blip.Builder
         private async Task<State> ProcessOutputsAsync(LazyInput lazyInput, IContext context, Flow flow, State state, ICollection<OutputTrace> outputTraces, CancellationToken cancellationToken)
         {
             var outputs = state.Outputs;
+            var currentStateId = state.Id;
             state = null;
+
+            bool? matchedIsDefaultOutput = null;
+            int? matchedOutputOrder = null;
 
             // If there's any output in the current state
             if (outputs != null)
@@ -876,6 +881,8 @@ namespace Take.Blip.Builder
                                 throw new InvalidOperationException($"Failed to process output condition, bacause the output context variable '{output.StateId}' is undefined or does not exist in the context.");
                             }
 
+                            matchedIsDefaultOutput = output.Conditions == null;
+                            matchedOutputOrder = output.Order;
                             break;
                         }
                     }
@@ -892,6 +899,29 @@ namespace Take.Blip.Builder
                                 outputTrace.Error = ex.ToString();
                             }
                         }
+
+                        _blipMonitoringLogger.ConversationalFlow(new LogInput
+                        {
+                            Title = "OutputProcessing",
+                            EventType = "StateExecution",
+                            Data = new JObject
+                            {
+                                ["flowId"] = flow.Id,
+                                ["currentStateId"] = currentStateId,
+                                ["outputStateId"] = output.StateId,
+                                ["outputOrder"] = output.Order,
+                                ["isDefaultOutput"] = output.Conditions == null,
+                                ["success"] = false,
+                                ["error"] = ex.ToString(),
+                            },
+                            FlowVersion = flow.Version,
+                            Channel = context.Input.Message?.From?.Domain,
+                            IdMessage = context.Input.Message?.Id,
+                            From = context.UserIdentity?.ToString(),
+                            To = context.OwnerIdentity?.ToString(),
+                            OriginalFrom = context.Input.Message?.From,
+                            OriginalTo = context.Input.Message?.To,
+                        });
 
                         throw new OutputProcessingException($"Failed to process output condition to state '{output.StateId}'", ex)
                         {
@@ -913,6 +943,29 @@ namespace Take.Blip.Builder
                     }
                 }
             }
+
+            _blipMonitoringLogger.ActionExecution(new LogInput
+            {
+                Title = "OutputProcessing",
+                EventType = "StateExecution",
+                Data = new JObject
+                {
+                    ["flowId"] = flow.Id,
+                    ["currentStateId"] = currentStateId,
+                    ["nextStateId"] = state?.Id,
+                    ["outputsCount"] = outputs?.Length,
+                    ["matchedOutputOrder"] = matchedOutputOrder,
+                    ["isDefaultOutput"] = matchedIsDefaultOutput,
+                    ["success"] = true,
+                },
+                FlowVersion = flow.Version,
+                Channel = context.Input.Message?.From?.Domain,
+                IdMessage = context.Input.Message?.Id,
+                From = context.UserIdentity?.ToString(),
+                To = context.OwnerIdentity?.ToString(),
+                OriginalFrom = context.Input.Message?.From,
+                OriginalTo = context.Input.Message?.To,
+            });
 
             return state;
         }
