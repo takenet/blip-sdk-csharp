@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Microsoft.ClearScript;
 using Microsoft.ClearScript.V8;
+using Newtonsoft.Json.Linq;
 using Serilog;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Actions.ExecuteScriptV2.Functions;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
@@ -19,6 +22,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         private readonly IConfiguration _configuration;
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly IBlipLogger _blipMonitoringLogger;
 
         private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteScriptV2Settings.OutputVariable).ToCamelCase() };
 
@@ -26,7 +30,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         public ExecuteScriptV2Action(
             IConfiguration configuration,
             IHttpClient httpClient,
-            ILogger logger)
+            ILogger logger,
+            IBlipLogger? blipMonitoringLogger = null)
             : base(nameof(ExecuteScriptV2), OUTPUT_PARAMETERS_NAME)
         {
             HostSettings.CustomAttributeLoader = new LowerCaseMembersLoader();
@@ -34,6 +39,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             _configuration = configuration;
             _httpClient = httpClient;
             _logger = logger;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         /// <inheritdoc />
@@ -79,9 +85,52 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                     _configuration.ExecuteScriptV2Timeout, arguments);
 
                 await SetScriptResultAsync(context, settings, result, time, cancellationToken);
+
+                _blipMonitoringLogger.ActionExecution(new LogInput
+                {
+                    Title = "ExecuteScriptV2",
+                    EventType = "ActionExecution",
+                    Data = new JObject
+                    {
+                        ["flowId"] = context.Flow?.Id,
+                        ["function"] = settings.Function,
+                        ["outputVariable"] = settings.OutputVariable,
+                        ["captureExceptions"] = settings.CaptureExceptions,
+                        ["success"] = true,
+                    },
+                    FlowVersion = context.Flow?.Version,
+                    Channel = context.Input.Message?.From?.Domain,
+                    IdMessage = context.Input.Message?.Id,
+                    From = context.UserIdentity?.ToString(),
+                    To = context.OwnerIdentity?.ToString(),
+                    OriginalFrom = context.Input.Message?.From,
+                    OriginalTo = context.Input.Message?.To,
+                });
             }
             catch (Exception ex)
             {
+                _blipMonitoringLogger.ActionExecution(new LogInput
+                {
+                    Title = "ExecuteScriptV2",
+                    EventType = "ActionExecution",
+                    Data = new JObject
+                    {
+                        ["flowId"] = context.Flow?.Id,
+                        ["function"] = settings.Function,
+                        ["outputVariable"] = settings.OutputVariable,
+                        ["captureExceptions"] = settings.CaptureExceptions,
+                        ["success"] = false,
+                        ["error"] = ex.ToString(),
+                    },
+                    FlowVersion = context.Flow?.Version,
+                    Channel = context.Input.Message?.From?.Domain,
+                    IdMessage = context.Input.Message?.Id,
+                    From = context.UserIdentity?.ToString(),
+                    To = context.OwnerIdentity?.ToString(),
+                    OriginalFrom = context.Input.Message?.From,
+                    OriginalTo = context.Input.Message?.To,
+                });
+
                 if (!settings.CaptureExceptions)
                 {
                     throw;

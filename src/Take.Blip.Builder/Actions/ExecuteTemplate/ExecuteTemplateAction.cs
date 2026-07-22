@@ -7,6 +7,8 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Utils;
 using Takenet.Iris.Messaging;
 
@@ -16,38 +18,85 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
     {
         private readonly ILogger _logger;
         private readonly IHandlebars _handlebars;
+        private readonly IBlipLogger _blipMonitoringLogger;
         private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteTemplateSettings.OutputVariable).ToCamelCase() };
 
-        public ExecuteTemplateAction(IHandlebars handlebars, ILogger logger) 
+        public ExecuteTemplateAction(IHandlebars handlebars, ILogger logger, IBlipLogger? blipMonitoringLogger = null)
             : base(nameof(ExecuteTemplate), OUTPUT_PARAMETERS_NAME)
         {
             _logger = logger;
             _handlebars = handlebars;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
         {
-            string result;
             try
             {
-                var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-                var dict = CopyArgumentsToDictionary(arguments);
-                var template = _handlebars.Compile(settings.Template);
-                result = template(dict);
-            }
-            catch (Exception ex)
-            {
-                if (ex is HandlebarsParserException)
+                string result;
+                try
                 {
-                    _logger.Warning(ex, "Unexpected error while trying to parse Handlebars template");
+                    var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
+                    var dict = CopyArgumentsToDictionary(arguments);
+                    var template = _handlebars.Compile(settings.Template);
+                    result = template(dict);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is HandlebarsParserException)
+                    {
+                        _logger.Warning(ex, "Unexpected error while trying to parse Handlebars template");
+                        throw;
+                    }
+
+                    _logger.Warning(ex, "Unexpected error while execute action Execute Template");
                     throw;
                 }
 
-                _logger.Warning(ex, "Unexpected error while execute action Execute Template");
+                await SetScriptResultAsync(context, settings, result, cancellationToken);
+
+                _blipMonitoringLogger.ActionExecution(new LogInput
+                {
+                    Title = "ExecuteTemplate",
+                    EventType = "ActionExecution",
+                    Data = new JObject
+                    {
+                        ["flowId"] = context.Flow?.Id,
+                        ["outputVariable"] = settings.OutputVariable,
+                        ["success"] = true,
+                    },
+                    FlowVersion = context.Flow?.Version,
+                    Channel = context.Input.Message?.From?.Domain,
+                    IdMessage = context.Input.Message?.Id,
+                    From = context.UserIdentity?.ToString(),
+                    To = context.OwnerIdentity?.ToString(),
+                    OriginalFrom = context.Input.Message?.From,
+                    OriginalTo = context.Input.Message?.To,
+                });
+            }
+            catch (Exception ex)
+            {
+                _blipMonitoringLogger.ActionExecution(new LogInput
+                {
+                    Title = "ExecuteTemplate",
+                    EventType = "ActionExecution",
+                    Data = new JObject
+                    {
+                        ["flowId"] = context.Flow?.Id,
+                        ["outputVariable"] = settings.OutputVariable,
+                        ["success"] = false,
+                        ["error"] = ex.ToString(),
+                    },
+                    FlowVersion = context.Flow?.Version,
+                    Channel = context.Input.Message?.From?.Domain,
+                    IdMessage = context.Input.Message?.Id,
+                    From = context.UserIdentity?.ToString(),
+                    To = context.OwnerIdentity?.ToString(),
+                    OriginalFrom = context.Input.Message?.From,
+                    OriginalTo = context.Input.Message?.To,
+                });
                 throw;
             }
-
-            await SetScriptResultAsync(context, settings, result, cancellationToken);
         }
 
         private async Task<JObject> GetScriptArgumentsAsync(
