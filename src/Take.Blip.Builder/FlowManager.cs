@@ -448,7 +448,7 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    _blipMonitoringLogger.ActionExecution(
+                                    _blipMonitoringLogger.ConversationalFlow(
                                         new LogInput
                                         {
                                             Title = "MaxTransitionsReached",
