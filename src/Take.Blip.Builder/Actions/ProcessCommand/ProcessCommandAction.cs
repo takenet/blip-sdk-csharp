@@ -70,6 +70,8 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = command.Uri?.ToString(),
                         ["method"] = command.Method.ToString(),
                         ["outputVariable"] = variable,
@@ -93,6 +95,8 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

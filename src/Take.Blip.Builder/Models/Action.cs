@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Diagnostics;
 
@@ -14,7 +15,14 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The action identifier. It is used to identify the action in the conversation context and in the action trace. Required.
         /// </summary>
+        [JsonProperty("$id")]
         public string Id { get; set; }
+
+        /// <summary>
+        /// The action display title configured in the flow builder.
+        /// </summary>
+        [JsonProperty("$title")]
+        public string Title { get; set; }
 
         /// <summary>
         /// The action execution order, relative to the others in the same state. Optional.
@@ -63,7 +71,9 @@ namespace Take.Blip.Builder.Models
             {
                 Order = Order,
                 Type = Type,
-                ContinueOnError = ContinueOnError
+                ContinueOnError = ContinueOnError,
+                ActionId = Id,
+                ActionTitle = Title,
             };
         }
     }

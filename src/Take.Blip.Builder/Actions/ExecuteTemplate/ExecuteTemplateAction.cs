@@ -62,6 +62,8 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["outputVariable"] = settings.OutputVariable,
                         ["success"] = true,
                     },
@@ -83,6 +85,8 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["outputVariable"] = settings.OutputVariable,
                         ["success"] = false,
                         ["error"] = ex.ToString(),

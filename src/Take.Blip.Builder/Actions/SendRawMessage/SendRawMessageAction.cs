@@ -66,6 +66,8 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["mediaType"] = settings.MediaType?.ToString(),
                         ["success"] = true,
                     },
@@ -87,6 +89,8 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["mediaType"] = settings.MediaType?.ToString(),
                         ["success"] = false,
                         ["error"] = ex.ToString(),

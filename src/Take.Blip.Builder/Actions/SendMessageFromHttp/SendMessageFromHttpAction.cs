@@ -93,6 +93,8 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["responseStatus"] = responseStatus,
                         ["success"] = true,
@@ -115,6 +117,8 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["responseStatus"] = responseStatus,
                         ["success"] = false,

@@ -93,6 +93,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["function"] = settings.Function,
                         ["outputVariable"] = settings.OutputVariable,
                         ["captureExceptions"] = settings.CaptureExceptions,
@@ -116,6 +118,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["function"] = settings.Function,
                         ["outputVariable"] = settings.OutputVariable,
                         ["captureExceptions"] = settings.CaptureExceptions,

@@ -32,5 +32,17 @@ namespace Take.Blip.Builder.Diagnostics
         /// </summary>
         [DataMember(Name = "continueOnError")]
         public bool ContinueOnError { get; set; }
+
+        /// <summary>
+        /// Gets or sets the action identifier ($id from the flow JSON).
+        /// </summary>
+        [DataMember(Name = "actionId")]
+        public string ActionId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the action display title ($title from the flow JSON).
+        /// </summary>
+        [DataMember(Name = "actionTitle")]
+        public string ActionTitle { get; set; }
     }
 }

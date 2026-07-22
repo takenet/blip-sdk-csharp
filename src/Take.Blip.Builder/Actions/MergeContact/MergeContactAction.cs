@@ -51,6 +51,8 @@ namespace Take.Blip.Builder.Actions.MergeContact
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -71,6 +73,8 @@ namespace Take.Blip.Builder.Actions.MergeContact
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

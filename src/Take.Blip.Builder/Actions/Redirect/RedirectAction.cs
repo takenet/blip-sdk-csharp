@@ -54,6 +54,8 @@ namespace Take.Blip.Builder.Actions.Redirect
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["address"] = redirect.Address?.ToString(),
                         ["success"] = true,
                     },
@@ -75,6 +77,8 @@ namespace Take.Blip.Builder.Actions.Redirect
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

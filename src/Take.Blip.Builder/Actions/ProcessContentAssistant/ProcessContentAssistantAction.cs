@@ -81,6 +81,8 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["outputVariable"] = settings.OutputVariable,
                         ["v2"] = settings.V2,
                         ["success"] = true,
@@ -103,6 +105,8 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["outputVariable"] = settings.OutputVariable,
                         ["v2"] = settings.V2,
                         ["success"] = false,

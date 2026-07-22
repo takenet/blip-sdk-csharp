@@ -30,6 +30,8 @@ namespace Take.Blip.Builder.Actions.DeleteVariable
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["variable"] = settings.Variable,
                         ["success"] = true,
                     },
@@ -51,6 +53,8 @@ namespace Take.Blip.Builder.Actions.DeleteVariable
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["variable"] = settings.Variable,
                         ["success"] = false,
                         ["error"] = ex.ToString(),

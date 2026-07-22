@@ -92,6 +92,8 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["customerIdentity"] = ticket.CustomerIdentity?.ToString(),
                         ["outputVariable"] = settings.Variable,
                         ["ticketId"] = createdTicket?.Id,
@@ -115,6 +117,8 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["customerIdentity"] = settings.CustomerIdentity?.ToString(),
                         ["outputVariable"] = settings.Variable,
                         ["success"] = false,

@@ -43,6 +43,8 @@ namespace Take.Blip.Builder.Actions.SendCommand
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = command.Uri?.ToString(),
                         ["method"] = command.Method.ToString(),
                         ["success"] = true,
@@ -65,6 +67,8 @@ namespace Take.Blip.Builder.Actions.SendCommand
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

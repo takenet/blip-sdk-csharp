@@ -95,6 +95,8 @@ namespace Take.Blip.Builder.Actions.SendMessage
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["contentType"] = (string)settings[Message.TYPE_KEY],
                         ["success"] = true,
                     },
@@ -116,6 +118,8 @@ namespace Take.Blip.Builder.Actions.SendMessage
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["contentType"] = (string)settings[Message.TYPE_KEY],
                         ["success"] = false,
                         ["error"] = ex.ToString(),

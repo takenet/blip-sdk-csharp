@@ -970,12 +970,9 @@ namespace Take.Blip.Builder
                 var (actionTrace, actionStopwatch) =
                     actionTraces != null
                         ? (stateAction.ToTrace(), Stopwatch.StartNew())
-                        : (null, null);
+                        : (stateAction.ToTrace(), (Stopwatch)null);
 
-                if (actionTrace != null)
-                {
-                    context.SetCurrentActionTrace(actionTrace);
-                }
+                context.SetCurrentActionTrace(actionTrace);
 
                 // Configure the action timeout, that can be defined in action or flow level
                 var executionTimeoutInSeconds =
@@ -1940,10 +1937,9 @@ namespace Take.Blip.Builder
 
             // Trace infra
             var (actionTrace, actionStopwatch) =
-                actionTraces != null ? (stateAction.ToTrace(), Stopwatch.StartNew()) : (null, null);
+                actionTraces != null ? (stateAction.ToTrace(), Stopwatch.StartNew()) : (stateAction.ToTrace(), (Stopwatch)null);
 
-            if (actionTrace != null)
-                context.SetCurrentActionTrace(actionTrace);
+            context.SetCurrentActionTrace(actionTrace);
 
             // Configure the action timeout, that can be defined in action or flow level
             var executionTimeoutInSeconds =

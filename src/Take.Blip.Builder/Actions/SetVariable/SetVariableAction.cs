@@ -36,6 +36,8 @@ namespace Take.Blip.Builder.Actions.SetVariable
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["variable"] = settings.Variable,
                         ["expiration"] = settings.Expiration,
                         ["success"] = true,
@@ -58,6 +60,8 @@ namespace Take.Blip.Builder.Actions.SetVariable
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["variable"] = settings.Variable,
                         ["expiration"] = settings.Expiration,
                         ["success"] = false,

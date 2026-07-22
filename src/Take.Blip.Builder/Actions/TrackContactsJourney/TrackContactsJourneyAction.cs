@@ -41,6 +41,8 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["stateId"] = settings.StateId,
                         ["stateName"] = settings.StateName,
                         ["previousStateId"] = settings.PreviousStateId,
@@ -64,6 +66,8 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["stateId"] = settings.StateId,
                         ["stateName"] = settings.StateName,
                         ["previousStateId"] = settings.PreviousStateId,

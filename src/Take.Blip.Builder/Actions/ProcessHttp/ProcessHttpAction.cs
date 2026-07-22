@@ -138,6 +138,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["method"] = settings.Method,
                         ["responseStatus"] = responseStatus,
@@ -175,6 +177,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["method"] = settings.Method,
                         ["responseStatus"] = responseStatus,
@@ -205,6 +209,8 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["method"] = settings.Method,
                         ["responseStatus"] = responseStatus,

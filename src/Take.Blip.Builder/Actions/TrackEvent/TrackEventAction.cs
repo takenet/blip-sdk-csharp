@@ -45,6 +45,8 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["category"] = settings.Category,
                         ["action"] = settings.Action,
                         ["label"] = settings.Label,
@@ -68,6 +70,8 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
+                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["category"] = settings.Category,
                         ["action"] = settings.Action,
                         ["label"] = settings.Label,
