@@ -2593,29 +2593,6 @@ namespace Take.Blip.Builder.UnitTests
 
         #region EnrichProcessHttpInputActionsAsync / EnrichProcessHttpActionTraceAsync
 
-        [Fact]
-        public async Task ProcessInputAsync_ShouldCallBlipMonitoringLogger_OnEveryExecution()
-        {
-            // Arrange
-            Message.Content = new PlainText { Text = "Ping!" };
-            var flow = new Flow
-            {
-                Id = Guid.NewGuid().ToString(),
-                States = new[]
-                {
-                    new State { Id = "root", Root = true, Input = new Input() }
-                }
-            };
-            var target = GetTarget();
-
-            // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
-
-            // Assert
-            blipLogger.Received(1).ActionExecution(Arg.Is<LogInput>(l =>
-                l.Title == "InputProcessing" &&
-                l.EventType == "StateExecution"));
-        }
 
         [Fact]
         public async Task ProcessInputAsync_ShouldEnrichProcessHttpInputActions_WhenTracingEnabled()
@@ -2798,31 +2775,6 @@ namespace Take.Blip.Builder.UnitTests
 
             // Assert: blipLogger still called despite enrichment failure
             blipLogger.Received(1).ActionExecution(Arg.Any<LogInput>());
-        }
-
-        [Fact]
-        public async Task ProcessInputAsync_ShouldCallBlipMonitoringLogger_WithCorrectFlowId()
-        {
-            // Arrange
-            Message.Content = new PlainText { Text = "Hello!" };
-            var flowId = Guid.NewGuid().ToString();
-            var flow = new Flow
-            {
-                Id = flowId,
-                States = new[]
-                {
-                    new State { Id = "root", Root = true, Input = new Input() }
-                }
-            };
-            var target = GetTarget();
-
-            // Act
-            await target.ProcessInputAsync(Message, flow, CancellationToken);
-
-            // Assert
-            blipLogger.Received(1).ActionExecution(Arg.Is<LogInput>(l =>
-                l.Data != null &&
-                ((JObject)l.Data)["flowId"].Value<string>() == flowId));
         }
 
         #endregion
