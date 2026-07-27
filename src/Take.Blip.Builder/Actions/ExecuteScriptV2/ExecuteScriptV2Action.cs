@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
+using Lime.Protocol.Serialization;
 using Microsoft.ClearScript;
 using Microsoft.ClearScript.V8;
 using Serilog;
 using Take.Blip.Builder.Actions.ExecuteScriptV2.Functions;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.ExecuteScriptV2
 {
@@ -19,6 +21,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         private readonly IConfiguration _configuration;
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly ISender _sender;
+        private readonly IEnvelopeSerializer _envelopeSerializer;
 
         private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteScriptV2Settings.OutputVariable).ToCamelCase() };
 
@@ -26,7 +30,9 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         public ExecuteScriptV2Action(
             IConfiguration configuration,
             IHttpClient httpClient,
-            ILogger logger)
+            ILogger logger,
+            ISender sender,
+            IEnvelopeSerializer envelopeSerializer)
             : base(nameof(ExecuteScriptV2), OUTPUT_PARAMETERS_NAME)
         {
             HostSettings.CustomAttributeLoader = new LowerCaseMembersLoader();
@@ -34,6 +40,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             _configuration = configuration;
             _httpClient = httpClient;
             _logger = logger;
+            _sender = sender;
+            _envelopeSerializer = envelopeSerializer;
         }
 
         /// <inheritdoc />
@@ -73,7 +81,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 var time = new Time(_logger, context, settings, linkedToken.Token);
 
                 engine.RegisterFunctions(settings, _httpClient, context, time, _logger,
-                    linkedToken.Token);
+                    _sender, _envelopeSerializer, _configuration, linkedToken.Token);
 
                 var result = engine.ExecuteInvoke(settings.Source, settings.Function,
                     _configuration.ExecuteScriptV2Timeout, arguments);

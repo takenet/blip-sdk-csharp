@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+using Lime.Protocol.Serialization;
 using NSubstitute;
 using Serilog;
 using Take.Blip.Builder.Actions.ExecuteScript;
@@ -9,6 +10,7 @@ using Take.Blip.Builder.Actions.ExecuteScriptV2;
 using Take.Blip.Builder.Benchmark.Context;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
+using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Benchmark.Actions
 {
@@ -41,7 +43,8 @@ namespace Take.Blip.Builder.Benchmark.Actions
             configuration.ExecuteScriptMaxStatements = 0;
 
             _v2Action = new ExecuteScriptV2Action(configuration, Substitute.For<IHttpClient>(),
-                Substitute.For<ILogger>());
+                Substitute.For<ILogger>(), Substitute.For<ISender>(),
+                Substitute.For<IEnvelopeSerializer>());
 
             _v1Action = new ExecuteScriptAction(configuration, Substitute.For<ILogger>());
         }
