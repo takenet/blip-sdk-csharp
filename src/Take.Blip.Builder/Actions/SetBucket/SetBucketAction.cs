@@ -38,6 +38,7 @@ namespace Take.Blip.Builder.Actions.SetBucket
                 {
                     Title = "SetBucket",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -62,6 +63,7 @@ namespace Take.Blip.Builder.Actions.SetBucket
                 {
                     Title = "SetBucket",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,

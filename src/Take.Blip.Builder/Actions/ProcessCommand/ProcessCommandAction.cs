@@ -67,6 +67,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                 {
                     Title = "ProcessCommand",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -92,6 +93,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                 {
                     Title = "ProcessCommand",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,

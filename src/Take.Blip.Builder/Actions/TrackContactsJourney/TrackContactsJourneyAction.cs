@@ -38,6 +38,7 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                 {
                     Title = "TrackContactsJourney",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -63,6 +64,7 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                 {
                     Title = "TrackContactsJourney",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,

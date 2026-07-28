@@ -92,6 +92,7 @@ namespace Take.Blip.Builder.Actions.SendMessage
                 {
                     Title = "SendMessage",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -115,6 +116,7 @@ namespace Take.Blip.Builder.Actions.SendMessage
                 {
                     Title = "SendMessage",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,

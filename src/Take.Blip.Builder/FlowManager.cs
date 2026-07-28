@@ -240,6 +240,7 @@ namespace Take.Blip.Builder
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
+                        context.SetCurrentStateId(stateId);
 
                         state =
                             flow.States.FirstOrDefault(s => s.Id == stateId)
@@ -427,6 +428,7 @@ namespace Take.Blip.Builder
                                         state.Id,
                                         linkedCts.Token
                                     );
+                                    context.SetCurrentStateId(state.Id);
                                 }
                                 else
                                 {
@@ -434,6 +436,7 @@ namespace Take.Blip.Builder
                                         context,
                                         linkedCts.Token
                                     );
+                                    context.SetCurrentStateId(null);
                                 }
 
                                 // Process the next state input actions
@@ -453,6 +456,7 @@ namespace Take.Blip.Builder
                                         {
                                             Title = "MaxTransitionsReached",
                                             EventType = "StateExecution",
+                                            StateId = state?.Id,
                                             Data = new JObject
                                             {
                                                 ["flowId"] = flow.Id,
@@ -779,6 +783,7 @@ namespace Take.Blip.Builder
                 {
                     Title = "SubflowEntry",
                     EventType = "StateExecution",
+                    StateId = state.Id,
                     Data = new JObject
                     {
                         ["flowId"] = subflow.Id,
@@ -874,6 +879,7 @@ namespace Take.Blip.Builder
                 {
                     Title = "SubflowReturn",
                     EventType = "StateExecution",
+                    StateId = state?.Id,
                     Data = new JObject
                     {
                         ["flowId"] = parentFlow.Id,
@@ -1354,6 +1360,7 @@ namespace Take.Blip.Builder
                             {
                                 Title = "OutputProcessing",
                                 EventType = "StateExecution",
+                                StateId = currentStateId,
                                 Data = new JObject
                                 {
                                     ["flowId"] = flow.Id,
@@ -1401,6 +1408,7 @@ namespace Take.Blip.Builder
                 {
                     Title = "OutputProcessing",
                     EventType = "StateExecution",
+                    StateId = currentStateId,
                     Data = new JObject
                     {
                         ["flowId"] = flow.Id,
@@ -1474,6 +1482,7 @@ namespace Take.Blip.Builder
                     {
                         Title = "InputValidation",
                         EventType = "StateExecution",
+                        StateId = state.Id,
                         Data = new JObject
                         {
                             ["flowId"] = context.Flow?.Id,
@@ -1766,6 +1775,7 @@ namespace Take.Blip.Builder
                             {
                                 Title = "CommandInput",
                                 EventType = "StateExecution",
+                                StateId = stateId,
                                 Data = new JObject
                                 {
                                     ["flowId"] = flow.Id,
@@ -1816,6 +1826,7 @@ namespace Take.Blip.Builder
                     {
                         Title = "CommandInput",
                         EventType = "StateExecution",
+                        StateId = stateId,
                         Data = new JObject
                         {
                             ["flowId"] = flow.Id,

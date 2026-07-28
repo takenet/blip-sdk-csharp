@@ -59,6 +59,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                 {
                     Title = "ExecuteTemplate",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -82,6 +83,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                 {
                     Title = "ExecuteTemplate",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,

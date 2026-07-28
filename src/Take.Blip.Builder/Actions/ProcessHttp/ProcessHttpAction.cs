@@ -135,6 +135,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 {
                     Title = ACTION_PROCESS_HTTP,
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -174,6 +175,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 {
                     Title = ACTION_PROCESS_HTTP,
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -206,6 +208,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 {
                     Title = ACTION_PROCESS_HTTP,
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,

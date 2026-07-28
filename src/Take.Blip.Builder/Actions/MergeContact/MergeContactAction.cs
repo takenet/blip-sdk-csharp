@@ -48,6 +48,7 @@ namespace Take.Blip.Builder.Actions.MergeContact
                 {
                     Title = "MergeContact",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -70,6 +71,7 @@ namespace Take.Blip.Builder.Actions.MergeContact
                 {
                     Title = "MergeContact",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,

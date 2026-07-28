@@ -12,6 +12,7 @@
         public string? Channel { get; set; }
         public string? Operation { get; set; }
         public string? EventType { get; set; }
+        public string? StateId { get; set; }
         public object? Data { get; set; }
     }
 }

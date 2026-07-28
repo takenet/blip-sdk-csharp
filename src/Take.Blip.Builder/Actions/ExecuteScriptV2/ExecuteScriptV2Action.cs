@@ -90,6 +90,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 {
                     Title = "ExecuteScriptV2",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -115,6 +116,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 {
                     Title = "ExecuteScriptV2",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,

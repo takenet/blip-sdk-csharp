@@ -33,6 +33,7 @@ namespace Take.Blip.Builder.Actions.SetVariable
                 {
                     Title = "SetVariable",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
@@ -57,6 +58,7 @@ namespace Take.Blip.Builder.Actions.SetVariable
                 {
                     Title = "SetVariable",
                     EventType = "ActionExecution",
+                    StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
                         ["flowId"] = context.Flow?.Id,
