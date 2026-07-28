@@ -31,54 +31,25 @@ namespace Take.Blip.Builder.Actions.SetVariable
             {
                 await context.SetVariableAsync(settings.Variable, settings.Value, cancellationToken, expiration);
 
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ActionExecution(context.ToActionLog("SetVariable", new JObject
                 {
-                    Title = "SetVariable",
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["variable"] = settings.Variable,
-                        ["expiration"] = settings.Expiration,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = true,
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["variable"] = settings.Variable,
+                    ["expiration"] = settings.Expiration,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }));
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("SetVariable", new JObject
                 {
-                    Title = "SetVariable",
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["variable"] = settings.Variable,
-                        ["expiration"] = settings.Expiration,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = false,
-                        ["error"] = ex.ToString(),
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["variable"] = settings.Variable,
+                    ["expiration"] = settings.Expiration,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }), ex);
                 throw;
             }
         }

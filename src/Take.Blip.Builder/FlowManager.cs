@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
+using SmartFormat.Core.Output;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Actions;
@@ -297,25 +298,17 @@ namespace Take.Blip.Builder
                                 linkedCts.Token.ThrowIfCancellationRequested();
 
                                 _blipMonitoringLogger.ConversationalFlow(
-                                    new LogInput
-                                    {
-                                        Title = "StateProcessingStart",
-                                        EventType = "StateExecution",
-                                        StateId = blockState?.Id,
-                                        Data = new JObject
+                                    CreateStateExecutionLog(
+                                        "StateProcessingStart",
+                                        blockState?.Id,
+                                        context,
+                                        new JObject
                                         {
                                             ["input"] = message.Content.ToString(),
                                             ["stateName"] = blockStateName,
                                             ["flowId"] = flow.Id,
-                                        },
-                                        FlowVersion = flow.Version,
-                                        Channel = message.From?.ToNode().Domain,
-                                        IdMessage = message.Id,
-                                        From = userIdentity,
-                                        To = ownerIdentity,
-                                        OriginalFrom = message.From,
-                                        OriginalTo = message.To,
-                                    }
+                                        }
+                                     )
                                 );
 
                                 if (stateWaitForInput)
@@ -480,27 +473,19 @@ namespace Take.Blip.Builder
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
                                     _blipMonitoringLogger.ConversationalFlow(
-                                        new LogInput
-                                        {
-                                            Title = "MaxTransitionsReached",
-                                            EventType = "StateExecution",
-                                            StateId = state?.Id,
-                                            Data = new JObject
+                                        CreateStateExecutionLog(
+                                            "MaxTransitionsReached",
+                                            state?.Id,
+                                            context,
+                                            new JObject
                                             {
                                                 ["currentStateId"] = state?.Id,
                                                 ["transitionCount"] = transitions,
                                                 ["maxTransitions"] =
                                                     _configuration.MaxTransitionsByInput,
                                                 ["success"] = false,
-                                            },
-                                            FlowVersion = flow.Version,
-                                            Channel = message.From?.ToNode().Domain,
-                                            IdMessage = message.Id,
-                                            From = userIdentity,
-                                            To = ownerIdentity,
-                                            OriginalFrom = message.From,
-                                            OriginalTo = message.To,
-                                        }
+                                            }
+                                        )
                                     );
                                     throw new FlowConstructionException(
                                         $"Max state transitions of {_configuration.MaxTransitionsByInput} was reached"
@@ -558,27 +543,19 @@ namespace Take.Blip.Builder
 
                                 blockStopwatch.Stop();
                                 _blipMonitoringLogger.ConversationalFlow(
-                                    new LogInput
-                                    {
-                                        Title = "StateProcessingEnd",
-                                        EventType = "StateExecution",
-                                        StateId = blockState?.Id,
-                                        Data = new JObject
+                                    CreateStateExecutionLog(
+                                        "StateProcessingEnd",
+                                        blockState?.Id,
+                                        context,
+                                        new JObject
                                         {
                                             ["stateId"] = blockState?.Id,
                                             ["stateName"] = blockStateName,
                                             ["flowId"] = flow.Id,
                                             ["elapsedMilliseconds"] = blockStopwatch.ElapsedMilliseconds,
                                             ["success"] = blockProcessingSucceeded,
-                                        },
-                                        FlowVersion = flow.Version,
-                                        Channel = message.From?.ToNode().Domain,
-                                        IdMessage = message.Id,
-                                        From = userIdentity,
-                                        To = ownerIdentity,
-                                        OriginalFrom = message.From,
-                                        OriginalTo = message.To,
-                                    }
+                                        }
+                                    )
                                 );
                             }
                         } while (!stateWaitForInput);
@@ -654,12 +631,14 @@ namespace Take.Blip.Builder
                     }
                     
                     _blipMonitoringLogger.ActionExecution(
-                           new LogInput
-                           {
-                               Data = new JObject
+                           CreateStateExecutionLog(
+                               "InputProcessing",
+                               state?.Id,
+                               context,
+                               new JObject
                                {
-                                   ["flowId"] = flow.Id,
                                    ["stateId"] = state?.Id,
+                                   ["flowId"] = flow.Id,
                                    ["input"] = message.Content.ToString(),
                                    ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
                                    ["error"] = inputTrace?.Error,
@@ -667,17 +646,8 @@ namespace Take.Blip.Builder
                                        inputTrace != null ? JToken.FromObject(inputTrace) : null,
                                    ["traceSettings"] =
                                        traceSettings != null ? JToken.FromObject(traceSettings) : null,
-                               },
-                               FlowVersion = flow.Version,
-                               Channel = message.From?.ToNode().Domain,
-                               IdMessage = message.Id,
-                               From = userIdentity,
-                               To = ownerIdentity,
-                               EventType = "StateExecution",
-                               Title = "InputProcessing",
-                               OriginalFrom = message.From,
-                               OriginalTo = message.To
-                           }
+                               }
+                           )
                        );
                 }
 
@@ -859,25 +829,17 @@ namespace Take.Blip.Builder
             );
 
             _blipMonitoringLogger.ConversationalFlow(
-                new LogInput
-                {
-                    Title = "SubflowEntry",
-                    EventType = "StateExecution",
-                    StateId = state.Id,
-                    Data = new JObject
+                CreateStateExecutionLog(
+                    "SubflowEntry",
+                    state.Id,
+                    context,
+                    new JObject
                     {
                         ["parentFlowId"] = parentFlow.Id,
                         ["currentStateId"] = state.Id,
                         ["success"] = true,
-                    },
-                    FlowVersion = subflow.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = userIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                }
+                    }
+                )
             );
 
             return (subflow, newState, newStateTrace, newStateStopwatch);
@@ -954,25 +916,17 @@ namespace Take.Blip.Builder
             }
 
             _blipMonitoringLogger.ConversationalFlow(
-                new LogInput
-                {
-                    Title = "SubflowReturn",
-                    EventType = "StateExecution",
-                    StateId = state?.Id,
-                    Data = new JObject
+                CreateStateExecutionLog(
+                    "SubflowReturn",
+                    state?.Id,
+                    context,
+                    new JObject
                     {
                         ["subflowId"] = flow.Id,
                         ["nextStateId"] = state?.Id,
                         ["success"] = true,
-                    },
-                    FlowVersion = parentFlow.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = userIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                }
+                    }
+                )
             );
 
             return (parentFlow, state, stateTrace, stateStopwatch);
@@ -1434,12 +1388,11 @@ namespace Take.Blip.Builder
                         }
 
                         _blipMonitoringLogger.ConversationalFlow(
-                            new LogInput
-                            {
-                                Title = "OutputProcessing",
-                                EventType = "StateExecution",
-                                StateId = currentStateId,
-                                Data = new JObject
+                            CreateStateExecutionLog(
+                                "OutputProcessing",
+                                currentStateId,
+                                context,
+                                new JObject
                                 {
                                     ["currentStateId"] = currentStateId,
                                     ["outputStateId"] = output.StateId,
@@ -1447,15 +1400,8 @@ namespace Take.Blip.Builder
                                     ["isDefaultOutput"] = output.Conditions == null,
                                     ["success"] = false,
                                     ["error"] = ex.ToString(),
-                                },
-                                FlowVersion = flow.Version,
-                                Channel = context.Input.Message?.From?.Domain,
-                                IdMessage = context.Input.Message?.Id,
-                                From = context.UserIdentity?.ToString(),
-                                To = context.OwnerIdentity?.ToString(),
-                                OriginalFrom = context.Input.Message?.From,
-                                OriginalTo = context.Input.Message?.To,
-                            }
+                                }
+                            )
                         );
 
                         throw new OutputProcessingException(
@@ -1481,12 +1427,11 @@ namespace Take.Blip.Builder
             }
 
             _blipMonitoringLogger.ConversationalFlow(
-                new LogInput
-                {
-                    Title = "OutputProcessing",
-                    EventType = "StateExecution",
-                    StateId = currentStateId,
-                    Data = new JObject
+                CreateStateExecutionLog(
+                    "OutputProcessing",
+                    currentStateId,
+                    context,
+                    new JObject
                     {
                         ["currentStateId"] = currentStateId,
                         ["nextStateId"] = state?.Id,
@@ -1494,15 +1439,8 @@ namespace Take.Blip.Builder
                         ["matchedOutputOrder"] = matchedOutputOrder,
                         ["isDefaultOutput"] = matchedIsDefaultOutput,
                         ["success"] = true,
-                    },
-                    FlowVersion = flow.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                }
+                    }
+                )
             );
 
             return state;
@@ -1554,26 +1492,18 @@ namespace Take.Blip.Builder
                 }
 
                 _blipMonitoringLogger.ConversationalFlow(
-                    new LogInput
-                    {
-                        Title = "InputValidation",
-                        EventType = "StateExecution",
-                        StateId = state.Id,
-                        Data = new JObject
+                    CreateStateExecutionLog(
+                        "InputValidation",
+                        state.Id,
+                        context,
+                        new JObject
                         {
                             ["stateId"] = state.Id,
                             ["validationRule"] = state.Input.Validation.Rule.ToString(),
                             ["isValid"] = false,
                             ["success"] = true,
-                        },
-                        FlowVersion = context.Flow?.Version,
-                        Channel = message.From?.Domain,
-                        IdMessage = message.Id,
-                        From = context.UserIdentity?.ToString(),
-                        To = context.OwnerIdentity?.ToString(),
-                        OriginalFrom = message.From,
-                        OriginalTo = message.To,
-                    }
+                        }
+                    )
                 );
 
                 return false;
@@ -1581,6 +1511,14 @@ namespace Take.Blip.Builder
 
             return true;
         }
+
+        private LogInput CreateStateExecutionLog(
+            string title,
+            string stateId,
+            IContext context,
+            JObject data
+        ) =>
+            context.ToStateLog(title, stateId, data);
 
         private void AddStateIdToSettings(
             string actionType,
@@ -1846,25 +1784,17 @@ namespace Take.Blip.Builder
                         );
 
                         _blipMonitoringLogger.ConversationalFlow(
-                            new LogInput
-                            {
-                                Title = "CommandInput",
-                                EventType = "StateExecution",
-                                StateId = stateId,
-                                Data = new JObject
+                            CreateStateExecutionLog(
+                                "CommandInput",
+                                stateId,
+                                context,
+                                new JObject
                                 {
                                     ["stateId"] = stateId,
                                     ["actionId"] = actionId,
                                     ["success"] = true,
-                                },
-                                FlowVersion = flow.Version,
-                                Channel = message.From?.ToNode().Domain,
-                                IdMessage = message.Id,
-                                From = userIdentity?.ToString(),
-                                To = ownerIdentity?.ToString(),
-                                OriginalFrom = message.From,
-                                OriginalTo = message.To,
-                            }
+                                }
+                            )
                         );
 
                         return outputVariables;
@@ -1896,26 +1826,21 @@ namespace Take.Blip.Builder
                 builderException.UserId = userIdentity;
 
                 _blipMonitoringLogger.ConversationalFlow(
-                    new LogInput
-                    {
-                        Title = "CommandInput",
-                        EventType = "StateExecution",
-                        StateId = stateId,
-                        Data = new JObject
+                    BlipLogExtensions.ToStateLog(
+                        "CommandInput",
+                        stateId,
+                        flow.Version,
+                        message,
+                        userIdentity,
+                        ownerIdentity,
+                        new JObject
                         {
                             ["stateId"] = stateId,
                             ["actionId"] = actionId,
                             ["success"] = false,
                             ["error"] = ex.ToString(),
-                        },
-                        FlowVersion = flow.Version,
-                        Channel = message.From?.ToNode().Domain,
-                        IdMessage = message.Id,
-                        From = userIdentity?.ToString(),
-                        To = ownerIdentity?.ToString(),
-                        OriginalFrom = message.From,
-                        OriginalTo = message.To,
-                    }
+                        }
+                    )
                 );
 
                 throw builderException;

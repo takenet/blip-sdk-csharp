@@ -1,0 +1,71 @@
+using Lime.Protocol;
+using Lime.Messaging.Contents;
+using Newtonsoft.Json.Linq;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
+
+namespace Take.Blip.Builder.Actions
+{
+    public static class BlipLogExtensions
+    {
+        public static LogInput ToActionLog(this IContext context, string title, JObject data)
+        {
+            return new LogInput
+            {
+                Title = title,
+                EventType = "ActionExecution",
+                StateId = context.GetCurrentStateId(),
+                FlowVersion = context.Flow?.Version,
+                Channel = context.Input.Message?.From?.Domain,
+                IdMessage = context.Input.Message?.Id,
+                From = context.UserIdentity?.ToString(),
+                To = context.OwnerIdentity?.ToString(),
+                OriginalFrom = context.Input.Message?.From,
+                OriginalTo = context.Input.Message?.To,
+                Data = data,
+            };
+        }
+
+        public static LogInput ToStateLog(this IContext context, string title, string stateId, JObject data)
+        {
+            return new LogInput
+            {
+                Title = title,
+                EventType = "StateExecution",
+                StateId = stateId,
+                FlowVersion = context?.Flow?.Version,
+                Channel = context?.Input?.Message?.From?.Domain,
+                IdMessage = context?.Input?.Message?.Id,
+                From = context?.UserIdentity?.ToString(),
+                To = context?.OwnerIdentity?.ToString(),
+                OriginalFrom = context?.Input?.Message?.From,
+                OriginalTo = context?.Input?.Message?.To,
+                Data = data,
+            };
+        }
+
+        public static LogInput ToStateLog(
+            string title,
+            string stateId,
+            int? flowVersion,
+            Message message,
+            Identity userIdentity,
+            Identity ownerIdentity,
+            JObject data)
+        {
+            return new LogInput
+            {
+                Title = title,
+                EventType = "StateExecution",
+                StateId = stateId,
+                FlowVersion = flowVersion,
+                Channel = message?.From?.ToNode().Domain,
+                IdMessage = message?.Id,
+                From = userIdentity?.ToString(),
+                To = ownerIdentity?.ToString(),
+                OriginalFrom = message?.From,
+                OriginalTo = message?.To,
+                Data = data,
+            };
+        }
+    }
+}

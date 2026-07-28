@@ -133,29 +133,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     PushStatusCodeWarning(context, responseStatus);
                 }
 
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ActionExecution(context.ToActionLog(ACTION_PROCESS_HTTP, new JObject
                 {
-                    Title = ACTION_PROCESS_HTTP,
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["uri"] = settings.Uri?.ToString(),
-                        ["method"] = settings.Method,
-                        ["responseStatus"] = responseStatus,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = isSuccessStatusCode,
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["uri"] = settings.Uri?.ToString(),
+                    ["method"] = settings.Method,
+                    ["responseStatus"] = responseStatus,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }));
             }
             catch (HttpRequestException ex)
             {
@@ -173,30 +159,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                         responseBody, cancellationToken);
                 }
 
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ErrorEvents(context.ToActionLog(ACTION_PROCESS_HTTP, new JObject
                 {
-                    Title = ACTION_PROCESS_HTTP,
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["uri"] = settings.Uri?.ToString(),
-                        ["method"] = settings.Method,
-                        ["responseStatus"] = responseStatus,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = false,
-                        ["error"] = ex.ToString(),
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["uri"] = settings.Uri?.ToString(),
+                    ["method"] = settings.Method,
+                    ["responseStatus"] = responseStatus,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }), ex);
             }
             catch (Exception ex)
             {
@@ -206,30 +177,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     PushTimeoutWarning(context);
                 }
 
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ErrorEvents(context.ToActionLog(ACTION_PROCESS_HTTP, new JObject
                 {
-                    Title = ACTION_PROCESS_HTTP,
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["uri"] = settings.Uri?.ToString(),
-                        ["method"] = settings.Method,
-                        ["responseStatus"] = responseStatus,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = false,
-                        ["error"] = ex.ToString(),
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["uri"] = settings.Uri?.ToString(),
+                    ["method"] = settings.Method,
+                    ["responseStatus"] = responseStatus,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }), ex);
             }
             finally
             {

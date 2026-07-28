@@ -65,53 +65,24 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                     await context.SetVariableAsync(variable, resultCommandJson, cancellationToken);
                 }
 
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ActionExecution(context.ToActionLog("ProcessCommand", new JObject
                 {
-                    Title = "ProcessCommand",
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["uri"] = command.Uri?.ToString(),
-                        ["method"] = command.Method.ToString(),
-                        ["outputVariable"] = variable,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = true,
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["uri"] = command.Uri?.ToString(),
+                    ["method"] = command.Method.ToString(),
+                    ["outputVariable"] = variable,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }));
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("ProcessCommand", new JObject
                 {
-                    Title = "ProcessCommand",
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = false,
-                        ["error"] = ex.ToString(),
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }), ex);
                 throw;
             }
         }

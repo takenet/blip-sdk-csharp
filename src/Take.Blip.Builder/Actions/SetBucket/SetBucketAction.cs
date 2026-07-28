@@ -36,54 +36,25 @@ namespace Take.Blip.Builder.Actions.SetBucket
                     expiration,
                     cancellationToken);
 
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ActionExecution(context.ToActionLog("SetBucket", new JObject
                 {
-                    Title = "SetBucket",
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["bucketId"] = settings.Id,
-                        ["expiration"] = settings.Expiration,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = true,
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["bucketId"] = settings.Id,
+                    ["expiration"] = settings.Expiration,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }));
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ActionExecution(new LogInput
+                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("SetBucket", new JObject
                 {
-                    Title = "SetBucket",
-                    EventType = "ActionExecution",
-                    StateId = context.GetCurrentStateId(),
-                    Data = new JObject
-                    {
-                        ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                        ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
-                        ["bucketId"] = settings.Id,
-                        ["expiration"] = settings.Expiration,
-                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                        ["success"] = false,
-                        ["error"] = ex.ToString(),
-                    },
-                    FlowVersion = context.Flow?.Version,
-                    Channel = context.Input.Message?.From?.Domain,
-                    IdMessage = context.Input.Message?.Id,
-                    From = context.UserIdentity?.ToString(),
-                    To = context.OwnerIdentity?.ToString(),
-                    OriginalFrom = context.Input.Message?.From,
-                    OriginalTo = context.Input.Message?.To,
-                });
+                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
+                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["bucketId"] = settings.Id,
+                    ["expiration"] = settings.Expiration,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }), ex);
                 throw;
             }
         }
