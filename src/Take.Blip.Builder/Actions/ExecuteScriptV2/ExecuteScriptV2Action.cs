@@ -46,6 +46,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         public override async Task ExecuteAsync(IContext context, ExecuteScriptV2Settings settings,
             CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
@@ -93,12 +94,12 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["function"] = settings.Function,
                         ["outputVariable"] = settings.OutputVariable,
                         ["captureExceptions"] = settings.CaptureExceptions,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -119,12 +120,12 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["function"] = settings.Function,
                         ["outputVariable"] = settings.OutputVariable,
                         ["captureExceptions"] = settings.CaptureExceptions,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

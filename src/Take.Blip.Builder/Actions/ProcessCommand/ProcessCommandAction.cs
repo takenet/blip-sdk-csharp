@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
@@ -38,6 +39,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
             if (settings == null)
@@ -70,12 +72,12 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = command.Uri?.ToString(),
                         ["method"] = command.Method.ToString(),
                         ["outputVariable"] = variable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -96,9 +98,9 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

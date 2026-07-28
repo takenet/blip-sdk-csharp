@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
@@ -38,6 +39,7 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         /// <returns></returns>
         public override async Task ExecuteAsync(IContext context, ProcessContentAssistantSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 var tags = JsonSerializer.Serialize<string[]>(settings?.Tags?.Split(",") ?? new string[0]);
@@ -81,11 +83,11 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["outputVariable"] = settings.OutputVariable,
                         ["v2"] = settings.V2,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -106,11 +108,11 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["outputVariable"] = settings.OutputVariable,
                         ["v2"] = settings.V2,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

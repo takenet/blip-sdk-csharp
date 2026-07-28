@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
@@ -26,6 +27,7 @@ namespace Take.Blip.Builder.Actions.SendCommand
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendCommandAction)}' action");
 
@@ -43,11 +45,11 @@ namespace Take.Blip.Builder.Actions.SendCommand
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = command.Uri?.ToString(),
                         ["method"] = command.Method.ToString(),
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -68,9 +70,9 @@ namespace Take.Blip.Builder.Actions.SendCommand
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
@@ -22,6 +23,7 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
 
         public override async Task ExecuteAsync(IContext context, TrackContactsJourneySettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 await _contactsJourneyExtension.AddAsync(
@@ -41,12 +43,12 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["stateId"] = settings.StateId,
                         ["stateName"] = settings.StateName,
                         ["previousStateId"] = settings.PreviousStateId,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -67,12 +69,12 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["stateId"] = settings.StateId,
                         ["stateName"] = settings.StateName,
                         ["previousStateId"] = settings.PreviousStateId,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

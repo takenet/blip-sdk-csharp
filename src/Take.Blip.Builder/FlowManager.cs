@@ -286,9 +286,37 @@ namespace Take.Blip.Builder
                         do
                         {
                             var redirectToClientState = String.Empty;
+                            var blockState = state;
+                            var blockStateName = blockState?.ExtensionData != null && blockState.ExtensionData.TryGetValue("$title", out var titleToken)
+                                ? titleToken?.ToString()
+                                : blockState?.Id;
+                            var blockStopwatch = Stopwatch.StartNew();
+                            var blockProcessingSucceeded = true;
                             try
                             {
                                 linkedCts.Token.ThrowIfCancellationRequested();
+
+                                _blipMonitoringLogger.ConversationalFlow(
+                                    new LogInput
+                                    {
+                                        Title = "StateProcessingStart",
+                                        EventType = "StateExecution",
+                                        StateId = blockState?.Id,
+                                        Data = new JObject
+                                        {
+                                            ["input"] = message.Content.ToString(),
+                                            ["stateName"] = blockStateName,
+                                            ["flowId"] = flow.Id,
+                                        },
+                                        FlowVersion = flow.Version,
+                                        Channel = message.From?.ToNode().Domain,
+                                        IdMessage = message.Id,
+                                        From = userIdentity,
+                                        To = ownerIdentity,
+                                        OriginalFrom = message.From,
+                                        OriginalTo = message.To,
+                                    }
+                                );
 
                                 if (stateWaitForInput)
                                 {
@@ -459,7 +487,6 @@ namespace Take.Blip.Builder
                                             StateId = state?.Id,
                                             Data = new JObject
                                             {
-                                                ["flowId"] = flow.Id,
                                                 ["currentStateId"] = state?.Id,
                                                 ["transitionCount"] = transitions,
                                                 ["maxTransitions"] =
@@ -482,6 +509,7 @@ namespace Take.Blip.Builder
                             }
                             catch (Exception ex)
                             {
+                                blockProcessingSucceeded = false;
                                 if (stateTrace != null)
                                 {
                                     if (
@@ -527,6 +555,31 @@ namespace Take.Blip.Builder
                                         stateStopwatch
                                     );
                                 }
+
+                                blockStopwatch.Stop();
+                                _blipMonitoringLogger.ConversationalFlow(
+                                    new LogInput
+                                    {
+                                        Title = "StateProcessingEnd",
+                                        EventType = "StateExecution",
+                                        StateId = blockState?.Id,
+                                        Data = new JObject
+                                        {
+                                            ["stateId"] = blockState?.Id,
+                                            ["stateName"] = blockStateName,
+                                            ["flowId"] = flow.Id,
+                                            ["elapsedMilliseconds"] = blockStopwatch.ElapsedMilliseconds,
+                                            ["success"] = blockProcessingSucceeded,
+                                        },
+                                        FlowVersion = flow.Version,
+                                        Channel = message.From?.ToNode().Domain,
+                                        IdMessage = message.Id,
+                                        From = userIdentity,
+                                        To = ownerIdentity,
+                                        OriginalFrom = message.From,
+                                        OriginalTo = message.To,
+                                    }
+                                );
                             }
                         } while (!stateWaitForInput);
 
@@ -599,6 +652,33 @@ namespace Take.Blip.Builder
                             cts.Token
                         );
                     }
+                    
+                    _blipMonitoringLogger.ActionExecution(
+                           new LogInput
+                           {
+                               Data = new JObject
+                               {
+                                   ["flowId"] = flow.Id,
+                                   ["stateId"] = state?.Id,
+                                   ["input"] = message.Content.ToString(),
+                                   ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
+                                   ["error"] = inputTrace?.Error,
+                                   ["inputTrace"] =
+                                       inputTrace != null ? JToken.FromObject(inputTrace) : null,
+                                   ["traceSettings"] =
+                                       traceSettings != null ? JToken.FromObject(traceSettings) : null,
+                               },
+                               FlowVersion = flow.Version,
+                               Channel = message.From?.ToNode().Domain,
+                               IdMessage = message.Id,
+                               From = userIdentity,
+                               To = ownerIdentity,
+                               EventType = "StateExecution",
+                               Title = "InputProcessing",
+                               OriginalFrom = message.From,
+                               OriginalTo = message.To
+                           }
+                       );
                 }
 
                 ownerContext.Dispose();
@@ -786,7 +866,6 @@ namespace Take.Blip.Builder
                     StateId = state.Id,
                     Data = new JObject
                     {
-                        ["flowId"] = subflow.Id,
                         ["parentFlowId"] = parentFlow.Id,
                         ["currentStateId"] = state.Id,
                         ["success"] = true,
@@ -882,7 +961,6 @@ namespace Take.Blip.Builder
                     StateId = state?.Id,
                     Data = new JObject
                     {
-                        ["flowId"] = parentFlow.Id,
                         ["subflowId"] = flow.Id,
                         ["nextStateId"] = state?.Id,
                         ["success"] = true,
@@ -1363,7 +1441,6 @@ namespace Take.Blip.Builder
                                 StateId = currentStateId,
                                 Data = new JObject
                                 {
-                                    ["flowId"] = flow.Id,
                                     ["currentStateId"] = currentStateId,
                                     ["outputStateId"] = output.StateId,
                                     ["outputOrder"] = output.Order,
@@ -1411,7 +1488,6 @@ namespace Take.Blip.Builder
                     StateId = currentStateId,
                     Data = new JObject
                     {
-                        ["flowId"] = flow.Id,
                         ["currentStateId"] = currentStateId,
                         ["nextStateId"] = state?.Id,
                         ["outputsCount"] = outputs?.Length,
@@ -1485,7 +1561,6 @@ namespace Take.Blip.Builder
                         StateId = state.Id,
                         Data = new JObject
                         {
-                            ["flowId"] = context.Flow?.Id,
                             ["stateId"] = state.Id,
                             ["validationRule"] = state.Input.Validation.Rule.ToString(),
                             ["isValid"] = false,
@@ -1778,7 +1853,6 @@ namespace Take.Blip.Builder
                                 StateId = stateId,
                                 Data = new JObject
                                 {
-                                    ["flowId"] = flow.Id,
                                     ["stateId"] = stateId,
                                     ["actionId"] = actionId,
                                     ["success"] = true,
@@ -1829,7 +1903,6 @@ namespace Take.Blip.Builder
                         StateId = stateId,
                         Data = new JObject
                         {
-                            ["flowId"] = flow.Id,
                             ["stateId"] = stateId,
                             ["actionId"] = actionId,
                             ["success"] = false,

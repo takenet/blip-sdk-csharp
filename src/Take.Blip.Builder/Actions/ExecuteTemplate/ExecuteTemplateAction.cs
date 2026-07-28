@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using HandlebarsDotNet;
 using Lime.Protocol;
@@ -31,6 +32,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
 
         public override async Task ExecuteAsync(IContext context, ExecuteTemplateSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 string result;
@@ -62,10 +64,10 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["outputVariable"] = settings.OutputVariable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -86,10 +88,10 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["outputVariable"] = settings.OutputVariable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

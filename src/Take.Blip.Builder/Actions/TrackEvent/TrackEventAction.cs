@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
@@ -24,6 +25,7 @@ namespace Take.Blip.Builder.Actions.TrackEvent
 
         public override async Task ExecuteAsync(IContext context, TrackEventSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 await _eventTrackExtension.AddAsync(
@@ -45,12 +47,12 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["category"] = settings.Category,
                         ["action"] = settings.Action,
                         ["label"] = settings.Label,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -71,12 +73,12 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["category"] = settings.Category,
                         ["action"] = settings.Action,
                         ["label"] = settings.Label,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

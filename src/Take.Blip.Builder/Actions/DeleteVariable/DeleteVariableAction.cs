@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
@@ -19,6 +20,7 @@ namespace Take.Blip.Builder.Actions.DeleteVariable
 
         public override async Task ExecuteAsync(IContext context, DeleteVariableSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 await context.DeleteVariableAsync(settings.Variable, cancellationToken);
@@ -30,10 +32,10 @@ namespace Take.Blip.Builder.Actions.DeleteVariable
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["variable"] = settings.Variable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -54,10 +56,10 @@ namespace Take.Blip.Builder.Actions.DeleteVariable
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["variable"] = settings.Variable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

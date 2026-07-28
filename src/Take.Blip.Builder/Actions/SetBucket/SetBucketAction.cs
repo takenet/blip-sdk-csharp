@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
@@ -22,6 +23,7 @@ namespace Take.Blip.Builder.Actions.SetBucket
 
         public override async Task ExecuteAsync(IContext context, SetBucketSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             var expiration = settings.Expiration.HasValue
                 ? TimeSpan.FromSeconds(settings.Expiration.Value)
                 : default(TimeSpan);
@@ -41,11 +43,11 @@ namespace Take.Blip.Builder.Actions.SetBucket
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["bucketId"] = settings.Id,
                         ["expiration"] = settings.Expiration,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -66,11 +68,11 @@ namespace Take.Blip.Builder.Actions.SetBucket
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["bucketId"] = settings.Id,
                         ["expiration"] = settings.Expiration,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

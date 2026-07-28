@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Security;
@@ -53,6 +54,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             var responseStatus = 0;
             string responseBody = null;
             try
@@ -138,12 +140,12 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["method"] = settings.Method,
                         ["responseStatus"] = responseStatus,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = isSuccessStatusCode,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -178,12 +180,12 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["method"] = settings.Method,
                         ["responseStatus"] = responseStatus,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },
@@ -211,12 +213,12 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["method"] = settings.Method,
                         ["responseStatus"] = responseStatus,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

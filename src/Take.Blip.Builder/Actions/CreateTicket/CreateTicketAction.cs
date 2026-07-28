@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Esprima;
 using Lime.Protocol;
@@ -30,6 +31,7 @@ namespace Take.Blip.Builder.Actions.CreateTicket
 
         public override async Task ExecuteAsync(IContext context, CreateTicketSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 var ticket = new Ticket()
@@ -92,12 +94,12 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["customerIdentity"] = ticket.CustomerIdentity?.ToString(),
                         ["outputVariable"] = settings.Variable,
                         ["ticketId"] = createdTicket?.Id,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -118,11 +120,11 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["customerIdentity"] = settings.CustomerIdentity?.ToString(),
                         ["outputVariable"] = settings.Variable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

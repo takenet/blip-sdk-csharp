@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
@@ -24,6 +25,7 @@ namespace Take.Blip.Builder.Actions.ManageList
 
         public override async Task ExecuteAsync(IContext context, ManageListSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 switch (settings.Action)
@@ -47,11 +49,11 @@ namespace Take.Blip.Builder.Actions.ManageList
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["listName"] = settings.ListName,
                         ["listAction"] = settings.Action.ToString(),
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -72,11 +74,11 @@ namespace Take.Blip.Builder.Actions.ManageList
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["listName"] = settings.ListName,
                         ["listAction"] = settings.Action.ToString(),
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

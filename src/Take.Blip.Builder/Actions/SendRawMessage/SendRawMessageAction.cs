@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
@@ -28,6 +29,7 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
 
         public override async Task ExecuteAsync(IContext context, SendRawMessageSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 var message = new Message(null)
@@ -66,10 +68,10 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["mediaType"] = settings.MediaType?.ToString(),
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -90,10 +92,10 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["mediaType"] = settings.MediaType?.ToString(),
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },

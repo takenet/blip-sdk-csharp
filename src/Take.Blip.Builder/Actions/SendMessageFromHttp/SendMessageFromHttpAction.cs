@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
@@ -37,6 +38,7 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
 
         public override async Task ExecuteAsync(IContext context, SendMessageFromHttpSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             int responseStatus = 0;
             try
             {
@@ -93,11 +95,11 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["responseStatus"] = responseStatus,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = true,
                     },
                     FlowVersion = context.Flow?.Version,
@@ -118,11 +120,11 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     StateId = context.GetCurrentStateId(),
                     Data = new JObject
                     {
-                        ["flowId"] = context.Flow?.Id,
                         ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                         ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                         ["uri"] = settings.Uri?.ToString(),
                         ["responseStatus"] = responseStatus,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                         ["success"] = false,
                         ["error"] = ex.ToString(),
                     },
