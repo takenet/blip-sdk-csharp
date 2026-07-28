@@ -87,7 +87,7 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                     await context.SetVariableAsync(settings.Variable, createdTicket.Id, cancellationToken);
                 }
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("CreateTicket", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -95,18 +95,18 @@ namespace Take.Blip.Builder.Actions.CreateTicket
                     ["outputVariable"] = settings.Variable,
                     ["ticketId"] = createdTicket?.Id,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("CreateTicket", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["customerIdentity"] = settings.CustomerIdentity?.ToString(),
                     ["outputVariable"] = settings.Variable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

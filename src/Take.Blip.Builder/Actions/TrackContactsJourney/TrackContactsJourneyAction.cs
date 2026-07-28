@@ -36,7 +36,7 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     cancellationToken: cancellationToken
                     );
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("TrackContactsJourney", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -44,11 +44,11 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     ["stateName"] = settings.StateName,
                     ["previousStateId"] = settings.PreviousStateId,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("TrackContactsJourney", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -56,7 +56,7 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     ["stateName"] = settings.StateName,
                     ["previousStateId"] = settings.PreviousStateId,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

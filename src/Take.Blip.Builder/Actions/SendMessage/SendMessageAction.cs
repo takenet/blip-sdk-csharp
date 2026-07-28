@@ -90,23 +90,23 @@ namespace Take.Blip.Builder.Actions.SendMessage
                     }
                 }
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("SendMessage", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["contentType"] = (string)settings[Message.TYPE_KEY],
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("SendMessage", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["contentType"] = (string)settings[Message.TYPE_KEY],
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

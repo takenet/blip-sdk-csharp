@@ -1,18 +1,20 @@
 using Lime.Protocol;
-using Lime.Messaging.Contents;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 
-namespace Take.Blip.Builder.Actions
+namespace Take.Blip.Builder.Utils
 {
     public static class BlipLogExtensions
     {
+        private static readonly string ACTION_EXECUTION_EVENT_TYPE = "ActionExecution";
+        private static readonly string STATE_EXECUTION_EVENT_TYPE = "StateExecution";
+
         public static LogInput ToActionLog(this IContext context, string title, JObject data)
         {
             return new LogInput
             {
                 Title = title,
-                EventType = "ActionExecution",
+                EventType = ACTION_EXECUTION_EVENT_TYPE,
                 StateId = context.GetCurrentStateId(),
                 FlowVersion = context.Flow?.Version,
                 Channel = context.Input.Message?.From?.Domain,
@@ -30,7 +32,7 @@ namespace Take.Blip.Builder.Actions
             return new LogInput
             {
                 Title = title,
-                EventType = "StateExecution",
+                EventType = STATE_EXECUTION_EVENT_TYPE,
                 StateId = stateId,
                 FlowVersion = context?.Flow?.Version,
                 Channel = context?.Input?.Message?.From?.Domain,
@@ -46,7 +48,6 @@ namespace Take.Blip.Builder.Actions
         public static LogInput ToStateLog(
             string title,
             string stateId,
-            int? flowVersion,
             Message message,
             Identity userIdentity,
             Identity ownerIdentity,
@@ -55,9 +56,8 @@ namespace Take.Blip.Builder.Actions
             return new LogInput
             {
                 Title = title,
-                EventType = "StateExecution",
+                EventType = STATE_EXECUTION_EVENT_TYPE,
                 StateId = stateId,
-                FlowVersion = flowVersion,
                 Channel = message?.From?.ToNode().Domain,
                 IdMessage = message?.Id,
                 From = userIdentity?.ToString(),

@@ -76,25 +76,25 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
 
                 await SetContentResultAsync(context, settings.OutputVariable, result, cancellationToken);
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("ProcessContentAssistant", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["outputVariable"] = settings.OutputVariable,
                     ["v2"] = settings.V2,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("ProcessContentAssistant", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["outputVariable"] = settings.OutputVariable,
                     ["v2"] = settings.V2,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

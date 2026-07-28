@@ -40,7 +40,7 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                     cancellationToken: cancellationToken
                     );
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("TrackEvent", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -48,11 +48,11 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                     ["action"] = settings.Action,
                     ["label"] = settings.Label,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("TrackEvent", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -60,7 +60,7 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                     ["action"] = settings.Action,
                     ["label"] = settings.Label,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

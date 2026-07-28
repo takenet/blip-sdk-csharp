@@ -31,25 +31,25 @@ namespace Take.Blip.Builder.Actions.SetVariable
             {
                 await context.SetVariableAsync(settings.Variable, settings.Value, cancellationToken, expiration);
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("SetVariable", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["variable"] = settings.Variable,
                     ["expiration"] = settings.Expiration,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("SetVariable", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["variable"] = settings.Variable,
                     ["expiration"] = settings.Expiration,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

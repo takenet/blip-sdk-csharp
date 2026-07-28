@@ -88,25 +88,25 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     await _sender.SendMessageAsync(message, cancellationToken);
                 }
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("SendMessageFromHttp", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = settings.Uri?.ToString(),
                     ["responseStatus"] = responseStatus,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("SendMessageFromHttp", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = settings.Uri?.ToString(),
                     ["responseStatus"] = responseStatus,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

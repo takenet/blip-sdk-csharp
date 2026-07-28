@@ -36,25 +36,25 @@ namespace Take.Blip.Builder.Actions.SetBucket
                     expiration,
                     cancellationToken);
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("SetBucket", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["bucketId"] = settings.Id,
                     ["expiration"] = settings.Expiration,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("SetBucket", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["bucketId"] = settings.Id,
                     ["expiration"] = settings.Expiration,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

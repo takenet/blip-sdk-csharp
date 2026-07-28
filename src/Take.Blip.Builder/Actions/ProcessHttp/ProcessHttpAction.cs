@@ -133,7 +133,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     PushStatusCodeWarning(context, responseStatus);
                 }
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog(ACTION_PROCESS_HTTP, new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -141,7 +141,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     ["method"] = settings.Method,
                     ["responseStatus"] = responseStatus,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (HttpRequestException ex)
             {
@@ -159,7 +159,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                         responseBody, cancellationToken);
                 }
 
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog(ACTION_PROCESS_HTTP, new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -167,7 +167,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     ["method"] = settings.Method,
                     ["responseStatus"] = responseStatus,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
             }
             catch (Exception ex)
             {
@@ -177,7 +177,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     PushTimeoutWarning(context);
                 }
 
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog(ACTION_PROCESS_HTTP, new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -185,7 +185,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     ["method"] = settings.Method,
                     ["responseStatus"] = responseStatus,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
             }
             finally
             {

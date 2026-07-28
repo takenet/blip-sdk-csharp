@@ -65,7 +65,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                     await context.SetVariableAsync(variable, resultCommandJson, cancellationToken);
                 }
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("ProcessCommand", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -73,16 +73,16 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                     ["method"] = command.Method.ToString(),
                     ["outputVariable"] = variable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("ProcessCommand", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

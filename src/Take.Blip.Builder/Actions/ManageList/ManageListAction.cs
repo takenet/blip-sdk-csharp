@@ -42,25 +42,25 @@ namespace Take.Blip.Builder.Actions.ManageList
                         throw new ArgumentOutOfRangeException();
                 }
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("ManageList", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["listName"] = settings.ListName,
                     ["listAction"] = settings.Action.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("ManageList", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["listName"] = settings.ListName,
                     ["listAction"] = settings.Action.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
                 throw;
             }
         }

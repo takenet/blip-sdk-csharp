@@ -87,7 +87,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
 
                 await SetScriptResultAsync(context, settings, result, time, cancellationToken);
 
-                _blipMonitoringLogger.ActionExecution(context.ToActionLog("ExecuteScriptV2", new JObject
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -95,11 +95,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                     ["outputVariable"] = settings.OutputVariable,
                     ["captureExceptions"] = settings.CaptureExceptions,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }));
+                });
             }
             catch (Exception ex)
             {
-                _blipMonitoringLogger.ErrorEvents(context.ToActionLog("ExecuteScriptV2", new JObject
+                this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
                     ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
@@ -107,7 +107,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                     ["outputVariable"] = settings.OutputVariable,
                     ["captureExceptions"] = settings.CaptureExceptions,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }), ex);
+                }, ex);
 
                 if (!settings.CaptureExceptions)
                 {

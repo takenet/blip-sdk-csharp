@@ -299,7 +299,7 @@ namespace Take.Blip.Builder
 
                                 _blipMonitoringLogger.ConversationalFlow(
                                     CreateStateExecutionLog(
-                                        "StateProcessingStart",
+                                        LogTitles.Flow.StateProcessingStart,
                                         blockState?.Id,
                                         context,
                                         new JObject
@@ -474,7 +474,7 @@ namespace Take.Blip.Builder
                                 {
                                     _blipMonitoringLogger.ConversationalFlow(
                                         CreateStateExecutionLog(
-                                            "MaxTransitionsReached",
+                                            LogTitles.Flow.MaxTransitionsReached,
                                             state?.Id,
                                             context,
                                             new JObject
@@ -544,7 +544,7 @@ namespace Take.Blip.Builder
                                 blockStopwatch.Stop();
                                 _blipMonitoringLogger.ConversationalFlow(
                                     CreateStateExecutionLog(
-                                        "StateProcessingEnd",
+                                        LogTitles.Flow.StateProcessingEnd,
                                         blockState?.Id,
                                         context,
                                         new JObject
@@ -632,7 +632,7 @@ namespace Take.Blip.Builder
                     
                     _blipMonitoringLogger.ActionExecution(
                            CreateStateExecutionLog(
-                               "InputProcessing",
+                               LogTitles.Flow.InputProcessing,
                                state?.Id,
                                context,
                                new JObject
@@ -830,7 +830,7 @@ namespace Take.Blip.Builder
 
             _blipMonitoringLogger.ConversationalFlow(
                 CreateStateExecutionLog(
-                    "SubflowEntry",
+                    LogTitles.Flow.SubflowEntry,
                     state.Id,
                     context,
                     new JObject
@@ -917,7 +917,7 @@ namespace Take.Blip.Builder
 
             _blipMonitoringLogger.ConversationalFlow(
                 CreateStateExecutionLog(
-                    "SubflowReturn",
+                    LogTitles.Flow.SubflowReturn,
                     state?.Id,
                     context,
                     new JObject
@@ -1389,7 +1389,7 @@ namespace Take.Blip.Builder
 
                         _blipMonitoringLogger.ConversationalFlow(
                             CreateStateExecutionLog(
-                                "OutputProcessing",
+                                LogTitles.Flow.OutputProcessing,
                                 currentStateId,
                                 context,
                                 new JObject
@@ -1428,7 +1428,7 @@ namespace Take.Blip.Builder
 
             _blipMonitoringLogger.ConversationalFlow(
                 CreateStateExecutionLog(
-                    "OutputProcessing",
+                    LogTitles.Flow.OutputProcessing,
                     currentStateId,
                     context,
                     new JObject
@@ -1493,7 +1493,7 @@ namespace Take.Blip.Builder
 
                 _blipMonitoringLogger.ConversationalFlow(
                     CreateStateExecutionLog(
-                        "InputValidation",
+                        LogTitles.Flow.InputValidation,
                         state.Id,
                         context,
                         new JObject
@@ -1785,7 +1785,7 @@ namespace Take.Blip.Builder
 
                         _blipMonitoringLogger.ConversationalFlow(
                             CreateStateExecutionLog(
-                                "CommandInput",
+                                LogTitles.Flow.CommandInput,
                                 stateId,
                                 context,
                                 new JObject
@@ -1825,11 +1825,10 @@ namespace Take.Blip.Builder
                 builderException.StateId = stateId;
                 builderException.UserId = userIdentity;
 
-                _blipMonitoringLogger.ConversationalFlow(
+                _blipMonitoringLogger.ErrorEvents(
                     BlipLogExtensions.ToStateLog(
-                        "CommandInput",
+                        LogTitles.Flow.CommandInput,
                         stateId,
-                        flow.Version,
                         message,
                         userIdentity,
                         ownerIdentity,
@@ -1837,10 +1836,9 @@ namespace Take.Blip.Builder
                         {
                             ["stateId"] = stateId,
                             ["actionId"] = actionId,
-                            ["success"] = false,
-                            ["error"] = ex.ToString(),
                         }
-                    )
+                    ),
+                    ex
                 );
 
                 throw builderException;
