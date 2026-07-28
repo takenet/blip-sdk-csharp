@@ -51,8 +51,6 @@ namespace Take.Blip.Builder.Actions.Redirect
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["address"] = redirect.Address?.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
@@ -61,8 +59,6 @@ namespace Take.Blip.Builder.Actions.Redirect
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);
                 throw;

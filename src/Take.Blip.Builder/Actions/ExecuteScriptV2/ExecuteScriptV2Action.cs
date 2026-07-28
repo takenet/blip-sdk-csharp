@@ -85,25 +85,27 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 var result = engine.ExecuteInvoke(settings.Source, settings.Function,
                     _configuration.ExecuteScriptV2Timeout, arguments);
 
-                await SetScriptResultAsync(context, settings, result, time, cancellationToken);
+                var outputValue = await SetScriptResultAsync(context, settings, result, time, cancellationToken);
+
+                var sensitiveData = new JObject { ["outputValue"] = outputValue };
+                if (settings.InputVariables != null && arguments != null)
+                    sensitiveData["inputVariables"] = JArray.FromObject(arguments);
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["function"] = settings.Function,
+                    ["source"] = settings.Source,
                     ["outputVariable"] = settings.OutputVariable,
                     ["captureExceptions"] = settings.CaptureExceptions,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
+                }, sensitiveData);
             }
             catch (Exception ex)
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["function"] = settings.Function,
+                    ["source"] = settings.Source,
                     ["outputVariable"] = settings.OutputVariable,
                     ["captureExceptions"] = settings.CaptureExceptions,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
@@ -188,7 +190,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             return arguments;
         }
 
-        private static async Task SetScriptResultAsync(
+        private static async Task<string> SetScriptResultAsync(
             IContext context, ExecuteScriptV2Settings settings, object result, Time time,
             CancellationToken cancellationToken)
         {
@@ -202,6 +204,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             {
                 await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
             }
+
+            return data;
         }
     }
 }

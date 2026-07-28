@@ -92,18 +92,19 @@ namespace Take.Blip.Builder.Actions.SendMessage
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
+                    ["messageId"] = message.Id,
                     ["contentType"] = (string)settings[Message.TYPE_KEY],
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    ["metadata"] = message.Metadata != null ? JObject.FromObject(message.Metadata) : null
+                }, new JObject
+                {
+                    ["content"] = rawContent
                 });
             }
             catch (Exception ex)
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["contentType"] = (string)settings[Message.TYPE_KEY],
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);

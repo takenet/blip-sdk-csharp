@@ -63,8 +63,6 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["mediaType"] = settings.MediaType?.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
@@ -73,8 +71,6 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["mediaType"] = settings.MediaType?.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);

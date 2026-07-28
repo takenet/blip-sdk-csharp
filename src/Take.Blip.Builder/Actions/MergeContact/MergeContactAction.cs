@@ -48,17 +48,13 @@ namespace Take.Blip.Builder.Actions.MergeContact
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
+                }, settings);
             }
             catch (Exception ex)
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);
                 throw;

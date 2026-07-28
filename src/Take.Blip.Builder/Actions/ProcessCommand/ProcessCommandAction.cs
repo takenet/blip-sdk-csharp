@@ -39,6 +39,7 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
+            var sensitiveData = new JObject { };
             var sw = Stopwatch.StartNew();
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -63,24 +64,26 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                 {
                     var resultCommandJson = _envelopeSerializer.Serialize(resultCommand);
                     await context.SetVariableAsync(variable, resultCommandJson, cancellationToken);
+                    sensitiveData = new JObject { ["outputValue"] = resultCommandJson };
                 }
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                var logData = new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = command.Uri?.ToString(),
                     ["method"] = command.Method.ToString(),
                     ["outputVariable"] = variable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
+                };
+
+                if (command.Method != CommandMethod.Get)
+                    logData["type"] = command.Type?.ToString();
+
+                this.LogExecution(_blipMonitoringLogger, context, logData, sensitiveData);
             }
             catch (Exception ex)
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);
                 throw;

@@ -57,6 +57,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             var sw = Stopwatch.StartNew();
             var responseStatus = 0;
             string responseBody = null;
+            string requestBody = null;
             try
             {
                 bool isSuccessStatusCode;
@@ -83,10 +84,10 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     if (!string.IsNullOrWhiteSpace(settings.Body))
                     {
                         string contentType = null;
-                        var body = await _variableReplacer.ReplaceAsync(settings.Body, context, cancellationToken, ACTION_PROCESS_HTTP);
+                        requestBody = await _variableReplacer.ReplaceAsync(settings.Body, context, cancellationToken, ACTION_PROCESS_HTTP);
 
                             settings.Headers?.TryGetValue("Content-Type", out contentType);
-                            httpRequestMessage.Content = new StringContent(body, Encoding.UTF8,
+                            httpRequestMessage.Content = new StringContent(requestBody, Encoding.UTF8,
                                 contentType ?? "application/json");
                     }
 
@@ -135,12 +136,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = settings.Uri?.ToString(),
                     ["method"] = settings.Method,
-                    ["responseStatus"] = responseStatus,
+                    ["responseStatus"] = responseStatus.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, new JObject
+                {
+                    ["requestBody"] = requestBody,
+                    ["responseBody"] = responseBody,
+                    ["headers"] = settings.Headers != null ? JObject.FromObject(settings.Headers) : null
                 });
             }
             catch (HttpRequestException ex)
@@ -161,8 +165,6 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = settings.Uri?.ToString(),
                     ["method"] = settings.Method,
                     ["responseStatus"] = responseStatus,
@@ -179,8 +181,6 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
 
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = settings.Uri?.ToString(),
                     ["method"] = settings.Method,
                     ["responseStatus"] = responseStatus,

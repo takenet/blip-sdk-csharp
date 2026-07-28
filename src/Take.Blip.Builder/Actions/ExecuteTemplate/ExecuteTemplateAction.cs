@@ -59,8 +59,6 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["outputVariable"] = settings.OutputVariable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
@@ -69,8 +67,6 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["outputVariable"] = settings.OutputVariable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);

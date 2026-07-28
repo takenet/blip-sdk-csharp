@@ -90,8 +90,6 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = settings.Uri?.ToString(),
                     ["responseStatus"] = responseStatus,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
@@ -101,8 +99,6 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = settings.Uri?.ToString(),
                     ["responseStatus"] = responseStatus,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,

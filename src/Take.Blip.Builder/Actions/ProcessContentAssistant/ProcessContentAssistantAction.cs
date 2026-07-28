@@ -78,8 +78,6 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["outputVariable"] = settings.OutputVariable,
                     ["v2"] = settings.V2,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
@@ -89,8 +87,6 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["outputVariable"] = settings.OutputVariable,
                     ["v2"] = settings.V2,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,

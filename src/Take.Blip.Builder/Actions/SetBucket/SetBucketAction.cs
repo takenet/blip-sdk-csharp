@@ -38,8 +38,6 @@ namespace Take.Blip.Builder.Actions.SetBucket
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["bucketId"] = settings.Id,
                     ["expiration"] = settings.Expiration,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
@@ -49,8 +47,6 @@ namespace Take.Blip.Builder.Actions.SetBucket
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["bucketId"] = settings.Id,
                     ["expiration"] = settings.Expiration,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,

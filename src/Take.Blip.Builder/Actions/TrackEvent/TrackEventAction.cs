@@ -42,8 +42,6 @@ namespace Take.Blip.Builder.Actions.TrackEvent
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["category"] = settings.Category,
                     ["action"] = settings.Action,
                     ["label"] = settings.Label,
@@ -54,8 +52,6 @@ namespace Take.Blip.Builder.Actions.TrackEvent
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["category"] = settings.Category,
                     ["action"] = settings.Action,
                     ["label"] = settings.Label,

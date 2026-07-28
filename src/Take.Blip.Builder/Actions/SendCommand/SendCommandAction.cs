@@ -40,19 +40,18 @@ namespace Take.Blip.Builder.Actions.SendCommand
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["uri"] = command.Uri?.ToString(),
                     ["method"] = command.Method.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, new JObject
+                {
+                    ["Command"] = settings
                 });
             }
             catch (Exception ex)
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);
                 throw;

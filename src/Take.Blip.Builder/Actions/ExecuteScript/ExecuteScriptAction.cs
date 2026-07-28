@@ -87,22 +87,28 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 
                 await SetScriptResultAsync(context, settings, result, cancellationToken);
 
+                var outputValue = result != null && !result.IsNull()
+                    ? (result.Type == Types.Object ? JsonConvert.SerializeObject(result.ToObject()) : result.ToString())
+                    : null;
+
+                var sensitiveData = new JObject { ["outputValue"] = outputValue };
+                if (settings.InputVariables != null && arguments != null)
+                    sensitiveData["inputVariables"] = JArray.FromObject(arguments);
+
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["function"] = settings.Function ?? DEFAULT_FUNCTION,
+                    ["source"] = settings.Source,
                     ["outputVariable"] = settings.OutputVariable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
+                }, sensitiveData);
             }
             catch (Exception ex)
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["function"] = settings.Function ?? DEFAULT_FUNCTION,
+                    ["source"] = settings.Source,
                     ["outputVariable"] = settings.OutputVariable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);

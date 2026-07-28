@@ -27,8 +27,6 @@ namespace Take.Blip.Builder.Actions.DeleteVariable
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["variable"] = settings.Variable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
@@ -37,8 +35,6 @@ namespace Take.Blip.Builder.Actions.DeleteVariable
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["variable"] = settings.Variable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);

@@ -89,8 +89,6 @@ namespace Take.Blip.Builder.Actions.CreateTicket
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["customerIdentity"] = ticket.CustomerIdentity?.ToString(),
                     ["outputVariable"] = settings.Variable,
                     ["ticketId"] = createdTicket?.Id,
@@ -101,8 +99,6 @@ namespace Take.Blip.Builder.Actions.CreateTicket
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["customerIdentity"] = settings.CustomerIdentity?.ToString(),
                     ["outputVariable"] = settings.Variable,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,

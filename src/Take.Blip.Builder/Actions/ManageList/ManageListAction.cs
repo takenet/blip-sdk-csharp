@@ -44,8 +44,6 @@ namespace Take.Blip.Builder.Actions.ManageList
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["listName"] = settings.ListName,
                     ["listAction"] = settings.Action.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
@@ -55,8 +53,6 @@ namespace Take.Blip.Builder.Actions.ManageList
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["listName"] = settings.ListName,
                     ["listAction"] = settings.Action.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,

@@ -13,7 +13,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
-using SmartFormat.Core.Output;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Actions;
@@ -88,7 +87,7 @@ namespace Take.Blip.Builder
             IInputMessageHandlerAggregator inputMessageHandlerAggregator,
             IInputExpirationCount inputExpirationCount,
             IBuilderExtension builderExtension,
-            IBlipLogger blipMonitoringLogger
+            IBlipLogger? blipMonitoringLogger = null
         )
         {
             _configuration = configuration;
@@ -111,7 +110,7 @@ namespace Take.Blip.Builder
             _inputMessageHandlerAggregator = inputMessageHandlerAggregator;
             _inputExpirationCount = inputExpirationCount;
             _builderExtension = builderExtension;
-            _blipMonitoringLogger = blipMonitoringLogger;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public async Task ProcessInputAsync(
@@ -272,6 +271,7 @@ namespace Take.Blip.Builder
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
+                            context.SetCurrentActionSource("inputActions");
                             await ProcessActionsAsync(
                                 lazyInput,
                                 context,
@@ -284,32 +284,34 @@ namespace Take.Blip.Builder
 
                         var stateWaitForInput = true;
                         var parentStateIdQueue = new Queue<string>();
+                        var blockProcessingSucceeded = true;
+
                         do
                         {
-                            var redirectToClientState = String.Empty;
-                            var blockState = state;
-                            var blockStateName = blockState?.ExtensionData != null && blockState.ExtensionData.TryGetValue("$title", out var titleToken)
+                            var blockStateName = state?.ExtensionData != null && state.ExtensionData.TryGetValue("name", out var titleToken)
                                 ? titleToken?.ToString()
-                                : blockState?.Id;
+                                : state?.Id;
                             var blockStopwatch = Stopwatch.StartNew();
-                            var blockProcessingSucceeded = true;
+                            var redirectToClientState = String.Empty;
                             try
                             {
-                                linkedCts.Token.ThrowIfCancellationRequested();
+                  
 
                                 _blipMonitoringLogger.ConversationalFlow(
                                     CreateStateExecutionLog(
                                         LogTitles.Flow.StateProcessingStart,
-                                        blockState?.Id,
+                                        state?.Id,
                                         context,
                                         new JObject
                                         {
                                             ["input"] = message.Content.ToString(),
-                                            ["stateName"] = blockStateName,
+                                            ["stateName"] = stateId,
                                             ["flowId"] = flow.Id,
                                         }
                                      )
                                 );
+
+                                linkedCts.Token.ThrowIfCancellationRequested();
 
                                 if (stateWaitForInput)
                                 {
@@ -479,7 +481,6 @@ namespace Take.Blip.Builder
                                             context,
                                             new JObject
                                             {
-                                                ["currentStateId"] = state?.Id,
                                                 ["transitionCount"] = transitions,
                                                 ["maxTransitions"] =
                                                     _configuration.MaxTransitionsByInput,
@@ -545,11 +546,10 @@ namespace Take.Blip.Builder
                                 _blipMonitoringLogger.ConversationalFlow(
                                     CreateStateExecutionLog(
                                         LogTitles.Flow.StateProcessingEnd,
-                                        blockState?.Id,
+                                        state?.Id,
                                         context,
                                         new JObject
                                         {
-                                            ["stateId"] = blockState?.Id,
                                             ["stateName"] = blockStateName,
                                             ["flowId"] = flow.Id,
                                             ["elapsedMilliseconds"] = blockStopwatch.ElapsedMilliseconds,
@@ -629,7 +629,7 @@ namespace Take.Blip.Builder
                             cts.Token
                         );
                     }
-                    
+
                     _blipMonitoringLogger.ActionExecution(
                            CreateStateExecutionLog(
                                LogTitles.Flow.InputProcessing,
@@ -668,6 +668,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
+            context.SetCurrentActionSource("inputActions");
             await ProcessActionsAsync(
                 lazyInput,
                 context,
@@ -691,6 +692,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
+            context.SetCurrentActionSource("outputActions");
             await ProcessActionsAsync(
                 lazyInput,
                 context,
@@ -714,6 +716,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
+            context.SetCurrentActionSource("afterStateChangedActions");
             await ProcessActionsAsync(
                 lazyInput,
                 context,
@@ -735,6 +738,7 @@ namespace Take.Blip.Builder
         {
             if (flow.OutputActions != null)
             {
+                context.SetCurrentActionSource("globalOutputActions");
                 await ProcessActionsAsync(
                     lazyInput,
                     context,
@@ -757,6 +761,7 @@ namespace Take.Blip.Builder
         {
             if (flow.AfterStateChangedActions != null)
             {
+                context.SetCurrentActionSource("globalAfterStateChangedActions");
                 await ProcessActionsAsync(
                     lazyInput,
                     context,

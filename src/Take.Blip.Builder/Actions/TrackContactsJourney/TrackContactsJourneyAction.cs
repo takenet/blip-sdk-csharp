@@ -38,8 +38,6 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["stateId"] = settings.StateId,
                     ["stateName"] = settings.StateName,
                     ["previousStateId"] = settings.PreviousStateId,
@@ -50,8 +48,6 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["actionId"] = context.GetCurrentActionTrace()?.ActionId,
-                    ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle,
                     ["stateId"] = settings.StateId,
                     ["stateName"] = settings.StateName,
                     ["previousStateId"] = settings.PreviousStateId,
