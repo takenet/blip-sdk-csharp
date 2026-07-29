@@ -293,8 +293,6 @@ namespace Take.Blip.Builder
                             var redirectToClientState = String.Empty;
                             try
                             {
-                  
-
                                 _blipMonitoringLogger.ConversationalFlow(
                                     CreateStateExecutionLog(
                                         LogTitles.Flow.StateProcessingStart,
@@ -302,9 +300,13 @@ namespace Take.Blip.Builder
                                         context,
                                         new JObject
                                         {
-                                            ["input"] = message.Content.ToString(),
                                             ["stateName"] = stateId,
                                             ["flowId"] = flow.Id,
+                                            ["stateName"] = blockStateName,
+                                        },
+                                        new JObject
+                                        {
+                                            ["input"] = message.Content.ToString(),
                                         }
                                      )
                                 );
@@ -470,7 +472,10 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    _blipMonitoringLogger.ConversationalFlow(
+                                    var ex = new FlowConstructionException(
+                                       $"Max state transitions of {_configuration.MaxTransitionsByInput} was reached"
+                                   );
+                                    _blipMonitoringLogger.ErrorEvents(
                                         CreateStateExecutionLog(
                                             LogTitles.Flow.MaxTransitionsReached,
                                             state?.Id,
@@ -479,14 +484,11 @@ namespace Take.Blip.Builder
                                             {
                                                 ["transitionCount"] = transitions,
                                                 ["maxTransitions"] =
-                                                    _configuration.MaxTransitionsByInput,
-                                                ["success"] = false,
+                                                    _configuration.MaxTransitionsByInput
                                             }
-                                        )
+                                        ), ex
                                     );
-                                    throw new FlowConstructionException(
-                                        $"Max state transitions of {_configuration.MaxTransitionsByInput} was reached"
-                                    );
+                                    throw ex;
                                 }
                             }
                             catch (Exception ex)
@@ -1390,7 +1392,15 @@ namespace Take.Blip.Builder
                             }
                         }
 
-                        _blipMonitoringLogger.ConversationalFlow(
+                        var error = new OutputProcessingException(
+                         $"Failed to process output condition to state '{output.StateId}'",
+                         ex)
+                        {
+                            OutputStateId = output.StateId,
+                            OutputConditions = output.Conditions,
+                        };
+
+                        _blipMonitoringLogger.ErrorEvents(
                             CreateStateExecutionLog(
                                 LogTitles.Flow.OutputProcessing,
                                 currentStateId,
@@ -1401,20 +1411,10 @@ namespace Take.Blip.Builder
                                     ["outputStateId"] = output.StateId,
                                     ["outputOrder"] = output.Order,
                                     ["isDefaultOutput"] = output.Conditions == null,
-                                    ["success"] = false,
-                                    ["error"] = ex.ToString(),
                                 }
-                            )
+                            ), error
                         );
-
-                        throw new OutputProcessingException(
-                            $"Failed to process output condition to state '{output.StateId}'",
-                            ex
-                        )
-                        {
-                            OutputStateId = output.StateId,
-                            OutputConditions = output.Conditions,
-                        };
+                        throw error;
                     }
                     finally
                     {
@@ -1441,7 +1441,6 @@ namespace Take.Blip.Builder
                         ["outputsCount"] = outputs?.Length,
                         ["matchedOutputOrder"] = matchedOutputOrder,
                         ["isDefaultOutput"] = matchedIsDefaultOutput,
-                        ["success"] = true,
                     }
                 )
             );
@@ -1519,9 +1518,10 @@ namespace Take.Blip.Builder
             string title,
             string stateId,
             IContext context,
-            JObject data
+            JObject data,
+            JObject sensitiveData = null
         ) =>
-            context.ToStateLog(title, stateId, data);
+            context.ToStateLog(title, stateId, data, sensitiveData);
 
         private void AddStateIdToSettings(
             string actionType,

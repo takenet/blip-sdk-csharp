@@ -11,9 +11,6 @@ namespace Take.Blip.Builder.Utils
 
         public static LogInput ToActionLog(this IContext context, string title, JObject data, JObject sensitiveData = null)
         {
-            if (sensitiveData != null)
-                sensitiveData["inputContent"] = context.Input.Content?.ToString();
-
             return new LogInput
             {
                 Title = title,
@@ -31,7 +28,7 @@ namespace Take.Blip.Builder.Utils
             };
         }
 
-        public static LogInput ToStateLog(this IContext context, string title, string stateId, JObject data)
+        public static LogInput ToStateLog(this IContext context, string title, string stateId, JObject data, JObject sensitiveData = null)
         {
             return new LogInput
             {
@@ -46,6 +43,7 @@ namespace Take.Blip.Builder.Utils
                 OriginalFrom = context?.Input?.Message?.From,
                 OriginalTo = context?.Input?.Message?.To,
                 Data = data,
+                SensitiveData = sensitiveData
             };
         }
 
