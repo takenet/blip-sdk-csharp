@@ -24,6 +24,7 @@ namespace Take.Blip.Builder.Utils
                 OriginalFrom = context.Input.Message?.From,
                 OriginalTo = context.Input.Message?.To,
                 Data = data,
+                FlowVersion = context?.Flow?.Version ?? 1,
                 SensitiveData = sensitiveData,
             };
         }
@@ -43,6 +44,7 @@ namespace Take.Blip.Builder.Utils
                 OriginalFrom = context?.Input?.Message?.From,
                 OriginalTo = context?.Input?.Message?.To,
                 Data = data,
+                FlowVersion = context?.Flow?.Version ?? 1,
                 SensitiveData = sensitiveData
             };
         }
@@ -68,6 +70,7 @@ namespace Take.Blip.Builder.Utils
                 OriginalFrom = message?.From,
                 OriginalTo = message?.To,
                 Data = data,
+                FlowVersion = 1
             };
         }
     }

@@ -12,6 +12,7 @@
         public required string EventType { get; set; }
         public required string StateId { get; set; }
         public required string Channel { get; set; }
+        public required int FlowVersion { get; set; }
         public object? Data { get; set; }
         public object? SensitiveData { get; set; }
     }

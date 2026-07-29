@@ -133,7 +133,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             await target.ExecuteAsync(Context, settings, CancellationToken);
 
-            _blipLogger.Received(1).ActionExecution(Arg.Any<LogInput>());
+            _blipLogger.Received(1).MessageDelivery(Arg.Any<LogInput>());
         }
 
         [Fact]
@@ -175,7 +175,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
-            _blipLogger.Received(1).ActionExecution(Arg.Any<LogInput>());
+            _blipLogger.Received(1).MessageDelivery(Arg.Any<LogInput>());
         }
 
         // ──────────────────────────────────────────────────────────────────
