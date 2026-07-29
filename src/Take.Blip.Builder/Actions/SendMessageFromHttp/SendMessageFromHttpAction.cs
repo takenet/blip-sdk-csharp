@@ -88,7 +88,7 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     await _sender.SendMessageAsync(message, cancellationToken);
                 }
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                this.LogDelivery(_blipMonitoringLogger, context, new JObject
                 {
                     ["uri"] = settings.Uri?.ToString(),
                     ["responseStatus"] = responseStatus,

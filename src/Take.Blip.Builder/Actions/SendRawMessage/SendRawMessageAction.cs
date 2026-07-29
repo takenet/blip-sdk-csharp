@@ -61,7 +61,7 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
 
                 await _sender.SendMessageAsync(message, cancellationToken);
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                this.LogDelivery(_blipMonitoringLogger, context, new JObject
                 {
                     ["mediaType"] = settings.MediaType?.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,

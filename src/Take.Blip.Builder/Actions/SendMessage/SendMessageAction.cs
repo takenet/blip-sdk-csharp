@@ -90,7 +90,7 @@ namespace Take.Blip.Builder.Actions.SendMessage
                     }
                 }
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                this.LogDelivery(_blipMonitoringLogger, context, new JObject
                 {
                     ["messageId"] = message.Id,
                     ["contentType"] = (string)settings[Message.TYPE_KEY],
