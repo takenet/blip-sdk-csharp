@@ -38,7 +38,7 @@ namespace Take.Blip.Builder.Utils
                 Title = title,
                 EventType = STATE_EXECUTION_EVENT_TYPE,
                 Operation = string.Empty,
-                StateId = context.GetCurrentStateId(),
+                StateId = stateId,
                 Channel = context?.Input?.Message?.From?.Domain,
                 IdMessage = context?.Input?.Message?.Id,
                 From = context?.UserIdentity?.ToString(),
