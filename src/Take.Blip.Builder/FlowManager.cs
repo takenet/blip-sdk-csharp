@@ -240,8 +240,6 @@ namespace Take.Blip.Builder
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
-                        context.SetCurrentStateId(stateId);
-
                         state =
                             flow.States.FirstOrDefault(s => s.Id == stateId)
                             ?? flow.States.Single(s => s.Root);
@@ -451,7 +449,6 @@ namespace Take.Blip.Builder
                                         state.Id,
                                         linkedCts.Token
                                     );
-                                    context.SetCurrentStateId(state.Id);
                                 }
                                 else
                                 {
@@ -459,7 +456,6 @@ namespace Take.Blip.Builder
                                         context,
                                         linkedCts.Token
                                     );
-                                    context.SetCurrentStateId(null);
                                 }
 
                                 // Process the next state input actions
@@ -1096,6 +1092,8 @@ namespace Take.Blip.Builder
                                 actionTrace.ParsedSettings = new JRaw(stringifySetting);
                             }
                         }
+
+                        context.SetCurrentStateId(state.Id);
 
                         using (
                             LogContext.PushProperty(
