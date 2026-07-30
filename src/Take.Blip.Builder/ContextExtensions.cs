@@ -9,6 +9,8 @@ namespace Take.Blip.Builder
         public const string CONTACT_KEY = "contact";
         public const string TICKET_KEY = "ticket";
         public const string CURRENT_ACTION_TRACE_KEY = "current-action-trace";
+        public const string CURRENT_STATE_ID_KEY = "current-state-id";
+        public const string CURRENT_ACTION_SOURCE_KEY = "current-action-source";
 
         public static Contact GetContact(this IContext context) 
             => GetValue<Contact>(context, CONTACT_KEY);
@@ -30,6 +32,18 @@ namespace Take.Blip.Builder
 
         public static void SetCurrentActionTrace(this IContext context, ActionTrace actionTrace)
             => SetValue(context, CURRENT_ACTION_TRACE_KEY, actionTrace);
+
+        public static string GetCurrentStateId(this IContext context)
+            => GetValue<string>(context, CURRENT_STATE_ID_KEY);
+
+        public static void SetCurrentStateId(this IContext context, string stateId)
+            => SetValue(context, CURRENT_STATE_ID_KEY, stateId);
+
+        public static string GetCurrentActionSource(this IContext context)
+            => GetValue<string>(context, CURRENT_ACTION_SOURCE_KEY);
+
+        public static void SetCurrentActionSource(this IContext context, string actionSource)
+            => SetValue(context, CURRENT_ACTION_SOURCE_KEY, actionSource);
 
         public static void RemoveTicket(this IContext context)
             => RemoveValue(context, TICKET_KEY);        

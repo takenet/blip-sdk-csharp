@@ -5,10 +5,14 @@ using Jint.Native;
 using Jint.Runtime;
 using Jint.Runtime.Debugger;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Hosting;
 using System;
+using System.Diagnostics;
 using TimeZoneConverter;
 using Esprima;
 using Lime.Protocol;
@@ -20,63 +24,96 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         private const string DEFAULT_FUNCTION = "run";
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        private readonly IBlipLogger _blipMonitoringLogger;
         const string BRAZIL_TIMEZONE = "E. South America Standard Time";
         const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
 
         private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteScriptSettings.OutputVariable).ToCamelCase() };
 
-        public ExecuteScriptAction(IConfiguration configuration, ILogger logger)
+        public ExecuteScriptAction(IConfiguration configuration, ILogger logger, IBlipLogger? blipMonitoringLogger = null)
             : base(nameof(ExecuteScript), OUTPUT_PARAMETERS_NAME)
         {
             _configuration = configuration;
             _logger = logger;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
         {
-            var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
-            TimeZoneInfo timeZoneLocal = TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
-            Engine engine;
-
+            var sw = Stopwatch.StartNew();
             try
             {
-                if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR) && settings.LocalTimeZoneEnabled)
+                var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
+                TimeZoneInfo timeZoneLocal = TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
+                Engine engine;
+
+                try
                 {
-                    timeZoneLocal = TZConvert.GetTimeZoneInfo(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
+                    if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR) && settings.LocalTimeZoneEnabled)
+                    {
+                        timeZoneLocal = TZConvert.GetTimeZoneInfo(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
+                    }
                 }
+                catch (Exception e)
+                {
+                    _logger.Information(e, "Error converting timezone");
+                }
+
+                engine = new Engine(options => options
+                        .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
+                        .MaxStatements(_configuration.ExecuteScriptMaxStatements)
+                        .LimitMemory(_configuration.ExecuteScriptLimitMemory)
+                        .TimeoutInterval(_configuration.ExecuteScriptTimeout)
+                        .DebugMode()
+                        .LocalTimeZone(timeZoneLocal));
+
+                engine.Step += (sender, e) =>
+                {
+                    CheckMemoryUsage(context, e);
+                    return StepMode.Into;
+                };
+
+                var DefaultParserOptions = new ParserOptions()
+                {
+                    AdaptRegexp = false,
+                    Tolerant = true
+                };
+
+                engine = engine.Execute(settings.Source, DefaultParserOptions);
+
+                var result = arguments != null
+                   ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
+                   : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
+
+                await SetScriptResultAsync(context, settings, result, cancellationToken);
+
+                var outputValue = result != null && !result.IsNull()
+                    ? (result.Type == Types.Object ? JsonConvert.SerializeObject(result.ToObject()) : result.ToString())
+                    : null;
+
+                var sensitiveData = new JObject { ["outputValue"] = outputValue };
+                if (settings.InputVariables != null && arguments != null)
+                    sensitiveData["inputVariables"] = JArray.FromObject(arguments);
+
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                {
+                    ["function"] = settings.Function ?? DEFAULT_FUNCTION,
+                    ["source"] = settings.Source,
+                    ["outputVariable"] = settings.OutputVariable,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, sensitiveData);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.Information(e, "Error converting timezone");
+                this.LogError(_blipMonitoringLogger, context, new JObject
+                {
+                    ["function"] = settings.Function ?? DEFAULT_FUNCTION,
+                    ["source"] = settings.Source,
+                    ["outputVariable"] = settings.OutputVariable,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, ex);
+                throw;
             }
-
-            engine = new Engine(options => options
-                    .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
-                    .MaxStatements(_configuration.ExecuteScriptMaxStatements)
-                    .LimitMemory(_configuration.ExecuteScriptLimitMemory)
-                    .TimeoutInterval(_configuration.ExecuteScriptTimeout)
-                    .DebugMode()
-                    .LocalTimeZone(timeZoneLocal));
-
-            engine.Step += (sender, e) =>
-            {
-                CheckMemoryUsage(context, e);
-                return StepMode.Into;
-            };
-
-            var DefaultParserOptions = new ParserOptions()
-            {
-                AdaptRegexp = false,
-                Tolerant = true
-            };
-
-            engine = engine.Execute(settings.Source, DefaultParserOptions);
-
-            var result = arguments != null
-               ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
-               : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
-
-            await SetScriptResultAsync(context, settings, result, cancellationToken);
         }
 
         protected async Task<object[]> GetScriptArgumentsAsync(

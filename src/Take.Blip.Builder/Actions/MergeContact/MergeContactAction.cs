@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Client.Extensions.Contacts;
 
 namespace Take.Blip.Builder.Actions.MergeContact
@@ -12,11 +15,13 @@ namespace Take.Blip.Builder.Actions.MergeContact
     {
         private readonly IContactExtension _contactExtension;
         private readonly ILogger _logger;
+        private readonly IBlipLogger _blipMonitoringLogger;
 
-        public MergeContactAction(IContactExtension contactExtension, ILogger logger)
+        public MergeContactAction(IContactExtension contactExtension, ILogger logger, IBlipLogger? blipMonitoringLogger = null)
         {
             _contactExtension = contactExtension;
             _logger = logger;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public string Type => nameof(MergeContact);
@@ -25,18 +30,35 @@ namespace Take.Blip.Builder.Actions.MergeContact
 
         public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
-            var contact = settings.ToObject<Contact>(LimeSerializerContainer.Serializer);
-            contact.Identity = contact.Identity;
+            try
+            {
+                var contact = settings.ToObject<Contact>(LimeSerializerContainer.Serializer);
+                contact.Identity = contact.Identity;
 
-            _logger.Information("Trying to merge contact values ({Settings}) for UserIdentity {UserIdentity}",
-               settings,
-               context.UserIdentity);
+                _logger.Information("Trying to merge contact values ({Settings}) for UserIdentity {UserIdentity}",
+                   settings,
+                   context.UserIdentity);
 
-            await _contactExtension.MergeAsync(context.UserIdentity, contact, cancellationToken);
-            context.RemoveContact();
+                await _contactExtension.MergeAsync(context.UserIdentity, contact, cancellationToken);
+                context.RemoveContact();
+
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                {
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, settings);
+            }
+            catch (Exception ex)
+            {
+                this.LogError(_blipMonitoringLogger, context, new JObject
+                {
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, ex);
+                throw;
+            }
         }
     }
 }

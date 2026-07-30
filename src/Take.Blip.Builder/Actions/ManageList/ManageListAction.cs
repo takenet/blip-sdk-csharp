@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
+using Newtonsoft.Json.Linq;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Client.Extensions.Broadcast;
 
 namespace Take.Blip.Builder.Actions.ManageList
@@ -10,27 +14,50 @@ namespace Take.Blip.Builder.Actions.ManageList
     public class ManageListAction : ActionBase<ManageListSettings>
     {
         private readonly IBroadcastExtension _broadcastExtension;
+        private readonly IBlipLogger _blipMonitoringLogger;
 
-        public ManageListAction(IBroadcastExtension broadcastExtension)
-            :base(nameof(ManageList))
+        public ManageListAction(IBroadcastExtension broadcastExtension, IBlipLogger? blipMonitoringLogger = null)
+            : base(nameof(ManageList))
         {
             _broadcastExtension = broadcastExtension;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public override async Task ExecuteAsync(IContext context, ManageListSettings settings, CancellationToken cancellationToken)
         {
-            switch (settings.Action)
+            var sw = Stopwatch.StartNew();
+            try
             {
-                case ManageListSettingsAction.Add:
-                    await AddToListAsync(context, settings.ListName, cancellationToken);
-                    break;
+                switch (settings.Action)
+                {
+                    case ManageListSettingsAction.Add:
+                        await AddToListAsync(context, settings.ListName, cancellationToken);
+                        break;
 
-                case ManageListSettingsAction.Remove:
-                    await RemoveFromListAsync(context, settings.ListName, cancellationToken);
-                    break;
-                
-                default:
-                    throw new ArgumentOutOfRangeException();
+                    case ManageListSettingsAction.Remove:
+                        await RemoveFromListAsync(context, settings.ListName, cancellationToken);
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                {
+                    ["listName"] = settings.ListName,
+                    ["listAction"] = settings.Action.ToString(),
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                });
+            }
+            catch (Exception ex)
+            {
+                this.LogError(_blipMonitoringLogger, context, new JObject
+                {
+                    ["listName"] = settings.ListName,
+                    ["listAction"] = settings.Action.ToString(),
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, ex);
+                throw;
             }
         }
 

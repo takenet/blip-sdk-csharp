@@ -1,8 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lime.Protocol;
+using Newtonsoft.Json.Linq;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Client.Extensions.ArtificialIntelligence;
 using Takenet.Iris.Messaging.Resources.ArtificialIntelligence;
 
@@ -14,13 +19,15 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
     public class ProcessContentAssistantAction : ActionBase<ProcessContentAssistantSettings>
     {
         private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension;
+        private readonly IBlipLogger _blipMonitoringLogger;
         private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ProcessContentAssistantSettings.OutputVariable).ToCamelCase() };
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-        public ProcessContentAssistantAction(IArtificialIntelligenceExtension artificialIntelligenceExtension) : base(nameof(ProcessContentAssistant), OUTPUT_PARAMETERS_NAME)
+        public ProcessContentAssistantAction(IArtificialIntelligenceExtension artificialIntelligenceExtension, IBlipLogger? blipMonitoringLogger = null) : base(nameof(ProcessContentAssistant), OUTPUT_PARAMETERS_NAME)
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         /// <summary>
@@ -32,39 +39,60 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         /// <returns></returns>
         public override async Task ExecuteAsync(IContext context, ProcessContentAssistantSettings settings, CancellationToken cancellationToken)
         {
-            var tags = JsonSerializer.Serialize<string[]>(settings?.Tags?.Split(",") ?? new string[0]);
-
-            var contentAssistantResource = new AnalysisRequest
+            var sw = Stopwatch.StartNew();
+            try
             {
-                Text = settings.Text,
-                Score = settings.Score.HasValue ? settings.Score.Value / Constants.PERCENTAGE_DENOMINATOR : context.Flow.BuilderConfiguration.MinimumIntentScore.Value,
-                Extras = new Dictionary<string, string>
+                var tags = JsonSerializer.Serialize<string[]>(settings?.Tags?.Split(",") ?? new string[0]);
+
+                var contentAssistantResource = new AnalysisRequest
                 {
-                    ["Tags"] = tags,
-                    ["MessageId"] = context.Input.Message.Id,
-                    ["UserIdentity"] = context.UserIdentity.ToString()
+                    Text = settings.Text,
+                    Score = settings.Score.HasValue ? settings.Score.Value / Constants.PERCENTAGE_DENOMINATOR : context.Flow.BuilderConfiguration.MinimumIntentScore.Value,
+                    Extras = new Dictionary<string, string>
+                    {
+                        ["Tags"] = tags,
+                        ["MessageId"] = context.Input.Message.Id,
+                        ["UserIdentity"] = context.UserIdentity.ToString()
+                    }
+                };
+
+                var result = string.Empty;
+
+                if (settings.V2)
+                {
+                    var contentResult = await _artificialIntelligenceExtension.GetContentAssistantAsync(
+                        contentAssistantResource,
+                        cancellationToken);
+
+                    result = contentResult.SerializeContentAssistantActionResponse() ?? string.Empty;
                 }
-            };
+                else
+                {
+                    var contentResult = await _artificialIntelligenceExtension.GetContentResultAsync(
+                        contentAssistantResource,
+                        cancellationToken: cancellationToken);
+                    result = contentResult.SerializeContentAssistantActionResponse() ?? string.Empty;
+                }
 
-            var result = string.Empty;
+                await SetContentResultAsync(context, settings.OutputVariable, result, cancellationToken);
 
-            if (settings.V2)
-            {
-                var contentResult = await _artificialIntelligenceExtension.GetContentAssistantAsync(
-                    contentAssistantResource,
-                    cancellationToken);
-
-                result = contentResult.SerializeContentAssistantActionResponse() ?? string.Empty;
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                {
+                    ["outputVariable"] = settings.OutputVariable,
+                    ["v2"] = settings.V2,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                });
             }
-            else
+            catch (Exception ex)
             {
-                var contentResult = await _artificialIntelligenceExtension.GetContentResultAsync(
-                    contentAssistantResource,
-                    cancellationToken: cancellationToken);
-                result = contentResult.SerializeContentAssistantActionResponse() ?? string.Empty;
+                this.LogError(_blipMonitoringLogger, context, new JObject
+                {
+                    ["outputVariable"] = settings.OutputVariable,
+                    ["v2"] = settings.V2,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, ex);
+                throw;
             }
-
-            await SetContentResultAsync(context, settings.OutputVariable, result, cancellationToken);
         }
 
         private async Task SetContentResultAsync(

@@ -240,7 +240,6 @@ namespace Take.Blip.Builder
 
                         // Try restore a stored state
                         var stateId = await _stateManager.GetStateIdAsync(context, linkedCts.Token);
-
                         state =
                             flow.States.FirstOrDefault(s => s.Id == stateId)
                             ?? flow.States.Single(s => s.Root);
@@ -270,6 +269,7 @@ namespace Take.Blip.Builder
                         // Process the global input actions
                         if (flow.InputActions != null)
                         {
+                            context.SetCurrentActionSource("inputActions");
                             await ProcessActionsAsync(
                                 lazyInput,
                                 context,
@@ -282,11 +282,35 @@ namespace Take.Blip.Builder
 
                         var stateWaitForInput = true;
                         var parentStateIdQueue = new Queue<string>();
+                        var blockProcessingSucceeded = true;
+
                         do
                         {
+                            var blockStateName = state?.ExtensionData != null && state.ExtensionData.TryGetValue("name", out var titleToken)
+                                ? titleToken?.ToString()
+                                : state?.Id;
+                            var blockStopwatch = Stopwatch.StartNew();
                             var redirectToClientState = String.Empty;
                             try
                             {
+                                _blipMonitoringLogger.ConversationalFlow(
+                                    CreateStateExecutionLog(
+                                        LogTitles.Flow.StateProcessingStart,
+                                        state?.Id,
+                                        context,
+                                        new JObject
+                                        {
+                                            ["stateName"] = stateId,
+                                            ["flowId"] = flow.Id,
+                                            ["stateName"] = blockStateName,
+                                        },
+                                        new JObject
+                                        {
+                                            ["input"] = message.Content.ToString(),
+                                        }
+                                     )
+                                );
+
                                 linkedCts.Token.ThrowIfCancellationRequested();
 
                                 if (stateWaitForInput)
@@ -448,13 +472,28 @@ namespace Take.Blip.Builder
                                 // Check if the state transition limit has reached (to avoid loops in the flow)
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
-                                    throw new FlowConstructionException(
-                                        $"Max state transitions of {_configuration.MaxTransitionsByInput} was reached"
+                                    var ex = new FlowConstructionException(
+                                       $"Max state transitions of {_configuration.MaxTransitionsByInput} was reached"
+                                   );
+                                    _blipMonitoringLogger.ErrorEvents(
+                                        CreateStateExecutionLog(
+                                            LogTitles.Flow.MaxTransitionsReached,
+                                            state?.Id,
+                                            context,
+                                            new JObject
+                                            {
+                                                ["transitionCount"] = transitions,
+                                                ["maxTransitions"] =
+                                                    _configuration.MaxTransitionsByInput
+                                            }
+                                        ), ex
                                     );
+                                    throw ex;
                                 }
                             }
                             catch (Exception ex)
                             {
+                                blockProcessingSucceeded = false;
                                 if (stateTrace != null)
                                 {
                                     if (
@@ -500,6 +539,22 @@ namespace Take.Blip.Builder
                                         stateStopwatch
                                     );
                                 }
+
+                                blockStopwatch.Stop();
+                                _blipMonitoringLogger.ConversationalFlow(
+                                    CreateStateExecutionLog(
+                                        LogTitles.Flow.StateProcessingEnd,
+                                        state?.Id,
+                                        context,
+                                        new JObject
+                                        {
+                                            ["stateName"] = blockStateName,
+                                            ["flowId"] = flow.Id,
+                                            ["elapsedMilliseconds"] = blockStopwatch.ElapsedMilliseconds,
+                                            ["success"] = blockProcessingSucceeded,
+                                        }
+                                    )
+                                );
                             }
                         } while (!stateWaitForInput);
 
@@ -574,34 +629,24 @@ namespace Take.Blip.Builder
                     }
 
                     _blipMonitoringLogger.ActionExecution(
-                        new LogInput
-                        {
-                            Data = new JObject
-                            {
-                                ["flowId"] = flow.Id,
-                                ["stateId"] = state?.Id,
-                                ["input"] = message.Content.ToString(),
-                                ["actionId"] = context.GetCurrentActionTrace()?.ActionId ?? null,
-                                ["actionTitle"] = context.GetCurrentActionTrace()?.ActionTitle ?? null,
-                                ["ticket"] = context.GetTicket()?.Id ?? null,
-                                ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
-                                ["error"] = inputTrace?.Error,
-                                ["inputTrace"] =
-                                    inputTrace != null ? JToken.FromObject(inputTrace) : null,
-                                ["traceSettings"] =
-                                    traceSettings != null ? JToken.FromObject(traceSettings) : null,
-                            },
-                            FlowVersion = flow.Version,
-                            Channel = message.From?.ToNode().Domain,
-                            IdMessage = message.Id,
-                            From = userIdentity,
-                            To = ownerIdentity,
-                            EventType = "StateExecution",
-                            Title = "InputProcessing",
-                            OriginalFrom = message.From,
-                            OriginalTo = message.To,
-                        }
-                    );
+                           CreateStateExecutionLog(
+                               LogTitles.Flow.InputProcessing,
+                               state?.Id,
+                               context,
+                               new JObject
+                               {
+                                   ["stateId"] = state?.Id,
+                                   ["flowId"] = flow.Id,
+                                   ["input"] = message.Content.ToString(),
+                                   ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
+                                   ["error"] = inputTrace?.Error,
+                                   ["inputTrace"] =
+                                       inputTrace != null ? JToken.FromObject(inputTrace) : null,
+                                   ["traceSettings"] =
+                                       traceSettings != null ? JToken.FromObject(traceSettings) : null,
+                               }
+                           )
+                       );
                 }
 
                 ownerContext.Dispose();
@@ -621,6 +666,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
+            context.SetCurrentActionSource("inputActions");
             await ProcessActionsAsync(
                 lazyInput,
                 context,
@@ -644,6 +690,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
+            context.SetCurrentActionSource("outputActions");
             await ProcessActionsAsync(
                 lazyInput,
                 context,
@@ -667,6 +714,7 @@ namespace Take.Blip.Builder
                 return;
             }
 
+            context.SetCurrentActionSource("afterStateChangedActions");
             await ProcessActionsAsync(
                 lazyInput,
                 context,
@@ -688,6 +736,7 @@ namespace Take.Blip.Builder
         {
             if (flow.OutputActions != null)
             {
+                context.SetCurrentActionSource("globalOutputActions");
                 await ProcessActionsAsync(
                     lazyInput,
                     context,
@@ -710,6 +759,7 @@ namespace Take.Blip.Builder
         {
             if (flow.AfterStateChangedActions != null)
             {
+                context.SetCurrentActionSource("globalAfterStateChangedActions");
                 await ProcessActionsAsync(
                     lazyInput,
                     context,
@@ -779,6 +829,20 @@ namespace Take.Blip.Builder
                 context,
                 shortNameOfSubflow,
                 cancellationToken
+            );
+
+            _blipMonitoringLogger.ConversationalFlow(
+                CreateStateExecutionLog(
+                    LogTitles.Flow.SubflowEntry,
+                    state.Id,
+                    context,
+                    new JObject
+                    {
+                        ["parentFlowId"] = parentFlow.Id,
+                        ["currentStateId"] = state.Id,
+                        ["success"] = true,
+                    }
+                )
             );
 
             return (subflow, newState, newStateTrace, newStateStopwatch);
@@ -853,6 +917,20 @@ namespace Take.Blip.Builder
                     cancellationToken
                 );
             }
+
+            _blipMonitoringLogger.ConversationalFlow(
+                CreateStateExecutionLog(
+                    LogTitles.Flow.SubflowReturn,
+                    state?.Id,
+                    context,
+                    new JObject
+                    {
+                        ["subflowId"] = flow.Id,
+                        ["nextStateId"] = state?.Id,
+                        ["success"] = true,
+                    }
+                )
+            );
 
             return (parentFlow, state, stateTrace, stateStopwatch);
         }
@@ -933,12 +1011,9 @@ namespace Take.Blip.Builder
                 var (actionTrace, actionStopwatch) =
                     actionTraces != null
                         ? (stateAction.ToTrace(), Stopwatch.StartNew())
-                        : (null, null);
+                        : (stateAction.ToTrace(), (Stopwatch)null);
 
-                if (actionTrace != null)
-                {
-                    context.SetCurrentActionTrace(actionTrace);
-                }
+                context.SetCurrentActionTrace(actionTrace);
 
                 // Configure the action timeout, that can be defined in action or flow level
                 var executionTimeoutInSeconds =
@@ -1019,6 +1094,8 @@ namespace Take.Blip.Builder
                                 actionTrace.ParsedSettings = new JRaw(stringifySetting);
                             }
                         }
+
+                        context.SetCurrentStateId(state.Id);
 
                         using (
                             LogContext.PushProperty(
@@ -1247,7 +1324,11 @@ namespace Take.Blip.Builder
         )
         {
             var outputs = state.Outputs;
+            var currentStateId = state.Id;
             state = null;
+
+            bool? matchedIsDefaultOutput = null;
+            int? matchedOutputOrder = null;
 
             // If there's any output in the current state
             if (outputs != null)
@@ -1292,6 +1373,8 @@ namespace Take.Blip.Builder
                                 );
                             }
 
+                            matchedIsDefaultOutput = output.Conditions == null;
+                            matchedOutputOrder = output.Order;
                             break;
                         }
                     }
@@ -1309,14 +1392,29 @@ namespace Take.Blip.Builder
                             }
                         }
 
-                        throw new OutputProcessingException(
-                            $"Failed to process output condition to state '{output.StateId}'",
-                            ex
-                        )
+                        var error = new OutputProcessingException(
+                         $"Failed to process output condition to state '{output.StateId}'",
+                         ex)
                         {
                             OutputStateId = output.StateId,
                             OutputConditions = output.Conditions,
                         };
+
+                        _blipMonitoringLogger.ErrorEvents(
+                            CreateStateExecutionLog(
+                                LogTitles.Flow.OutputProcessing,
+                                currentStateId,
+                                context,
+                                new JObject
+                                {
+                                    ["currentStateId"] = currentStateId,
+                                    ["outputStateId"] = output.StateId,
+                                    ["outputOrder"] = output.Order,
+                                    ["isDefaultOutput"] = output.Conditions == null,
+                                }
+                            ), error
+                        );
+                        throw error;
                     }
                     finally
                     {
@@ -1330,6 +1428,22 @@ namespace Take.Blip.Builder
                     }
                 }
             }
+
+            _blipMonitoringLogger.ConversationalFlow(
+                CreateStateExecutionLog(
+                    LogTitles.Flow.OutputProcessing,
+                    currentStateId,
+                    context,
+                    new JObject
+                    {
+                        ["currentStateId"] = currentStateId,
+                        ["nextStateId"] = state?.Id,
+                        ["outputsCount"] = outputs?.Length,
+                        ["matchedOutputOrder"] = matchedOutputOrder,
+                        ["isDefaultOutput"] = matchedIsDefaultOutput,
+                    }
+                )
+            );
 
             return state;
         }
@@ -1379,11 +1493,35 @@ namespace Take.Blip.Builder
                     }
                 }
 
+                _blipMonitoringLogger.ConversationalFlow(
+                    CreateStateExecutionLog(
+                        LogTitles.Flow.InputValidation,
+                        state.Id,
+                        context,
+                        new JObject
+                        {
+                            ["stateId"] = state.Id,
+                            ["validationRule"] = state.Input.Validation.Rule.ToString(),
+                            ["isValid"] = false,
+                            ["success"] = true,
+                        }
+                    )
+                );
+
                 return false;
             }
 
             return true;
         }
+
+        private LogInput CreateStateExecutionLog(
+            string title,
+            string stateId,
+            IContext context,
+            JObject data,
+            JObject sensitiveData = null
+        ) =>
+            context.ToStateLog(title, stateId, data, sensitiveData);
 
         private void AddStateIdToSettings(
             string actionType,
@@ -1648,6 +1786,20 @@ namespace Take.Blip.Builder
                             linkedCts.Token
                         );
 
+                        _blipMonitoringLogger.ConversationalFlow(
+                            CreateStateExecutionLog(
+                                LogTitles.Flow.CommandInput,
+                                stateId,
+                                context,
+                                new JObject
+                                {
+                                    ["stateId"] = stateId,
+                                    ["actionId"] = actionId,
+                                    ["success"] = true,
+                                }
+                            )
+                        );
+
                         return outputVariables;
                     }
                     finally
@@ -1675,6 +1827,22 @@ namespace Take.Blip.Builder
 
                 builderException.StateId = stateId;
                 builderException.UserId = userIdentity;
+
+                _blipMonitoringLogger.ErrorEvents(
+                    BlipLogExtensions.ToStateLog(
+                        LogTitles.Flow.CommandInput,
+                        stateId,
+                        message,
+                        userIdentity,
+                        ownerIdentity,
+                        new JObject
+                        {
+                            ["stateId"] = stateId,
+                            ["actionId"] = actionId,
+                        }
+                    ),
+                    ex
+                );
 
                 throw builderException;
             }
@@ -1779,10 +1947,9 @@ namespace Take.Blip.Builder
 
             // Trace infra
             var (actionTrace, actionStopwatch) =
-                actionTraces != null ? (stateAction.ToTrace(), Stopwatch.StartNew()) : (null, null);
+                actionTraces != null ? (stateAction.ToTrace(), Stopwatch.StartNew()) : (stateAction.ToTrace(), (Stopwatch)null);
 
-            if (actionTrace != null)
-                context.SetCurrentActionTrace(actionTrace);
+            context.SetCurrentActionTrace(actionTrace);
 
             // Configure the action timeout, that can be defined in action or flow level
             var executionTimeoutInSeconds =

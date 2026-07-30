@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Microsoft.ClearScript;
 using Microsoft.ClearScript.V8;
+using Newtonsoft.Json.Linq;
 using Serilog;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Actions.ExecuteScriptV2.Functions;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
@@ -19,6 +22,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         private readonly IConfiguration _configuration;
         private readonly IHttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly IBlipLogger _blipMonitoringLogger;
 
         private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteScriptV2Settings.OutputVariable).ToCamelCase() };
 
@@ -26,7 +30,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         public ExecuteScriptV2Action(
             IConfiguration configuration,
             IHttpClient httpClient,
-            ILogger logger)
+            ILogger logger,
+            IBlipLogger? blipMonitoringLogger = null)
             : base(nameof(ExecuteScriptV2), OUTPUT_PARAMETERS_NAME)
         {
             HostSettings.CustomAttributeLoader = new LowerCaseMembersLoader();
@@ -34,12 +39,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             _configuration = configuration;
             _httpClient = httpClient;
             _logger = logger;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         /// <inheritdoc />
         public override async Task ExecuteAsync(IContext context, ExecuteScriptV2Settings settings,
             CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             try
             {
                 var arguments = await GetScriptArgumentsAsync(context, settings, cancellationToken);
@@ -78,10 +85,32 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 var result = engine.ExecuteInvoke(settings.Source, settings.Function,
                     _configuration.ExecuteScriptV2Timeout, arguments);
 
-                await SetScriptResultAsync(context, settings, result, time, cancellationToken);
+                var outputValue = await SetScriptResultAsync(context, settings, result, time, cancellationToken);
+
+                var sensitiveData = new JObject { ["outputValue"] = outputValue };
+                if (settings.InputVariables != null && arguments != null)
+                    sensitiveData["inputVariables"] = JArray.FromObject(arguments);
+
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                {
+                    ["function"] = settings.Function,
+                    ["source"] = settings.Source,
+                    ["outputVariable"] = settings.OutputVariable,
+                    ["captureExceptions"] = settings.CaptureExceptions,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, sensitiveData);
             }
             catch (Exception ex)
             {
+                this.LogError(_blipMonitoringLogger, context, new JObject
+                {
+                    ["function"] = settings.Function,
+                    ["source"] = settings.Source,
+                    ["outputVariable"] = settings.OutputVariable,
+                    ["captureExceptions"] = settings.CaptureExceptions,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, ex);
+
                 if (!settings.CaptureExceptions)
                 {
                     throw;
@@ -161,7 +190,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             return arguments;
         }
 
-        private static async Task SetScriptResultAsync(
+        private static async Task<string> SetScriptResultAsync(
             IContext context, ExecuteScriptV2Settings settings, object result, Time time,
             CancellationToken cancellationToken)
         {
@@ -175,6 +204,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             {
                 await context.DeleteVariableAsync(settings.OutputVariable, cancellationToken);
             }
+
+            return data;
         }
     }
 }

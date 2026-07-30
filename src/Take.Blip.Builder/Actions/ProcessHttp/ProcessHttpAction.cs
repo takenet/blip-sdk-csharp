@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Security;
@@ -11,6 +12,8 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
 
@@ -30,6 +33,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
         private readonly IConfiguration _configuration;
         private readonly IVariableReplacer _variableReplacer;
         private readonly ISensitiveInfoReplacer _sensitiveInfoReplacer;
+        private readonly IBlipLogger _blipMonitoringLogger;
 
         private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[]
         {
@@ -37,7 +41,7 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             nameof(ProcessHttpSettings.ResponseBodyVariable).ToCamelCase()
         };
 
-        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration,  ISensitiveInfoReplacer sensitiveInfoReplacer, IVariableReplacer variableReplacer)
+        public ProcessHttpAction(IHttpClient httpClient, ILogger logger, IConfiguration configuration, ISensitiveInfoReplacer sensitiveInfoReplacer, IVariableReplacer variableReplacer, IBlipLogger? blipMonitoringLogger = null)
             : base(nameof(ProcessHttp), OUTPUT_PARAMETERS_NAME)
         {
             _httpClient = httpClient;
@@ -45,12 +49,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             _configuration = configuration;
             _sensitiveInfoReplacer = sensitiveInfoReplacer;
             _variableReplacer = variableReplacer;
+            _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
         public override async Task ExecuteAsync(IContext context, ProcessHttpSettings settings, CancellationToken cancellationToken)
         {
+            var sw = Stopwatch.StartNew();
             var responseStatus = 0;
             string responseBody = null;
+            string requestBody = null;
             try
             {
                 bool isSuccessStatusCode;
@@ -77,10 +84,10 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                     if (!string.IsNullOrWhiteSpace(settings.Body))
                     {
                         string contentType = null;
-                        var body = await _variableReplacer.ReplaceAsync(settings.Body, context, cancellationToken, ACTION_PROCESS_HTTP);
+                        requestBody = await _variableReplacer.ReplaceAsync(settings.Body, context, cancellationToken, ACTION_PROCESS_HTTP);
 
                             settings.Headers?.TryGetValue("Content-Type", out contentType);
-                            httpRequestMessage.Content = new StringContent(body, Encoding.UTF8,
+                            httpRequestMessage.Content = new StringContent(requestBody, Encoding.UTF8,
                                 contentType ?? "application/json");
                     }
 
@@ -126,6 +133,19 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 {
                     PushStatusCodeWarning(context, responseStatus);
                 }
+
+                this.LogExecution(_blipMonitoringLogger, context, new JObject
+                {
+                    ["uri"] = settings.Uri?.ToString(),
+                    ["method"] = settings.Method,
+                    ["responseStatus"] = responseStatus.ToString(),
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, new JObject
+                {
+                    ["requestBody"] = requestBody,
+                    ["responseBody"] = responseBody,
+                    ["headers"] = settings.Headers != null ? JObject.FromObject(settings.Headers) : null
+                });
             }
             catch (HttpRequestException ex)
             {
@@ -143,6 +163,13 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                         responseBody, cancellationToken);
                 }
 
+                this.LogError(_blipMonitoringLogger, context, new JObject
+                {
+                    ["uri"] = settings.Uri?.ToString(),
+                    ["method"] = settings.Method,
+                    ["responseStatus"] = responseStatus,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, ex);
             }
             catch (Exception ex)
             {
@@ -151,6 +178,14 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
                 {
                     PushTimeoutWarning(context);
                 }
+
+                this.LogError(_blipMonitoringLogger, context, new JObject
+                {
+                    ["uri"] = settings.Uri?.ToString(),
+                    ["method"] = settings.Method,
+                    ["responseStatus"] = responseStatus,
+                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                }, ex);
             }
             finally
             {
