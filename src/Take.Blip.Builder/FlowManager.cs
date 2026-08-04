@@ -290,6 +290,8 @@ namespace Take.Blip.Builder
                                 ? titleToken?.ToString()
                                 : state?.Id;
                             var blockStopwatch = Stopwatch.StartNew();
+                            var startStateId = stateId;
+
                             var redirectToClientState = String.Empty;
                             try
                             {
@@ -300,7 +302,6 @@ namespace Take.Blip.Builder
                                         context,
                                         new JObject
                                         {
-                                            ["stateName"] = stateId,
                                             ["flowId"] = flow.Id,
                                             ["stateName"] = blockStateName,
                                         },
@@ -544,12 +545,16 @@ namespace Take.Blip.Builder
                                 _blipMonitoringLogger.ConversationalFlow(
                                     CreateStateExecutionLog(
                                         LogTitles.Flow.StateProcessingEnd,
-                                        state?.Id,
+                                        startStateId,
                                         context,
                                         new JObject
                                         {
                                             ["stateName"] = blockStateName,
                                             ["flowId"] = flow.Id,
+                                            ["nextStateId"] = state?.Id,
+                                            ["nextStateName"] = state?.ExtensionData != null && state.ExtensionData.TryGetValue("name", out var nextTitleToken)
+                                                ? nextTitleToken?.ToString()
+                                                : state?.Id,
                                             ["elapsedMilliseconds"] = blockStopwatch.ElapsedMilliseconds,
                                             ["success"] = blockProcessingSucceeded,
                                         }
