@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Ai.Bot.Monitoring.Abstractions;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 using Take.Blip.Client.Extensions.ContactsJourney;
 
 namespace Take.Blip.Builder.Actions.TrackContactsJourney
@@ -41,6 +40,7 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     ["stateId"] = settings.StateId,
                     ["stateName"] = settings.StateName,
                     ["previousStateId"] = settings.PreviousStateId,
+                    ["previousStateName"] = settings.PreviousStateName,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
             }
@@ -51,6 +51,7 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
                     ["stateId"] = settings.StateId,
                     ["stateName"] = settings.StateName,
                     ["previousStateId"] = settings.PreviousStateId,
+                    ["previousStateName"] = settings.PreviousStateName,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);
                 throw;
