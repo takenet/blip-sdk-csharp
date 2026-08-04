@@ -290,8 +290,7 @@ namespace Take.Blip.Builder
                                 ? titleToken?.ToString()
                                 : state?.Id;
                             var blockStopwatch = Stopwatch.StartNew();
-                            var startStateId = stateId;
-
+                            var startStateId = state?.Id;
                             var redirectToClientState = String.Empty;
                             try
                             {
