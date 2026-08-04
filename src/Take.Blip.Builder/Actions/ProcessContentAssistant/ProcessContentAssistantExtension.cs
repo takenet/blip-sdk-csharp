@@ -49,7 +49,7 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         /// </summary>
         /// <param name="contentResult"></param>
         /// <returns></returns>
-        public static string SerializeContentAssistantActionResponse(this ContentAssistant contentResult)
+        public static string SerializeContentAssistantActionResponse(this Client.Extensions.ArtificialIntelligence.ContentAssistant contentResult)
         {
             var bestCombinationFound = contentResult.Combinations?.FirstOrDefault();  // The first combination is that has the best score
             var result = contentResult?.Results?.FirstOrDefault();
