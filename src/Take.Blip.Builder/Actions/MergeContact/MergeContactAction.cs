@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Lime.Messaging.Resources;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Abstractions;
+using Blip.Ai.Bot.Monitoring.Logging.Abstractions.Models;
 using Take.Blip.Client.Extensions.Contacts;
 
 namespace Take.Blip.Builder.Actions.MergeContact

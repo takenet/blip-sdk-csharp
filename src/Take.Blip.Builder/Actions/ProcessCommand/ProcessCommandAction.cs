@@ -8,8 +8,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Abstractions;
+using Blip.Ai.Bot.Monitoring.Logging.Abstractions.Models;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
 

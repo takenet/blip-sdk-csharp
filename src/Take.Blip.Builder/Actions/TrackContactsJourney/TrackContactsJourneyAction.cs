@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Blip.Ai.Bot.Monitoring.Logging.Abstractions;
 using Take.Blip.Client.Extensions.ContactsJourney;
 
 namespace Take.Blip.Builder.Actions.TrackContactsJourney

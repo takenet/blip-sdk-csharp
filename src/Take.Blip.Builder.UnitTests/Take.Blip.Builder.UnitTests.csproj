@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Take.Blip.Ai.Bot.Monitoring.Abstractions\Take.Blip.Ai.Bot.Monitoring.Abstractions.csproj" />
     <ProjectReference Include="..\Take.Blip.Builder\Take.Blip.Builder.csproj" />
   </ItemGroup>
 

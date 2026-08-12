@@ -1,6 +1,6 @@
+using Blip.Ai.Bot.Monitoring.Logging.Abstractions.Models;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
 
 namespace Take.Blip.Builder.Utils
 {
@@ -30,6 +30,7 @@ namespace Take.Blip.Builder.Utils
                 Data = data,
                 FlowVersion = context?.Flow?.Version ?? 1,
                 SensitiveData = sensitiveData,
+                FlowId = context?.Flow?.Id
             };
         }
 
@@ -51,7 +52,8 @@ namespace Take.Blip.Builder.Utils
                 OriginalTo = context?.Input?.Message?.To,
                 Data = data,
                 FlowVersion = context?.Flow?.Version ?? 1,
-                SensitiveData = sensitiveData
+                SensitiveData = sensitiveData,
+                FlowId = context?.Flow?.Id
             };
         }
 
@@ -78,7 +80,8 @@ namespace Take.Blip.Builder.Utils
                 OriginalFrom = message?.From,
                 OriginalTo = message?.To,
                 Data = data,
-                FlowVersion = 1
+                FlowVersion = 1,
+                FlowId = null
             };
         }
 

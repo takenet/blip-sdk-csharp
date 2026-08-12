@@ -7,8 +7,8 @@ using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Abstractions;
+using Blip.Ai.Bot.Monitoring.Logging.Abstractions.Models;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.SendRawMessage

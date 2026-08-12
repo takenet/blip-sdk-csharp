@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.2.32630.192
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11612.150 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Take.Blip.Client", "Take.Blip.Client\Take.Blip.Client.csproj", "{C10F4D3E-1B45-44C2-B25B-8785A89B67DC}"
 EndProject
@@ -39,8 +39,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelpDesk", "Samples\HelpDesk\HelpDesk.csproj", "{10DC6EDE-CF09-4D37-A63C-41E035C215E5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Builder.Benchmark", "Take.Blip.Builder.Benchmark\Take.Blip.Builder.Benchmark.csproj", "{80384664-856D-4C98-AE9F-22AD1078A7D0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Take.Blip.Ai.Bot.Monitoring.Abstractions", "Take.Blip.Ai.Bot.Monitoring.Abstractions\Take.Blip.Ai.Bot.Monitoring.Abstractions.csproj", "{7184C7BA-4574-4120-A86E-C265AC471282}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -104,10 +102,6 @@ Global
 		{80384664-856D-4C98-AE9F-22AD1078A7D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80384664-856D-4C98-AE9F-22AD1078A7D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80384664-856D-4C98-AE9F-22AD1078A7D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7184C7BA-4574-4120-A86E-C265AC471282}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7184C7BA-4574-4120-A86E-C265AC471282}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7184C7BA-4574-4120-A86E-C265AC471282}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7184C7BA-4574-4120-A86E-C265AC471282}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
