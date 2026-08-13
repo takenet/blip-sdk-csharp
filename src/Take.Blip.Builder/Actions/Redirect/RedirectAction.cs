@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Blip.Ai.Bot.Monitoring.Logging.Abstractions;
-using Blip.Ai.Bot.Monitoring.Logging.Abstractions.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
 
 namespace Take.Blip.Builder.Actions.Redirect
 {

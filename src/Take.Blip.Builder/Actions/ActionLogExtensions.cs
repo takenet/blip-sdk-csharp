@@ -1,5 +1,5 @@
 using System;
-using Blip.Ai.Bot.Monitoring.Logging.Abstractions;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Utils;
 

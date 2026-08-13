@@ -1,4 +1,4 @@
-using Blip.Ai.Bot.Monitoring.Logging.Abstractions.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 

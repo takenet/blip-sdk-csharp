@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
-using Blip.Ai.Bot.Monitoring.Logging.Abstractions;
-using Blip.Ai.Bot.Monitoring.Logging.Abstractions.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 
