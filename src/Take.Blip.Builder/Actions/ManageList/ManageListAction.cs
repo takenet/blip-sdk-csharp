@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Lime.Protocol.Network;
 using Newtonsoft.Json.Linq;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Client.Extensions.Broadcast;
 
 namespace Take.Blip.Builder.Actions.ManageList

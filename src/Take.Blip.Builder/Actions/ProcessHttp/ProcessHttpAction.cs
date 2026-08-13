@@ -12,8 +12,9 @@ using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Utils;
 

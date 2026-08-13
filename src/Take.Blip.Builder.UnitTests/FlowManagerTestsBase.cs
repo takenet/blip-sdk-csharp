@@ -6,7 +6,7 @@ using Lime.Protocol.Serialization;
 using NSubstitute;
 using Serilog;
 using SimpleInjector;
-using Take.Blip.Ai.Bot.Monitoring.Abstractions;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
