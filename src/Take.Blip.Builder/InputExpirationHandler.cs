@@ -1,5 +1,6 @@
 ﻿using Lime.Messaging.Contents;
 using Lime.Protocol;
+using Lime.Protocol.Network;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -75,7 +76,15 @@ namespace Take.Blip.Builder
 
                 if (scheduledMessage != null)
                 {
-                    await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
+                    try
+                    {
+                        await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
+                    }
+                    catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
+                    {
+                        // Timer was already executed or cancelled by a concurrent pod — safe to ignore
+                        _logger.Warning(ex, "Scheduled message with id '{MessageId}' was already cancelled or executed", messageId);
+                    }
                 }
 
             }
@@ -205,7 +214,15 @@ namespace Take.Blip.Builder
         {
             var scheduleMessage = CreateInputExirationMessage(message, state.Id, flow.SessionState);
             var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes);
-            await _schedulerExtension.ScheduleMessageAsync(scheduleMessage, scheduleTime, from, cancellationToken);
+            try
+            {
+                await _schedulerExtension.ScheduleMessageAsync(scheduleMessage, scheduleTime, from, cancellationToken);
+            }
+            catch (LimeException ex)
+            {
+                // Duplicate schedule from a concurrent pod — the job is already queued, so this is a no-op
+                _logger.Warning(ex, "Could not schedule expiration message with id '{MessageId}' — may already exist", scheduleMessage.Id);
+            }
         }
         private async Task<bool> ValidateInputExirationCountAsync(State state, Message message, Node from, IContext context, CancellationToken cancellationToken)
         {
