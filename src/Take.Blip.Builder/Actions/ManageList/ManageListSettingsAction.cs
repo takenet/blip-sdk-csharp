@@ -3,6 +3,6 @@
     public enum ManageListSettingsAction
     {
         Add,
-        Remove
+        Remove,
     }
 }

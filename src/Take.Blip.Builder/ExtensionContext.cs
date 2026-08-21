@@ -23,34 +23,63 @@ namespace Take.Blip.Builder
             LazyInput input,
             Flow flow,
             IEnumerable<IVariableProvider> variableProviders,
-            IContextExtension contextExtension)
-            : base (user, application, input, flow, variableProviders)
+            IContextExtension contextExtension
+        )
+            : base(user, application, input, flow, variableProviders)
         {
             _contextExtension = contextExtension;
         }
 
-        public override Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
+        public override Task SetVariableAsync(
+            string name,
+            string value,
+            CancellationToken cancellationToken,
+            TimeSpan expiration = default(TimeSpan)
+        )
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            return _contextExtension.SetTextVariableAsync(UserIdentity, name.ToLowerInvariant(), value, cancellationToken, expiration);
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+            return _contextExtension.SetTextVariableAsync(
+                UserIdentity,
+                name.ToLowerInvariant(),
+                value,
+                cancellationToken,
+                expiration
+            );
         }
 
-        public override async Task DeleteVariableAsync(string name, CancellationToken cancellationToken)
+        public override async Task DeleteVariableAsync(
+            string name,
+            CancellationToken cancellationToken
+        )
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
 
             try
             {
-                await _contextExtension.DeleteVariableAsync(UserIdentity, name.ToLowerInvariant(), cancellationToken);
+                await _contextExtension.DeleteVariableAsync(
+                    UserIdentity,
+                    name.ToLowerInvariant(),
+                    cancellationToken
+                );
             }
-            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND) { }
+            catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
+            { }
         }
 
-        public override async Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken)
+        public override async Task<string> GetContextVariableAsync(
+            string name,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
-                return await _contextExtension.GetTextVariableAsync(UserIdentity, name, cancellationToken);
+                return await _contextExtension.GetTextVariableAsync(
+                    UserIdentity,
+                    name,
+                    cancellationToken
+                );
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {

@@ -7,6 +7,10 @@ namespace Take.Blip.Builder.Variables
     {
         VariableSource Source { get; }
 
-        Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken);
+        Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        );
     }
 }

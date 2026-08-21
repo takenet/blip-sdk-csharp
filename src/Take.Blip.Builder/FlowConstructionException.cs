@@ -10,14 +10,12 @@ namespace Take.Blip.Builder
         private const string FLOW_CONSTRUCTION_TAG = "[FlowConstruction]";
 
         /// <inheritdoc />
-        public FlowConstructionException(string message) : base(ModifyMessage(message))
-        {
-        }
+        public FlowConstructionException(string message)
+            : base(ModifyMessage(message)) { }
 
         /// <inheritdoc />
-        public FlowConstructionException(string message, Exception innerException) : base(ModifyMessage(message), innerException)
-        {
-        }
+        public FlowConstructionException(string message, Exception innerException)
+            : base(ModifyMessage(message), innerException) { }
 
         private static string ModifyMessage(string message)
         {

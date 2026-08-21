@@ -1,12 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Serilog;
-using Take.Blip.Client;
-using Lime.Protocol;
-using System;
-using Take.Blip.Builder.Utils;
 using Take.Blip.Builder.Models;
+using Take.Blip.Builder.Utils;
+using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -26,13 +26,17 @@ namespace Take.Blip.Builder.Variables
         /// <param name="sender">The sender to use for sending commands.</param>
         /// <param name="documentSerializer">The document serializer to use.</param>
         /// <param name="logger">The logger to use for logging.</param>
-        public BlipFunctionVariableProvider(ISender sender, IDocumentSerializer documentSerializer, ILogger logger)
-            : base(sender, documentSerializer, "functions", logger, BUILDER_ADDRESS) {
+        public BlipFunctionVariableProvider(
+            ISender sender,
+            IDocumentSerializer documentSerializer,
+            ILogger logger
+        )
+            : base(sender, documentSerializer, "functions", logger, BUILDER_ADDRESS)
+        {
             _sender = sender;
             _logger = logger;
         }
 
-        
         /// <summary>
         /// Gets the source of the variable.
         /// </summary>
@@ -45,24 +49,37 @@ namespace Take.Blip.Builder.Variables
         /// <param name="context">The context in which the variable is being requested.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>The value of the variable.</returns>
-        public override async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+        public override async Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
             var getFunctionCommand = GenerateFunctionCommand(name);
             try
             {
                 var resourceCommandResult = await _sender.ProcessCommandAsync(
-                getFunctionCommand,
-                cancellationToken);
+                    getFunctionCommand,
+                    cancellationToken
+                );
 
                 if (resourceCommandResult.Status != CommandStatus.Success)
                 {
-                    _logger.Warning("Variable {VariableName} from {ResourceName} not found", name, APPLICATION_NAME);
+                    _logger.Warning(
+                        "Variable {VariableName} from {ResourceName} not found",
+                        name,
+                        APPLICATION_NAME
+                    );
                     return null;
                 }
 
-                var function = ((DocumentCollection)resourceCommandResult.Resource).Items[0].ToObject<Function>();
+                var function = ((DocumentCollection)resourceCommandResult.Resource)
+                    .Items[0]
+                    .ToObject<Function>();
 
-                return !string.IsNullOrEmpty(function.FunctionContent) ? function.FunctionContent : null;
+                return !string.IsNullOrEmpty(function.FunctionContent)
+                    ? function.FunctionContent
+                    : null;
             }
             catch (Exception ex)
             {
@@ -70,14 +87,13 @@ namespace Take.Blip.Builder.Variables
             }
         }
 
-
         private Command GenerateFunctionCommand(string name)
         {
             var command = new Command()
             {
                 Uri = new LimeUri($"/{APPLICATION_NAME}?functionName={name}"),
                 To = BUILDER_ADDRESS,
-                Method = CommandMethod.Get
+                Method = CommandMethod.Get,
             };
 
             return command;

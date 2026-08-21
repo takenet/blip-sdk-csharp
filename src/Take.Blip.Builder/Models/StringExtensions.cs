@@ -36,25 +36,27 @@ namespace Take.Blip.Builder.Models
 
             for (var j = 1; j <= m; j++)
             {
-                d[0, j%2] = j;
+                d[0, j % 2] = j;
                 for (var i = 1; i <= n; i++)
                 {
                     if (s[i - 1] == t[j - 1])
                     {
-                        d[i, j%2] = d[i - 1, (j - 1)%2];        //no operation
+                        d[i, j % 2] = d[i - 1, (j - 1) % 2]; //no operation
                     }
                     else
-                    { 
-                        d[i, j%2] = Math.Min(Math.Min(
-                                d[i - 1, j%2] + 1,              //a deletion
-                                d[i, (j - 1)%2] + 1),           //an insertion
-                                d[i - 1, (j - 1)%2] + 1         //a substitution
+                    {
+                        d[i, j % 2] = Math.Min(
+                            Math.Min(
+                                d[i - 1, j % 2] + 1, //a deletion
+                                d[i, (j - 1) % 2] + 1
+                            ), //an insertion
+                            d[i - 1, (j - 1) % 2] + 1 //a substitution
                         );
                     }
                 }
             }
 
-            return d[n, m%2];
+            return d[n, m % 2];
         }
     }
 }

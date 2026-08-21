@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using Lime.Protocol.Serialization;
 using Serilog;
 using Take.Blip.Client;
-using System.Collections.Generic;
-using System.Text.Json;
 
 namespace Take.Blip.Builder.Variables
 {
@@ -15,39 +15,53 @@ namespace Take.Blip.Builder.Variables
         private static string APPLICATION_NAME = "functions";
         private static readonly string BUILDER_ADDRESS = "postmaster@builder.msging.net";
         private static readonly string AI_AGENT_OBJECT = "aiagent";
-        private static Dictionary<string,string> values;
+        private static Dictionary<string, string> values;
         private static readonly string AI_AGENT_ALL_OBJECT = "message";
         private readonly ILogger _logger;
-        public AiAgentVariableProvider(ISender sender, IDocumentSerializer documentSerializer, ILogger logger)
+
+        public AiAgentVariableProvider(
+            ISender sender,
+            IDocumentSerializer documentSerializer,
+            ILogger logger
+        )
             : base(sender, documentSerializer, APPLICATION_NAME, logger, BUILDER_ADDRESS)
         {
             _sender = sender;
             _logger = logger;
-            values = new Dictionary<string, string> { { "redirect", "redirect" }, 
-                                                      { "userMessageId", "user_message_id" },
-                                                      { "skill_id", "skill_id" },
-                                                      { "task_id", "taks_id" },
-                                                      { "taskName", "task_name" },
-                                                      { "skillName", "skill_name" },
-                                                      { "toolCall_id", "tool_call_id" },
-                                                      { "name", "name" },
-                                                      { "parameters", "parameters" },
-                                                      { "userMessage", "user_message" },
-                                                      { "userMessage_id", "user_message_id" },
-                                                      { "agentResponse", "agent_response" },
-                                                      { "errorCode", "error_code" },
-                                                      { "message", "" },
+            values = new Dictionary<string, string>
+            {
+                { "redirect", "redirect" },
+                { "userMessageId", "user_message_id" },
+                { "skill_id", "skill_id" },
+                { "task_id", "taks_id" },
+                { "taskName", "task_name" },
+                { "skillName", "skill_name" },
+                { "toolCall_id", "tool_call_id" },
+                { "name", "name" },
+                { "parameters", "parameters" },
+                { "userMessage", "user_message" },
+                { "userMessage_id", "user_message_id" },
+                { "agentResponse", "agent_response" },
+                { "errorCode", "error_code" },
+                { "message", "" },
             };
         }
 
         public override VariableSource Source => VariableSource.AiAgent;
 
-        public override async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+        public override async Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
                 var stringAiAgentResult = "";
-                var aiAgentObject = await context.GetVariableAsync(AI_AGENT_OBJECT, cancellationToken);
+                var aiAgentObject = await context.GetVariableAsync(
+                    AI_AGENT_OBJECT,
+                    cancellationToken
+                );
 
                 if (!string.IsNullOrEmpty(aiAgentObject))
                 {

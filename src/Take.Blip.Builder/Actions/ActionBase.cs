@@ -6,12 +6,16 @@ using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Actions
 {
-    public abstract class ActionBase<TSettings> : IAction where TSettings : IValidable
+    public abstract class ActionBase<TSettings> : IAction
+        where TSettings : IValidable
     {
         protected ActionBase(string type, string[]? outputVariables = null)
         {
             if (string.IsNullOrWhiteSpace(type))
-                throw new ArgumentException("Action type cannot be null or whitespace.", nameof(type));
+                throw new ArgumentException(
+                    "Action type cannot be null or whitespace.",
+                    nameof(type)
+                );
 
             Type = type;
 
@@ -19,14 +23,17 @@ namespace Take.Blip.Builder.Actions
             {
                 OutputVariables = outputVariables;
             }
-
         }
 
         public string Type { get; }
 
         public string[]? OutputVariables { get; }
 
-        public Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public Task ExecuteAsync(
+            IContext context,
+            JObject settings,
+            CancellationToken cancellationToken
+        )
         {
             if (context == null)
             {
@@ -44,6 +51,10 @@ namespace Take.Blip.Builder.Actions
             return ExecuteAsync(context, validableSettings, cancellationToken);
         }
 
-        public abstract Task ExecuteAsync(IContext context, TSettings settings, CancellationToken cancellationToken);
+        public abstract Task ExecuteAsync(
+            IContext context,
+            TSettings settings,
+            CancellationToken cancellationToken
+        );
     }
 }

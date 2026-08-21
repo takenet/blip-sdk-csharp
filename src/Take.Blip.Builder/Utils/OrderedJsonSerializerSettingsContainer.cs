@@ -16,11 +16,8 @@ namespace Take.Blip.Builder.Utils
                 NullValueHandling = NullValueHandling.Ignore,
             };
             Settings.Converters.Add(
-                new StringEnumConverter
-                {
-                    CamelCaseText = true,
-                    AllowIntegerValues = true
-                });
+                new StringEnumConverter { CamelCaseText = true, AllowIntegerValues = true }
+            );
         }
     }
 }

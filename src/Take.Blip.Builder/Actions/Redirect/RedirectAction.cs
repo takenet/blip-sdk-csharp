@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 
 namespace Take.Blip.Builder.Actions.Redirect
 {
@@ -17,7 +17,11 @@ namespace Take.Blip.Builder.Actions.Redirect
         private readonly IBlipLogger _blipMonitoringLogger;
         private const string REDIRECT_TEST_LOG = "REDIRECT_TEST_LOG";
 
-        public RedirectAction(IRedirectManager redirectManager, ILogger logger, IBlipLogger? blipMonitoringLogger = null)
+        public RedirectAction(
+            IRedirectManager redirectManager,
+            ILogger logger,
+            IBlipLogger? blipMonitoringLogger = null
+        )
         {
             _redirectManager = redirectManager;
             _logger = logger;
@@ -28,40 +32,61 @@ namespace Take.Blip.Builder.Actions.Redirect
 
         public string[]? OutputVariables => null;
 
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(
+            IContext context,
+            JObject settings,
+            CancellationToken cancellationToken
+        )
         {
             var sw = Stopwatch.StartNew();
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
 
             try
             {
-                var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
-                if (context.Input.Message.Metadata != null &&
-                    context.Input.Message.Metadata.TryGetValue(REDIRECT_TEST_LOG, out var metadataRedirectAddress) &&
-                    redirect.Address.ToString().Contains(metadataRedirectAddress))
+                var redirect = settings.ToObject<Lime.Messaging.Contents.Redirect>(
+                    LimeSerializerContainer.Serializer
+                );
+                if (
+                    context.Input.Message.Metadata != null
+                    && context.Input.Message.Metadata.TryGetValue(
+                        REDIRECT_TEST_LOG,
+                        out var metadataRedirectAddress
+                    )
+                    && redirect.Address.ToString().Contains(metadataRedirectAddress)
+                )
                 {
-                    _logger.Warning("#({REDIRECT_TEST_LOG})# ({Message}) - ({Address}) - ({Context})",
+                    _logger.Warning(
+                        "#({REDIRECT_TEST_LOG})# ({Message}) - ({Address}) - ({Context})",
                         REDIRECT_TEST_LOG,
                         context.Input.Message,
                         redirect.Address,
-                        redirect.Context);
+                        redirect.Context
+                    );
                 }
 
                 await _redirectManager.RedirectUserAsync(context, redirect, cancellationToken);
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
-                {
-                    ["address"] = redirect.Address?.ToString(),
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
+                this.LogExecution(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["address"] = redirect.Address?.ToString(),
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    }
+                );
             }
             catch (Exception ex)
             {
-                this.LogError(_blipMonitoringLogger, context, new JObject
-                {
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, ex);
+                this.LogError(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject { ["elapsedMilliseconds"] = sw.ElapsedMilliseconds },
+                    ex
+                );
                 throw;
             }
         }

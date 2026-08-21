@@ -13,8 +13,9 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         private const string BRAZIL_TIMEZONE = "America/Sao_Paulo";
         private const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
 
-        private static readonly TimeZoneInfo _defaultTimezone =
-            TZConvert.GetTimeZoneInfo(BRAZIL_TIMEZONE);
+        private static readonly TimeZoneInfo _defaultTimezone = TZConvert.GetTimeZoneInfo(
+            BRAZIL_TIMEZONE
+        );
 
         /// <summary>
         /// Get the bot timezone or Brazil timezone if not set.
@@ -23,16 +24,22 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="context"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static TimeZoneInfo GetTimeZone(ILogger logger, IContext context,
-            ExecuteScriptV2Settings settings)
+        public static TimeZoneInfo GetTimeZone(
+            ILogger logger,
+            IContext context,
+            ExecuteScriptV2Settings settings
+        )
         {
             try
             {
-                if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR) &&
-                    settings.LocalTimeZoneEnabled)
+                if (
+                    context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR)
+                    && settings.LocalTimeZoneEnabled
+                )
                 {
                     return TZConvert.GetTimeZoneInfo(
-                        context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
+                        context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]
+                    );
                 }
             }
             catch (Exception ex)

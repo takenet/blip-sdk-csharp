@@ -25,12 +25,17 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <param name="time"></param>
         /// <param name="logger"></param>
         /// <param name="cancellationToken"></param>
-        public Context(IContext context, Time time, ILogger logger,
-            CancellationToken cancellationToken)
+        public Context(
+            IContext context,
+            Time time,
+            ILogger logger,
+            CancellationToken cancellationToken
+        )
         {
             _context = context;
             _time = time;
-            _logger = logger.ForContext("OwnerIdentity", context.OwnerIdentity)
+            _logger = logger
+                .ForContext("OwnerIdentity", context.OwnerIdentity)
                 .ForContext("UserIdentity", context.UserIdentity);
             _cancellationToken = cancellationToken;
         }
@@ -44,22 +49,34 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         /// <returns></returns>
         public async Task SetVariableAsync(string key, object value, TimeSpan expiration = default)
         {
-            var result =
-                await ScriptObjectConverter.ToStringAsync(value, _time, _cancellationToken);
+            var result = await ScriptObjectConverter.ToStringAsync(
+                value,
+                _time,
+                _cancellationToken
+            );
 
             if (result != null)
             {
-                _logger.Information("[{Source}] Setting variable '{VariableKey}' in the context",
-                    "ExecuteScriptV2.Context", key);
+                _logger.Information(
+                    "[{Source}] Setting variable '{VariableKey}' in the context",
+                    "ExecuteScriptV2.Context",
+                    key
+                );
 
-                await _context.SetVariableAsync(key, result, _cancellationToken,
-                    expiration: expiration);
+                await _context.SetVariableAsync(
+                    key,
+                    result,
+                    _cancellationToken,
+                    expiration: expiration
+                );
                 return;
             }
 
             _logger.Information(
                 "[{Source}] Deleting variable '{VariableKey}' in the context, set value is empty",
-                "ExecuteScriptV2.Context", key);
+                "ExecuteScriptV2.Context",
+                key
+            );
 
             await _context.DeleteVariableAsync(key, _cancellationToken);
         }
@@ -73,7 +90,9 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
         {
             _logger.Information(
                 "[{Source}] Deleting variable '{VariableKey}' in the context",
-                "ExecuteScriptV2.Context", key);
+                "ExecuteScriptV2.Context",
+                key
+            );
 
             return _context.DeleteVariableAsync(key, _cancellationToken);
         }

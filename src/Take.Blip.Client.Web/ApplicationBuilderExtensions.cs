@@ -7,7 +7,7 @@ namespace Take.Blip.Client.Web
 {
     public static class ApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseBlip(this IApplicationBuilder applicationBuilder) 
-            => applicationBuilder.UseMiddleware<BlipMiddleware>();
+        public static IApplicationBuilder UseBlip(this IApplicationBuilder applicationBuilder) =>
+            applicationBuilder.UseMiddleware<BlipMiddleware>();
     }
 }

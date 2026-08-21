@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using System.Diagnostics;
 using Serilog;
 
 namespace Take.Blip.Client.Receivers
@@ -25,14 +25,25 @@ namespace Take.Blip.Client.Receivers
         /// <param name="exceptionDocument">The exception document.</param>
         /// <param name="logger"></param>
         /// <exception cref="System.ArgumentNullException"></exception>
-        public HandleExceptionMessageReceiver(IMessageReceiver receiver, ISender sender, Document exceptionDocument, ILogger logger)
+        public HandleExceptionMessageReceiver(
+            IMessageReceiver receiver,
+            ISender sender,
+            Document exceptionDocument,
+            ILogger logger
+        )
         {
             _receiver = receiver ?? throw new ArgumentNullException(nameof(receiver));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _sendResponseMessageReceiver = new SendResponseMessageReceiver(sender, exceptionDocument);
+            _sendResponseMessageReceiver = new SendResponseMessageReceiver(
+                sender,
+                exceptionDocument
+            );
         }
 
-        public async Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ReceiveAsync(
+            Message envelope,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             try
             {

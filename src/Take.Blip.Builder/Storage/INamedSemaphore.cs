@@ -6,6 +6,10 @@ namespace Take.Blip.Builder.Storage
 {
     public interface INamedSemaphore
     {
-        Task<IAsyncDisposable> WaitAsync(string handle, TimeSpan timeout, CancellationToken cancellationToken);
+        Task<IAsyncDisposable> WaitAsync(
+            string handle,
+            TimeSpan timeout,
+            CancellationToken cancellationToken
+        );
     }
 }

@@ -3,6 +3,6 @@
     public enum TraceTargetType
     {
         Http,
-        Lime
+        Lime,
     }
 }

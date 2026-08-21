@@ -16,7 +16,8 @@ namespace HelpDesk
     {
         private readonly ISender _sender;
         private readonly IHelpDeskExtension _helpDeskExtension;
-        private static readonly IDictionary<Node, string> _states = new ConcurrentDictionary<Node, string>();
+        private static readonly IDictionary<Node, string> _states =
+            new ConcurrentDictionary<Node, string>();
 
         public MessageReceiver(ISender sender, IHelpDeskExtension helpDeskExtension)
         {
@@ -27,8 +28,8 @@ namespace HelpDesk
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             // Redirect customer from human to robot.
-            if (message.Content.GetType().Equals(typeof(Redirect))){
-
+            if (message.Content.GetType().Equals(typeof(Redirect)))
+            {
                 var redirect = message.Content as Redirect;
                 var ticket = redirect.Context.Value as Ticket;
                 var fromIdentity = Uri.UnescapeDataString(message.From.Name);
@@ -40,7 +41,7 @@ namespace HelpDesk
             }
 
             // Customer is talking with a human
-            if(_states.ContainsKey(message.From) && _states[message.From].Equals("human"))
+            if (_states.ContainsKey(message.From) && _states[message.From].Equals("human"))
             {
                 // Fowarding message to an agent
                 await _helpDeskExtension.ForwardMessageToAgentAsync(message, cancellationToken);
@@ -54,9 +55,13 @@ namespace HelpDesk
             if (content.Text.ToLowerInvariant().Equals("atendimento"))
             {
                 _states.Add(message.From.ToIdentity().ToString(), "human");
-                
+
                 // Create a new ticket
-                var ticket = await _helpDeskExtension.CreateTicketAsync(message.From.ToIdentity(), message.Content, cancellationToken);
+                var ticket = await _helpDeskExtension.CreateTicketAsync(
+                    message.From.ToIdentity(),
+                    message.Content,
+                    cancellationToken
+                );
 
                 await _helpDeskExtension.ForwardMessageToAgentAsync(message, cancellationToken);
             }

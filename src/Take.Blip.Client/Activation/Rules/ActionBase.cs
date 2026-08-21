@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Take.Blip.Client.Activation.Rules
 {
-
     public abstract class ActionBase : NamedEntity
     {
         public ActionBase(string name)
-            : base(name)
-        {
+            : base(name) { }
 
-        }
-
-        public abstract Task ExecuteAsync(IDictionary<string, object> fact, IDictionary<string, object> context, CancellationToken cancellationToken);
+        public abstract Task ExecuteAsync(
+            IDictionary<string, object> fact,
+            IDictionary<string, object> context,
+            CancellationToken cancellationToken
+        );
     }
 }

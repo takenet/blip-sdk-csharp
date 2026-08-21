@@ -30,12 +30,16 @@ namespace Take.Blip.Client
         /// <param name="client"></param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        public static Task StartAsync(this IBlipClient client, CancellationToken cancellationToken)
-            => client.StartAsync(
+        public static Task StartAsync(
+            this IBlipClient client,
+            CancellationToken cancellationToken
+        ) =>
+            client.StartAsync(
                 m => TaskUtil.TrueCompletedTask,
                 n => TaskUtil.TrueCompletedTask,
                 c => TaskUtil.TrueCompletedTask,
-                cancellationToken);
+                cancellationToken
+            );
 
         /// <summary>
         /// Starts the client with the specified envelope consumers.
@@ -51,9 +55,11 @@ namespace Take.Blip.Client
             Func<Message, Task<bool>> messageConsumer,
             Func<Notification, Task<bool>> notificationConsumer,
             Func<Command, Task<bool>> commandConsumer,
-            CancellationToken cancellationToken) 
-                => client.StartAsync(
-                    new ChannelListener(messageConsumer, notificationConsumer, commandConsumer),
-                    cancellationToken);
+            CancellationToken cancellationToken
+        ) =>
+            client.StartAsync(
+                new ChannelListener(messageConsumer, notificationConsumer, commandConsumer),
+                cancellationToken
+            );
     }
 }

@@ -16,7 +16,7 @@
     {
         private readonly ISender _sender;
         private readonly Settings _settings;
-        
+
         public Startup(ISender sender, Settings settings)
         {
             _sender = sender;

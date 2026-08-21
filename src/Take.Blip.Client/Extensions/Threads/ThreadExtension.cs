@@ -1,7 +1,7 @@
-﻿using Lime.Protocol;
-using Lime.Protocol.Network;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
+using Lime.Protocol.Network;
 
 namespace Take.Blip.Client.Extensions.Threads
 {
@@ -9,10 +9,8 @@ namespace Take.Blip.Client.Extensions.Threads
     {
         public const string THREADS_URI = "/threads";
 
-        public ThreadExtension(ISender sender) 
-            : base(sender)
-        {
-        }
+        public ThreadExtension(ISender sender)
+            : base(sender) { }
 
         public Task<DocumentCollection> GetThreadsAsync(CancellationToken cancellationToken)
         {
@@ -20,13 +18,22 @@ namespace Take.Blip.Client.Extensions.Threads
             return ProcessCommandAsync<DocumentCollection>(requestCommand, cancellationToken);
         }
 
-        public Task<DocumentCollection> GetThreadAsync(Identity identity, CancellationToken cancellationToken = default(CancellationToken)) 
-            => GetThreadInternalAsync(identity, null, cancellationToken);
+        public Task<DocumentCollection> GetThreadAsync(
+            Identity identity,
+            CancellationToken cancellationToken = default(CancellationToken)
+        ) => GetThreadInternalAsync(identity, null, cancellationToken);
 
-        public Task<DocumentCollection> GetThreadAsync(Identity identity, int take, CancellationToken cancellationToken = default(CancellationToken)) 
-            => GetThreadInternalAsync(identity, take, cancellationToken);
+        public Task<DocumentCollection> GetThreadAsync(
+            Identity identity,
+            int take,
+            CancellationToken cancellationToken = default(CancellationToken)
+        ) => GetThreadInternalAsync(identity, take, cancellationToken);
 
-        private Task<DocumentCollection> GetThreadInternalAsync(Identity identity, int? take, CancellationToken cancellationToken = default(CancellationToken))
+        private Task<DocumentCollection> GetThreadInternalAsync(
+            Identity identity,
+            int? take,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             var requestUri = $"{THREADS_URI}/{identity}";
             if (take.HasValue)
@@ -37,11 +44,18 @@ namespace Take.Blip.Client.Extensions.Threads
             return ProcessCommandAsync<DocumentCollection>(requestCommand, cancellationToken);
         }
 
-        public Task<Document> GetTranscriptionAsync(Identity identity, string accessKey, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Document> GetTranscriptionAsync(
+            Identity identity,
+            string accessKey,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             if ("".Equals(accessKey) || accessKey == null)
             {
-                throw new LimeException(ReasonCodes.COMMAND_INVALID_ARGUMENT, "Invalid value for accessKey: " + accessKey);
+                throw new LimeException(
+                    ReasonCodes.COMMAND_INVALID_ARGUMENT,
+                    "Invalid value for accessKey: " + accessKey
+                );
             }
 
             var requestUri = $"/threads/{identity}/transcription?accessKey={accessKey}";

@@ -39,9 +39,10 @@ namespace Builder.Console
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
-            IContextProvider contextProvider, 
+            IContextProvider contextProvider,
             IUserOwnerResolver userOwnerResolver,
-            ILogger logger)
+            ILogger logger
+        )
             : base(contactExtension, directoryExtension, logger)
         {
             _flowManager = flowManager;
@@ -55,27 +56,37 @@ namespace Builder.Console
             _artificialIntelligenceExtension = artificialIntelligenceExtension;
         }
 
-        protected override async Task ReceiveAsync(Message message, Contact contact, CancellationToken cancellationToken = new CancellationToken())
+        protected override async Task ReceiveAsync(
+            Message message,
+            Contact contact,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
             var inputMessage = message;
 
             // Check if is a message from a desk agent to the customer
-            if (message.From.Name != null &&
-                message.From.Domain != null &&
-                message.From.Domain.Equals(HelpDeskExtension.DEFAULT_DESK_DOMAIN, StringComparison.OrdinalIgnoreCase))
+            if (
+                message.From.Name != null
+                && message.From.Domain != null
+                && message.From.Domain.Equals(
+                    HelpDeskExtension.DEFAULT_DESK_DOMAIN,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
             {
                 // Check for ticket transfer
-                if (message.Content is Ticket ticket && 
-                    ticket.Status == TicketStatusEnum.Transferred)
+                if (
+                    message.Content is Ticket ticket
+                    && ticket.Status == TicketStatusEnum.Transferred
+                )
                 {
                     return;
-                }                
-                
+                }
+
                 var originator = Node.Parse(Uri.UnescapeDataString(message.From.Name));
 
                 // If the content is a ticket or redirect, change the message originator
-                if (message.Content is Ticket || 
-                    message.Content is Redirect)
+                if (message.Content is Ticket || message.Content is Redirect)
                 {
                     inputMessage = inputMessage.ShallowCopy();
                     inputMessage.From = originator;
@@ -89,14 +100,15 @@ namespace Builder.Console
                             Id = GetForwardId(message.Id),
                             To = originator,
                             Content = message.Content,
-                            Metadata = message.Metadata
+                            Metadata = message.Metadata,
                         },
-                        cancellationToken);
+                        cancellationToken
+                    );
 
                     return;
                 }
             }
-            
+
             // Check for redirects (from desk or a tunnel)
             if (inputMessage.Content is Redirect redirect)
             {
@@ -110,13 +122,17 @@ namespace Builder.Console
             }
 
             // Ignore chatstate composing and paused messages when not on desk
-            if (message.Content is ChatState chatState && 
-                (chatState.State == ChatStateEvent.Composing || chatState.State == ChatStateEvent.Paused))
+            if (
+                message.Content is ChatState chatState
+                && (
+                    chatState.State == ChatStateEvent.Composing
+                    || chatState.State == ChatStateEvent.Paused
+                )
+            )
             {
                 // Determine if the current flow state is a desk state
                 var state = await GetCurrentStateAsync(inputMessage, cancellationToken);
-                if (state == null || 
-                    !state.StartsWith("desk:", StringComparison.OrdinalIgnoreCase))
+                if (state == null || !state.StartsWith("desk:", StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
@@ -125,10 +141,17 @@ namespace Builder.Console
             await _flowManager.ProcessInputAsync(inputMessage, _settings.Flow, cancellationToken);
         }
 
-        private async Task<string> GetCurrentStateAsync(Message message, CancellationToken cancellationToken)
+        private async Task<string> GetCurrentStateAsync(
+            Message message,
+            CancellationToken cancellationToken
+        )
         {
-            var (userIdentity, ownerIdentity) = await _userOwnerResolver.GetUserOwnerIdentitiesAsync(
-                message, _settings.Flow.BuilderConfiguration, cancellationToken);
+            var (userIdentity, ownerIdentity) =
+                await _userOwnerResolver.GetUserOwnerIdentitiesAsync(
+                    message,
+                    _settings.Flow.BuilderConfiguration,
+                    cancellationToken
+                );
 
             var lazyInput = new LazyInput(
                 message,
@@ -137,15 +160,22 @@ namespace Builder.Console
                 _documentSerializer,
                 _envelopeSerializer,
                 _artificialIntelligenceExtension,
-                cancellationToken);
+                cancellationToken
+            );
 
-            var context = _contextProvider.CreateContext(userIdentity, ownerIdentity, lazyInput, _settings.Flow);
+            var context = _contextProvider.CreateContext(
+                userIdentity,
+                ownerIdentity,
+                lazyInput,
+                _settings.Flow
+            );
             return await _stateManager.GetStateIdAsync(context, cancellationToken);
         }
 
         private static string GetForwardId(string messageId)
         {
-            if (messageId == null) return null;
+            if (messageId == null)
+                return null;
             return $"fwd:{messageId}";
         }
     }

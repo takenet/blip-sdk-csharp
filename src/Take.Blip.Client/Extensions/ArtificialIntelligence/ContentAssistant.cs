@@ -51,9 +51,7 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         public Result[] Results { get; set; }
 
         public ContentAssistant()
-            : base(MediaType)
-        {
-        }
+            : base(MediaType) { }
     }
 
     /// <summary>

@@ -6,8 +6,5 @@ using Take.Blip.Builder.Hosting;
 
 namespace Builder.Console
 {
-    public class BuilderConfiguration : ConventionsConfiguration
-    {
-        
-    }
+    public class BuilderConfiguration : ConventionsConfiguration { }
 }

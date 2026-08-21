@@ -23,6 +23,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
         }
 
         public Identity Identity { get; }
+
         [Fact]
         public async Task GetDateShouldReturnTodayDate()
         {
@@ -69,7 +70,11 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("yesterday.date", Context, CancellationToken);
+            var actual = await target.GetVariableAsync(
+                "yesterday.date",
+                Context,
+                CancellationToken
+            );
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(-1).ToString("yyyy-MM-dd"));
@@ -82,7 +87,11 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("plus5days.date", Context, CancellationToken);
+            var actual = await target.GetVariableAsync(
+                "plus5days.date",
+                Context,
+                CancellationToken
+            );
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(5).ToString("yyyy-MM-dd"));
@@ -95,7 +104,11 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("minus5days.date", Context, CancellationToken);
+            var actual = await target.GetVariableAsync(
+                "minus5days.date",
+                Context,
+                CancellationToken
+            );
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(-5).ToString("yyyy-MM-dd"));
@@ -108,7 +121,11 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("tomorrow.plus5days.date", Context, CancellationToken);
+            var actual = await target.GetVariableAsync(
+                "tomorrow.plus5days.date",
+                Context,
+                CancellationToken
+            );
 
             // Assert
             actual.ShouldBe(DateTime.UtcNow.Date.AddDays(6).ToString("yyyy-MM-dd"));

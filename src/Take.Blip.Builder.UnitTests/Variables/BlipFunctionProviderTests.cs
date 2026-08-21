@@ -41,20 +41,25 @@ namespace Take.Blip.Builder.UnitTests.Variables
             {
                 Uri = new LimeUri($"/functions/{Uri.EscapeDataString(FUNCTION_NAME)}"),
                 Method = CommandMethod.Get,
-                To = Node.Parse("postmaster@builder.msging.net")
+                To = Node.Parse("postmaster@builder.msging.net"),
             };
 
             var commandResult = new Command()
             {
                 Status = CommandStatus.Success,
-                Resource = PlainText.Parse(FUCTION_VALUE)
+                Resource = PlainText.Parse(FUCTION_VALUE),
             };
 
-            Sender.ProcessCommandAsync(Arg.Is<Command>(c => c.Id != null &&
-                                                            c.Method.Equals(command.Method) &&
-                                                            c.To.Equals(command.To) &&
-                                                            c.Uri.Equals(command.Uri)),
-                                      Arg.Any<CancellationToken>())
+            Sender
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c =>
+                        c.Id != null
+                        && c.Method.Equals(command.Method)
+                        && c.To.Equals(command.To)
+                        && c.Uri.Equals(command.Uri)
+                    ),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(commandResult);
         }
 
@@ -82,34 +87,37 @@ namespace Take.Blip.Builder.UnitTests.Variables
             {
                 Uri = new LimeUri($"/functions?functionName=teste"),
                 To = BuilderAddress,
-                Method = CommandMethod.Get
+                Method = CommandMethod.Get,
             };
-
 
             //Arrange
             var target = GetTarget();
 
-            Sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).ReturnsForAnyArgs(new Command()
-            {
-                Status = CommandStatus.Success,
-                Resource = new DocumentCollection()
-                {
-                    ItemType = Function.MediaType,
-                    Items = new Document[]
+            Sender
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(
+                    new Command()
                     {
-                        new Function()
+                        Status = CommandStatus.Success,
+                        Resource = new DocumentCollection()
                         {
-                            FunctionContent = FUCTION_VALUE,
-                            UserIdentity = "test",
-                            FunctionDescription = "",
-                            FunctionId  = Guid.NewGuid(),
-                            FunctionName = "",
-                            FunctionParameters = "",
-                            TenantId = ""
-                        }
+                            ItemType = Function.MediaType,
+                            Items = new Document[]
+                            {
+                                new Function()
+                                {
+                                    FunctionContent = FUCTION_VALUE,
+                                    UserIdentity = "test",
+                                    FunctionDescription = "",
+                                    FunctionId = Guid.NewGuid(),
+                                    FunctionName = "",
+                                    FunctionParameters = "",
+                                    TenantId = "",
+                                },
+                            },
+                        },
                     }
-                }
-            });
+                );
 
             //Act
             var actual = await target.GetVariableAsync(FUNCTION_NAME, Context, CancellationToken);
@@ -125,33 +133,37 @@ namespace Take.Blip.Builder.UnitTests.Variables
             {
                 Uri = new LimeUri($"/functions?functionName=teste"),
                 To = BuilderAddress,
-                Method = CommandMethod.Get
+                Method = CommandMethod.Get,
             };
 
             //Arrange
             var target = GetTarget();
 
-            Sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).ReturnsForAnyArgs(new Command()
-            {
-                Status = CommandStatus.Failure,
-                Resource = new DocumentCollection()
-                {
-                    ItemType = Function.MediaType,
-                    Items = new Document[]
+            Sender
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(
+                    new Command()
                     {
-                        new Function()
+                        Status = CommandStatus.Failure,
+                        Resource = new DocumentCollection()
                         {
-                            FunctionContent = FUCTION_VALUE,
-                            UserIdentity = "test",
-                            FunctionDescription = "",
-                            FunctionId  = Guid.NewGuid(),
-                            FunctionName = "",
-                            FunctionParameters = "",
-                            TenantId = ""
-                        }
+                            ItemType = Function.MediaType,
+                            Items = new Document[]
+                            {
+                                new Function()
+                                {
+                                    FunctionContent = FUCTION_VALUE,
+                                    UserIdentity = "test",
+                                    FunctionDescription = "",
+                                    FunctionId = Guid.NewGuid(),
+                                    FunctionName = "",
+                                    FunctionParameters = "",
+                                    TenantId = "",
+                                },
+                            },
+                        },
                     }
-                }
-            });
+                );
 
             //Act
             var actual = await target.GetVariableAsync(FUNCTION_NAME, Context, CancellationToken);
@@ -167,26 +179,25 @@ namespace Take.Blip.Builder.UnitTests.Variables
             {
                 Uri = new LimeUri($"/functions?functionName=teste"),
                 To = BuilderAddress,
-                Method = CommandMethod.Get
+                Method = CommandMethod.Get,
             };
 
             //Arrange
             var target = GetTarget();
 
-            Sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).ReturnsForAnyArgs(new Command()
-            {
-                Status = CommandStatus.Success,
-                Resource = new DocumentCollection()
-                {
-                    ItemType = Function.MediaType,
-                    Items = new Document[]
+            Sender
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(
+                    new Command()
                     {
-                        new Function()
+                        Status = CommandStatus.Success,
+                        Resource = new DocumentCollection()
                         {
-                        }
+                            ItemType = Function.MediaType,
+                            Items = new Document[] { new Function() { } },
+                        },
                     }
-                }
-            });
+                );
 
             //Act
             var actual = await target.GetVariableAsync(FUNCTION_NAME, Context, CancellationToken);
@@ -202,26 +213,30 @@ namespace Take.Blip.Builder.UnitTests.Variables
             {
                 Uri = new LimeUri($"/functions?functionName=teste"),
                 To = BuilderAddress,
-                Method = CommandMethod.Get
+                Method = CommandMethod.Get,
             };
-
 
             //Arrange
             var target = GetTarget();
 
-            Sender.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).ReturnsForAnyArgs(new Command()
-            {
-                Status = CommandStatus.Success,
-                Resource = new DocumentCollection()
-                {
-                    ItemType = Function.MediaType,
-                    Items = new Document[]
-                    {}
-                }
-            });
+            Sender
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .ReturnsForAnyArgs(
+                    new Command()
+                    {
+                        Status = CommandStatus.Success,
+                        Resource = new DocumentCollection()
+                        {
+                            ItemType = Function.MediaType,
+                            Items = new Document[] { },
+                        },
+                    }
+                );
 
             //Act
-            target.GetVariableAsync(FUNCTION_NAME, Context, CancellationToken).ShouldThrow<Exception>();
+            target
+                .GetVariableAsync(FUNCTION_NAME, Context, CancellationToken)
+                .ShouldThrow<Exception>();
         }
     }
 }

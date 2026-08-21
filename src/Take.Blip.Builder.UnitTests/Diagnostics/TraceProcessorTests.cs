@@ -1,11 +1,11 @@
-﻿using Lime.Protocol;
-using Newtonsoft.Json.Linq;
-using NSubstitute;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
+using Newtonsoft.Json.Linq;
+using NSubstitute;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
@@ -40,7 +40,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 {
                     Mode = TraceMode.All,
                     TargetType = TraceTargetType.Http,
-                    Target = "http://myserver.com"
+                    Target = "http://myserver.com",
                 },
                 Trace = new InputTrace
                 {
@@ -62,11 +62,11 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                         new JObject
                                         {
                                             { "property1", "value1" },
-                                            { "property2", 2 }
+                                            { "property2", 2 },
                                         }
                                     ),
-                                    ElapsedMilliseconds = 150
-                                }
+                                    ElapsedMilliseconds = 150,
+                                },
                             },
                             Outputs = new List<OutputTrace>
                             {
@@ -75,9 +75,9 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     StateId = "124",
                                     ElapsedMilliseconds = 241,
                                     ConditionsCount = 3,
-                                    Error = "Error processing output"
-                                }
-                            }
+                                    Error = "Error processing output",
+                                },
+                            },
                         },
                         new StateTrace
                         {
@@ -92,16 +92,16 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                         {
                                             { "to", "user@domain.com" },
                                             { "type", "text/plain" },
-                                            { "content", "Hi there!" }
+                                            { "content", "Hi there!" },
                                         }
                                     ),
-                                    ElapsedMilliseconds = 150
-                                }
+                                    ElapsedMilliseconds = 150,
+                                },
                             },
-                            AfterStateChangedActions = new List<ActionTrace>()
-                        }
-                    }
-                }
+                            AfterStateChangedActions = new List<ActionTrace>(),
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -113,12 +113,16 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             await target.ProcessTraceAsync(traceEvent, CancellationToken);
 
             // Assert
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(r =>
-                    r.Method.Method == "POST" &&
-                    r.Content != null &&
-                    r.Content.Headers.ContentType.MediaType == "application/json"),
-                Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(r =>
+                        r.Method.Method == "POST"
+                        && r.Content != null
+                        && r.Content.Headers.ContentType.MediaType == "application/json"
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -132,7 +136,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 {
                     Mode = TraceMode.All,
                     TargetType = TraceTargetType.Lime,
-                    Target = traceIndentity
+                    Target = traceIndentity,
                 },
                 Trace = new InputTrace
                 {
@@ -154,11 +158,11 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                         new JObject
                                         {
                                             { "property1", "value1" },
-                                            { "property2", 2 }
+                                            { "property2", 2 },
                                         }
                                     ),
-                                    ElapsedMilliseconds = 150
-                                }
+                                    ElapsedMilliseconds = 150,
+                                },
                             },
                             Outputs = new List<OutputTrace>
                             {
@@ -167,9 +171,9 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     StateId = "124",
                                     ElapsedMilliseconds = 241,
                                     ConditionsCount = 3,
-                                    Error = "Error processing output"
-                                }
-                            }
+                                    Error = "Error processing output",
+                                },
+                            },
                         },
                         new StateTrace
                         {
@@ -184,16 +188,16 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                         {
                                             { "to", "user@domain.com" },
                                             { "type", "text/plain" },
-                                            { "content", "Hi there!" }
+                                            { "content", "Hi there!" },
                                         }
                                     ),
-                                    ElapsedMilliseconds = 150
-                                }
+                                    ElapsedMilliseconds = 150,
+                                },
                             },
-                            AfterStateChangedActions = new List<ActionTrace>()
-                        }
-                    }
-                }
+                            AfterStateChangedActions = new List<ActionTrace>(),
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -201,12 +205,14 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             await target.ProcessTraceAsync(traceEvent, CancellationToken);
 
             // Assert
-            await Sender.Received(1).SendMessageAsync(
-                Arg.Is<Message>(m =>
-                    m.Id == null &&
-                    m.Content != null &&
-                    m.To != traceIndentity),
-                Arg.Any<CancellationToken>());
+            await Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.Id == null && m.Content != null && m.To != traceIndentity
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
     }
 }

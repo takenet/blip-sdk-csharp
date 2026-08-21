@@ -18,7 +18,10 @@ namespace Take.Blip.Client.Extensions.Broadcast
         /// <param name="listName">Name of the list.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task CreateDistributionListAsync(string listName, CancellationToken cancellationToken = default(CancellationToken));
+        Task CreateDistributionListAsync(
+            string listName,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Gets all existing distribution lists.
@@ -27,7 +30,11 @@ namespace Take.Blip.Client.Extensions.Broadcast
         /// <param name="take">The take.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>DocumentCollection of IdentityDocuments</returns>
-        Task<DocumentCollection> GetRecipientsAsynGetAllDistributionListsAsync(int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken));
+        Task<DocumentCollection> GetRecipientsAsynGetAllDistributionListsAsync(
+            int skip = 0,
+            int take = 100,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Deletes an existing distribution list.
@@ -35,7 +42,10 @@ namespace Take.Blip.Client.Extensions.Broadcast
         /// <param name="listName">Name of the list.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task DeleteDistributionListAsync(string listName, CancellationToken cancellationToken = default(CancellationToken));
+        Task DeleteDistributionListAsync(
+            string listName,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Adds a recipient identity to an existing distribution list.
@@ -44,7 +54,11 @@ namespace Take.Blip.Client.Extensions.Broadcast
         /// <param name="recipientIdentity">The recipient identity.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task AddRecipientAsync(string listName, Identity recipientIdentity, CancellationToken cancellationToken = default(CancellationToken));
+        Task AddRecipientAsync(
+            string listName,
+            Identity recipientIdentity,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Deletes a recipient identity from an existing distribution list.
@@ -53,7 +67,11 @@ namespace Take.Blip.Client.Extensions.Broadcast
         /// <param name="recipientIdentity">The recipient identity.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task DeleteRecipientAsync(string listName, Identity recipientIdentity, CancellationToken cancellationToken = default(CancellationToken));
+        Task DeleteRecipientAsync(
+            string listName,
+            Identity recipientIdentity,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Determines whether the distribution list has the specified recipient.
@@ -62,7 +80,11 @@ namespace Take.Blip.Client.Extensions.Broadcast
         /// <param name="recipientIdentity">The recipient identity.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<bool> HasRecipientAsync(string listName, Identity recipientIdentity, CancellationToken cancellationToken = default(CancellationToken));
+        Task<bool> HasRecipientAsync(
+            string listName,
+            Identity recipientIdentity,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Gets the recipients of the specified list.
@@ -72,7 +94,12 @@ namespace Take.Blip.Client.Extensions.Broadcast
         /// <param name="take">The take.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<DocumentCollection> GetRecipientsAsync(string listName, int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken));
+        Task<DocumentCollection> GetRecipientsAsync(
+            string listName,
+            int skip = 0,
+            int take = 100,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Gets the list identity from a name.
@@ -88,6 +115,11 @@ namespace Take.Blip.Client.Extensions.Broadcast
         /// <param name="content">The content.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task SendMessageAsync(string listName, Document content, string id = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task SendMessageAsync(
+            string listName,
+            Document content,
+            string id = null,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
     }
 }

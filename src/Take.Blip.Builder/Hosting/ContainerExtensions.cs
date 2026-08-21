@@ -22,8 +22,8 @@ using Take.Blip.Builder.Actions.SendMessageFromHttp;
 using Take.Blip.Builder.Actions.SendRawMessage;
 using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetVariable;
-using Take.Blip.Builder.Actions.TrackEvent;
 using Take.Blip.Builder.Actions.TrackContactsJourney;
+using Take.Blip.Builder.Actions.TrackEvent;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
@@ -62,14 +62,14 @@ namespace Take.Blip.Builder.Hosting
             container.RegisterSingleton<IUserOwnerResolver, UserOwnerResolver>();
 
             container.Collection.Register<IInputMessageHandler>(
-               new[]
-               {
-                    typeof(InputExpirationHandler),
-                    typeof(InputReplyHandler)
-               },
-               Lifestyle.Singleton);
+                new[] { typeof(InputExpirationHandler), typeof(InputReplyHandler) },
+                Lifestyle.Singleton
+            );
 
-            container.RegisterSingleton<IInputMessageHandlerAggregator, InputMessageHandlerAggregator>();
+            container.RegisterSingleton<
+                IInputMessageHandlerAggregator,
+                InputMessageHandlerAggregator
+            >();
 
             container.RegisterSingleton<IFlowLoader, FlowLoader>();
             container.RegisterSingleton<IInputExpirationCount, InputExpirationCount>();
@@ -100,8 +100,9 @@ namespace Take.Blip.Builder.Hosting
                     typeof(DeleteVariableAction),
                     typeof(ProcessContentAssistantAction),
                     typeof(TrackContactsJourneyAction),
-                    typeof(ExecuteTemplateAction)
-                });
+                    typeof(ExecuteTemplateAction),
+                }
+            );
 
             return container;
         }
@@ -125,7 +126,10 @@ namespace Take.Blip.Builder.Hosting
         {
             container.RegisterSingleton<INamedSemaphore, MemoryNamedSemaphore>();
             container.RegisterSingleton<IFlowSemaphore, BasicFlowSemaphore>();
-            container.RegisterSingleton<ISerializer<StorageDocument>, JsonSerializer<StorageDocument>>();
+            container.RegisterSingleton<
+                ISerializer<StorageDocument>,
+                JsonSerializer<StorageDocument>
+            >();
             container.RegisterSingleton<ISerializer<Contact>, JsonSerializer<Contact>>();
 
             return container;
@@ -159,19 +163,21 @@ namespace Take.Blip.Builder.Hosting
                     typeof(ResourceVariableProvider),
                     typeof(BlipFunctionVariableProvider),
                     typeof(AiAgentVariableProvider),
-                    typeof(SecretVariableProvider)
-                });
+                    typeof(SecretVariableProvider),
+                }
+            );
 
             return container;
         }
 
         private static Container RegisterExternal(this Container container)
         {
-            container.RegisterSingleton<IDocumentTypeResolver>( () => {
+            container.RegisterSingleton<IDocumentTypeResolver>(() =>
+            {
                 var documentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
                 documentTypeResolver.RegisterDocument<InputExpiration>();
                 return documentTypeResolver;
-                });
+            });
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
             container.RegisterSingleton<ILogger>(() => LoggerProvider.Logger);

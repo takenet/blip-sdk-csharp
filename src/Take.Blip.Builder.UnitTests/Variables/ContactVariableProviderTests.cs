@@ -1,12 +1,12 @@
-﻿using Lime.Messaging.Resources;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using NSubstitute;
 using Serilog;
 using Shouldly;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Variables;
 using Take.Blip.Client.Activation;
@@ -17,7 +17,6 @@ namespace Take.Blip.Builder.UnitTests.Variables
 {
     public class ContactVariableProviderTests : ContextTestsBase
     {
-
         public ContactVariableProviderTests()
         {
             ContactExtension = Substitute.For<IContactExtension>();
@@ -30,7 +29,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             {
                 Identity = "john@domain.com",
                 Name = "John Doe",
-                Address = "184 Alpha Avenue"
+                Address = "184 Alpha Avenue",
             };
             ContactExtension.GetAsync(Contact.Identity, CancellationToken).Returns(Contact);
             Context.UserIdentity.Returns(Contact.Identity);
@@ -41,13 +40,13 @@ namespace Take.Blip.Builder.UnitTests.Variables
         }
 
         public IContactExtension ContactExtension { get; }
-        
+
         public ILogger Logger { get; }
-        
+
         public IConfiguration Configuration { get; }
-        
+
         public Application Application { get; }
-        
+
         public IDictionary<string, object> InputContext { get; }
 
         public Contact Contact { get; }
@@ -84,15 +83,12 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Asset
             actual.ShouldBe(Contact.Name);
         }
-        
+
         [Fact]
         public async Task GetExtrasPropertyShouldReturnsValue()
         {
             // Arrange
-            Contact.Extras = new Dictionary<string, string>()
-            {
-                ["extra1"] = "value1"
-            };
+            Contact.Extras = new Dictionary<string, string>() { ["extra1"] = "value1" };
             var target = GetTarget();
 
             // Act
@@ -109,7 +105,9 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             Contact nullContact = null;
-            ContactExtension.GetAsync(Arg.Any<Identity>(), Arg.Any<CancellationToken>()).Returns(nullContact);
+            ContactExtension
+                .GetAsync(Arg.Any<Identity>(), Arg.Any<CancellationToken>())
+                .Returns(nullContact);
 
             // Act
             var actual = await target.GetVariableAsync("name", Context, CancellationToken);

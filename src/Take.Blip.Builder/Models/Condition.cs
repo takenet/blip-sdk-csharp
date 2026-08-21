@@ -19,7 +19,7 @@ namespace Take.Blip.Builder.Models
 
         /// <summary>
         /// The variable name of the conversation context to be evaluated, if the <see cref="Source"/> value is <see cref="ValueSource.Context"/>.
-        /// </summary>        
+        /// </summary>
         public string Variable { get; set; }
 
         /// <summary>
@@ -41,36 +41,52 @@ namespace Take.Blip.Builder.Models
         /// The values to be used by the comparison with the context value.
         /// </summary>
         public string[] Values { get; set; }
-               
+
         public void Validate()
         {
             this.ValidateObject();
 
             if (Source == ValueSource.Context && string.IsNullOrWhiteSpace(Variable))
             {
-                throw new ValidationException("The variable name should be provided if the comparsion source is context");
+                throw new ValidationException(
+                    "The variable name should be provided if the comparsion source is context"
+                );
             }
 
             if (Source == ValueSource.Entity && string.IsNullOrWhiteSpace(Entity))
             {
-                throw new ValidationException("The entity name should be provided if the comparsion source is entity");
+                throw new ValidationException(
+                    "The entity name should be provided if the comparsion source is entity"
+                );
             }
 
-            if (Comparison.GetComparisonType() == ComparisonType.Unary && Values != null && Values.Length > 0)
+            if (
+                Comparison.GetComparisonType() == ComparisonType.Unary
+                && Values != null
+                && Values.Length > 0
+            )
             {
-                throw new ValidationException("The condition values should not be provided if comparison is Exists or NotExists");
+                throw new ValidationException(
+                    "The condition values should not be provided if comparison is Exists or NotExists"
+                );
             }
 
-            if (Comparison.GetComparisonType() == ComparisonType.Binary && (Values == null || Values.Length == 0))
+            if (
+                Comparison.GetComparisonType() == ComparisonType.Binary
+                && (Values == null || Values.Length == 0)
+            )
             {
-                throw new ValidationException("The condition values should be provided if comparison is not Exists or NotExists");
+                throw new ValidationException(
+                    "The condition values should be provided if comparison is not Exists or NotExists"
+                );
             }
         }
-        
+
         public async Task<bool> EvaluateConditionAsync(
             LazyInput lazyInput,
             IContext context,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             string comparisonValue;
 
@@ -111,7 +127,14 @@ namespace Take.Blip.Builder.Models
                         case ConditionOperator.Or:
                             if (Comparison == ConditionComparison.NotEquals)
                             {
-                                return !Values.Any(v => string.Compare(comparisonValue, v, CultureInfo.InvariantCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) == 0);
+                                return !Values.Any(v =>
+                                    string.Compare(
+                                        comparisonValue,
+                                        v,
+                                        CultureInfo.InvariantCulture,
+                                        CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase
+                                    ) == 0
+                                );
                             }
                             return Values.Any(v => binaryComparisonFunc(comparisonValue, v));
 
@@ -125,6 +148,6 @@ namespace Take.Blip.Builder.Models
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }        
+        }
     }
 }

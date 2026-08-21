@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
+using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Diagnostics
 {
-
     /// <summary>
     /// Represents an action trace within a state, including order, type, parsed settings, and error handling flag.
     /// </summary>

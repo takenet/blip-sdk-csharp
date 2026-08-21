@@ -1,7 +1,7 @@
-﻿using Lime.Protocol;
-using System;
-using System.Threading.Tasks;
+﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using Lime.Protocol;
 
 namespace Take.Blip.Client.Extensions.Tunnel
 {
@@ -10,7 +10,8 @@ namespace Take.Blip.Client.Extensions.Tunnel
     /// and forwards to the original sender.
     /// </summary>
     /// <typeparam name="TEnvelope"></typeparam>
-    public class TunnelEnvelopeReceiver<TEnvelope> : IEnvelopeReceiver<TEnvelope> where TEnvelope : Envelope, new()
+    public class TunnelEnvelopeReceiver<TEnvelope> : IEnvelopeReceiver<TEnvelope>
+        where TEnvelope : Envelope, new()
     {
         private readonly Func<TEnvelope, CancellationToken, Task> _senderFunc;
 
@@ -19,12 +20,24 @@ namespace Take.Blip.Client.Extensions.Tunnel
             _senderFunc = senderFunc;
         }
 
-        public virtual async Task ReceiveAsync(TEnvelope envelope, CancellationToken cancellationToken = default)
+        public virtual async Task ReceiveAsync(
+            TEnvelope envelope,
+            CancellationToken cancellationToken = default
+        )
         {
-            if (!(envelope.From?.Domain?.Equals(TunnelExtension.TunnelAddress.Domain, StringComparison.OrdinalIgnoreCase) ?? false)
-                || envelope.From?.Instance == null)
+            if (
+                !(
+                    envelope.From?.Domain?.Equals(
+                        TunnelExtension.TunnelAddress.Domain,
+                        StringComparison.OrdinalIgnoreCase
+                    ) ?? false
+                )
+                || envelope.From?.Instance == null
+            )
             {
-                throw new ArgumentException("Invalid envelope destination for the tunnel receiver. Please check the configured filter.");
+                throw new ArgumentException(
+                    "Invalid envelope destination for the tunnel receiver. Please check the configured filter."
+                );
             }
 
             // Retrieve the original destination

@@ -36,21 +36,22 @@ namespace MessageTypes
 
         public MediaLink getGif()
         {
-            var imageUri =
-                new Uri("http://i.giphy.com/14aUO0Mf7dWDXW.gif");
+            var imageUri = new Uri("http://i.giphy.com/14aUO0Mf7dWDXW.gif");
 
-            var document = new MediaLink
-            {
-                Type = "image/gif",
-                Uri = imageUri
-            };
+            var document = new MediaLink { Type = "image/gif", Uri = imageUri };
             return document;
         }
 
         public MediaLink getImage()
         {
-            var imageUri = new Uri("http://2.bp.blogspot.com/-pATX0YgNSFs/VP-82AQKcuI/AAAAAAAALSU/Vet9e7Qsjjw/s1600/Cat-hd-wallpapers.jpg", UriKind.Absolute);
-            var previewUri = new Uri("https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcS8qkelB28RstsNxLi7gbrwCLsBVmobPjb5IrwKJSuqSnGX4IzX", UriKind.Absolute);
+            var imageUri = new Uri(
+                "http://2.bp.blogspot.com/-pATX0YgNSFs/VP-82AQKcuI/AAAAAAAALSU/Vet9e7Qsjjw/s1600/Cat-hd-wallpapers.jpg",
+                UriKind.Absolute
+            );
+            var previewUri = new Uri(
+                "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcS8qkelB28RstsNxLi7gbrwCLsBVmobPjb5IrwKJSuqSnGX4IzX",
+                UriKind.Absolute
+            );
 
             var document = new MediaLink
             {
@@ -60,7 +61,7 @@ namespace MessageTypes
                 AspectRatio = "1:1",
                 Size = 227791,
                 Uri = imageUri,
-                PreviewUri = previewUri
+                PreviewUri = previewUri,
             };
 
             return document;
@@ -90,7 +91,9 @@ namespace MessageTypes
         {
             var document = new MediaLink
             {
-                Uri = new Uri("http://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_open_parameters.pdf"),
+                Uri = new Uri(
+                    "http://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_open_parameters.pdf"
+                ),
             };
             return document;
         }

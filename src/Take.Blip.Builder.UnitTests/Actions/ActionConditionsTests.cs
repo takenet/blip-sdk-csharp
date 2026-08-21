@@ -1,9 +1,9 @@
-using Lime.Messaging.Contents;
-using NSubstitute;
-using SimpleInjector;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using NSubstitute;
+using SimpleInjector;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Models;
 using Xunit;
@@ -28,7 +28,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         public IActionProvider ActionProvider { get; set; }
 
-        private Flow CreateFlowWithTwoStates(string firstStateId, string firstStateContent, string secondStateId, string secondStateContent)
+        private Flow CreateFlowWithTwoStates(
+            string firstStateId,
+            string firstStateContent,
+            string secondStateId,
+            string secondStateContent
+        )
         {
             return new Flow()
             {
@@ -44,27 +49,21 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         {
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
-                                    new Condition
-                                    {
-                                        Values = new[] { firstStateContent }
-                                    }
+                                    new Condition { Values = new[] { firstStateContent } },
                                 },
-                                StateId = firstStateId
+                                StateId = firstStateId,
                             },
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
-                                    new Condition
-                                    {
-                                        Values = new[] { secondStateContent }
-                                    }
+                                    new Condition { Values = new[] { secondStateContent } },
                                 },
-                                StateId = secondStateId
-                            }
-                        }
+                                StateId = secondStateId,
+                            },
+                        },
                     },
                     new State
                     {
@@ -74,16 +73,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         {
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
-                                    new Condition
-                                    {
-                                        Values = new[] { secondStateContent }
-                                    }
+                                    new Condition { Values = new[] { secondStateContent } },
                                 },
-                                StateId = secondStateId
-                            }
-                        }
+                                StateId = secondStateId,
+                            },
+                        },
                     },
                     new State
                     {
@@ -93,18 +89,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
                         {
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
-                                    new Condition
-                                    {
-                                        Values = new[] { firstStateContent }
-                                    }
+                                    new Condition { Values = new[] { firstStateContent } },
                                 },
-                                StateId = firstStateId
-                            }
-                        }
-                    }
-                }
+                                StateId = firstStateId,
+                            },
+                        },
+                    },
+                },
             };
         }
 
@@ -118,7 +111,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             flow.States.First(state => state.Id == stateId).OutputActions = actions;
         }
 
-        private void DefineAfterStateChangedActionsForDefinedState(Flow flow, string stateId, Action[] actions)
+        private void DefineAfterStateChangedActionsForDefinedState(
+            Flow flow,
+            string stateId,
+            Action[] actions
+        )
         {
             flow.States.First(state => state.Id == stateId).AfterStateChangedActions = actions;
         }
@@ -131,31 +128,24 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var firstStateContent = "Ping!";
             var secondStateId = "pong";
             var secondStateContent = "Pong!";
-            var flow = CreateFlowWithTwoStates(firstStateId, firstStateContent, secondStateId, secondStateContent);
+            var flow = CreateFlowWithTwoStates(
+                firstStateId,
+                firstStateContent,
+                secondStateId,
+                secondStateContent
+            );
 
             var inputActions = new[]
             {
                 new Action
                 {
                     Type = "ActionFistState",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "Ping!" }
-                        }
-                    }
+                    Conditions = new[] { new Condition { Values = new[] { "Ping!" } } },
                 },
                 new Action
                 {
                     Type = "OtherAction",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "Other!" }
-                        }
-                    }
+                    Conditions = new[] { new Condition { Values = new[] { "Other!" } } },
                 },
             };
             DefineInputActionsForDefinedState(flow, firstStateId, inputActions);
@@ -179,21 +169,20 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var firstStateContent = "Ping!";
             var secondStateId = "pong";
             var secondStateContent = "Pong!";
-            var flow = CreateFlowWithTwoStates(firstStateId, firstStateContent, secondStateId, secondStateContent);
+            var flow = CreateFlowWithTwoStates(
+                firstStateId,
+                firstStateContent,
+                secondStateId,
+                secondStateContent
+            );
 
             var inputActions = new[]
             {
                 new Action
                 {
                     Type = "ActionFistState",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "XPTO!" }
-                        }
-                    }
-                }
+                    Conditions = new[] { new Condition { Values = new[] { "XPTO!" } } },
+                },
             };
 
             DefineInputActionsForDefinedState(flow, firstStateId, inputActions);
@@ -216,31 +205,24 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var firstStateContent = "Ping!";
             var secondStateId = "pong";
             var secondStateContent = "Pong!";
-            var flow = CreateFlowWithTwoStates(firstStateId, firstStateContent, secondStateId, secondStateContent);
+            var flow = CreateFlowWithTwoStates(
+                firstStateId,
+                firstStateContent,
+                secondStateId,
+                secondStateContent
+            );
 
             var outputActions = new[]
             {
                 new Action
                 {
                     Type = "ActionFistState",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "Ping!" }
-                        }
-                    }
+                    Conditions = new[] { new Condition { Values = new[] { "Ping!" } } },
                 },
                 new Action
                 {
                     Type = "OtherAction",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "Other!" }
-                        }
-                    }
+                    Conditions = new[] { new Condition { Values = new[] { "Other!" } } },
                 },
             };
             DefineOutputActionsForDefinedState(flow, "root", outputActions);
@@ -264,21 +246,20 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var firstStateContent = "Ping!";
             var secondStateId = "pong";
             var secondStateContent = "Pong!";
-            var flow = CreateFlowWithTwoStates(firstStateId, firstStateContent, secondStateId, secondStateContent);
+            var flow = CreateFlowWithTwoStates(
+                firstStateId,
+                firstStateContent,
+                secondStateId,
+                secondStateContent
+            );
 
             var outputActions = new[]
             {
                 new Action
                 {
                     Type = "ActionFistState",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "XPTO!" }
-                        }
-                    }
-                }
+                    Conditions = new[] { new Condition { Values = new[] { "XPTO!" } } },
+                },
             };
 
             DefineOutputActionsForDefinedState(flow, "root", outputActions);
@@ -301,31 +282,24 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var firstStateContent = "Ping!";
             var secondStateId = "pong";
             var secondStateContent = "Pong!";
-            var flow = CreateFlowWithTwoStates(firstStateId, firstStateContent, secondStateId, secondStateContent);
+            var flow = CreateFlowWithTwoStates(
+                firstStateId,
+                firstStateContent,
+                secondStateId,
+                secondStateContent
+            );
 
             var afterStateChangedActions = new[]
             {
                 new Action
                 {
                     Type = "ActionFistState",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "Ping!" }
-                        }
-                    }
+                    Conditions = new[] { new Condition { Values = new[] { "Ping!" } } },
                 },
                 new Action
                 {
                     Type = "OtherAction",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "Other!" }
-                        }
-                    }
+                    Conditions = new[] { new Condition { Values = new[] { "Other!" } } },
                 },
             };
             DefineAfterStateChangedActionsForDefinedState(flow, "root", afterStateChangedActions);
@@ -349,21 +323,20 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var firstStateContent = "Ping!";
             var secondStateId = "pong";
             var secondStateContent = "Pong!";
-            var flow = CreateFlowWithTwoStates(firstStateId, firstStateContent, secondStateId, secondStateContent);
+            var flow = CreateFlowWithTwoStates(
+                firstStateId,
+                firstStateContent,
+                secondStateId,
+                secondStateContent
+            );
 
             var afterStateChangedActions = new[]
             {
                 new Action
                 {
                     Type = "ActionFistState",
-                    Conditions = new[]
-                    {
-                        new Condition
-                        {
-                            Values = new[] { "XPTO!" }
-                        }
-                    }
-                }
+                    Conditions = new[] { new Condition { Values = new[] { "XPTO!" } } },
+                },
             };
 
             DefineAfterStateChangedActionsForDefinedState(flow, "root", afterStateChangedActions);

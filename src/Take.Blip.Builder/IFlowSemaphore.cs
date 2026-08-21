@@ -1,12 +1,11 @@
-﻿using Lime.Protocol;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder
 {
-
     /// <summary>
     /// Defines a flow semaphore service, used to block the processing of two messages from the same contact and bot
     /// </summary>
@@ -21,7 +20,13 @@ namespace Take.Blip.Builder
         /// <param name="timeout">Timeout</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        Task<IAsyncDisposable> WaitAsync(Flow flow, Message message, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken);
+        Task<IAsyncDisposable> WaitAsync(
+            Flow flow,
+            Message message,
+            Identity userIdentity,
+            TimeSpan timeout,
+            CancellationToken cancellationToken
+        );
 
         /// <summary>
         /// Do semaphore lock to block the processing of two actions from the same contact and bot
@@ -32,6 +37,12 @@ namespace Take.Blip.Builder
         /// <param name="timeout"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<IAsyncDisposable> WaitAsync(Flow flow, string actionId, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken);
+        Task<IAsyncDisposable> WaitAsync(
+            Flow flow,
+            string actionId,
+            Identity userIdentity,
+            TimeSpan timeout,
+            CancellationToken cancellationToken
+        );
     }
 }

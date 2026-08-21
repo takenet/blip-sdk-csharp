@@ -21,15 +21,16 @@ namespace Take.Blip.Client.Web
 
         public static IServiceCollection AddBlip(this IServiceCollection serviceCollection)
         {
-            var applicationJsonPath =
-                Path.Combine(
-                    Path.GetDirectoryName(
-                        Assembly.GetEntryAssembly().Location),
-                    Bootstrapper.DefaultApplicationFileName);
+            var applicationJsonPath = Path.Combine(
+                Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                Bootstrapper.DefaultApplicationFileName
+            );
 
             if (!File.Exists(applicationJsonPath))
             {
-                throw new InvalidOperationException($"Could not find the application file in '{applicationJsonPath}'");
+                throw new InvalidOperationException(
+                    $"Could not find the application file in '{applicationJsonPath}'"
+                );
             }
 
             var application = Application.ParseFromJsonFile(applicationJsonPath);
@@ -49,27 +50,27 @@ namespace Take.Blip.Client.Web
             }
 
             var workingDir = Path.GetDirectoryName(applicationJsonPath);
-            if (string.IsNullOrWhiteSpace(workingDir)) workingDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            if (string.IsNullOrWhiteSpace(workingDir))
+                workingDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
             var envelopeBuffer = new EnvelopeBuffer();
-            var envelopeSerializer = new EnvelopeSerializer(new DocumentTypeResolver().WithMessagingDocuments());
+            var envelopeSerializer = new EnvelopeSerializer(
+                new DocumentTypeResolver().WithMessagingDocuments()
+            );
             var clientBuilder = new BlipClientBuilder(
-                new WebTransportFactory(envelopeBuffer, envelopeSerializer, application));
+                new WebTransportFactory(envelopeBuffer, envelopeSerializer, application)
+            );
 
             IStoppable stoppable;
 
             using (var cts = new CancellationTokenSource(StartTimeout))
             {
                 stoppable = Bootstrapper
-                    .StartAsync(
-                        cts.Token, 
-                        application,
-                        clientBuilder,
-                        new TypeResolver(workingDir))
+                    .StartAsync(cts.Token, application, clientBuilder, new TypeResolver(workingDir))
                     .GetAwaiter()
                     .GetResult();
             }
-            
+
             serviceCollection.AddSingleton(application);
             serviceCollection.AddSingleton(stoppable);
             serviceCollection.AddSingleton<IEnvelopeBuffer>(envelopeBuffer);
@@ -78,4 +79,3 @@ namespace Take.Blip.Client.Web
         }
     }
 }
-

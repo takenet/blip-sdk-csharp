@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using System.Diagnostics;
 using Take.Blip.Client;
 
 namespace Take.Blip.Client.ConsoleTemplate
 {
     /// <summary>
-    /// Defines a class for handling messages. 
+    /// Defines a class for handling messages.
     /// This type must be registered in the application.json file in the 'messageReceivers' section.
     /// </summary>
     public class PlainTextMessageReceiver : IMessageReceiver

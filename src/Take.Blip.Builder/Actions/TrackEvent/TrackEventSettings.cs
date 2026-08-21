@@ -19,7 +19,14 @@ namespace Take.Blip.Builder.Actions.TrackEvent
         {
             get
             {
-                if (decimal.TryParse(Value, NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedValue))
+                if (
+                    decimal.TryParse(
+                        Value,
+                        NumberStyles.Number,
+                        CultureInfo.InvariantCulture,
+                        out var parsedValue
+                    )
+                )
                 {
                     return parsedValue;
                 }
@@ -36,12 +43,16 @@ namespace Take.Blip.Builder.Actions.TrackEvent
         {
             if (string.IsNullOrEmpty(Category))
             {
-                throw new ArgumentException($"The '{nameof(Category)}' settings value is required for '{nameof(TrackEventAction)}' action");
+                throw new ArgumentException(
+                    $"The '{nameof(Category)}' settings value is required for '{nameof(TrackEventAction)}' action"
+                );
             }
 
             if (string.IsNullOrEmpty(Action))
             {
-                throw new ArgumentException($"The '{nameof(Action)}' settings value is required for '{nameof(TrackEventAction)}' action");
+                throw new ArgumentException(
+                    $"The '{nameof(Action)}' settings value is required for '{nameof(TrackEventAction)}' action"
+                );
             }
         }
     }

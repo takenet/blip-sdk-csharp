@@ -11,9 +11,7 @@ namespace Take.Blip.Builder.Diagnostics
         public const string BUILDER_TRACE_TARGET = "builder.trace.target";
         public const string BUILDER_TRACE_SLOW_THRESHOLD = "builder.trace.slowThreshold";
 
-        public TraceSettings()
-        {
-        }
+        public TraceSettings() { }
 
         /// <summary>
         /// Creates a new instance of <see cref="TraceSettings"/> based on the message metadata.
@@ -23,10 +21,20 @@ namespace Take.Blip.Builder.Diagnostics
         /// <param name="messageMetadata"></param>
         public TraceSettings(IDictionary<string, string> messageMetadata)
         {
-            if (messageMetadata == null ||
-                !(messageMetadata.TryGetValue(BUILDER_TRACE_MODE, out var traceModeString) && Enum.TryParse<TraceMode>(traceModeString, out var traceMode)) ||
-                !(messageMetadata.TryGetValue(BUILDER_TRACE_TARGET_TYPE, out var traceTargeTypeString) && Enum.TryParse<TraceTargetType>(traceTargeTypeString, out var targetType)) ||
-                !(messageMetadata.TryGetValue(BUILDER_TRACE_TARGET, out var target)))
+            if (
+                messageMetadata == null
+                || !(
+                    messageMetadata.TryGetValue(BUILDER_TRACE_MODE, out var traceModeString)
+                    && Enum.TryParse<TraceMode>(traceModeString, out var traceMode)
+                )
+                || !(
+                    messageMetadata.TryGetValue(
+                        BUILDER_TRACE_TARGET_TYPE,
+                        out var traceTargeTypeString
+                    ) && Enum.TryParse<TraceTargetType>(traceTargeTypeString, out var targetType)
+                )
+                || !(messageMetadata.TryGetValue(BUILDER_TRACE_TARGET, out var target))
+            )
             {
                 throw new ArgumentException(nameof(messageMetadata));
             }
@@ -34,7 +42,12 @@ namespace Take.Blip.Builder.Diagnostics
             Target = target;
             TargetType = targetType;
 
-            if (messageMetadata.TryGetValue(BUILDER_TRACE_SLOW_THRESHOLD, out var slowThresholdString))
+            if (
+                messageMetadata.TryGetValue(
+                    BUILDER_TRACE_SLOW_THRESHOLD,
+                    out var slowThresholdString
+                )
+            )
             {
                 int.TryParse(slowThresholdString, out var slowThreshold);
                 SlowThreshold = slowThreshold;
@@ -49,13 +62,13 @@ namespace Take.Blip.Builder.Diagnostics
 
         public int? SlowThreshold { get; set; }
 
-        public IDictionary<string,string> GetDictionary()
+        public IDictionary<string, string> GetDictionary()
         {
             var returnDictionary = new Dictionary<string, string>()
             {
                 { BUILDER_TRACE_MODE, Mode.ToString() },
                 { BUILDER_TRACE_TARGET, Target },
-                { BUILDER_TRACE_TARGET_TYPE, TargetType.ToString() }
+                { BUILDER_TRACE_TARGET_TYPE, TargetType.ToString() },
             };
 
             if (SlowThreshold != null)
@@ -68,7 +81,8 @@ namespace Take.Blip.Builder.Diagnostics
 
         public void Validate()
         {
-            if (Mode == TraceMode.Disabled) return;
+            if (Mode == TraceMode.Disabled)
+                return;
         }
     }
 }

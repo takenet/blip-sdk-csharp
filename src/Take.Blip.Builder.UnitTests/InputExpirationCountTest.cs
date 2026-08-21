@@ -32,7 +32,7 @@ namespace Take.Blip.Builder.UnitTests
             // Act
             await _inputExpirationCount.IncrementAsync(message);
             var result = await _inputExpirationCount.IncrementAsync(message);
-            
+
             // Assert
             result.ShouldBe(2);
         }
@@ -49,11 +49,11 @@ namespace Take.Blip.Builder.UnitTests
             };
             await _inputExpirationCount.IncrementAsync(message);
             await _inputExpirationCount.IncrementAsync(message);
-           
+
             // Act
             var result = await _inputExpirationCount.TryRemoveAsync(message);
             var countActual = await _inputExpirationCount.IncrementAsync(message);
-            
+
             // Assert
             result.ShouldBe(true);
             countActual.ShouldBe(1);

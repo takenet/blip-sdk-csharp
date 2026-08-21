@@ -14,9 +14,9 @@ namespace MessageTypes
 
         public OptionNativeContentReceiver(ISender sender)
         {
-            _sender = sender;         
+            _sender = sender;
         }
-        
+
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             JsonDocument document = new JsonDocument();
@@ -25,5 +25,4 @@ namespace MessageTypes
             await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
     }
-
 }

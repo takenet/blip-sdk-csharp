@@ -25,7 +25,10 @@ namespace Take.Blip.Builder
             return _sender.SendMessageAsync(message, cancellationToken);
         }
 
-        public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken)
+        public Task SendNotificationAsync(
+            Notification notification,
+            CancellationToken cancellationToken
+        )
         {
             return _sender.SendNotificationAsync(notification, cancellationToken);
         }
@@ -35,7 +38,10 @@ namespace Take.Blip.Builder
             return _sender.SendCommandAsync(Intercept(command), cancellationToken);
         }
 
-        public Task<Command> ProcessCommandAsync(Command requestCommand, CancellationToken cancellationToken)
+        public Task<Command> ProcessCommandAsync(
+            Command requestCommand,
+            CancellationToken cancellationToken
+        )
         {
             return _sender.ProcessCommandAsync(Intercept(requestCommand), cancellationToken);
         }
@@ -45,8 +51,7 @@ namespace Take.Blip.Builder
             if (command.From == null)
             {
                 var owner = OwnerContext.Owner;
-                if (owner != null &&
-                    owner != _applicationIdentity)
+                if (owner != null && owner != _applicationIdentity)
                 {
                     var ownerCommand = command.ShallowCopy();
                     ownerCommand.From = owner.ToNode();

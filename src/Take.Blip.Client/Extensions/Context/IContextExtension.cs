@@ -19,7 +19,12 @@ namespace Take.Blip.Client.Extensions.Context
         /// <param name="variableName"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<T> GetVariableAsync<T>(Identity identity, string variableName, CancellationToken cancellationToken) where T : Document;
+        Task<T> GetVariableAsync<T>(
+            Identity identity,
+            string variableName,
+            CancellationToken cancellationToken
+        )
+            where T : Document;
 
         /// <summary>
         /// Set a documents into an identity context.
@@ -31,7 +36,14 @@ namespace Take.Blip.Client.Extensions.Context
         /// <param name="cancellationToken"></param>
         /// <param name="expiration"></param>
         /// <returns></returns>
-        Task SetVariableAsync<T>(Identity identity, string variableName, T document, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan)) where T : Document;
+        Task SetVariableAsync<T>(
+            Identity identity,
+            string variableName,
+            T document,
+            CancellationToken cancellationToken,
+            TimeSpan expiration = default(TimeSpan)
+        )
+            where T : Document;
 
         /// <summary>
         /// Set a documents into the global context.
@@ -42,7 +54,13 @@ namespace Take.Blip.Client.Extensions.Context
         /// <param name="cancellationToken"></param>
         /// <param name="expiration"></param>
         /// <returns></returns>
-        Task SetGlobalVariableAsync<T>(string variableName, T document, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan)) where T : Document;
+        Task SetGlobalVariableAsync<T>(
+            string variableName,
+            T document,
+            CancellationToken cancellationToken,
+            TimeSpan expiration = default(TimeSpan)
+        )
+            where T : Document;
 
         /// <summary>
         /// Set a documents from an identity context.
@@ -52,12 +70,16 @@ namespace Take.Blip.Client.Extensions.Context
         /// <param name="variableName"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task DeleteVariableAsync(Identity identity, string variableName, CancellationToken cancellationToken);
+        Task DeleteVariableAsync(
+            Identity identity,
+            string variableName,
+            CancellationToken cancellationToken
+        );
 
         /// <summary>
         /// Set a documents from the global context.
         /// </summary>
-        /// <typeparam name="T"></typeparam>        
+        /// <typeparam name="T"></typeparam>
         /// <param name="variableName"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
@@ -68,7 +90,12 @@ namespace Take.Blip.Client.Extensions.Context
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<DocumentCollection> GetVariablesAsync(Identity identity, int skip = 0, int take = 100, CancellationToken cancellationToken = default(CancellationToken));
+        Task<DocumentCollection> GetVariablesAsync(
+            Identity identity,
+            int skip = 0,
+            int take = 100,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
     }
 
     public static class ContextExtensionExtensions
@@ -81,9 +108,18 @@ namespace Take.Blip.Client.Extensions.Context
         /// <param name="variableName"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static async Task<string> GetTextVariableAsync(this IContextExtension contextExtension, Identity identity, string variableName, CancellationToken cancellationToken)
+        public static async Task<string> GetTextVariableAsync(
+            this IContextExtension contextExtension,
+            Identity identity,
+            string variableName,
+            CancellationToken cancellationToken
+        )
         {
-            var document = await contextExtension.GetVariableAsync<PlainText>(identity, variableName, cancellationToken);
+            var document = await contextExtension.GetVariableAsync<PlainText>(
+                identity,
+                variableName,
+                cancellationToken
+            );
             return document?.Text;
         }
 
@@ -97,8 +133,21 @@ namespace Take.Blip.Client.Extensions.Context
         /// <param name="cancellationToken"></param>
         /// <param name="expiration"></param>
         /// <returns></returns>
-        public static Task SetTextVariableAsync(this IContextExtension contextExtension, Identity identity, string variableName, string variableValue, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan)) 
-            => contextExtension.SetVariableAsync(identity, variableName, new PlainText() {Text = variableValue }, cancellationToken, expiration);
+        public static Task SetTextVariableAsync(
+            this IContextExtension contextExtension,
+            Identity identity,
+            string variableName,
+            string variableValue,
+            CancellationToken cancellationToken,
+            TimeSpan expiration = default(TimeSpan)
+        ) =>
+            contextExtension.SetVariableAsync(
+                identity,
+                variableName,
+                new PlainText() { Text = variableValue },
+                cancellationToken,
+                expiration
+            );
 
         /// <summary>
         /// Set a text as value for an global variable.
@@ -109,7 +158,18 @@ namespace Take.Blip.Client.Extensions.Context
         /// <param name="cancellationToken"></param>
         /// <param name="expiration"></param>
         /// <returns></returns>
-        public static Task SetGlobalTextVariableAsync(this IContextExtension contextExtension, string variableName, string variableValue, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan))
-            => contextExtension.SetGlobalVariableAsync(variableName, new PlainText() { Text = variableName }, cancellationToken, expiration);
+        public static Task SetGlobalTextVariableAsync(
+            this IContextExtension contextExtension,
+            string variableName,
+            string variableValue,
+            CancellationToken cancellationToken,
+            TimeSpan expiration = default(TimeSpan)
+        ) =>
+            contextExtension.SetGlobalVariableAsync(
+                variableName,
+                new PlainText() { Text = variableName },
+                cancellationToken,
+                expiration
+            );
     }
 }

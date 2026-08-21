@@ -1,7 +1,7 @@
-﻿using Lime.Protocol;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Takenet.Iris.Messaging.Contents;
 
 namespace Take.Blip.Client.Extensions.AttendanceForwarding
@@ -16,7 +16,11 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
             _sender = sender;
         }
 
-        public Task ForwardMessageToAttendantAsync(Message originalMessage, string attendanceIdentity, CancellationToken cancellationToken)
+        public Task ForwardMessageToAttendantAsync(
+            Message originalMessage,
+            string attendanceIdentity,
+            CancellationToken cancellationToken
+        )
         {
             var forwardDestinationNode = GetAttendantDestinationNode(attendanceIdentity);
             var newMessage = new Message
@@ -27,21 +31,24 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
                 {
                     Attendant = forwardDestinationNode,
                     Customer = originalMessage.From,
-                    Content = new DocumentContainer { Value = originalMessage.Content }
-                }
+                    Content = new DocumentContainer { Value = originalMessage.Content },
+                },
             };
 
             return _sender.SendMessageAsync(newMessage, cancellationToken);
         }
 
-        public Task ForwardAttendantReplyAsync(Message replyMessage, CancellationToken cancellationToken)
+        public Task ForwardAttendantReplyAsync(
+            Message replyMessage,
+            CancellationToken cancellationToken
+        )
         {
             var forwardContent = replyMessage.Content as Attendance;
             var newMessage = new Message
             {
                 Id = replyMessage.Id,
                 To = forwardContent.Customer,
-                Content = forwardContent.Content.Value
+                Content = forwardContent.Content.Value,
             };
 
             return _sender.SendMessageAsync(newMessage, cancellationToken);
@@ -49,9 +56,10 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
 
         public bool FromAttendant(Message message, string attendantIdentity)
         {
-            return message.Content?.GetMediaType() == Attendance.MediaType &&
-                   message.From.ToIdentity().Equals(GetAttendantDestinationNode(attendantIdentity).ToIdentity());
-
+            return message.Content?.GetMediaType() == Attendance.MediaType
+                && message
+                    .From.ToIdentity()
+                    .Equals(GetAttendantDestinationNode(attendantIdentity).ToIdentity());
         }
 
         private static Node GetAttendantDestinationNode(string forwardDestination)
@@ -60,6 +68,5 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
             node.Domain = node.Domain ?? "0mn.io";
             return node;
         }
-
     }
 }

@@ -10,12 +10,11 @@ namespace MessageTypes
     {
         private readonly ISender _sender;
         JsonDocument jsonDocuments;
+
         public OptionSelectMessageReceiver(ISender sender)
         {
             _sender = sender;
         }
-
-
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
@@ -33,25 +32,24 @@ namespace MessageTypes
                     {
                         Order = 1,
                         Text = "First option!",
-                        Value = new PlainText { Text = "1" }
+                        Value = new PlainText { Text = "1" },
                     },
                     new SelectOption
                     {
                         Order = 2,
                         Text = "Second option",
-                        Value = new PlainText { Text = "2" }
+                        Value = new PlainText { Text = "2" },
                     },
                     new SelectOption
                     {
                         Order = 3,
                         Text = "Third option",
-                        Value = jsonDocuments
-                    }
-                }
+                        Value = jsonDocuments,
+                    },
+                },
             };
 
             await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
-
     }
 }

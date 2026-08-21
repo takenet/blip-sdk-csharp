@@ -37,10 +37,13 @@ namespace Take.Blip.Builder
             IDocumentSerializer documentSerializer,
             IEnvelopeSerializer envelopeSerializer,
             IArtificialIntelligenceExtension artificialIntelligenceExtension,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             Message = message ?? throw new ArgumentNullException(nameof(message));
-            _builderConfiguration = builderConfiguration ?? throw new ArgumentNullException(nameof(builderConfiguration));
+            _builderConfiguration =
+                builderConfiguration
+                ?? throw new ArgumentNullException(nameof(builderConfiguration));
             _lazySerializedContent = new Lazy<string>(() => documentSerializer.Serialize(Content));
             _analyzable = new Lazy<bool>(() =>
             {
@@ -55,63 +58,65 @@ namespace Take.Blip.Builder
             _lazyGetContentResult = CreateLazyGetContentResult();
         }
 
-        private Lazy<Task<AnalysisResponse>> CreateLazyAnalyzedContent(Identity userIdentity) => new Lazy<Task<AnalysisResponse>>(async () =>
-        {
-            // Only analyze the input if the type is plain text or analyzable metadata is true.
-            if (!_analyzable.Value && Content.GetMediaType() != PlainText.MediaType) return null;
-
-            try
+        private Lazy<Task<AnalysisResponse>> CreateLazyAnalyzedContent(Identity userIdentity) =>
+            new Lazy<Task<AnalysisResponse>>(async () =>
             {
-                return await _artificialIntelligenceExtension.AnalyzeAsync(
-                    new AnalysisRequest
-                    {
-                        Text = _lazySerializedContent.Value,
-                        Extras = new Dictionary<string, string>
+                // Only analyze the input if the type is plain text or analyzable metadata is true.
+                if (!_analyzable.Value && Content.GetMediaType() != PlainText.MediaType)
+                    return null;
+
+                try
+                {
+                    return await _artificialIntelligenceExtension.AnalyzeAsync(
+                        new AnalysisRequest
                         {
-                            ["MessageId"] = Message.Id,
-                            ["UserIdentity"] = userIdentity.ToString()
-                        }
-                    },
-                    _cancellationToken);
-            }
-            catch (LimeException)
-            {
-                return null;
-            }
-        });
+                            Text = _lazySerializedContent.Value,
+                            Extras = new Dictionary<string, string>
+                            {
+                                ["MessageId"] = Message.Id,
+                                ["UserIdentity"] = userIdentity.ToString(),
+                            },
+                        },
+                        _cancellationToken
+                    );
+                }
+                catch (LimeException)
+                {
+                    return null;
+                }
+            });
 
-        private Lazy<string> CreateLazySerializedMessage(IEnvelopeSerializer envelopeSerializer) => new Lazy<string>(() =>
-        {
-            if (Message != null)
+        private Lazy<string> CreateLazySerializedMessage(IEnvelopeSerializer envelopeSerializer) =>
+            new Lazy<string>(() =>
             {
-                return envelopeSerializer.Serialize(Message);
-            }
-            return null;
-        });
-
-        private Lazy<Task<ContentResult>> CreateLazyGetContentResult() => new Lazy<Task<ContentResult>>(async () =>
-        {
-            var intentId = (await GetIntentAsync())?.Id;
-            if (intentId == null) return null;
-            var entityValues = (await AnalyzedContent)?
-                .Entities?
-                .Select(entity => entity.Value)
-                .ToArray();
-            try
-            {
-                return await _artificialIntelligenceExtension.GetContentResultAsync(
-                   new ContentCombination
-                   {
-                       Intent = intentId,
-                       Entities = entityValues
-                   },
-                   _cancellationToken);
-            }
-            catch (LimeException)
-            {
+                if (Message != null)
+                {
+                    return envelopeSerializer.Serialize(Message);
+                }
                 return null;
-            }
-        });
+            });
+
+        private Lazy<Task<ContentResult>> CreateLazyGetContentResult() =>
+            new Lazy<Task<ContentResult>>(async () =>
+            {
+                var intentId = (await GetIntentAsync())?.Id;
+                if (intentId == null)
+                    return null;
+                var entityValues = (await AnalyzedContent)
+                    ?.Entities?.Select(entity => entity.Value)
+                    .ToArray();
+                try
+                {
+                    return await _artificialIntelligenceExtension.GetContentResultAsync(
+                        new ContentCombination { Intent = intentId, Entities = entityValues },
+                        _cancellationToken
+                    );
+                }
+                catch (LimeException)
+                {
+                    return null;
+                }
+            });
 
         public Message Message { get; }
 
@@ -129,17 +134,16 @@ namespace Take.Blip.Builder
         {
             var minimumIntentScore = _builderConfiguration?.MinimumIntentScore ?? 0.5;
 
-            return (await AnalyzedContent)?
-                .Intentions?
-                .OrderByDescending(i => i.Score)
+            return (await AnalyzedContent)
+                ?.Intentions?.OrderByDescending(i => i.Score)
                 .FirstOrDefault(i => i.Score >= minimumIntentScore);
         }
 
         public async Task<EntityResponse> GetEntityValue(string entityName)
         {
-            return (await AnalyzedContent)?
-                .Entities?
-                .FirstOrDefault(e => e.Name != null && e.Name.Equals(entityName, StringComparison.OrdinalIgnoreCase));
+            return (await AnalyzedContent)?.Entities?.FirstOrDefault(e =>
+                e.Name != null && e.Name.Equals(entityName, StringComparison.OrdinalIgnoreCase)
+            );
         }
     }
 }

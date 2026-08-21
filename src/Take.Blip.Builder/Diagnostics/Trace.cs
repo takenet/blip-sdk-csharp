@@ -1,7 +1,7 @@
-﻿using Lime.Protocol;
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
+using Lime.Protocol;
 
 namespace Take.Blip.Builder.Diagnostics
 {
@@ -11,16 +11,18 @@ namespace Take.Blip.Builder.Diagnostics
     [DataContract]
     public class Trace : Document
     {
-        public static readonly MediaType MediaType = MediaType.Parse("application/vnd.blip.trace+json");
+        public static readonly MediaType MediaType = MediaType.Parse(
+            "application/vnd.blip.trace+json"
+        );
 
-        public Trace() : base(MediaType)
+        public Trace()
+            : base(MediaType)
         {
             Timestamp = DateTimeOffset.UtcNow;
         }
 
-        public Trace(MediaType mediaType) : base(mediaType)
-        {
-        }
+        public Trace(MediaType mediaType)
+            : base(mediaType) { }
 
         /// <summary>
         /// TimeStamp of when the trace was created.

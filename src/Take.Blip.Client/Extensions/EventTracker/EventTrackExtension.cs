@@ -1,9 +1,9 @@
-﻿using Lime.Messaging.Resources;
-using Lime.Protocol;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Resources;
+using Lime.Protocol;
 using Takenet.Iris.Messaging.Resources.Analytics;
 
 namespace Take.Blip.Client.Extensions.EventTracker
@@ -13,26 +13,30 @@ namespace Take.Blip.Client.Extensions.EventTracker
         private const string EVENTRACK_URI = "/event-track";
         private const string DEFAULT_ANALYTICS_DOMAIN = "analytics." + Constants.DEFAULT_DOMAIN;
 
-        private readonly Node AnalyticsAddress = new Node(Constants.POSTMASTER, DEFAULT_ANALYTICS_DOMAIN, null);
+        private readonly Node AnalyticsAddress = new Node(
+            Constants.POSTMASTER,
+            DEFAULT_ANALYTICS_DOMAIN,
+            null
+        );
 
         public EventTrackExtension(ISender sender)
-            : base(sender)
-        {
-        }
+            : base(sender) { }
 
         public Task AddAsync(
             string category,
             string action,
             IDictionary<string, string> extras = null,
             CancellationToken cancellationToken = new CancellationToken(),
-            Identity identity = null)
+            Identity identity = null
+        )
         {
             return AddAsync(
                 category,
                 action,
                 contactIdentity: identity,
                 extras: extras,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken
+            );
         }
 
         public Task AddAsync(
@@ -45,7 +49,8 @@ namespace Take.Blip.Client.Extensions.EventTracker
             decimal? value = null,
             IDictionary<string, string> extras = null,
             bool fireAndForget = false,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             return AddAsync(
                 category,
@@ -59,7 +64,8 @@ namespace Take.Blip.Client.Extensions.EventTracker
                 value,
                 extras,
                 fireAndForget,
-                cancellationToken);
+                cancellationToken
+            );
         }
 
         public Task AddAsync(
@@ -74,10 +80,13 @@ namespace Take.Blip.Client.Extensions.EventTracker
             decimal? value = null,
             IDictionary<string, string> extras = null,
             bool fireAndForget = false,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
-            if (string.IsNullOrEmpty(category)) throw new ArgumentNullException(nameof(category));
-            if (string.IsNullOrEmpty(action)) throw new ArgumentNullException(nameof(action));
+            if (string.IsNullOrEmpty(category))
+                throw new ArgumentNullException(nameof(category));
+            if (string.IsNullOrEmpty(action))
+                throw new ArgumentNullException(nameof(action));
 
             var requestCommand = new Command(null)
             {
@@ -97,9 +106,9 @@ namespace Take.Blip.Client.Extensions.EventTracker
                         ExternalId = contactExternalId,
                         Group = contactGroup,
                         Identity = contactIdentity,
-                        Source = contactSource
-                    }
-                }
+                        Source = contactSource,
+                    },
+                },
             };
 
             if (fireAndForget)
@@ -114,27 +123,47 @@ namespace Take.Blip.Client.Extensions.EventTracker
             return ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
-        public Task<DocumentCollection> GetAllAsync(DateTimeOffset startDate, DateTimeOffset endDate, string category, string action, int skip = 0, int take = 20, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<DocumentCollection> GetAllAsync(
+            DateTimeOffset startDate,
+            DateTimeOffset endDate,
+            string category,
+            string action,
+            int skip = 0,
+            int take = 20,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             var commandRequest = CreateGetCommandRequest(
                 $"{EVENTRACK_URI}/{category}/{action}?{nameof(startDate)}={Uri.EscapeDataString(startDate.ToString("s"))}&{nameof(endDate)}={Uri.EscapeDataString(endDate.ToString("s"))}&${nameof(skip)}={skip}&{nameof(take)}={take}",
-                AnalyticsAddress);
+                AnalyticsAddress
+            );
             return ProcessCommandAsync<DocumentCollection>(commandRequest, cancellationToken);
         }
 
-        public Task<DocumentCollection> GetCategoriesAsync(int take = 20, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<DocumentCollection> GetCategoriesAsync(
+            int take = 20,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             var commandRequest = CreateGetCommandRequest(
                 $"{EVENTRACK_URI}?$take={take}",
-                AnalyticsAddress);
+                AnalyticsAddress
+            );
             return ProcessCommandAsync<DocumentCollection>(commandRequest, cancellationToken);
         }
 
-        public Task<DocumentCollection> GetCategoryActionsCounterAsync(DateTimeOffset startDate, DateTimeOffset endDate, string category, int take = 20, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<DocumentCollection> GetCategoryActionsCounterAsync(
+            DateTimeOffset startDate,
+            DateTimeOffset endDate,
+            string category,
+            int take = 20,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             var commandRequest = CreateGetCommandRequest(
                 $"{EVENTRACK_URI}/{category}?{nameof(startDate)}={Uri.EscapeDataString(startDate.ToString("s"))}&{nameof(endDate)}={Uri.EscapeDataString(endDate.ToString("s"))}&$take={take}",
-                AnalyticsAddress);
+                AnalyticsAddress
+            );
             return ProcessCommandAsync<DocumentCollection>(commandRequest, cancellationToken);
         }
     }

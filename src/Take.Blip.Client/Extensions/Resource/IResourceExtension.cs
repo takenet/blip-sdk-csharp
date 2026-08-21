@@ -2,7 +2,5 @@
 
 namespace Take.Blip.Client.Extensions.Resource
 {
-    public interface IResourceExtension : IBucketExtension
-    {
-    }
+    public interface IResourceExtension : IBucketExtension { }
 }

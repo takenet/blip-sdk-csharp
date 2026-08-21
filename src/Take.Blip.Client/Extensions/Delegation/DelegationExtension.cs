@@ -9,17 +9,17 @@ namespace Take.Blip.Client.Extensions.Delegation
     {
         const string DELEGATIONS_URI = "/delegations";
 
-
         public DelegationExtension(ISender sender)
-            : base(sender)
-        {
+            : base(sender) { }
 
-        }
-
-        public async Task DelegateAsync(Identity target, EnvelopeType[] envelopeTypes = null,
-            CancellationToken cancellationToken = new CancellationToken())
+        public async Task DelegateAsync(
+            Identity target,
+            EnvelopeType[] envelopeTypes = null,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
-            if (target == null) throw new ArgumentNullException(nameof(target));                        
+            if (target == null)
+                throw new ArgumentNullException(nameof(target));
             var requestCommand = new Command()
             {
                 Method = CommandMethod.Set,
@@ -27,15 +27,18 @@ namespace Take.Blip.Client.Extensions.Delegation
                 Resource = new Lime.Messaging.Resources.Delegation()
                 {
                     EnvelopeTypes = envelopeTypes,
-                    Target = target.ToNode()
-                }
+                    Target = target.ToNode(),
+                },
             };
 
             await ProcessCommandAsync(requestCommand, cancellationToken);
         }
 
-        public Task UndelegateAsync(Identity target, EnvelopeType[] envelopeTypes = null,
-            CancellationToken cancellationToken = new CancellationToken())
+        public Task UndelegateAsync(
+            Identity target,
+            EnvelopeType[] envelopeTypes = null,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
             throw new NotImplementedException();
         }

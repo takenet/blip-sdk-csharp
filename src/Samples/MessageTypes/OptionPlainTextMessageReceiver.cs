@@ -15,16 +15,10 @@ namespace MessageTypes
             _sender = sender;
         }
 
-        
-
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            var document = new PlainText
-            {
-                Text = "Welcome to our service! How can I help you?"
-            };
+            var document = new PlainText { Text = "Welcome to our service! How can I help you?" };
             await _sender.SendMessageAsync(document, message.From, cancellationToken);
         }
-
     }
 }

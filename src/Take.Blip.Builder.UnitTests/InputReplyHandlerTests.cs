@@ -1,12 +1,12 @@
-﻿using Lime.Messaging.Contents;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Xunit;
+using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using NSubstitute;
-using System.Collections.Generic;
-using System;
 using Take.Blip.Builder.Diagnostics;
+using Xunit;
 
 namespace Take.Blip.Builder.UnitTests
 {
@@ -23,7 +23,7 @@ namespace Take.Blip.Builder.UnitTests
             Message = new Message()
             {
                 From = UserIdentity.ToNode(),
-                To = ApplicationIdentity.ToNode()
+                To = ApplicationIdentity.ToNode(),
             };
 
             var documentSerializer = new DocumentSerializer(_documentTypeResolver);
@@ -92,7 +92,9 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             returnedMessage.Content.Equals(plainText);
             Assert.True(returnedMessage.Metadata.ContainsKey(TraceSettings.BUILDER_TRACE_TARGET));
-            Assert.True(returnedMessage.Metadata.ContainsKey(TraceSettings.BUILDER_TRACE_TARGET_TYPE));
+            Assert.True(
+                returnedMessage.Metadata.ContainsKey(TraceSettings.BUILDER_TRACE_TARGET_TYPE)
+            );
             Assert.True(returnedMessage.Metadata.ContainsKey(TraceSettings.BUILDER_TRACE_MODE));
             AssertMessageMetadatas(messageHasChanged, returnedMessage);
         }
@@ -120,7 +122,7 @@ namespace Take.Blip.Builder.UnitTests
             {
                 Latitude = 34.988889,
                 Longitude = -106.614444,
-                Text = "Text"
+                Text = "Text",
             };
             Message.Content = MockReplyMessage(location);
 
@@ -138,9 +140,12 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var mediaLink = new MediaLink
             {
-                Type = new MediaType("application", "vnd.openxmlformats-officedocument.presentationml.presentation"),
+                Type = new MediaType(
+                    "application",
+                    "vnd.openxmlformats-officedocument.presentationml.presentation"
+                ),
                 Uri = new System.Uri("https://www.uri.com.br/file.pptx"),
-                Text = "Text"
+                Text = "Text",
             };
             Message.Content = MockReplyMessage(mediaLink);
 
@@ -168,24 +173,21 @@ namespace Take.Blip.Builder.UnitTests
             AssertMessageMetadatas(messageHasChanged, returnedMessage);
         }
 
-        private static Document MockReplyMessage(Document document = null, bool isInReplyToNull = false) =>
+        private static Document MockReplyMessage(
+            Document document = null,
+            bool isInReplyToNull = false
+        ) =>
             new Reply()
             {
-                Replied = new DocumentContainer()
-                {
-                    Value = new PlainText
-                    {
-                        Text = "Text"
-                    }
-                },
+                Replied = new DocumentContainer() { Value = new PlainText { Text = "Text" } },
                 InReplyTo = isInReplyToNull
                     ? null
                     : new InReplyTo
                     {
                         Id = "ReplyToId",
                         Value = document,
-                        Direction = MessageDirection.Received
-                    }
+                        Direction = MessageDirection.Received,
+                    },
             };
 
         private static void AssertMessageMetadatas(bool messageHasChanged, Message message)
@@ -195,10 +197,6 @@ namespace Take.Blip.Builder.UnitTests
             Assert.True(message.Metadata.ContainsKey(InputReplyHandler.REPLY_CONTENT));
         }
 
-        private static Document MockPlainText() =>
-            new PlainText
-            {
-                Text = "Text"
-            };
+        private static Document MockPlainText() => new PlainText { Text = "Text" };
     }
 }

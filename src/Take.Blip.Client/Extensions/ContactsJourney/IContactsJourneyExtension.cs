@@ -12,6 +12,7 @@ namespace Take.Blip.Client.Extensions.ContactsJourney
             string previousStateName = null,
             string contactIdentity = null,
             bool fireAndForget = false,
-            CancellationToken cancellationToken = new CancellationToken());
+            CancellationToken cancellationToken = new CancellationToken()
+        );
     }
 }

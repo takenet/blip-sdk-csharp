@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.SendMessage
@@ -28,25 +28,34 @@ namespace Take.Blip.Builder.Actions.SendMessage
 
         public string[]? OutputVariables => null;
 
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(
+            IContext context,
+            JObject settings,
+            CancellationToken cancellationToken
+        )
         {
             var sw = Stopwatch.StartNew();
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendMessageAction)}' action");
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            if (settings == null)
+                throw new ArgumentNullException(
+                    nameof(settings),
+                    $"The settings are required for '{nameof(SendMessageAction)}' action"
+                );
 
             try
             {
-                var message = new Message(null)
-                {
-                    To = context.Input.Message.From
-                };
+                var message = new Message(null) { To = context.Input.Message.From };
 
                 var mediaType = MediaType.Parse((string)settings[Message.TYPE_KEY]);
                 var rawContent = settings[Message.CONTENT_KEY];
 
                 if (mediaType.IsJson)
                 {
-                    message.Content = new JsonDocument(rawContent.ToObject<Dictionary<string, object>>(), mediaType);
+                    message.Content = new JsonDocument(
+                        rawContent.ToObject<Dictionary<string, object>>(),
+                        mediaType
+                    );
                 }
                 else
                 {
@@ -68,12 +77,22 @@ namespace Take.Blip.Builder.Actions.SendMessage
                 {
                     message.Metadata ??= new Dictionary<string, string>();
 
-                    if (context.Input.Message.Metadata.TryGetValue("#tunnel.owner", out string owner))
+                    if (
+                        context.Input.Message.Metadata.TryGetValue(
+                            "#tunnel.owner",
+                            out string owner
+                        )
+                    )
                     {
                         message.Metadata.Add("#tunnel.owner", owner);
                     }
 
-                    if (context.Input.Message.Metadata.TryGetValue("#tunnel.originator", out string originator))
+                    if (
+                        context.Input.Message.Metadata.TryGetValue(
+                            "#tunnel.originator",
+                            out string originator
+                        )
+                    )
                     {
                         message.Metadata.Add("#tunnel.originator", originator);
                     }
@@ -84,31 +103,41 @@ namespace Take.Blip.Builder.Actions.SendMessage
                 // Await the interval if it is a chatstate message
                 if (isChatState)
                 {
-                    var chatState = rawContent.ToObject<ChatState>(LimeSerializerContainer.Serializer);
+                    var chatState = rawContent.ToObject<ChatState>(
+                        LimeSerializerContainer.Serializer
+                    );
                     if (chatState.Interval != null)
                     {
                         await Task.Delay(chatState.Interval.Value, cancellationToken);
                     }
                 }
 
-                this.LogDelivery(_blipMonitoringLogger, context, new JObject
-                {
-                    ["messageId"] = message.Id,
-                    ["contentType"] = (string)settings[Message.TYPE_KEY],
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                    ["metadata"] = message.Metadata != null ? JObject.FromObject(message.Metadata) : null
-                }, new JObject
-                {
-                    ["content"] = rawContent
-                });
+                this.LogDelivery(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["messageId"] = message.Id,
+                        ["contentType"] = (string)settings[Message.TYPE_KEY],
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                        ["metadata"] =
+                            message.Metadata != null ? JObject.FromObject(message.Metadata) : null,
+                    },
+                    new JObject { ["content"] = rawContent }
+                );
             }
             catch (Exception ex)
             {
-                this.LogError(_blipMonitoringLogger, context, new JObject
-                {
-                    ["contentType"] = (string)settings[Message.TYPE_KEY],
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, ex);
+                this.LogError(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["contentType"] = (string)settings[Message.TYPE_KEY],
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    },
+                    ex
+                );
                 throw;
             }
         }

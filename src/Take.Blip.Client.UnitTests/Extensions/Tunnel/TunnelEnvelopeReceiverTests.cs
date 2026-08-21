@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using NSubstitute;
 using Take.Blip.Client.Extensions.Tunnel;
-
 using Xunit;
 #pragma warning disable 4014
 
@@ -15,8 +14,9 @@ namespace Take.Blip.Client.UnitTests.Extensions.Tunnel
     public class TunnelEnvelopeReceiverTests : TestsBase
     {
         public ISender Sender { get; } = Substitute.For<ISender>();
-       
-        public TunnelEnvelopeReceiver<Message> GetMessageTarget() => new TunnelEnvelopeReceiver<Message>(Sender.SendMessageAsync);
+
+        public TunnelEnvelopeReceiver<Message> GetMessageTarget() =>
+            new TunnelEnvelopeReceiver<Message>(Sender.SendMessageAsync);
 
         [Fact]
         public async Task ReceiveValidTunnelEnvelopeShouldForwardToOriginator()
@@ -26,7 +26,7 @@ namespace Take.Blip.Client.UnitTests.Extensions.Tunnel
             {
                 From = "children-bot@tunnel.msging.net/originator%40domain.local%2Finstance",
                 To = "master-bot@msging.net",
-                Content = "Hello"
+                Content = "Hello",
             };
 
             var target = GetMessageTarget();
@@ -41,8 +41,10 @@ namespace Take.Blip.Client.UnitTests.Extensions.Tunnel
                     Arg.Is<Message>(m =>
                         m.To == "originator@domain.local"
                         && m.From == null
-                        && m.Content == message.Content),
-                    Arg.Any<CancellationToken>());
+                        && m.Content == message.Content
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -53,13 +55,15 @@ namespace Take.Blip.Client.UnitTests.Extensions.Tunnel
             {
                 From = "originator@domain.local/instance",
                 To = "master-bot@msging.net",
-                Content = "Hello"
+                Content = "Hello",
             };
 
             var target = GetMessageTarget();
 
             // Act
-            Assert.ThrowsAsync<ArgumentException>(async () => await target.ReceiveAsync(message, CancellationToken));
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+                await target.ReceiveAsync(message, CancellationToken)
+            );
         }
     }
 }

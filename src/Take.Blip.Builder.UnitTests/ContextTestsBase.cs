@@ -19,11 +19,11 @@ namespace Take.Blip.Builder.UnitTests
             Context.UserIdentity.Returns(UserIdentity);
             Context.OwnerIdentity.Returns(OwnerIdentity);
         }
-        
+
         public IContext Context { get; }
-        
+
         public Flow Flow { get; }
-        
+
         public Identity UserIdentity { get; }
 
         public Identity OwnerIdentity { get; }

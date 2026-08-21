@@ -80,6 +80,6 @@
         /// <summary>
         /// get values from aiAgent
         /// </summary>
-        AiAgent
+        AiAgent,
     }
 }

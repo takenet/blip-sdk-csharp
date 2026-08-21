@@ -6,16 +6,15 @@ using System.Threading.Tasks;
 
 namespace Take.Blip.Client.Activation.Rules
 {
-
     public abstract class ConditionBase : NamedEntity
     {
         public ConditionBase(string name)
-            : base(name)
-        {
-            
-        }      
+            : base(name) { }
 
-        public abstract Task<bool> IsMatchAsync(object factProperty, IDictionary<string, object> context, CancellationToken cancellationToken);
-
+        public abstract Task<bool> IsMatchAsync(
+            object factProperty,
+            IDictionary<string, object> context,
+            CancellationToken cancellationToken
+        );
     }
 }

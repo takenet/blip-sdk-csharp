@@ -17,25 +17,27 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
         public Dictionary<string, string> Headers { get; set; }
         public TimeSpan? RequestTimeout { get; set; }
 
-
         public void Validate()
         {
             if (Uri == null)
             {
                 throw new ValidationException(
-                    $"The '{nameof(Uri)}' settings value is required for '{nameof(SendMessageFromHttpAction)}' action");
+                    $"The '{nameof(Uri)}' settings value is required for '{nameof(SendMessageFromHttpAction)}' action"
+                );
             }
 
             if (Type == null)
             {
                 throw new ValidationException(
-                    $"The '{nameof(Type)}' settings value is required for '{nameof(SendMessageFromHttpAction)}' action");
+                    $"The '{nameof(Type)}' settings value is required for '{nameof(SendMessageFromHttpAction)}' action"
+                );
             }
 
             if (!MediaType.TryParse(Type, out MediaType))
             {
                 throw new ValidationException(
-                    $"The '{nameof(Type)}' settings value must be a valid MIME type for '{nameof(SendMessageFromHttpAction)}' action");
+                    $"The '{nameof(Type)}' settings value must be a valid MIME type for '{nameof(SendMessageFromHttpAction)}' action"
+                );
             }
         }
     }

@@ -21,12 +21,12 @@ namespace Take.Blip.Builder.Models
         /// If not provided, is used the local application identity.
         /// </summary>
         public Identity OwnerIdentity { get; set; }
-        
+
         /// <summary>
         /// Indicates that the tunnel owner context should be used if the input message is from a tunnel user.
         /// </summary>
-        public bool? UseTunnelOwnerContext { get; set; }        
-        
+        public bool? UseTunnelOwnerContext { get; set; }
+
         /// <summary>
         /// The expiration for a user state in a flow.
         /// </summary>
@@ -38,20 +38,27 @@ namespace Take.Blip.Builder.Models
         public double? MinimumIntentScore { get; set; }
 
         /// <summary>
-        /// The global timeout for action execution. 
+        /// The global timeout for action execution.
         /// </summary>
         public double? ActionExecutionTimeout { get; set; }
 
         public static BuilderConfiguration FromDictionary(IDictionary<string, string> configuration)
         {
-            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-            
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration));
+
             var builderConfiguration = configuration
                 .Where(kv => kv.Key.StartsWith(CONFIGURATION_KEY_PREFIX))
-                .Select(kv => new KeyValuePair<string, string>(kv.Key.Replace(CONFIGURATION_KEY_PREFIX, ""), kv.Value))
+                .Select(kv => new KeyValuePair<string, string>(
+                    kv.Key.Replace(CONFIGURATION_KEY_PREFIX, ""),
+                    kv.Value
+                ))
                 .ToDictionary(kv => kv.Key, kv => kv.Value);
-            
-            var jObject = JObject.FromObject(builderConfiguration, JsonSerializer.Create(JsonSerializerSettingsContainer.Settings));
+
+            var jObject = JObject.FromObject(
+                builderConfiguration,
+                JsonSerializer.Create(JsonSerializerSettingsContainer.Settings)
+            );
 
             return jObject.ToObject<BuilderConfiguration>();
         }

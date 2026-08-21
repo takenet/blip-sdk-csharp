@@ -24,10 +24,7 @@ namespace Take.Blip.Client.UnitTests
         private static readonly SemaphoreSlim ListenerSemaphore = new SemaphoreSlim(1, 1);
 
         public DummyServer()
-            : this(new Uri("net.tcp://localhost:443"))
-        {
-
-        }
+            : this(new Uri("net.tcp://localhost:443")) { }
 
         public DummyServer(Uri listenerUri)
         {
@@ -36,7 +33,8 @@ namespace Take.Blip.Client.UnitTests
             _transportListener = new TcpTransportListener(
                 ListenerUri,
                 null,
-                new EnvelopeSerializer(new DocumentTypeResolver().WithMessagingDocuments()));
+                new EnvelopeSerializer(new DocumentTypeResolver().WithMessagingDocuments())
+            );
             Channels = new Queue<ServerChannel>();
             Authentications = new Queue<Authentication>();
             Messages = new Queue<Message>();
@@ -46,7 +44,9 @@ namespace Take.Blip.Client.UnitTests
 
         public Uri ListenerUri { get; }
 
-        public async Task StartAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task StartAsync(
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             await ListenerSemaphore.WaitAsync(cancellationToken);
 
@@ -63,7 +63,8 @@ namespace Take.Blip.Client.UnitTests
                         new Node("postmaster", "msging.net", "instance"),
                         transport,
                         TimeSpan.FromSeconds(60),
-                        autoReplyPings: true);
+                        autoReplyPings: true
+                    );
 
                     await serverChannel.EstablishSessionAsync(
                         new[] { SessionCompression.None },
@@ -74,18 +75,23 @@ namespace Take.Blip.Client.UnitTests
                             AuthenticationScheme.Key,
                             AuthenticationScheme.Plain,
                             AuthenticationScheme.Transport,
-                            AuthenticationScheme.External
+                            AuthenticationScheme.External,
                         },
                         (n, a, _) =>
                         {
                             Authentications.Enqueue(a);
-                            return new AuthenticationResult(DomainRole.RootAuthority, a).AsCompletedTask();
+                            return new AuthenticationResult(
+                                DomainRole.RootAuthority,
+                                a
+                            ).AsCompletedTask();
                         },
                         (n, s, c) =>
                         {
                             return n.AsCompletedTask();
-                        }, _cts.Token);
-                   
+                        },
+                        _cts.Token
+                    );
+
                     var channelListener = new ChannelListener(
                         m =>
                         {
@@ -106,19 +112,22 @@ namespace Take.Blip.Client.UnitTests
                                     new Command(c.Id)
                                     {
                                         Status = CommandStatus.Success,
-                                        Method = c.Method
+                                        Method = c.Method,
                                     },
-                                    _cts.Token);
+                                    _cts.Token
+                                );
                             }
                             return true;
-                        });
+                        }
+                    );
 
                     channelListener.Start(serverChannel);
                     Channels.Enqueue(serverChannel);
 
                     return true;
                 },
-                _cts.Token);
+                _cts.Token
+            );
         }
 
         public Queue<ServerChannel> Channels { get; }
@@ -131,7 +140,9 @@ namespace Take.Blip.Client.UnitTests
 
         public Queue<Command> Commands { get; }
 
-        public async Task StopAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task StopAsync(
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             _cts?.Cancel();
             await (_transportListener?.StopAsync() ?? Task.CompletedTask);

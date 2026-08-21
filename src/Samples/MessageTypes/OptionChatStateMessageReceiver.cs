@@ -17,12 +17,8 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-            var chatState = new ChatState
-            {
-                State = ChatStateEvent.Composing
-            };
+            var chatState = new ChatState { State = ChatStateEvent.Composing };
             await _sender.SendMessageAsync(chatState, message.From, cancellationToken);
         }
-
     }
 }

@@ -9,7 +9,8 @@ namespace Take.Blip.Client.Activation
     /// Defines a factory for instance of <see cref="T"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IFactory<T> where T : class
+    public interface IFactory<T>
+        where T : class
     {
         /// <summary>
         /// Creates an instance of <see cref="T"/>.

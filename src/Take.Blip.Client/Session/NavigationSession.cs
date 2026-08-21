@@ -12,16 +12,15 @@ namespace Take.Blip.Client.Session
     [DataContract]
     public class NavigationSession : Document
     {
-        private static readonly MediaType MediaType = MediaType.Parse("application/vnd.takenet.navigation-session+json");
+        private static readonly MediaType MediaType = MediaType.Parse(
+            "application/vnd.takenet.navigation-session+json"
+        );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationSession"/> class.
         /// </summary>
         public NavigationSession()
-            : base(MediaType)
-        {
-
-        }
+            : base(MediaType) { }
 
         /// <summary>
         /// Gets or sets the session creation date.

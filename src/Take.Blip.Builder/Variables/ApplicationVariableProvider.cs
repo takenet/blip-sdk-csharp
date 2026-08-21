@@ -14,10 +14,14 @@ namespace Take.Blip.Builder.Variables
         {
             _application = application;
         }
-        
+
         public VariableSource Source => VariableSource.Application;
-        
-        public Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+
+        public Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
             return GetVariable(name).AsCompletedTask();
         }
@@ -28,27 +32,29 @@ namespace Take.Blip.Builder.Variables
             {
                 case "identifier":
                     return _application.Identifier;
-                
+
                 case "domain":
                     return _application.Domain;
-                
+
                 case "instance":
                     return _application.Instance;
-                
+
                 case "identity":
-                    return _application.Identity;                
-                
+                    return _application.Identity;
+
                 case "node":
                     return _application.Node;
-                
+
                 case "settings":
                     return _application.Settings != null
-                        ? JsonConvert.SerializeObject(_application.Settings, Application.SerializerSettings)
+                        ? JsonConvert.SerializeObject(
+                            _application.Settings,
+                            Application.SerializerSettings
+                        )
                         : null;
-                
+
                 default:
                     return null;
-                
             }
         }
     }

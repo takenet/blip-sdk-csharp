@@ -28,9 +28,16 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         const string BRAZIL_TIMEZONE = "E. South America Standard Time";
         const string LOCAL_TIMEZONE_SEPARATOR = "builder:#localTimeZone";
 
-        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(ExecuteScriptSettings.OutputVariable).ToCamelCase() };
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[]
+        {
+            nameof(ExecuteScriptSettings.OutputVariable).ToCamelCase(),
+        };
 
-        public ExecuteScriptAction(IConfiguration configuration, ILogger logger, IBlipLogger? blipMonitoringLogger = null)
+        public ExecuteScriptAction(
+            IConfiguration configuration,
+            ILogger logger,
+            IBlipLogger? blipMonitoringLogger = null
+        )
             : base(nameof(ExecuteScript), OUTPUT_PARAMETERS_NAME)
         {
             _configuration = configuration;
@@ -38,7 +45,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
             _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
-        public override async Task ExecuteAsync(IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(
+            IContext context,
+            ExecuteScriptSettings settings,
+            CancellationToken cancellationToken
+        )
         {
             var sw = Stopwatch.StartNew();
             try
@@ -49,9 +60,14 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 
                 try
                 {
-                    if (context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR) && settings.LocalTimeZoneEnabled)
+                    if (
+                        context.Flow.Configuration.ContainsKey(LOCAL_TIMEZONE_SEPARATOR)
+                        && settings.LocalTimeZoneEnabled
+                    )
                     {
-                        timeZoneLocal = TZConvert.GetTimeZoneInfo(context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]);
+                        timeZoneLocal = TZConvert.GetTimeZoneInfo(
+                            context.Flow.Configuration[LOCAL_TIMEZONE_SEPARATOR]
+                        );
                     }
                 }
                 catch (Exception e)
@@ -59,13 +75,15 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                     _logger.Information(e, "Error converting timezone");
                 }
 
-                engine = new Engine(options => options
+                engine = new Engine(options =>
+                    options
                         .LimitRecursion(_configuration.ExecuteScriptLimitRecursion)
                         .MaxStatements(_configuration.ExecuteScriptMaxStatements)
                         .LimitMemory(_configuration.ExecuteScriptLimitMemory)
                         .TimeoutInterval(_configuration.ExecuteScriptTimeout)
                         .DebugMode()
-                        .LocalTimeZone(timeZoneLocal));
+                        .LocalTimeZone(timeZoneLocal)
+                );
 
                 engine.Step += (sender, e) =>
                 {
@@ -76,48 +94,67 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 var DefaultParserOptions = new ParserOptions()
                 {
                     AdaptRegexp = false,
-                    Tolerant = true
+                    Tolerant = true,
                 };
 
                 engine = engine.Execute(settings.Source, DefaultParserOptions);
 
-                var result = arguments != null
-                   ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
-                   : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
+                var result =
+                    arguments != null
+                        ? engine.Invoke(settings.Function ?? DEFAULT_FUNCTION, arguments)
+                        : engine.Invoke(settings.Function ?? DEFAULT_FUNCTION);
 
                 await SetScriptResultAsync(context, settings, result, cancellationToken);
 
-                var outputValue = result != null && !result.IsNull()
-                    ? (result.Type == Types.Object ? JsonConvert.SerializeObject(result.ToObject()) : result.ToString())
-                    : null;
+                var outputValue =
+                    result != null && !result.IsNull()
+                        ? (
+                            result.Type == Types.Object
+                                ? JsonConvert.SerializeObject(result.ToObject())
+                                : result.ToString()
+                        )
+                        : null;
 
                 var sensitiveData = new JObject { ["outputValue"] = outputValue };
                 if (settings.InputVariables != null && arguments != null)
                     sensitiveData["inputVariables"] = JArray.FromObject(arguments);
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
-                {
-                    ["function"] = settings.Function ?? DEFAULT_FUNCTION,
-                    ["source"] = settings.Source,
-                    ["outputVariable"] = settings.OutputVariable,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, sensitiveData);
+                this.LogExecution(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["function"] = settings.Function ?? DEFAULT_FUNCTION,
+                        ["source"] = settings.Source,
+                        ["outputVariable"] = settings.OutputVariable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    },
+                    sensitiveData
+                );
             }
             catch (Exception ex)
             {
-                this.LogError(_blipMonitoringLogger, context, new JObject
-                {
-                    ["function"] = settings.Function ?? DEFAULT_FUNCTION,
-                    ["source"] = settings.Source,
-                    ["outputVariable"] = settings.OutputVariable,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, ex);
+                this.LogError(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["function"] = settings.Function ?? DEFAULT_FUNCTION,
+                        ["source"] = settings.Source,
+                        ["outputVariable"] = settings.OutputVariable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    },
+                    ex
+                );
                 throw;
             }
         }
 
         protected async Task<object[]> GetScriptArgumentsAsync(
-            IContext context, ExecuteScriptSettings settings, CancellationToken cancellationToken)
+            IContext context,
+            ExecuteScriptSettings settings,
+            CancellationToken cancellationToken
+        )
         {
             object[] arguments = null;
             if (settings.InputVariables != null && settings.InputVariables.Length > 0)
@@ -125,8 +162,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
                 arguments = new object[settings.InputVariables.Length];
                 for (int i = 0; i < arguments.Length; i++)
                 {
-                    arguments[i] =
-                        await context.GetVariableAsync(settings.InputVariables[i], cancellationToken, Type);
+                    arguments[i] = await context.GetVariableAsync(
+                        settings.InputVariables[i],
+                        cancellationToken,
+                        Type
+                    );
                 }
             }
 
@@ -134,13 +174,18 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
         }
 
         private async Task SetScriptResultAsync(
-            IContext context, ExecuteScriptSettings settings, JsValue result, CancellationToken cancellationToken)
+            IContext context,
+            ExecuteScriptSettings settings,
+            JsValue result,
+            CancellationToken cancellationToken
+        )
         {
             if (result != null && !result.IsNull())
             {
-                var value = result.Type == Types.Object
-                    ? JsonConvert.SerializeObject(result.ToObject())
-                    : result.ToString();
+                var value =
+                    result.Type == Types.Object
+                        ? JsonConvert.SerializeObject(result.ToObject())
+                        : result.ToString();
 
                 await context.SetVariableAsync(settings.OutputVariable, value, cancellationToken);
             }
@@ -152,18 +197,23 @@ namespace Take.Blip.Builder.Actions.ExecuteScript
 
         private void CheckMemoryUsage(IContext context, DebugInformation debugInformation)
         {
-            if (debugInformation.CurrentMemoryUsage >= _configuration.ExecuteScriptLimitMemoryWarning)
+            if (
+                debugInformation.CurrentMemoryUsage
+                >= _configuration.ExecuteScriptLimitMemoryWarning
+            )
             {
                 using (LogContext.PushProperty(nameof(DebugInformation), debugInformation, true))
-                    _logger.Warning("The script memory allocation ({CurrentMemoryUsage}:N0 bytes) is above the warning threshold of {ExecuteScriptLimitMemoryWarning}:N0 bytes",
+                    _logger.Warning(
+                        "The script memory allocation ({CurrentMemoryUsage}:N0 bytes) is above the warning threshold of {ExecuteScriptLimitMemoryWarning}:N0 bytes",
                         debugInformation.CurrentMemoryUsage,
-                        _configuration.ExecuteScriptLimitMemoryWarning);
-
+                        _configuration.ExecuteScriptLimitMemoryWarning
+                    );
 
                 var currentActionTrace = context.GetCurrentActionTrace();
                 if (currentActionTrace != null)
                 {
-                    currentActionTrace.Warning = $"The script memory allocation ({debugInformation.CurrentMemoryUsage:N0} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning:N0} bytes";
+                    currentActionTrace.Warning =
+                        $"The script memory allocation ({debugInformation.CurrentMemoryUsage:N0} bytes) is above the warning threshold of {_configuration.ExecuteScriptLimitMemoryWarning:N0} bytes";
                 }
             }
         }

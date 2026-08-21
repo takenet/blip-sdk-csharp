@@ -11,7 +11,9 @@ namespace Take.Blip.Client.Extensions
 {
     public static class DocumentTypeResolverExtensions
     {
-        public static IDocumentTypeResolver WithBlipDocuments(this IDocumentTypeResolver documentTypeResolver)
+        public static IDocumentTypeResolver WithBlipDocuments(
+            this IDocumentTypeResolver documentTypeResolver
+        )
         {
             documentTypeResolver = documentTypeResolver.WithMessagingDocuments();
             documentTypeResolver.RegisterAssemblyDocuments(typeof(Attendance).Assembly);
@@ -20,7 +22,9 @@ namespace Take.Blip.Client.Extensions
             documentTypeResolver.RegisterAssemblyDocuments(typeof(DetailMedia).Assembly);
             documentTypeResolver.RegisterAssemblyDocuments(typeof(Application).Assembly);
             documentTypeResolver.RegisterAssemblyDocuments(typeof(InputExpiration).Assembly);
-            documentTypeResolver.RegisterAssemblyDocuments(typeof(DocumentTypeResolverExtensions).Assembly);
+            documentTypeResolver.RegisterAssemblyDocuments(
+                typeof(DocumentTypeResolverExtensions).Assembly
+            );
             return documentTypeResolver;
         }
     }

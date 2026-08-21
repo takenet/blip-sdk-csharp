@@ -9,9 +9,9 @@ namespace Take.Blip.Client.Web
             return new Command
             {
                 Id = requestCommand.Id,
-                To = requestCommand.From,                
+                To = requestCommand.From,
                 Method = requestCommand.Method,
-                Status = CommandStatus.Success
+                Status = CommandStatus.Success,
             };
         }
     }

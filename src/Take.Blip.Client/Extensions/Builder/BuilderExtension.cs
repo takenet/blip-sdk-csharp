@@ -6,12 +6,17 @@ namespace Take.Blip.Client.Extensions.Builder
 {
     public class BuilderExtension : ExtensionBase, IBuilderExtension
     {
-        private static readonly Node BuilderAddress = Node.Parse($"postmaster@builder.{Constants.DEFAULT_DOMAIN}");
-        public BuilderExtension(ISender sender) : base(sender)
-        {
-        }
+        private static readonly Node BuilderAddress = Node.Parse(
+            $"postmaster@builder.{Constants.DEFAULT_DOMAIN}"
+        );
 
-        public async Task<Document> GetFunctionOnBlipFunctionAsync(string functionId, CancellationToken cancellationToken) 
+        public BuilderExtension(ISender sender)
+            : base(sender) { }
+
+        public async Task<Document> GetFunctionOnBlipFunctionAsync(
+            string functionId,
+            CancellationToken cancellationToken
+        )
         {
             var requestCommand = new Command()
             {
@@ -21,8 +26,7 @@ namespace Take.Blip.Client.Extensions.Builder
                 Uri = new LimeUri($"/functions/{functionId}"),
             };
 
-              return await ProcessCommandAsync<Document>(requestCommand, cancellationToken);
+            return await ProcessCommandAsync<Document>(requestCommand, cancellationToken);
         }
-
     }
 }

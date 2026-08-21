@@ -6,17 +6,24 @@ using System.Threading.Tasks;
 
 namespace Take.Blip.Client.Activation
 {
-    internal class Factory<T> : IFactory<T> where T : class
+    internal class Factory<T> : IFactory<T>
+        where T : class
     {
         private readonly Type _type;
 
         public Factory(Type type)
         {
-            if (type.IsAssignableFrom(typeof(T))) throw new ArgumentException($"The type '{type}' is not assignable from '{typeof(T)}'");
+            if (type.IsAssignableFrom(typeof(T)))
+                throw new ArgumentException(
+                    $"The type '{type}' is not assignable from '{typeof(T)}'"
+                );
             _type = type;
         }
 
-        public Task<T> CreateAsync(IServiceProvider serviceProvider, IDictionary<string, object> settings)
+        public Task<T> CreateAsync(
+            IServiceProvider serviceProvider,
+            IDictionary<string, object> settings
+        )
         {
             T service;
             try
@@ -36,7 +43,11 @@ namespace Take.Blip.Client.Activation
             return Task.FromResult(service);
         }
 
-        private static object GetService(Type serviceType, IServiceProvider serviceProvider, params object[] args)
+        private static object GetService(
+            Type serviceType,
+            IServiceProvider serviceProvider,
+            params object[] args
+        )
         {
             // Check the type constructors
             try
@@ -48,7 +59,10 @@ namespace Take.Blip.Client.Activation
 
                 if (serviceConstructor == null)
                 {
-                    throw new ArgumentException($"The  type '{serviceType}' doesn't have a public constructor", nameof(serviceType));
+                    throw new ArgumentException(
+                        $"The  type '{serviceType}' doesn't have a public constructor",
+                        nameof(serviceType)
+                    );
                 }
 
                 var parameters = serviceConstructor.GetParameters();
@@ -72,7 +86,10 @@ namespace Take.Blip.Client.Activation
             }
             catch (Exception ex)
             {
-                throw new ArgumentException($"Could not instantiate type {serviceType.FullName}", ex);
+                throw new ArgumentException(
+                    $"Could not instantiate type {serviceType.FullName}",
+                    ex
+                );
             }
         }
     }

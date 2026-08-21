@@ -21,7 +21,12 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="ascending"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<DocumentCollection> GetIntentionsAsync(int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken));
+        Task<DocumentCollection> GetIntentionsAsync(
+            int skip = 0,
+            int take = 100,
+            bool ascending = true,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Get an intention by its id.
@@ -29,7 +34,10 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="id"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Intention> GetIntentionAsync(string id, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Intention> GetIntentionAsync(
+            string id,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Sets an intention.
@@ -37,7 +45,10 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="intention"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Intention> SetIntentionAsync(Intention intention, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Intention> SetIntentionAsync(
+            Intention intention,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Query the stored entities.
@@ -47,7 +58,12 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="ascending"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<DocumentCollection> GetEntitiesAsync(int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken));
+        Task<DocumentCollection> GetEntitiesAsync(
+            int skip = 0,
+            int take = 100,
+            bool ascending = true,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Get an entity by its id.
@@ -55,7 +71,10 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="id"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Entity> GetEntityAsync(string id, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Entity> GetEntityAsync(
+            string id,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Sets an entity.
@@ -63,7 +82,10 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="entity"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Entity> SetEntityAsync(Entity entity, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Entity> SetEntityAsync(
+            Entity entity,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Query the answers associated with an intention
@@ -74,7 +96,13 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="ascending"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<DocumentCollection> GetAnswersAsync(string intentionId, int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken));
+        Task<DocumentCollection> GetAnswersAsync(
+            string intentionId,
+            int skip = 0,
+            int take = 100,
+            bool ascending = true,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Get a specific intention answer by its id.
@@ -83,7 +111,11 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="answerId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Answer> GetAnswerAsync(string intentionId, string answerId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Answer> GetAnswerAsync(
+            string intentionId,
+            string answerId,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Set the answers for an intention.
@@ -92,7 +124,11 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="answers"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SetAnswersAsync(string intentionId, IEnumerable<Answer> answers, CancellationToken cancellationToken = default(CancellationToken));
+        Task SetAnswersAsync(
+            string intentionId,
+            IEnumerable<Answer> answers,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Query the questions associated with an intention
@@ -103,7 +139,13 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="ascending"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<DocumentCollection> GetQuestionsAsync(string intentionId, int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken));
+        Task<DocumentCollection> GetQuestionsAsync(
+            string intentionId,
+            int skip = 0,
+            int take = 100,
+            bool ascending = true,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Get a specific intention question by its id.
@@ -112,7 +154,11 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="questionId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Question> GetQuestionAsync(string intentionId, string questionId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Question> GetQuestionAsync(
+            string intentionId,
+            string questionId,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Set the questions for an intention.
@@ -121,7 +167,11 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="questions"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SetQuestionsAsync(string intentionId, IEnumerable<Question> questions, CancellationToken cancellationToken = default(CancellationToken));
+        Task SetQuestionsAsync(
+            string intentionId,
+            IEnumerable<Question> questions,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Query the existing models for the current identity.
@@ -131,7 +181,12 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="ascending"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<DocumentCollection> GetModelsAsync(int skip = 0, int take = 100, bool ascending = true, CancellationToken cancellationToken = default(CancellationToken));
+        Task<DocumentCollection> GetModelsAsync(
+            int skip = 0,
+            int take = 100,
+            bool ascending = true,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Train the current model into the registered AI providers.
@@ -146,7 +201,10 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="id"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task PublishModelAsync(string id, CancellationToken cancellationToken = default(CancellationToken));
+        Task PublishModelAsync(
+            string id,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Analyze the user input using a published model.
@@ -154,7 +212,10 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="analysisRequest"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<AnalysisResponse> AnalyzeAsync(AnalysisRequest analysisRequest, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AnalysisResponse> AnalyzeAsync(
+            AnalysisRequest analysisRequest,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Get content result for the analyzed user input.
@@ -162,7 +223,10 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="resource"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ContentResult> GetContentResultAsync(Document resource, CancellationToken cancellationToken = default(CancellationToken));
+        Task<ContentResult> GetContentResultAsync(
+            Document resource,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Send a feedback to a executed analysis to help improving the model.
@@ -171,7 +235,11 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="analysisFeedback"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SendFeedbackAsync(string analysisId, AnalysisFeedback analysisFeedback, CancellationToken cancellationToken = default(CancellationToken));
+        Task SendFeedbackAsync(
+            string analysisId,
+            AnalysisFeedback analysisFeedback,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
         /// <summary>
         /// Get content assistant for the analyzed user input.
@@ -179,6 +247,9 @@ namespace Take.Blip.Client.Extensions.ArtificialIntelligence
         /// <param name="document"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ContentAssistant> GetContentAssistantAsync(Document document, CancellationToken cancellationToken = default);
+        Task<ContentAssistant> GetContentAssistantAsync(
+            Document document,
+            CancellationToken cancellationToken = default
+        );
     }
 }

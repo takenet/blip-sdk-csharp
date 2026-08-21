@@ -9,24 +9,19 @@ namespace Take.Blip.Builder
     public class BuilderException : Exception
     {
         /// <inheritdoc />
-        public BuilderException()
-        {
-        }
+        public BuilderException() { }
 
         /// <inheritdoc />
-        public BuilderException(string message) : base(message)
-        {
-        }
+        public BuilderException(string message)
+            : base(message) { }
 
         /// <inheritdoc />
-        public BuilderException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-        
+        public BuilderException(string message, Exception innerException)
+            : base(message, innerException) { }
+
         /// <inheritdoc />
-        protected BuilderException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        protected BuilderException(SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
 
         public string MessageId { get; set; }
 

@@ -17,11 +17,14 @@ namespace Take.Blip.Builder.Utils
             if (string.IsNullOrEmpty(contentType) || string.IsNullOrEmpty(expectedType))
                 return false;
 
-            var mediaTypes = contentType.Split(',')
-                                         .Select(type => type.Trim())
-                                         .ToList();
+            var mediaTypes = contentType.Split(',').Select(type => type.Trim()).ToList();
 
-            return mediaTypes.Any(type => new MediaTypeHeaderValue(type).MediaType.Equals(expectedType, StringComparison.OrdinalIgnoreCase));
+            return mediaTypes.Any(type =>
+                new MediaTypeHeaderValue(type).MediaType.Equals(
+                    expectedType,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            );
         }
     }
 }

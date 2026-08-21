@@ -20,7 +20,7 @@ namespace Take.Blip.Client.Console
     public static class ConsoleRunner
     {
         const ConsoleColor HIGHLIGHT_COLOR = ConsoleColor.DarkCyan;
-    
+
         /// <summary>
         /// Runs an console application with the specified arguments.
         /// </summary>
@@ -47,24 +47,35 @@ namespace Take.Blip.Client.Console
         {
             try
             {
-                if (options.RunAsService) return RunAsService(options);
-                if (options.Install) return InstallService(options);
-                if (options.Uninstall) return UninstallService(options);
-            
+                if (options.RunAsService)
+                    return RunAsService(options);
+                if (options.Install)
+                    return InstallService(options);
+                if (options.Uninstall)
+                    return UninstallService(options);
+
                 string applicationJsonPath = GetApplicationJsonPath(options);
 
                 if (!File.Exists(applicationJsonPath))
                 {
-                    WriteLine($"Could not find the '{options.ApplicationJsonPath}' file in '{applicationJsonPath}' path.", ConsoleColor.Red);
+                    WriteLine(
+                        $"Could not find the '{options.ApplicationJsonPath}' file in '{applicationJsonPath}' path.",
+                        ConsoleColor.Red
+                    );
                     return -1;
                 }
 
                 WriteLine("Starting application...", HIGHLIGHT_COLOR);
                 IStoppable stopabble;
 
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(options.StartTimeout)))
+                using (
+                    var cts = new CancellationTokenSource(
+                        TimeSpan.FromSeconds(options.StartTimeout)
+                    )
+                )
                 {
-                    stopabble = await StartAsync(applicationJsonPath, cts.Token).ConfigureAwait(false);
+                    stopabble = await StartAsync(applicationJsonPath, cts.Token)
+                        .ConfigureAwait(false);
                 }
 
 #if !NET461
@@ -76,7 +87,6 @@ namespace Take.Blip.Client.Console
                         System.Runtime.Loader.AssemblyLoadContext.Default.Unloading += ctx =>
                         {
                             semaphore.Release();
-
                         };
                         WriteLine("Application started. Waiting for SIGTERM.", HIGHLIGHT_COLOR);
                         await semaphore.WaitAsync();
@@ -89,19 +99,20 @@ namespace Take.Blip.Client.Console
                 }
 #else
                 WriteLine("Application started. Press any key to stop.", HIGHLIGHT_COLOR);
-                    System.Console.Read();
+                System.Console.Read();
 #endif
-
 
                 WriteLine("Stopping application...", HIGHLIGHT_COLOR);
                 await stopabble.StopAsync().ConfigureAwait(false);
                 WriteLine("Application stopped.", HIGHLIGHT_COLOR);
                 return 0;
-
             }
             catch (OperationCanceledException)
             {
-                WriteLine("Could not start the application in the configured timeout", ConsoleColor.Red);
+                WriteLine(
+                    "Could not start the application in the configured timeout",
+                    ConsoleColor.Red
+                );
                 return -1;
             }
             catch (Exception ex)
@@ -128,18 +139,27 @@ namespace Take.Blip.Client.Console
             {
                 applicationJsonPath = Path.Combine(
                     Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
-                    applicationJsonPath);
+                    applicationJsonPath
+                );
             }
 
             return applicationJsonPath;
         }
 
-        internal static async Task<IStoppable> StartAsync(string applicationFileName, CancellationToken cancellationToken)
+        internal static async Task<IStoppable> StartAsync(
+            string applicationFileName,
+            CancellationToken cancellationToken
+        )
         {
             var application = Application.ParseFromJsonFile(applicationFileName);
             var workingDir = Path.GetDirectoryName(applicationFileName);
-            if (string.IsNullOrWhiteSpace(workingDir)) workingDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            return await Bootstrapper.StartAsync(cancellationToken, application, typeResolver: new TypeResolver(workingDir));
+            if (string.IsNullOrWhiteSpace(workingDir))
+                workingDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            return await Bootstrapper.StartAsync(
+                cancellationToken,
+                application,
+                typeResolver: new TypeResolver(workingDir)
+            );
         }
 
         private static void WriteLine(string value = "", ConsoleColor color = ConsoleColor.White)
@@ -174,7 +194,8 @@ namespace Take.Blip.Client.Console
 
             options.ServiceDisplayName = options.ServiceDisplayName ?? options.ServiceName;
 
-            var remainingArgs = Environment.GetCommandLineArgs()
+            var remainingArgs = Environment
+                .GetCommandLineArgs()
                 .Where(arg => arg != $"--{Options.INSTALL_FLAG}")
                 .Select(EscapeCommandLineArgument)
                 .ToList();
@@ -191,16 +212,15 @@ namespace Take.Blip.Client.Console
 
             var fullServiceCommand = host + " " + string.Join(" ", remainingArgs);
 
-            new Win32ServiceManager()
-                .CreateService(
-                    options.ServiceName,
-                    options.ServiceDisplayName,
-                    options.ServiceDescription,
-                    fullServiceCommand,
-                    Win32ServiceCredentials.LocalSystem,
-                    autoStart: true,
-                    errorSeverity: ErrorSeverity.Normal
-                );
+            new Win32ServiceManager().CreateService(
+                options.ServiceName,
+                options.ServiceDisplayName,
+                options.ServiceDescription,
+                fullServiceCommand,
+                Win32ServiceCredentials.LocalSystem,
+                autoStart: true,
+                errorSeverity: ErrorSeverity.Normal
+            );
 
             WriteLine($@"Successfully registered service ""{options.ServiceDisplayName}""");
             return 0;
@@ -214,10 +234,11 @@ namespace Take.Blip.Client.Console
                 return -1;
             }
 
-            new Win32ServiceManager()
-                .DeleteService(options.ServiceName);
+            new Win32ServiceManager().DeleteService(options.ServiceName);
 
-            System.Console.WriteLine($@"Successfully unregistered service ""{options.ServiceDisplayName}""");
+            System.Console.WriteLine(
+                $@"Successfully unregistered service ""{options.ServiceDisplayName}"""
+            );
             return 0;
         }
 

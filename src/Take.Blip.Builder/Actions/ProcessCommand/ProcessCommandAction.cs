@@ -1,16 +1,16 @@
-﻿using Lime.Protocol;
-using Lime.Protocol.Serialization;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
+using Lime.Protocol;
+using Lime.Protocol.Serialization;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Client;
 
@@ -26,7 +26,12 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
         private const string SERIALIZABLE_PATTERN = @".+[/|\+]json$";
         private const string OUTPUT_VARIABLE_PROPERTY = "variable";
 
-        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer, IConfiguration configuration, IBlipLogger? blipMonitoringLogger = null)
+        public ProcessCommandAction(
+            ISender sender,
+            IEnvelopeSerializer envelopeSerializer,
+            IConfiguration configuration,
+            IBlipLogger? blipMonitoringLogger = null
+        )
         {
             _sender = sender;
             _envelopeSerializer = envelopeSerializer;
@@ -38,14 +43,21 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         public string[]? OutputVariables => new[] { OUTPUT_VARIABLE_PROPERTY.ToCamelCase() };
 
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(
+            IContext context,
+            JObject settings,
+            CancellationToken cancellationToken
+        )
         {
             var sensitiveData = new JObject { };
             var sw = Stopwatch.StartNew();
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
             if (settings == null)
-                throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(ProcessCommandAction)}' action");
+                throw new ArgumentNullException(
+                    nameof(settings),
+                    $"The settings are required for '{nameof(ProcessCommandAction)}' action"
+                );
 
             try
             {
@@ -83,20 +95,28 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
             }
             catch (Exception ex)
             {
-                this.LogError(_blipMonitoringLogger, context, new JObject
-                {
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, ex);
+                this.LogError(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject { ["elapsedMilliseconds"] = sw.ElapsedMilliseconds },
+                    ex
+                );
                 throw;
             }
         }
 
         private Command ConvertToCommand(JObject settings)
         {
-
-            if (settings.TryGetValue(Command.TYPE_KEY, out var type)
-                && Regex.IsMatch(type.ToString(), SERIALIZABLE_PATTERN, default, Constants.REGEX_TIMEOUT)
-                && settings.TryGetValue(Command.RESOURCE_KEY, out var resource))
+            if (
+                settings.TryGetValue(Command.TYPE_KEY, out var type)
+                && Regex.IsMatch(
+                    type.ToString(),
+                    SERIALIZABLE_PATTERN,
+                    default,
+                    Constants.REGEX_TIMEOUT
+                )
+                && settings.TryGetValue(Command.RESOURCE_KEY, out var resource)
+            )
             {
                 settings.Property(Command.RESOURCE_KEY).Value = JObject.Parse(resource.ToString());
             }
@@ -109,15 +129,18 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
 
         private void InsertMetadatasOnCommand(Command command)
         {
-            if (_configuration.ProcessCommandMetadatasToInsert != null && _configuration.ProcessCommandMetadatasToInsert.Count > 0)
+            if (
+                _configuration.ProcessCommandMetadatasToInsert != null
+                && _configuration.ProcessCommandMetadatasToInsert.Count > 0
+            )
             {
                 if (command.Metadata is null)
                     command.Metadata = new Dictionary<string, string>();
 
-                var result = command.Metadata
-                                    .Concat(_configuration.ProcessCommandMetadatasToInsert)
-                                    .GroupBy(kv => kv.Key)
-                                    .ToDictionary(k => k.Key, v => v.Last().Value);
+                var result = command
+                    .Metadata.Concat(_configuration.ProcessCommandMetadatasToInsert)
+                    .GroupBy(kv => kv.Key)
+                    .ToDictionary(k => k.Key, v => v.Last().Value);
 
                 command.Metadata = result;
             }

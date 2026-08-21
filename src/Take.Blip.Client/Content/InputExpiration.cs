@@ -1,5 +1,5 @@
-﻿using Lime.Protocol;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
+using Lime.Protocol;
 
 namespace Take.Blip.Client.Content
 {
@@ -28,8 +28,8 @@ namespace Take.Blip.Client.Content
         /// </summary>
         [DataMember(Name = "currentSessionState")]
         public string CurrentSessionState { get; set; }
-		
-        public InputExpiration(): base(MediaType.Parse(MIME_TYPE))
-        { }
+
+        public InputExpiration()
+            : base(MediaType.Parse(MIME_TYPE)) { }
     }
 }

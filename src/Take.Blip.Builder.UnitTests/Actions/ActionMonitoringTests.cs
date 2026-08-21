@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
@@ -8,8 +10,6 @@ using Lime.Protocol.Serialization.Newtonsoft;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Shouldly;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Builder.Actions.DeleteVariable;
 using Take.Blip.Builder.Actions.SendMessage;
 using Take.Blip.Builder.Actions.SendRawMessage;
@@ -65,11 +65,21 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             SetActionTrace("action-001", "Set Name");
             var settings = new SetVariableSettings { Variable = "name", Value = "Bob" };
-            Context.SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<System.Threading.CancellationToken>(), Arg.Any<TimeSpan>())
-                   .Returns<System.Threading.Tasks.Task>(_ => throw new InvalidOperationException("fail"));
+            Context
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    Arg.Any<System.Threading.CancellationToken>(),
+                    Arg.Any<TimeSpan>()
+                )
+                .Returns<System.Threading.Tasks.Task>(_ =>
+                    throw new InvalidOperationException("fail")
+                );
             var target = new SetVariableAction(_blipLogger);
 
-            await Should.ThrowAsync<InvalidOperationException>(() => target.ExecuteAsync(Context, settings, CancellationToken));
+            await Should.ThrowAsync<InvalidOperationException>(() =>
+                target.ExecuteAsync(Context, settings, CancellationToken)
+            );
 
             _blipLogger.Received(1).ErrorEvents(Arg.Any<LogInput>(), Arg.Any<Exception>());
         }
@@ -106,11 +116,19 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             SetActionTrace("action-002", "Clear Var");
             var settings = new DeleteVariableSettings { Variable = "name" };
-            Context.DeleteVariableAsync(Arg.Any<string>(), Arg.Any<System.Threading.CancellationToken>())
-                   .Returns<System.Threading.Tasks.Task>(_ => throw new InvalidOperationException("fail"));
+            Context
+                .DeleteVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<System.Threading.CancellationToken>()
+                )
+                .Returns<System.Threading.Tasks.Task>(_ =>
+                    throw new InvalidOperationException("fail")
+                );
             var target = new DeleteVariableAction(_blipLogger);
 
-            await Should.ThrowAsync<InvalidOperationException>(() => target.ExecuteAsync(Context, settings, CancellationToken));
+            await Should.ThrowAsync<InvalidOperationException>(() =>
+                target.ExecuteAsync(Context, settings, CancellationToken)
+            );
 
             _blipLogger.Received(1).ErrorEvents(Arg.Any<LogInput>(), Arg.Any<Exception>());
         }
@@ -124,11 +142,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             SetActionTrace("action-003", "Send Welcome");
             var sender = Substitute.For<ISender>();
-            var settings = JObject.FromObject(new
-            {
-                type = PlainText.MIME_TYPE,
-                content = "Hello"
-            });
+            var settings = JObject.FromObject(
+                new { type = PlainText.MIME_TYPE, content = "Hello" }
+            );
             var target = new SendMessageAction(sender, _blipLogger);
 
             await target.ExecuteAsync(Context, settings, CancellationToken);
@@ -141,16 +157,19 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             SetActionTrace("action-003", "Send Welcome");
             var sender = Substitute.For<ISender>();
-            sender.SendMessageAsync(Arg.Any<Message>(), Arg.Any<System.Threading.CancellationToken>())
-                  .Returns<System.Threading.Tasks.Task>(_ => throw new InvalidOperationException("send fail"));
-            var settings = JObject.FromObject(new
-            {
-                type = PlainText.MIME_TYPE,
-                content = "Hello"
-            });
+            sender
+                .SendMessageAsync(Arg.Any<Message>(), Arg.Any<System.Threading.CancellationToken>())
+                .Returns<System.Threading.Tasks.Task>(_ =>
+                    throw new InvalidOperationException("send fail")
+                );
+            var settings = JObject.FromObject(
+                new { type = PlainText.MIME_TYPE, content = "Hello" }
+            );
             var target = new SendMessageAction(sender, _blipLogger);
 
-            await Should.ThrowAsync<InvalidOperationException>(() => target.ExecuteAsync(Context, settings, CancellationToken));
+            await Should.ThrowAsync<InvalidOperationException>(() =>
+                target.ExecuteAsync(Context, settings, CancellationToken)
+            );
 
             _blipLogger.Received(1).ErrorEvents(Arg.Any<LogInput>(), Arg.Any<Exception>());
         }
@@ -169,7 +188,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new SendRawMessageSettings
             {
                 Type = PlainText.MIME_TYPE,
-                RawContent = "Test"
+                RawContent = "Test",
             };
             var target = new SendRawMessageAction(sender, serializer, _blipLogger);
 

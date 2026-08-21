@@ -2,10 +2,10 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Lime.Protocol;
-using Newtonsoft.Json.Linq;
 using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Blip.Ai.Bot.Monitoring.Logging.Services;
+using Lime.Protocol;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Activation;
 using Take.Blip.Client.Extensions.HelpDesk;
 using Takenet.Iris.Messaging.Resources;
@@ -18,9 +18,16 @@ namespace Take.Blip.Builder.Actions.CreateTicket
         private readonly Application _application;
         private readonly IBlipLogger _blipMonitoringLogger;
 
-        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[] { nameof(CreateTicketSettings.Variable).ToCamelCase() };
+        private static readonly string[] OUTPUT_PARAMETERS_NAME = new string[]
+        {
+            nameof(CreateTicketSettings.Variable).ToCamelCase(),
+        };
 
-        public CreateTicketAction(IHelpDeskExtension helpDeskExtension, Application application, IBlipLogger? blipMonitoringLogger = null)
+        public CreateTicketAction(
+            IHelpDeskExtension helpDeskExtension,
+            Application application,
+            IBlipLogger? blipMonitoringLogger = null
+        )
             : base(nameof(CreateTicket), OUTPUT_PARAMETERS_NAME)
         {
             _helpDeskExtension = helpDeskExtension;
@@ -28,7 +35,11 @@ namespace Take.Blip.Builder.Actions.CreateTicket
             _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
-        public override async Task ExecuteAsync(IContext context, CreateTicketSettings settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(
+            IContext context,
+            CreateTicketSettings settings,
+            CancellationToken cancellationToken
+        )
         {
             var sw = Stopwatch.StartNew();
             try
@@ -54,8 +65,10 @@ namespace Take.Blip.Builder.Actions.CreateTicket
 
                 if (context.Flow.BuilderConfiguration.UseTunnelOwnerContext ?? false)
                 {
-                    if (ticket.RoutingOwnerIdentity == null &&
-                        ticket.OwnerIdentity != _application.Identity)
+                    if (
+                        ticket.RoutingOwnerIdentity == null
+                        && ticket.OwnerIdentity != _application.Identity
+                    )
                     {
                         ticket.RoutingOwnerIdentity = _application.Identity;
                     }
@@ -72,36 +85,49 @@ namespace Take.Blip.Builder.Actions.CreateTicket
 
                 if (ticket.CustomerInput == null)
                 {
-                    ticket.CustomerInput = new DocumentContainer
-                    {
-                        Value = context.Input.Content
-                    };
+                    ticket.CustomerInput = new DocumentContainer { Value = context.Input.Content };
                 }
 
-                var createdTicket = await _helpDeskExtension.CreateTicketAsync(ticket, cancellationToken);
+                var createdTicket = await _helpDeskExtension.CreateTicketAsync(
+                    ticket,
+                    cancellationToken
+                );
                 context.SetTicket(createdTicket);
 
                 if (!string.IsNullOrWhiteSpace(settings.Variable))
                 {
-                    await context.SetVariableAsync(settings.Variable, createdTicket.Id, cancellationToken);
+                    await context.SetVariableAsync(
+                        settings.Variable,
+                        createdTicket.Id,
+                        cancellationToken
+                    );
                 }
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
-                {
-                    ["customerIdentity"] = ticket.CustomerIdentity?.ToString(),
-                    ["outputVariable"] = settings.Variable,
-                    ["ticketId"] = createdTicket?.Id,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
+                this.LogExecution(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["customerIdentity"] = ticket.CustomerIdentity?.ToString(),
+                        ["outputVariable"] = settings.Variable,
+                        ["ticketId"] = createdTicket?.Id,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    }
+                );
             }
             catch (Exception ex)
             {
-                this.LogError(_blipMonitoringLogger, context, new JObject
-                {
-                    ["customerIdentity"] = settings.CustomerIdentity?.ToString(),
-                    ["outputVariable"] = settings.Variable,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, ex);
+                this.LogError(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["customerIdentity"] = settings.CustomerIdentity?.ToString(),
+                        ["outputVariable"] = settings.Variable,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    },
+                    ex
+                );
                 throw;
             }
         }

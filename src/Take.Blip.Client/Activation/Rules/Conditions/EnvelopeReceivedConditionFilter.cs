@@ -7,7 +7,6 @@ using Lime.Protocol;
 
 namespace Take.Blip.Client.Activation.Rules.Conditions
 {
-
     public class EnvelopeReceivedConditionFilter
     {
         public string Sender { get; set; }

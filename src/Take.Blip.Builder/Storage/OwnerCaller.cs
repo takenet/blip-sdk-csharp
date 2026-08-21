@@ -1,6 +1,6 @@
-﻿using Lime.Protocol;
-using System;
+﻿using System;
 using System.Runtime.Serialization;
+using Lime.Protocol;
 
 namespace Take.Blip.Builder.Storage
 {
@@ -20,22 +20,19 @@ namespace Take.Blip.Builder.Storage
 
         public override string ToString() => $"{Owner}{SEPARATOR}{Caller}";
 
-        public static OwnerCaller Create(Identity owner, Identity caller)
-            => new OwnerCaller
-            {
-                Owner = owner,
-                Caller = caller
-            };
+        public static OwnerCaller Create(Identity owner, Identity caller) =>
+            new OwnerCaller { Owner = owner, Caller = caller };
 
         public static OwnerCaller Parse(string s)
         {
-            if (s == null) throw new ArgumentNullException(nameof(s));
+            if (s == null)
+                throw new ArgumentNullException(nameof(s));
             var values = s.Split(SEPARATOR);
             return Create(values[0], values[1]);
         }
 
-        public override bool Equals(object obj)
-            => obj != null && ToString().Equals(obj.ToString(), StringComparison.OrdinalIgnoreCase);
+        public override bool Equals(object obj) =>
+            obj != null && ToString().Equals(obj.ToString(), StringComparison.OrdinalIgnoreCase);
 
         public override int GetHashCode() => ToString().GetHashCode();
     }

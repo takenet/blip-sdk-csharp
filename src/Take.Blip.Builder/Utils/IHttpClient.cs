@@ -7,6 +7,9 @@ namespace Take.Blip.Builder.Utils
 {
     public interface IHttpClient : IDisposable
     {
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken);
+        Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken
+        );
     }
 }

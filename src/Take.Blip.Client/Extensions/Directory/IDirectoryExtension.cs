@@ -19,6 +19,9 @@ namespace Take.Blip.Client.Extensions.Directory
         /// <param name="identity">The identity to query.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<Account> GetDirectoryAccountAsync(Identity identity, CancellationToken cancellationToken);
+        Task<Account> GetDirectoryAccountAsync(
+            Identity identity,
+            CancellationToken cancellationToken
+        );
     }
 }

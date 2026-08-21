@@ -24,7 +24,7 @@ public class ContextTestsBase : CancellationTokenTestsBase
     /// <summary>
     /// The context instance.
     /// </summary>
-    protected IContext Context { get; set;  }
+    protected IContext Context { get; set; }
 
     /// <summary>
     /// The flow instance.

@@ -5,6 +5,11 @@ namespace Take.Blip.Builder.Utils
 {
     public interface IVariableReplacer
     {
-        Task<string> ReplaceAsync(string value, IContext context, CancellationToken cancellationToken, string stateActionType = null);
+        Task<string> ReplaceAsync(
+            string value,
+            IContext context,
+            CancellationToken cancellationToken,
+            string stateActionType = null
+        );
     }
 }

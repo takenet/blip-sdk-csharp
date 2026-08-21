@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Take.Blip.Client.Activation.Rules
 {
-
     public class NamedEntity
     {
         public NamedEntity(string name)

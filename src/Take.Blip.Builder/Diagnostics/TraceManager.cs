@@ -1,9 +1,9 @@
-﻿using Serilog;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Serilog;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
 
@@ -19,7 +19,8 @@ namespace Take.Blip.Builder.Diagnostics
         public TraceManager(
             ILogger logger,
             ITraceProcessor traceProcessor,
-            IConfiguration configuration)
+            IConfiguration configuration
+        )
         {
             _configuration = configuration;
             _traceProcessor = traceProcessor;
@@ -30,16 +31,20 @@ namespace Take.Blip.Builder.Diagnostics
                 {
                     BoundedCapacity = configuration.TraceQueueBoundedCapacity,
                     MaxDegreeOfParallelism = configuration.TraceQueueMaxDegreeOfParallelism,
-                    EnsureOrdered = false
-                });
+                    EnsureOrdered = false,
+                }
+            );
         }
 
-        public (StateTrace, Stopwatch) CreateStateTrace(InputTrace inputTrace, State state, StateTrace stateTrace = null, Stopwatch stateStopwatch = null)
+        public (StateTrace, Stopwatch) CreateStateTrace(
+            InputTrace inputTrace,
+            State state,
+            StateTrace stateTrace = null,
+            Stopwatch stateStopwatch = null
+        )
         {
             stateStopwatch?.Stop();
-            if (inputTrace != null &&
-                stateTrace != null &&
-                stateStopwatch != null)
+            if (inputTrace != null && stateTrace != null && stateStopwatch != null)
             {
                 stateTrace.ElapsedMilliseconds = stateStopwatch.ElapsedMilliseconds;
                 inputTrace.States.Add(stateTrace);
@@ -57,28 +62,36 @@ namespace Take.Blip.Builder.Diagnostics
             return (stateTrace, stateStopwatch);
         }
 
-        public async Task ProcessTraceAsync(InputTrace inputTrace, TraceSettings traceSettings, Stopwatch inputStopwatch, CancellationToken cancellationToken)
+        public async Task ProcessTraceAsync(
+            InputTrace inputTrace,
+            TraceSettings traceSettings,
+            Stopwatch inputStopwatch,
+            CancellationToken cancellationToken
+        )
         {
             inputStopwatch?.Stop();
 
             // Check if we should trace the request
-            if (inputTrace != null &&
-                traceSettings != null &&
-                inputStopwatch != null &&
-                (
-                    traceSettings.Mode == TraceMode.All ||
-                    (traceSettings.Mode.IsSlow() && inputStopwatch.ElapsedMilliseconds >= (traceSettings.SlowThreshold ?? 5000)) ||
-                    (traceSettings.Mode.IsError() && inputTrace.Error != null)
-                ))
+            if (
+                inputTrace != null
+                && traceSettings != null
+                && inputStopwatch != null
+                && (
+                    traceSettings.Mode == TraceMode.All
+                    || (
+                        traceSettings.Mode.IsSlow()
+                        && inputStopwatch.ElapsedMilliseconds
+                            >= (traceSettings.SlowThreshold ?? 5000)
+                    )
+                    || (traceSettings.Mode.IsError() && inputTrace.Error != null)
+                )
+            )
             {
                 inputTrace.ElapsedMilliseconds = inputStopwatch.ElapsedMilliseconds;
                 await _traceActionBlock.SendAsync(
-                    new TraceEvent
-                    {
-                        Trace = inputTrace,
-                        Settings = traceSettings
-                    },
-                    cancellationToken);
+                    new TraceEvent { Trace = inputTrace, Settings = traceSettings },
+                    cancellationToken
+                );
             }
         }
 
@@ -97,7 +110,8 @@ namespace Take.Blip.Builder.Diagnostics
                     ex,
                     "Error tracing trace event for user '{User}' and input '{Input}'",
                     traceEvent?.Trace?.User,
-                    traceEvent?.Trace?.Input);
+                    traceEvent?.Trace?.Input
+                );
             }
         }
     }

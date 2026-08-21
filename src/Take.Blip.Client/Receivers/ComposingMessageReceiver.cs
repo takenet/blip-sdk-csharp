@@ -1,8 +1,8 @@
-﻿using Lime.Messaging.Contents;
-using Lime.Protocol;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -24,18 +24,19 @@ namespace Take.Blip.Client.Receivers
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
 
-        public virtual Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = new CancellationToken())
+        public virtual Task ReceiveAsync(
+            Message envelope,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
             return _sender.SendMessageAsync(
                 new Message
                 {
                     To = envelope.From,
-                    Content = new ChatState
-                    {
-                        State = ChatStateEvent.Composing
-                    }
+                    Content = new ChatState { State = ChatStateEvent.Composing },
                 },
-                cancellationToken);
+                cancellationToken
+            );
         }
     }
 }

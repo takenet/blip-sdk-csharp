@@ -20,14 +20,21 @@ namespace Take.Blip.Client.Activation.Rules.Conditions
             _filter = filter;
         }
 
-        public override Task<bool> IsMatchAsync(object factProperty, IDictionary<string, object> context, CancellationToken cancellationToken)
+        public override Task<bool> IsMatchAsync(
+            object factProperty,
+            IDictionary<string, object> context,
+            CancellationToken cancellationToken
+        )
         {
             if (!(factProperty is Message message))
             {
-                throw new ArgumentException($"Invalid fact property for the current condition. Expected is Message, got {factProperty?.GetType()}.");
+                throw new ArgumentException(
+                    $"Invalid fact property for the current condition. Expected is Message, got {factProperty?.GetType()}."
+                );
             }
 
-            if (_filter == null) return TaskUtil.TrueCompletedTask;
+            if (_filter == null)
+                return TaskUtil.TrueCompletedTask;
 
             throw new NotImplementedException();
         }

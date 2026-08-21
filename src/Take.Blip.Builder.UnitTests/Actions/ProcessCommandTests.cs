@@ -1,13 +1,13 @@
-﻿using Lime.Messaging.Contents;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Actions.ProcessCommand;
 using Take.Blip.Builder.Hosting;
@@ -25,7 +25,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
             BlipClient = Substitute.For<ISender>();
             Configuration = Substitute.For<IConfiguration>();
 
-            Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
+            Context.Flow.Returns(
+                new Builder.Models.Flow { Configuration = new Dictionary<string, string>() }
+            );
         }
 
         public ISender BlipClient { get; set; }
@@ -34,7 +36,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         private ProcessCommandAction GetTarget()
         {
-            return new ProcessCommandAction(BlipClient, LimeSerializerContainer.EnvelopeSerializer, Configuration);
+            return new ProcessCommandAction(
+                BlipClient,
+                LimeSerializerContainer.EnvelopeSerializer,
+                Configuration
+            );
         }
 
         [Fact]
@@ -45,7 +51,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 Id = EnvelopeId.NewId(),
                 Method = CommandMethod.Get,
-                Uri = new LimeUri("/ping")
+                Uri = new LimeUri("/ping"),
             };
 
             var settings = JObject.FromObject(command, LimeSerializerContainer.Serializer);
@@ -59,18 +65,34 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 Method = CommandMethod.Get,
                 Status = CommandStatus.Success,
-                Resource = new JsonDocument()
+                Resource = new JsonDocument(),
             };
 
-            BlipClient.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(responseCommand);
+            BlipClient
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .Returns(responseCommand);
 
             // Act
             await target.ExecuteAsync(Context, settings, CancellationToken);
 
             // Assert
-            await BlipClient.Received(1).ProcessCommandAsync(Arg.Is<Command>(c => c.Uri.Equals(command.Uri)), Arg.Any<CancellationToken>());
+            await BlipClient
+                .Received(1)
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Uri.Equals(command.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
 
-            await Context.Received(1).SetVariableAsync(variable, JsonConvert.SerializeObject(responseCommand, LimeSerializerContainer.Serializer.Converters.ToArray()), Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    variable,
+                    JsonConvert.SerializeObject(
+                        responseCommand,
+                        LimeSerializerContainer.Serializer.Converters.ToArray()
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -82,7 +104,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Id = EnvelopeId.NewId(),
                 Method = CommandMethod.Set,
                 Uri = new LimeUri($"/contexts/{Context.UserIdentity}/somevariable"),
-                Resource = new PlainText { Text = "some value" }
+                Resource = new PlainText { Text = "some value" },
             };
 
             var settings = JObject.FromObject(command, LimeSerializerContainer.Serializer);
@@ -95,18 +117,34 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var responseCommand = new Command()
             {
                 Method = CommandMethod.Set,
-                Status = CommandStatus.Success
+                Status = CommandStatus.Success,
             };
 
-            BlipClient.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(responseCommand);
+            BlipClient
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .Returns(responseCommand);
 
             // Act
             await target.ExecuteAsync(Context, settings, CancellationToken);
 
             // Assert
-            await BlipClient.Received(1).ProcessCommandAsync(Arg.Is<Command>(c => c.Uri.Equals(command.Uri)), Arg.Any<CancellationToken>());
+            await BlipClient
+                .Received(1)
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Uri.Equals(command.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
 
-            await Context.Received(1).SetVariableAsync(variable, JsonConvert.SerializeObject(responseCommand, LimeSerializerContainer.Serializer.Converters.ToArray()), Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    variable,
+                    JsonConvert.SerializeObject(
+                        responseCommand,
+                        LimeSerializerContainer.Serializer.Converters.ToArray()
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -118,7 +156,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Id = EnvelopeId.NewId(),
                 Method = CommandMethod.Merge,
                 Uri = new LimeUri($"/contacts"),
-                Resource = new Contact() { Identity = Context.UserIdentity, Address = "Nowhere St." }
+                Resource = new Contact()
+                {
+                    Identity = Context.UserIdentity,
+                    Address = "Nowhere St.",
+                },
             };
 
             var settings = JObject.FromObject(command, LimeSerializerContainer.Serializer);
@@ -131,18 +173,34 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var responseCommand = new Command()
             {
                 Method = CommandMethod.Merge,
-                Status = CommandStatus.Success
+                Status = CommandStatus.Success,
             };
 
-            BlipClient.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(responseCommand);
+            BlipClient
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .Returns(responseCommand);
 
             // Act
             await target.ExecuteAsync(Context, settings, CancellationToken);
 
             // Assert
-            await BlipClient.Received(1).ProcessCommandAsync(Arg.Is<Command>(c => c.Uri.Equals(command.Uri)), Arg.Any<CancellationToken>());
+            await BlipClient
+                .Received(1)
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c => c.Uri.Equals(command.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
 
-            await Context.Received(1).SetVariableAsync(variable, JsonConvert.SerializeObject(responseCommand, LimeSerializerContainer.Serializer.Converters.ToArray()), Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    variable,
+                    JsonConvert.SerializeObject(
+                        responseCommand,
+                        LimeSerializerContainer.Serializer.Converters.ToArray()
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -154,7 +212,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Id = EnvelopeId.NewId(),
                 Method = CommandMethod.Get,
                 Uri = new LimeUri("/contacts"),
-                To = new Node("postmaster", "crm.msging.net", null)
+                To = new Node("postmaster", "crm.msging.net", null),
             };
 
             var settings = JObject.FromObject(command, LimeSerializerContainer.Serializer);
@@ -168,11 +226,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 Method = CommandMethod.Get,
                 Status = CommandStatus.Success,
-                Resource = new JsonDocument()
+                Resource = new JsonDocument(),
             };
 
-            BlipClient.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(responseCommand);
-            Configuration.ProcessCommandMetadatasToInsert.Returns(new Dictionary<string, string> { { SEND_TO_SERVER_METADATA_KEY, "true" } });
+            BlipClient
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .Returns(responseCommand);
+            Configuration.ProcessCommandMetadatasToInsert.Returns(
+                new Dictionary<string, string> { { SEND_TO_SERVER_METADATA_KEY, "true" } }
+            );
 
             // Act
             await target.ExecuteAsync(Context, settings, CancellationToken);
@@ -180,14 +242,27 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             await BlipClient
                 .Received(1)
-                .ProcessCommandAsync(Arg.Is<Command>(c => c.Uri.Equals(command.Uri) && (c.Metadata != null && c.Metadata.ContainsKey(SEND_TO_SERVER_METADATA_KEY))),
-                                     Arg.Any<CancellationToken>());
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c =>
+                        c.Uri.Equals(command.Uri)
+                        && (
+                            c.Metadata != null
+                            && c.Metadata.ContainsKey(SEND_TO_SERVER_METADATA_KEY)
+                        )
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
 
             await Context
                 .Received(1)
-                .SetVariableAsync(variable,
-                                  JsonConvert.SerializeObject(responseCommand, LimeSerializerContainer.Serializer.Converters.ToArray()),
-                                  Arg.Any<CancellationToken>());
+                .SetVariableAsync(
+                    variable,
+                    JsonConvert.SerializeObject(
+                        responseCommand,
+                        LimeSerializerContainer.Serializer.Converters.ToArray()
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -203,8 +278,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Metadata = new Dictionary<string, string>
                 {
                     { "testKey", "abc" },
-                    { SEND_TO_SERVER_METADATA_KEY, "false" }
-                }
+                    { SEND_TO_SERVER_METADATA_KEY, "false" },
+                },
             };
 
             var settings = JObject.FromObject(command, LimeSerializerContainer.Serializer);
@@ -218,11 +293,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 Method = CommandMethod.Get,
                 Status = CommandStatus.Success,
-                Resource = new JsonDocument()
+                Resource = new JsonDocument(),
             };
 
-            BlipClient.ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>()).Returns(responseCommand);
-            Configuration.ProcessCommandMetadatasToInsert.Returns(new Dictionary<string, string> { { SEND_TO_SERVER_METADATA_KEY, "true" } });
+            BlipClient
+                .ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>())
+                .Returns(responseCommand);
+            Configuration.ProcessCommandMetadatasToInsert.Returns(
+                new Dictionary<string, string> { { SEND_TO_SERVER_METADATA_KEY, "true" } }
+            );
 
             // Act
             await target.ExecuteAsync(Context, settings, CancellationToken);
@@ -230,14 +309,29 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             await BlipClient
                 .Received(1)
-                .ProcessCommandAsync(Arg.Is<Command>(c => c.Uri.Equals(command.Uri) && (c.Metadata != null && c.Metadata.Count.Equals(2) && c.Metadata.ContainsKey(SEND_TO_SERVER_METADATA_KEY) && c.Metadata[SEND_TO_SERVER_METADATA_KEY].Equals("true"))),
-                                     Arg.Any<CancellationToken>());
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c =>
+                        c.Uri.Equals(command.Uri)
+                        && (
+                            c.Metadata != null
+                            && c.Metadata.Count.Equals(2)
+                            && c.Metadata.ContainsKey(SEND_TO_SERVER_METADATA_KEY)
+                            && c.Metadata[SEND_TO_SERVER_METADATA_KEY].Equals("true")
+                        )
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
 
             await Context
                 .Received(1)
-                .SetVariableAsync(variable,
-                                  JsonConvert.SerializeObject(responseCommand, LimeSerializerContainer.Serializer.Converters.ToArray()),
-                                  Arg.Any<CancellationToken>());
+                .SetVariableAsync(
+                    variable,
+                    JsonConvert.SerializeObject(
+                        responseCommand,
+                        LimeSerializerContainer.Serializer.Converters.ToArray()
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
     }
 }

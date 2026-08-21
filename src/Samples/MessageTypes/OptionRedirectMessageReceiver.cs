@@ -31,24 +31,17 @@ namespace MessageTypes
 
         public Redirect getRedirect()
         {
-            var document = new Redirect
-            {
-                Address = "atendimento"
-            };
+            var document = new Redirect { Address = "atendimento" };
             return document;
         }
 
         public Redirect getRedirectWithContext()
         {
             var document = new Redirect
-                {
-                    Address = "mysdkbot@msging.net",
-                    Context = new DocumentContainer {
-                        Value = new PlainText {
-                            Text = "Get Started"
-                        }
-                    }
-                };
+            {
+                Address = "mysdkbot@msging.net",
+                Context = new DocumentContainer { Value = new PlainText { Text = "Get Started" } },
+            };
             return document;
         }
     }

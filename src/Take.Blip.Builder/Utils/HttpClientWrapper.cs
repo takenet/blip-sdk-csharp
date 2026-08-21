@@ -11,10 +11,8 @@ namespace Take.Blip.Builder.Utils
                 {
                     UseCookies = false,
                     ClientCertificateOptions = ClientCertificateOption.Manual,
-                    SslProtocols = SslProtocols.None
-                })
-        {
-            
-        }
+                    SslProtocols = SslProtocols.None,
+                }
+            ) { }
     }
 }

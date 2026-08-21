@@ -1,12 +1,12 @@
-﻿using Lime.Protocol;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using NSubstitute;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using NSubstitute;
 using Take.Blip.Builder.Actions.ProcessContentAssistant;
 using Take.Blip.Builder.Models;
 using Take.Blip.Client;
@@ -18,13 +18,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
 {
     public class ProcessContentAssistantTests : ActionTestsBase
     {
-        private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+        private readonly IArtificialIntelligenceExtension _artificialIntelligenceExtension =
+            Substitute.For<IArtificialIntelligenceExtension>();
         private readonly ISender _sender = Substitute.For<ISender>();
         private readonly ProcessContentAssistantAction _processContentAssistantAction;
 
         public ProcessContentAssistantTests()
         {
-            _processContentAssistantAction = new ProcessContentAssistantAction(_artificialIntelligenceExtension);
+            _processContentAssistantAction = new ProcessContentAssistantAction(
+                _artificialIntelligenceExtension
+            );
         }
 
         [Fact]
@@ -36,7 +39,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 Text = "Test case",
                 OutputVariable = "responseVariable",
-                Score = 55
+                Score = 55,
             };
 
             Context.Flow.BuilderConfiguration.MinimumIntentScore = minimumIntentScore;
@@ -44,45 +47,58 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var contentAssistantResource = new AnalysisRequest
             {
                 Text = settings.Text,
-                Score = settings.Score.Value / 100
+                Score = settings.Score.Value / 100,
             };
 
             var contentResult = new ContentResult
             {
                 Combinations = new ContentCombination[]
-               {
+                {
                     new ContentCombination
                     {
                         Entities = new string[] { "teste" },
-                        Intent = "Teste"
+                        Intent = "Teste",
                     },
-               },
+                },
                 Name = "Name",
-                Result = new Message
-                {
-                    Content = "Answer"
-                }
+                Result = new Message { Content = "Answer" },
             };
 
-            var contentResultResponse = JsonConvert.SerializeObject(new ContentAssistantActionResponse
-            {
-                HasCombination = true,
-                Entities = contentResult.Combinations.First().Entities.ToList(),
-                Intent = contentResult.Combinations.First().Intent,
-                Value = contentResult.Result.Content.ToString()
-            });
+            var contentResultResponse = JsonConvert.SerializeObject(
+                new ContentAssistantActionResponse
+                {
+                    HasCombination = true,
+                    Entities = contentResult.Combinations.First().Entities.ToList(),
+                    Intent = contentResult.Combinations.First().Intent,
+                    Value = contentResult.Result.Content.ToString(),
+                }
+            );
 
             //Act
-            _artificialIntelligenceExtension.GetContentResultAsync(Arg.Is<AnalysisRequest>(
-                ar =>
-                ar.Score == contentAssistantResource.Score &&
-                ar.Text == contentAssistantResource.Text),
-                Arg.Any<CancellationToken>()).Returns(contentResult);
+            _artificialIntelligenceExtension
+                .GetContentResultAsync(
+                    Arg.Is<AnalysisRequest>(ar =>
+                        ar.Score == contentAssistantResource.Score
+                        && ar.Text == contentAssistantResource.Text
+                    ),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(contentResult);
 
-            await _processContentAssistantAction.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            await _processContentAssistantAction.ExecuteAsync(
+                Context,
+                JObject.FromObject(settings),
+                CancellationToken
+            );
 
             //Assert
-            await Context.Received(1).SetVariableAsync(settings.OutputVariable, contentResultResponse, CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    settings.OutputVariable,
+                    contentResultResponse,
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -94,44 +110,51 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new ProcessContentAssistantSettings
             {
                 Text = "Test case",
-                OutputVariable = "responseVariable"
+                OutputVariable = "responseVariable",
             };
-            var contentAssistantResource = new AnalysisRequest
-            {
-                Text = settings.Text
-            };
+            var contentAssistantResource = new AnalysisRequest { Text = settings.Text };
 
             var contentAssistantResult = new ContentResult
             {
                 Combinations = new ContentCombination[]
-               {
-                    new ContentCombination
-                    {
-                        Entities = new string[] {},
-                        Intent = "Teste"
-                    },
-               },
-                Name = "Name",
-                Result = new Message
                 {
-                    Content = "Answer"
-                }
+                    new ContentCombination { Entities = new string[] { }, Intent = "Teste" },
+                },
+                Name = "Name",
+                Result = new Message { Content = "Answer" },
             };
 
-            var contentAssistantActionResponse = JsonConvert.SerializeObject(new ContentAssistantActionResponse
-            {
-                HasCombination = true,
-                Entities = contentAssistantResult.Combinations.First().Entities.ToList(),
-                Intent = contentAssistantResult.Combinations.First().Intent,
-                Value = contentAssistantResult.Result.Content.ToString()
-            });
+            var contentAssistantActionResponse = JsonConvert.SerializeObject(
+                new ContentAssistantActionResponse
+                {
+                    HasCombination = true,
+                    Entities = contentAssistantResult.Combinations.First().Entities.ToList(),
+                    Intent = contentAssistantResult.Combinations.First().Intent,
+                    Value = contentAssistantResult.Result.Content.ToString(),
+                }
+            );
 
             //Act
-            _artificialIntelligenceExtension.GetContentResultAsync(Arg.Is<AnalysisRequest>(ar => ar.Text == contentAssistantResource.Text), CancellationToken).Returns(contentAssistantResult);
-            await _processContentAssistantAction.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            _artificialIntelligenceExtension
+                .GetContentResultAsync(
+                    Arg.Is<AnalysisRequest>(ar => ar.Text == contentAssistantResource.Text),
+                    CancellationToken
+                )
+                .Returns(contentAssistantResult);
+            await _processContentAssistantAction.ExecuteAsync(
+                Context,
+                JObject.FromObject(settings),
+                CancellationToken
+            );
 
             //Assert
-            await Context.Received(1).SetVariableAsync(settings.OutputVariable, contentAssistantActionResponse, CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    settings.OutputVariable,
+                    contentAssistantActionResponse,
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -142,45 +165,53 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new ProcessContentAssistantSettings
             {
                 Text = "Test case",
-                OutputVariable = "responseVariable"
+                OutputVariable = "responseVariable",
             };
 
             var contentAssistantResource = new AnalysisRequest
             {
                 Text = settings.Text,
-                Score = minimumIntentScore
+                Score = minimumIntentScore,
             };
 
             var contentAssistantResult = new ContentResult
             {
                 Combinations = new ContentCombination[] { },
                 Name = string.Empty,
-                Result = new Message
-                {
-                    Content = string.Empty
-                }
+                Result = new Message { Content = string.Empty },
             };
 
-            var contentAssistantActionResponse = JsonConvert.SerializeObject(new ContentAssistantActionResponse
-            {
-                HasCombination = true,
-                Entities = new List<string>(),
-                Intent = string.Empty,
-                Value = string.Empty
-            });
+            var contentAssistantActionResponse = JsonConvert.SerializeObject(
+                new ContentAssistantActionResponse
+                {
+                    HasCombination = true,
+                    Entities = new List<string>(),
+                    Intent = string.Empty,
+                    Value = string.Empty,
+                }
+            );
 
             //act
-            _artificialIntelligenceExtension.GetContentResultAsync(
-                Arg.Is<AnalysisRequest>(
-                    ar => ar.Score == contentAssistantResource.Score &&
-                    ar.Text == contentAssistantResource.Text),
-                CancellationToken).
-                Returns(contentAssistantResult);
+            _artificialIntelligenceExtension
+                .GetContentResultAsync(
+                    Arg.Is<AnalysisRequest>(ar =>
+                        ar.Score == contentAssistantResource.Score
+                        && ar.Text == contentAssistantResource.Text
+                    ),
+                    CancellationToken
+                )
+                .Returns(contentAssistantResult);
 
             await _processContentAssistantAction.ExecuteAsync(Context, settings, CancellationToken);
 
             //assert
-            await Context.Received(1).SetVariableAsync(settings.OutputVariable, contentAssistantActionResponse, CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    settings.OutputVariable,
+                    contentAssistantActionResponse,
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -192,7 +223,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Context.Flow.BuilderConfiguration.MinimumIntentScore = minimumIntentScore;
 
             //Act
-            System.Action functionCall = () => _processContentAssistantAction.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            System.Action functionCall = () =>
+                _processContentAssistantAction.ExecuteAsync(
+                    Context,
+                    JObject.FromObject(settings),
+                    CancellationToken
+                );
 
             //Assert
             Assert.Throws<ArgumentException>(functionCall);
@@ -203,15 +239,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             //Arrange
             var minimumIntentScore = 0.5;
-            var settings = new ProcessContentAssistantSettings
-            {
-                Text = "Test case"
-            };
+            var settings = new ProcessContentAssistantSettings { Text = "Test case" };
 
             Context.Flow.BuilderConfiguration.MinimumIntentScore = minimumIntentScore;
 
             //Act
-            System.Action functionCall = () => _processContentAssistantAction.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
+            System.Action functionCall = () =>
+                _processContentAssistantAction.ExecuteAsync(
+                    Context,
+                    JObject.FromObject(settings),
+                    CancellationToken
+                );
 
             //Assert
             Assert.Throws<ArgumentException>(functionCall);

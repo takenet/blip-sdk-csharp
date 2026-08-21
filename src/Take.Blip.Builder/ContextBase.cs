@@ -23,7 +23,8 @@ namespace Take.Blip.Builder
             Identity application,
             LazyInput input,
             Flow flow,
-            IEnumerable<IVariableProvider> variableProviders)
+            IEnumerable<IVariableProvider> variableProviders
+        )
         {
             UserIdentity = user ?? throw new ArgumentNullException(nameof(user));
             OwnerIdentity = application ?? throw new ArgumentNullException(nameof(application));
@@ -43,7 +44,11 @@ namespace Take.Blip.Builder
 
         public IDictionary<string, object> InputContext { get; }
 
-        public async Task<string> GetVariableAsync(string name, CancellationToken cancellationToken, string stateActionType = null)
+        public async Task<string> GetVariableAsync(
+            string name,
+            CancellationToken cancellationToken,
+            string stateActionType = null
+        )
         {
             var variable = VariableName.Parse(name);
 
@@ -57,21 +62,31 @@ namespace Take.Blip.Builder
             {
                 if (!_variableProviderDictionary.TryGetValue(variable.Source, out var provider))
                 {
-                    throw new ArgumentException($"There's no provider for variable source '{variable.Source}'");
+                    throw new ArgumentException(
+                        $"There's no provider for variable source '{variable.Source}'"
+                    );
                 }
 
-                var restrictionAttributes = provider
-                    .GetType()
-                    .GetCustomAttribute(typeof(VariableProviderRestrictionAttribute)) as VariableProviderRestrictionAttribute;
+                var restrictionAttributes =
+                    provider
+                        .GetType()
+                        .GetCustomAttribute(typeof(VariableProviderRestrictionAttribute))
+                    as VariableProviderRestrictionAttribute;
 
                 if (IsAllowedVariableProviderRestriction(restrictionAttributes, stateActionType))
                 {
-                    variableValue = await provider.GetVariableAsync(variable.Name, this, cancellationToken);
+                    variableValue = await provider.GetVariableAsync(
+                        variable.Name,
+                        this,
+                        cancellationToken
+                    );
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(variableValue) ||
-                string.IsNullOrWhiteSpace(variable.Property))
+            if (
+                string.IsNullOrWhiteSpace(variableValue)
+                || string.IsNullOrWhiteSpace(variable.Property)
+            )
             {
                 return variableValue;
             }
@@ -81,9 +96,17 @@ namespace Take.Blip.Builder
 
         public abstract Task DeleteVariableAsync(string name, CancellationToken cancellationToken);
 
-        public abstract Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan));
+        public abstract Task SetVariableAsync(
+            string name,
+            string value,
+            CancellationToken cancellationToken,
+            TimeSpan expiration = default(TimeSpan)
+        );
 
-        public abstract Task<string> GetContextVariableAsync(string name, CancellationToken cancellationToken);
+        public abstract Task<string> GetContextVariableAsync(
+            string name,
+            CancellationToken cancellationToken
+        );
 
         private static string GetJsonProperty(string variableValue, string property)
         {
@@ -95,7 +118,8 @@ namespace Take.Blip.Builder
                 foreach (var s in propertyNames)
                 {
                     json = json[s];
-                    if (json == null) return null;
+                    if (json == null)
+                        return null;
                 }
 
                 return json.ToString(Formatting.None).Trim('"');
@@ -106,15 +130,23 @@ namespace Take.Blip.Builder
             }
         }
 
-        public static bool IsAllowedVariableProviderRestriction(VariableProviderRestrictionAttribute restrictionAttributes, string stateActionType)
+        public static bool IsAllowedVariableProviderRestriction(
+            VariableProviderRestrictionAttribute restrictionAttributes,
+            string stateActionType
+        )
         {
-            return restrictionAttributes is null || restrictionAttributes.AllowedActions.IsEmpty()
-                    || restrictionAttributes.AllowedActions.Contains(stateActionType);
+            return restrictionAttributes is null
+                || restrictionAttributes.AllowedActions.IsEmpty()
+                || restrictionAttributes.AllowedActions.Contains(stateActionType);
         }
 
         private struct VariableName
         {
-            private static readonly Regex VariableNameRegex = new Regex("^(?<sourceOrName>[\\w\\d]+)(\\.(?<name>[\\w\\d\\.]+))?(@(?<property>([\\w\\d\\.](\\[(?<index>\\d+|\\$n)\\])?)+))?$", RegexOptions.Compiled | RegexOptions.IgnoreCase, Constants.REGEX_TIMEOUT);
+            private static readonly Regex VariableNameRegex = new Regex(
+                "^(?<sourceOrName>[\\w\\d]+)(\\.(?<name>[\\w\\d\\.]+))?(@(?<property>([\\w\\d\\.](\\[(?<index>\\d+|\\$n)\\])?)+))?$",
+                RegexOptions.Compiled | RegexOptions.IgnoreCase,
+                Constants.REGEX_TIMEOUT
+            );
 
             private VariableName(VariableSource source, string name, string property)
             {
@@ -137,11 +169,13 @@ namespace Take.Blip.Builder
             /// <returns></returns>
             public static VariableName Parse(string s)
             {
-                if (s == null) throw new ArgumentNullException(nameof(s));
+                if (s == null)
+                    throw new ArgumentNullException(nameof(s));
 
                 var match = VariableNameRegex.Match(s);
 
-                if (!match.Success) throw new ArgumentException($"Invalid variable name '{s}'", nameof(s));
+                if (!match.Success)
+                    throw new ArgumentException($"Invalid variable name '{s}'", nameof(s));
 
                 VariableSource source;
                 string name;

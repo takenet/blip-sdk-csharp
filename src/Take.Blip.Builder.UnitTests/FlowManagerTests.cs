@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Lime.Messaging.Contents;
 using Lime.Messaging.Resources;
 using Lime.Protocol;
@@ -11,12 +13,9 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Serilog;
 using Shouldly;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
-using TraceSettings = Take.Blip.Builder.Diagnostics.TraceSettings;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client.Activation;
@@ -29,6 +28,7 @@ using Xunit;
 using Action = Take.Blip.Builder.Models.Action;
 using Input = Take.Blip.Builder.Models.Input;
 using ISender = Take.Blip.Client.ISender;
+using TraceSettings = Take.Blip.Builder.Diagnostics.TraceSettings;
 
 #pragma warning disable 4014
 
@@ -47,7 +47,8 @@ namespace Take.Blip.Builder.UnitTests
             var sender = Substitute.For<ISender>();
             var documentSerializer = Substitute.For<IDocumentSerializer>();
             var envelopeSerializer = Substitute.For<IEnvelopeSerializer>();
-            var artificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+            var artificialIntelligenceExtension =
+                Substitute.For<IArtificialIntelligenceExtension>();
             var variableReplacer = Substitute.For<IVariableReplacer>();
             var logger = Substitute.For<ILogger>();
             var traceManager = Substitute.For<ITraceManager>();
@@ -84,20 +85,24 @@ namespace Take.Blip.Builder.UnitTests
                 builderExtension,
                 monitoring
             );
-            var originalSettings = "{\"headers\":{\"Authorization\":\"{{secret.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"secret\\\":\\\"{{secret.mySecret}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{secret.url}}\"}";
-            var executedSettings = "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"secret\\\":\\\"***\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
-
+            var originalSettings =
+                "{\"headers\":{\"Authorization\":\"{{secret.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"secret\\\":\\\"{{secret.mySecret}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{secret.url}}\"}";
+            var executedSettings =
+                "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"secret\\\":\\\"***\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
 
             var expectedSecret = "{{secret.mySecret}}";
             var expectedUri = "/ping";
 
-
             // Use reflection se for método privado
-            var method = typeof(FlowManager)
-                .GetMethod("RestoreBodyStringWithSecrets", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var method = typeof(FlowManager).GetMethod(
+                "RestoreBodyStringWithSecrets",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
 
             // Act
-            var result = method.Invoke(flowManager, new object[] { originalSettings, executedSettings }) as string;
+            var result =
+                method.Invoke(flowManager, new object[] { originalSettings, executedSettings })
+                as string;
 
             // Assert
             var resultObj = JObject.Parse(result);
@@ -113,9 +118,11 @@ namespace Take.Blip.Builder.UnitTests
         public void RestoreBodyStringWithSecrets_ShouldNotChange_WhenNoSecretsOrHttp()
         {
             // Arrange
-            var originalSettings = "{\"headers\":{\"Authorization\":\"{{resource.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{resource.url}}\"}";
+            var originalSettings =
+                "{\"headers\":{\"Authorization\":\"{{resource.token}}\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"{{resource.ping}}\\\",\\\"normal\\\":\\\"{{resource.normal}}\\\"}\",\"uri\":\"{{resource.url}}\"}";
 
-            var executedSettings = "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
+            var executedSettings =
+                "{\"headers\":{\"Authorization\":\"real-token\"},\"method\":\"POST\",\"body\":\"{\\\"id\\\":\\\"{{$guid}}\\\",\\\"uri\\\":\\\"/ping\\\",\\\"normal\\\":\\\"real-value\\\"}\",\"uri\":\"https://actual-url.com\"}";
 
             var configuration = Substitute.For<IConfiguration>();
             var stateManager = Substitute.For<IStateManager>();
@@ -125,7 +132,8 @@ namespace Take.Blip.Builder.UnitTests
             var sender = Substitute.For<ISender>();
             var documentSerializer = Substitute.For<IDocumentSerializer>();
             var envelopeSerializer = Substitute.For<IEnvelopeSerializer>();
-            var artificialIntelligenceExtension = Substitute.For<IArtificialIntelligenceExtension>();
+            var artificialIntelligenceExtension =
+                Substitute.For<IArtificialIntelligenceExtension>();
             var variableReplacer = Substitute.For<IVariableReplacer>();
             var logger = Substitute.For<ILogger>();
             var traceManager = Substitute.For<ITraceManager>();
@@ -163,11 +171,15 @@ namespace Take.Blip.Builder.UnitTests
                 monitoring
             );
 
-            var method = typeof(FlowManager)
-                .GetMethod("RestoreBodyStringWithSecrets", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var method = typeof(FlowManager).GetMethod(
+                "RestoreBodyStringWithSecrets",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
 
             // Act
-            var result = method.Invoke(flowManager, new object[] { originalSettings, executedSettings }) as string;
+            var result =
+                method.Invoke(flowManager, new object[] { originalSettings, executedSettings })
+                as string;
 
             // Assert
             var resultObj = JObject.Parse(result);
@@ -180,7 +192,6 @@ namespace Take.Blip.Builder.UnitTests
             body["normal"].Value<string>().ShouldBe("real-value");
             body["uri"].Value<string>().ShouldBe("/ping");
         }
-
 
         [Fact]
         public async Task FlowWithoutConditionsShouldChangeStateAndSendMessage()
@@ -200,13 +211,7 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -220,13 +225,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -234,7 +239,14 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
@@ -244,8 +256,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == messageContent),
-                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+                        && m.Content.ToString() == messageContent
+                    ),
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested)
+                );
         }
 
         [Fact]
@@ -257,7 +271,9 @@ namespace Take.Blip.Builder.UnitTests
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(variableValue);
+            Context
+                .GetVariableAsync(variableName, Arg.Any<CancellationToken>(), Arg.Any<string>())
+                .Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -272,13 +288,7 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -292,13 +302,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -306,7 +316,14 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
@@ -316,8 +333,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == expectedMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == expectedMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -329,7 +348,9 @@ namespace Take.Blip.Builder.UnitTests
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "{\"propertyName1\":\"propertyValue1\",\"propertyName2\":2}";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(variableValue);
+            Context
+                .GetVariableAsync(variableName, Arg.Any<CancellationToken>(), Arg.Any<string>())
+                .Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -344,13 +365,7 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -364,13 +379,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -378,7 +393,14 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
@@ -388,8 +410,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == expectedMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == expectedMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -412,13 +436,7 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -432,13 +450,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -446,7 +464,14 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
@@ -456,9 +481,12 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == expectedMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == expectedMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
+
         [Fact]
         public async Task ProcessInputAsync_ShouldChangeActionType_WhenActionIsBlipFunction()
         {
@@ -472,53 +500,67 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-            new State
-            {
-                Id = "root",
-                Root = true,
-                Input = new Input(),
-                OutputActions = new[]
-                {
-                    new Action
+                    new State
                     {
-                        Type = "ExecuteBlipFunction",
-                        Settings = new JRaw(
-                            new JObject()
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
                             {
-                                { "function", "run" },
-                                { "source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}" },
-                                { "outputVariable", "invalidScript" }
-                            }
-                        )
-                    }
-                }
-            }
-        }
+                                Type = "ExecuteBlipFunction",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "function", "run" },
+                                        {
+                                            "source",
+                                            "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}"
+                                        },
+                                        { "outputVariable", "invalidScript" },
+                                    }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             var target = GetTarget();
             var functionDocument = new Function
             {
-                FunctionContent = "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}",
+                FunctionContent =
+                    "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}",
                 UserIdentity = "teste",
                 FunctionDescription = "",
                 FunctionId = Guid.NewGuid(),
                 FunctionName = "run",
                 FunctionParameters = "",
-                TenantId = ""
+                TenantId = "",
             };
 
             // Setup the BuilderExtension mock to return the function
-            BuilderExtension.GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            BuilderExtension
+                .GetFunctionOnBlipFunctionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns(functionDocument);
 
             // Setup Context mock for variable access
-            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>())
+            Context
+                .GetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<string>()
+                )
                 .Returns(Task.FromResult((string)null));
 
             // Act & Assert
-            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
-            exception.Message.ShouldContain("The processing of the action 'ExecuteScriptV2' has failed");
+            var exception = await target
+                .ProcessInputAsync(Message, flow, CancellationToken)
+                .ShouldThrowAsync<ActionProcessingException>();
+            exception.Message.ShouldContain(
+                "The processing of the action 'ExecuteScriptV2' has failed"
+            );
         }
 
         [Fact]
@@ -533,36 +575,44 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-            new State
-            {
-                Id = "root",
-                Root = true,
-                Input = new Input(),
-                OutputActions = new[]
-                {
-                    new Action
+                    new State
                     {
-                        Type = "TrackEvent",
-                        Settings = new JRaw(
-                            new JObject()
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
                             {
-                                { "category", "Variable doesn't exist" },
-                                { "action", "{{variable.doesntExist}}" }
-                            }
-                        )
-                    }
-                }
-            }
-        }
+                                Type = "TrackEvent",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "category", "Variable doesn't exist" },
+                                        { "action", "{{variable.doesntExist}}" },
+                                    }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             // Setup the context to return null for the non-existent variable
-            Context.GetVariableAsync("variable.doesntExist", Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns((string)null);
+            Context
+                .GetVariableAsync(
+                    "variable.doesntExist",
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<string>()
+                )
+                .Returns((string)null);
 
             var target = GetTarget();
 
             // Act & Assert
-            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            var exception = await target
+                .ProcessInputAsync(Message, flow, CancellationToken)
+                .ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("TrackEvent");
         }
@@ -579,38 +629,49 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-            new State
-            {
-                Id = "root",
-                Root = true,
-                Input = new Input(),
-                OutputActions = new[]
-                {
-                    new Action
+                    new State
                     {
-                        Type = "Redirect",
-                        Settings = new JRaw(
-                            new JObject()
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
                             {
-                                { "address", "{{variable.doesntExist}}" }
-                            }
-                        )
-                    }
-                }
-            }
-        }
+                                Type = "Redirect",
+                                Settings = new JRaw(
+                                    new JObject() { { "address", "{{variable.doesntExist}}" } }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             // Setup the context to return null for the non-existent variable
-            Context.GetVariableAsync("variable.doesntExist", Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult((string)null));
+            Context
+                .GetVariableAsync(
+                    "variable.doesntExist",
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<string>()
+                )
+                .Returns(Task.FromResult((string)null));
 
             // Also setup the general variable retrieval to handle the parsing
-            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult((string)null));
+            Context
+                .GetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<string>()
+                )
+                .Returns(Task.FromResult((string)null));
 
             var target = GetTarget();
 
             // Act & Assert
-            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            var exception = await target
+                .ProcessInputAsync(Message, flow, CancellationToken)
+                .ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("Redirect");
         }
@@ -632,25 +693,33 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = stateIdVariable
-                            }
-                        }
-                    }
-                }
+                        Outputs = new[] { new Output { StateId = stateIdVariable } },
+                    },
+                },
             };
 
             // Setup the context to return null for the non-existent variable
-            Context.GetVariableAsync("variable.doesntExist", Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult((string)null));
-            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult((string)null));
+            Context
+                .GetVariableAsync(
+                    "variable.doesntExist",
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<string>()
+                )
+                .Returns(Task.FromResult((string)null));
+            Context
+                .GetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<string>()
+                )
+                .Returns(Task.FromResult((string)null));
 
             var target = GetTarget();
 
             // Act
-            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            var exception = await target
+                .ProcessInputAsync(Message, flow, CancellationToken)
+                .ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("output condition to state");
         }
@@ -667,37 +736,48 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-            new State
-            {
-                Id = "root",
-                Root = true,
-                Input = new Input(),
-                OutputActions = new[]
-                {
-                    new Action
+                    new State
                     {
-                        Type = "ExecuteScript",
-                        Settings = new JRaw(
-                            new JObject()
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        OutputActions = new[]
+                        {
+                            new Action
                             {
-                                { "function", "run" },
-                                { "source", "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}" },
-                                { "outputVariable", "invalidScript" }
-                            }
-                        )
-                    }
-                }
-            }
-        }
+                                Type = "ExecuteScript",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "function", "run" },
+                                        {
+                                            "source",
+                                            "function run(inputVariable1, inputVariable2) {\n    let a = inputVariable1.doesntExist;\n    let b = inputVariable2.doesntExist;\n\n    return a * b;\n}"
+                                        },
+                                        { "outputVariable", "invalidScript" },
+                                    }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             // Setup required mocks for the test to work properly
-            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns((string)null);
+            Context
+                .GetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<string>()
+                )
+                .Returns((string)null);
 
             var target = GetTarget();
 
             // Act & Assert
-            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            var exception = await target
+                .ProcessInputAsync(Message, flow, CancellationToken)
+                .ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("ExecuteScript");
         }
@@ -714,133 +794,77 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-            new State
-            {
-                Id = "root",
-                Root = true,
-                Input = new Input(),
-                Outputs = new[]
-                {
-                    new Output
+                    new State
                     {
-                        StateId = "transition2"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition2",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                        Outputs = new[] { new Output { StateId = "transition2" } },
+                    },
+                    new State
                     {
-                        StateId = "transition3"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition3",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "transition2",
+                        Outputs = new[] { new Output { StateId = "transition3" } },
+                    },
+                    new State
                     {
-                        StateId = "transition4"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition4",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "transition3",
+                        Outputs = new[] { new Output { StateId = "transition4" } },
+                    },
+                    new State
                     {
-                        StateId = "transition5"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition5",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "transition4",
+                        Outputs = new[] { new Output { StateId = "transition5" } },
+                    },
+                    new State
                     {
-                        StateId = "transition6"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition6",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "transition5",
+                        Outputs = new[] { new Output { StateId = "transition6" } },
+                    },
+                    new State
                     {
-                        StateId = "transition7"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition7",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "transition6",
+                        Outputs = new[] { new Output { StateId = "transition7" } },
+                    },
+                    new State
                     {
-                        StateId = "transition8"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition8",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "transition7",
+                        Outputs = new[] { new Output { StateId = "transition8" } },
+                    },
+                    new State
                     {
-                        StateId = "transition9"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition9",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "transition8",
+                        Outputs = new[] { new Output { StateId = "transition9" } },
+                    },
+                    new State
                     {
-                        StateId = "transition10"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition10",
-                Outputs = new[]
-                {
-                    new Output
+                        Id = "transition9",
+                        Outputs = new[] { new Output { StateId = "transition10" } },
+                    },
+                    new State
                     {
-                        StateId = "transition11"
-                    }
-                }
-            },
-            new State
-            {
-                Id = "transition11"
-            }
-        }
+                        Id = "transition10",
+                        Outputs = new[] { new Output { StateId = "transition11" } },
+                    },
+                    new State { Id = "transition11" },
+                },
             };
 
             // Setup required mocks to prevent NullReferenceException
-            Context.GetVariableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<string>())
+            Context
+                .GetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<string>()
+                )
                 .Returns(Task.FromResult((string)null));
 
             var target = GetTarget();
 
             // Act & Assert
-            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<FlowConstructionException>();
+            var exception = await target
+                .ProcessInputAsync(Message, flow, CancellationToken)
+                .ShouldThrowAsync<FlowConstructionException>();
             exception.Message.ShouldContain("[FlowConstruction]");
             exception.Message.ShouldContain("Max state transitions");
         }
@@ -861,12 +885,9 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
-                        {
-                            Variable = variableName
-                        }
-                    }
-                }
+                        Input = new Input { Variable = variableName },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -874,9 +895,24 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            Context.Received(1).SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
-            StateManager.Received(0).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
+            Context
+                .Received(1)
+                .SetVariableAsync(variableName, input.Text, Arg.Any<CancellationToken>());
+            StateManager
+                .Received(0)
+                .SetStateIdAsync(
+                    Arg.Any<IContext>(),
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -885,15 +921,12 @@ namespace Take.Blip.Builder.UnitTests
             // Arrange
             var input = new Reply()
             {
-                Replied = new DocumentContainer
-                {
-                    Value = new PlainText { Text = "Replied" }
-                },
+                Replied = new DocumentContainer { Value = new PlainText { Text = "Replied" } },
                 InReplyTo = new InReplyTo
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Value = new PlainText { Text = "InReplyTo" }
-                }
+                    Value = new PlainText { Text = "InReplyTo" },
+                },
             };
 
             Message.Content = input;
@@ -907,12 +940,9 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
-                        {
-                            Variable = variableName
-                        }
-                    }
-                }
+                        Input = new Input { Variable = variableName },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -920,9 +950,28 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input.Replied.Value), flow);
-            Context.Received(1).SetVariableAsync(variableName, ((PlainText)input.Replied.Value).Text, Arg.Any<CancellationToken>());
-            StateManager.Received(0).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input.Replied.Value),
+                    flow
+                );
+            Context
+                .Received(1)
+                .SetVariableAsync(
+                    variableName,
+                    ((PlainText)input.Replied.Value).Text,
+                    Arg.Any<CancellationToken>()
+                );
+            StateManager
+                .Received(0)
+                .SetStateIdAsync(
+                    Arg.Any<IContext>(),
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -941,24 +990,14 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new Output[]
-                        {
-                            new Output
-                            {
-                                StateId = "first"
-                            }
-                        }
+                        Outputs = new Output[] { new Output { StateId = "first" } },
                     },
                     new State
                     {
                         Id = "first",
-                        Input = new Input
-                        {
-                            Bypass = true,
-                            Variable = variableName
-                        }
-                    }
-                }
+                        Input = new Input { Bypass = true, Variable = variableName },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -966,9 +1005,28 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == Message.Content), flow);
-            Context.Received(0).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(Arg.Any<IContext>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == Message.Content),
+                    flow
+                );
+            Context
+                .Received(0)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>()
+                );
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(
+                    Arg.Any<IContext>(),
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -994,13 +1052,7 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "welcome"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "welcome" } },
                     },
                     new State
                     {
@@ -1014,13 +1066,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", "Hello, {{contact.name}}" }
+                                        { "content", "Hello, {{contact.name}}" },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget(container =>
             {
@@ -1036,7 +1088,8 @@ namespace Take.Blip.Builder.UnitTests
                 .Received()
                 .GetAsync(
                     Arg.Is<Identity>(v => v == Message.From.ToIdentity()),
-                    Arg.Any<CancellationToken>());
+                    Arg.Any<CancellationToken>()
+                );
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -1044,8 +1097,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == $"Hello, {contactName}"),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == $"Hello, {contactName}"
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -1057,7 +1112,9 @@ namespace Take.Blip.Builder.UnitTests
             var messageType = "text/plain";
             var pongMessageContent = "Pong!";
             var poloMessageContent = "Polo!";
-            Context.GetVariableAsync("Word", Arg.Any<CancellationToken>(), Arg.Any<string>()).Returns(Task.FromResult(input.Text));
+            Context
+                .GetVariableAsync("Word", Arg.Any<CancellationToken>(), Arg.Any<string>())
+                .Returns(Task.FromResult(input.Text));
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
@@ -1067,39 +1124,36 @@ namespace Take.Blip.Builder.UnitTests
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input()
-                        {
-                            Variable = "Word"
-                        },
+                        Input = new Input() { Variable = "Word" },
                         Outputs = new[]
                         {
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
                                     new Condition
                                     {
                                         Variable = "Word",
                                         Source = ValueSource.Context,
-                                        Values = new[] { "Marco!" }
-                                    }
+                                        Values = new[] { "Marco!" },
+                                    },
                                 },
-                                StateId = "marco"
+                                StateId = "marco",
                             },
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
                                     new Condition
                                     {
                                         Variable = "Word",
                                         Source = ValueSource.Context,
-                                        Values = new[] { "Ping!" }
-                                    }
+                                        Values = new[] { "Ping!" },
+                                    },
                                 },
-                                StateId = "ping"
-                            }
-                        }
+                                StateId = "ping",
+                            },
+                        },
                     },
                     new State
                     {
@@ -1113,11 +1167,11 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", pongMessageContent }
+                                        { "content", pongMessageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -1131,13 +1185,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", poloMessageContent }
+                                        { "content", poloMessageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -1145,8 +1199,12 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
-            StateManager.DidNotReceive().SetStateIdAsync(Context, "marco", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager
+                .DidNotReceive()
+                .SetStateIdAsync(Context, "marco", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
@@ -1155,8 +1213,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == pongMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == pongMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
             Context.Received(1).SetVariableAsync("Word", input.Text, Arg.Any<CancellationToken>());
             Context.Received(2).GetVariableAsync("Word", Arg.Any<CancellationToken>());
         }
@@ -1165,14 +1225,30 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInputContextConditionsSatisfiedShouldKeepStateAndWaitNextInput()
         {
             // Arrange
-            var inputOk = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "OK!" } };
-            var inputNOk = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" } };
+            var inputOk = new Message()
+            {
+                From = UserIdentity.ToNode(),
+                To = ApplicationIdentity.ToNode(),
+                Content = new PlainText() { Text = "OK!" },
+            };
+            var inputNOk = new Message()
+            {
+                From = UserIdentity.ToNode(),
+                To = ApplicationIdentity.ToNode(),
+                Content = new PlainText() { Text = "NOK!" },
+            };
             var messageType = "text/plain";
             var okMessageContent = "OK";
             var nokMessageContent = "NOK";
             var variables = new Dictionary<string, string>();
             Context
-                .When(c => c.SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()))
+                .When(c =>
+                    c.SetVariableAsync(
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<CancellationToken>()
+                    )
+                )
                 .Do(callInfo =>
                 {
                     var key = callInfo.ArgAt<string>(0);
@@ -1200,30 +1276,24 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "Start"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "Start" } },
                     },
                     new State
                     {
                         Id = "Start",
                         Input = new Input()
                         {
-                            Conditions = new []
+                            Conditions = new[]
                             {
                                 new Condition
                                 {
                                     Variable = "InputIsValid",
                                     Source = ValueSource.Context,
-                                    Values = new[] { "true" }
-                                }
-                            }
+                                    Values = new[] { "true" },
+                                },
+                            },
                         },
-                        InputActions = new []
+                        InputActions = new[]
                         {
                             new Action
                             {
@@ -1233,44 +1303,41 @@ namespace Take.Blip.Builder.UnitTests
                                     {
                                         { "function", "run" },
                                         { "source", "function run() { return true; }" }, // Satisfying Input condition above
-                                        { "outputVariable", "InputIsValid" }
+                                        { "outputVariable", "InputIsValid" },
                                     }
-                                )
-                            }
+                                ),
+                            },
                         },
                         Outputs = new[]
                         {
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
                                     new Condition
                                     {
                                         Variable = "InputIsValid",
                                         Source = ValueSource.Context,
-                                        Values = new[] { "true" }
-                                    }
+                                        Values = new[] { "true" },
+                                    },
                                 },
-                                StateId = "Ok"
+                                StateId = "Ok",
                             },
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
                                     new Condition
                                     {
                                         Variable = "InputIsValid",
                                         Source = ValueSource.Context,
-                                        Values = new[] { "false" }
-                                    }
+                                        Values = new[] { "false" },
+                                    },
                                 },
-                                StateId = "NOk"
+                                StateId = "NOk",
                             },
-                            new Output
-                            {
-                                StateId = "error"
-                            }
-                        }
+                            new Output { StateId = "error" },
+                        },
                     },
                     new State
                     {
@@ -1284,11 +1351,11 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", okMessageContent }
+                                        { "content", okMessageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -1301,12 +1368,12 @@ namespace Take.Blip.Builder.UnitTests
                                 Settings = new JRaw(
                                     new JObject()
                                     {
-                                        { "type", messageType},
-                                        { "content", nokMessageContent }
+                                        { "type", messageType },
+                                        { "content", nokMessageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -1320,13 +1387,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", "failed to set variable" }
+                                        { "content", "failed to set variable" },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -1334,17 +1401,27 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(inputOk, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
             StateManager.DidNotReceive().DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
-            StateManager.DidNotReceive().SetStateIdAsync(Context, "error", Arg.Any<CancellationToken>());
-            StateManager.DidNotReceive().SetStateIdAsync(Context, "Ok", Arg.Any<CancellationToken>());
-            StateManager.DidNotReceive().SetStateIdAsync(Context, "NOk", Arg.Any<CancellationToken>());
+            StateManager
+                .DidNotReceive()
+                .SetStateIdAsync(Context, "error", Arg.Any<CancellationToken>());
+            StateManager
+                .DidNotReceive()
+                .SetStateIdAsync(Context, "Ok", Arg.Any<CancellationToken>());
+            StateManager
+                .DidNotReceive()
+                .SetStateIdAsync(Context, "NOk", Arg.Any<CancellationToken>());
 
             Sender
                 .DidNotReceive()
                 .SendMessageAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>());
 
-            Context.Received(1).SetVariableAsync("InputIsValid", "true", Arg.Any<CancellationToken>());
+            Context
+                .Received(1)
+                .SetVariableAsync("InputIsValid", "true", Arg.Any<CancellationToken>());
             Context.Received(1).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
         }
 
@@ -1352,14 +1429,30 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithInputContextConditionsNotSatisfiedShouldChangeStateAndSendMessage()
         {
             // Arrange
-            var inputOk = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "OK!" } };
-            var inputNOk = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "NOK!" } };
+            var inputOk = new Message()
+            {
+                From = UserIdentity.ToNode(),
+                To = ApplicationIdentity.ToNode(),
+                Content = new PlainText() { Text = "OK!" },
+            };
+            var inputNOk = new Message()
+            {
+                From = UserIdentity.ToNode(),
+                To = ApplicationIdentity.ToNode(),
+                Content = new PlainText() { Text = "NOK!" },
+            };
             var messageType = "text/plain";
             var okMessageContent = "OK";
             var nokMessageContent = "NOK";
             var variables = new Dictionary<string, string>();
             Context
-                .When(c => c.SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()))
+                .When(c =>
+                    c.SetVariableAsync(
+                        Arg.Any<string>(),
+                        Arg.Any<string>(),
+                        Arg.Any<CancellationToken>()
+                    )
+                )
                 .Do(callInfo =>
                 {
                     var key = callInfo.ArgAt<string>(0);
@@ -1387,30 +1480,24 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "Start"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "Start" } },
                     },
                     new State
                     {
                         Id = "Start",
                         Input = new Input()
                         {
-                            Conditions = new []
+                            Conditions = new[]
                             {
                                 new Condition
                                 {
                                     Variable = "InputIsValid",
                                     Source = ValueSource.Context,
-                                    Values = new[] { "true" }
-                                }
-                            }
+                                    Values = new[] { "true" },
+                                },
+                            },
                         },
-                        InputActions = new []
+                        InputActions = new[]
                         {
                             new Action
                             {
@@ -1420,44 +1507,41 @@ namespace Take.Blip.Builder.UnitTests
                                     {
                                         { "function", "run" },
                                         { "source", "function run(content) { return false; }" }, // Not satisfying Input condition above
-                                        { "outputVariable", "InputIsValid" }
+                                        { "outputVariable", "InputIsValid" },
                                     }
-                                )
-                            }
+                                ),
+                            },
                         },
                         Outputs = new[]
                         {
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
                                     new Condition
                                     {
                                         Variable = "InputIsValid",
                                         Source = ValueSource.Context,
-                                        Values = new[] { "true" }
-                                    }
+                                        Values = new[] { "true" },
+                                    },
                                 },
-                                StateId = "Ok"
+                                StateId = "Ok",
                             },
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
                                     new Condition
                                     {
                                         Variable = "InputIsValid",
                                         Source = ValueSource.Context,
-                                        Values = new[] { "false" }
-                                    }
+                                        Values = new[] { "false" },
+                                    },
                                 },
-                                StateId = "NOk"
+                                StateId = "NOk",
                             },
-                            new Output
-                            {
-                                StateId = "error"
-                            }
-                        }
+                            new Output { StateId = "error" },
+                        },
                     },
                     new State
                     {
@@ -1471,11 +1555,11 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", okMessageContent }
+                                        { "content", okMessageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -1489,11 +1573,11 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", nokMessageContent }
+                                        { "content", nokMessageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -1507,13 +1591,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", "failed to set variable" }
+                                        { "content", "failed to set variable" },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -1521,11 +1605,17 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(inputNOk, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
-            StateManager.DidNotReceive().SetStateIdAsync(Context, "error", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "Start", Arg.Any<CancellationToken>());
+            StateManager
+                .DidNotReceive()
+                .SetStateIdAsync(Context, "error", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             StateManager.Received(1).SetStateIdAsync(Context, "NOk", Arg.Any<CancellationToken>());
-            StateManager.DidNotReceive().SetStateIdAsync(Context, "Ok", Arg.Any<CancellationToken>());
+            StateManager
+                .DidNotReceive()
+                .SetStateIdAsync(Context, "Ok", Arg.Any<CancellationToken>());
 
             Sender
                 .Received(1)
@@ -1534,9 +1624,13 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == nokMessageContent),
-                    Arg.Any<CancellationToken>());
-            Context.Received(1).SetVariableAsync("InputIsValid", "false", Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == nokMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
+            Context
+                .Received(1)
+                .SetVariableAsync("InputIsValid", "false", Arg.Any<CancellationToken>());
             Context.Received(3).GetVariableAsync("InputIsValid", Arg.Any<CancellationToken>());
         }
 
@@ -1544,31 +1638,55 @@ namespace Take.Blip.Builder.UnitTests
         public async Task FlowWithConditionsAndMultipleInputsShouldChangeStatesAndSendMessages()
         {
             // Arrange
-            var input1 = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "Ping!" } };
+            var input1 = new Message()
+            {
+                From = UserIdentity.ToNode(),
+                To = ApplicationIdentity.ToNode(),
+                Content = new PlainText() { Text = "Ping!" },
+            };
             var context1 = Substitute.For<IContext>();
-            var lazyInput1 = new LazyInput(input1,
+            var lazyInput1 = new LazyInput(
+                input1,
                 UserIdentity,
                 new BuilderConfiguration(),
                 Substitute.For<IDocumentSerializer>(),
                 Substitute.For<IEnvelopeSerializer>(),
                 ArtificialIntelligenceExtension,
-                CancellationToken);
+                CancellationToken
+            );
             context1.Input.Returns(lazyInput1);
-            var input2 = new Message() { From = UserIdentity.ToNode(), To = ApplicationIdentity.ToNode(), Content = new PlainText() { Text = "Marco!" } };
+            var input2 = new Message()
+            {
+                From = UserIdentity.ToNode(),
+                To = ApplicationIdentity.ToNode(),
+                Content = new PlainText() { Text = "Marco!" },
+            };
             var context2 = Substitute.For<IContext>();
-            var lazyInput2 = new LazyInput(input2,
+            var lazyInput2 = new LazyInput(
+                input2,
                 UserIdentity,
                 new BuilderConfiguration(),
                 Substitute.For<IDocumentSerializer>(),
                 Substitute.For<IEnvelopeSerializer>(),
                 ArtificialIntelligenceExtension,
-                CancellationToken);
+                CancellationToken
+            );
             context2.Input.Returns(lazyInput2);
             ContextProvider
-                .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), lazyInput1, Arg.Any<Flow>())
+                .CreateContext(
+                    Arg.Any<Identity>(),
+                    Arg.Any<Identity>(),
+                    lazyInput1,
+                    Arg.Any<Flow>()
+                )
                 .Returns(context1);
             ContextProvider
-                .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), lazyInput2, Arg.Any<Flow>())
+                .CreateContext(
+                    Arg.Any<Identity>(),
+                    Arg.Any<Identity>(),
+                    lazyInput2,
+                    Arg.Any<Flow>()
+                )
                 .Returns(context2);
 
             var messageType = "text/plain";
@@ -1588,27 +1706,18 @@ namespace Take.Blip.Builder.UnitTests
                         {
                             new Output
                             {
-                                Conditions = new []
+                                Conditions = new[]
                                 {
-                                    new Condition
-                                    {
-                                        Values = new[] { "Marco!" }
-                                    }
+                                    new Condition { Values = new[] { "Marco!" } },
                                 },
-                                StateId = "marco"
+                                StateId = "marco",
                             },
                             new Output
                             {
-                                Conditions = new []
-                                {
-                                    new Condition
-                                    {
-                                        Values = new[] { "Ping!" }
-                                    }
-                                },
-                                StateId = "ping"
-                            }
-                        }
+                                Conditions = new[] { new Condition { Values = new[] { "Ping!" } } },
+                                StateId = "ping",
+                            },
+                        },
                     },
                     new State
                     {
@@ -1622,11 +1731,11 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", pongMessageContent }
+                                        { "content", pongMessageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -1640,13 +1749,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", poloMessageContent }
+                                        { "content", poloMessageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -1655,8 +1764,12 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(input2, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(Context, "marco", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "marco", Arg.Any<CancellationToken>());
             StateManager.Received(2).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
@@ -1665,8 +1778,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == pongMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == pongMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -1674,8 +1789,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == poloMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == poloMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -1706,18 +1823,12 @@ namespace Take.Blip.Builder.UnitTests
                                     new Condition()
                                     {
                                         Source = ValueSource.Intent,
-                                        Values = new[]
-                                        {
-                                            "My intent"
-                                        }
-                                    }
-                                }
+                                        Values = new[] { "My intent" },
+                                    },
+                                },
                             },
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                            new Output { StateId = "ping" },
+                        },
                     },
                     new State
                     {
@@ -1731,11 +1842,11 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -1749,33 +1860,30 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", "This is not supposed to be received..." }
+                                        { "content", "This is not supposed to be received..." },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             ArtificialIntelligenceExtension
-                .AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == input.Text), Arg.Any<CancellationToken>())
-                .Returns(new AnalysisResponse()
-                {
-                    Intentions = new[]
+                .AnalyzeAsync(
+                    Arg.Is<AnalysisRequest>(r => r.Text == input.Text),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(
+                    new AnalysisResponse()
                     {
-                        new IntentionResponse
+                        Intentions = new[]
                         {
-                            Name = "My intent",
-                            Score = 1
+                            new IntentionResponse { Name = "My intent", Score = 1 },
+                            new IntentionResponse { Name = "Other intent", Score = 0.1 },
                         },
-                        new IntentionResponse
-                        {
-                            Name = "Other intent",
-                            Score = 0.1
-                        }
                     }
-                });
+                );
 
             var target = GetTarget();
 
@@ -1783,8 +1891,17 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            StateManager.Received(1).SetStateIdAsync(Context, "my-intent", Arg.Any<CancellationToken>());
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "my-intent", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
@@ -1793,8 +1910,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == messageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -1829,18 +1948,12 @@ namespace Take.Blip.Builder.UnitTests
                                     {
                                         Source = ValueSource.Entity,
                                         Entity = entityName,
-                                        Values = new[]
-                                        {
-                                            entityValue
-                                        }
-                                    }
-                                }
+                                        Values = new[] { entityValue },
+                                    },
+                                },
                             },
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                            new Output { StateId = "ping" },
+                        },
                     },
                     new State
                     {
@@ -1854,11 +1967,11 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -1872,33 +1985,34 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", "This is not supposed to be received..." }
+                                        { "content", "This is not supposed to be received..." },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             ArtificialIntelligenceExtension
-                .AnalyzeAsync(Arg.Is<AnalysisRequest>(r => r.Text == input.Text), Arg.Any<CancellationToken>())
-                .Returns(new AnalysisResponse()
-                {
-                    Entities = new[]
+                .AnalyzeAsync(
+                    Arg.Is<AnalysisRequest>(r => r.Text == input.Text),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(
+                    new AnalysisResponse()
                     {
-                        new EntityResponse()
+                        Entities = new[]
                         {
-                            Name = entityName,
-                            Value = entityValue
+                            new EntityResponse() { Name = entityName, Value = entityValue },
+                            new EntityResponse()
+                            {
+                                Name = "Other entity name",
+                                Value = "Other entity value",
+                            },
                         },
-                        new EntityResponse()
-                        {
-                            Name = "Other entity name",
-                            Value = "Other entity value"
-                        }
                     }
-                });
+                );
 
             var target = GetTarget();
 
@@ -1906,8 +2020,17 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
-            StateManager.Received(1).SetStateIdAsync(Context, "my-entity", Arg.Any<CancellationToken>());
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "my-entity", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
@@ -1916,8 +2039,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == messageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -1942,13 +2067,7 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -1963,19 +2082,23 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
             // Act
-            var exception = await target.ProcessInputAsync(Message, flow, CancellationToken).ShouldThrowAsync<ActionProcessingException>();
-            exception.Message.ShouldBe($"The processing of the action 'SendMessage' has timed out after {timeout.TotalMilliseconds} ms");
+            var exception = await target
+                .ProcessInputAsync(Message, flow, CancellationToken)
+                .ShouldThrowAsync<ActionProcessingException>();
+            exception.Message.ShouldBe(
+                $"The processing of the action 'SendMessage' has timed out after {timeout.TotalMilliseconds} ms"
+            );
             fakeSender.SentMessages.ShouldBeEmpty();
         }
 
@@ -1997,13 +2120,7 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -2017,13 +2134,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -2051,13 +2168,7 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -2072,13 +2183,13 @@ namespace Take.Blip.Builder.UnitTests
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -2086,7 +2197,14 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
         }
@@ -2110,23 +2228,14 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
                         Id = "ping",
-                        Input = new Input()
-                        {
-                            Expiration = TimeSpan.FromMinutes(1)
-                        }
-                    }
-                }
+                        Input = new Input() { Expiration = TimeSpan.FromMinutes(1) },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -2134,7 +2243,14 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(1).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider
+                .Received(1)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             SchedulerExtension
                 .Received(1)
@@ -2144,10 +2260,12 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(ApplicationIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content is InputExpiration
-                        && UserIdentity.Equals((m.Content as InputExpiration).Identity)),
+                        && UserIdentity.Equals((m.Content as InputExpiration).Identity)
+                    ),
                     Arg.Any<DateTimeOffset>(),
                     Arg.Any<Node>(),
-                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested)
+                );
         }
 
         //When content input temporary is null or empty
@@ -2167,28 +2285,20 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
                         Id = "ping",
-                        Input = new Input()
-                        {
-                            Expiration = TimeSpan.FromMinutes(1)
-                        }
-                    }
-                }
+                        Input = new Input() { Expiration = TimeSpan.FromMinutes(1) },
+                    },
+                },
             };
             var target = GetTarget();
 
             // Act
-            Func<Task> processInputAsync = async () => await target.ProcessInputAsync(Message, flow, CancellationToken);
+            Func<Task> processInputAsync = async () =>
+                await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
             processInputAsync.ShouldThrow<ArgumentException>();
@@ -2213,56 +2323,54 @@ namespace Take.Blip.Builder.UnitTests
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
                         Id = "ping",
-                        Input = new Input()
-                        {
-                            Expiration = TimeSpan.FromMinutes(1)
-                        },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping2"
-                            }
-                        }
+                        Input = new Input() { Expiration = TimeSpan.FromMinutes(1) },
+                        Outputs = new[] { new Output { StateId = "ping2" } },
                     },
-                    new State
-                    {
-                        Id = "ping2",
-                        Input = new Input()
-                    }
-                }
+                    new State { Id = "ping2", Input = new Input() },
+                },
             };
             var target = GetTarget();
             SchedulerExtension
-               .GetScheduledMessageAsync(Arg.Any<string>(), Arg.Any<Node>(), Arg.Any<CancellationToken>())
-               .Returns(new Schedule
-               {
-                   Name = $"{UserIdentity}-inputexpirationtime",
-                   Message = Message,
-                   Status = ScheduleStatus.Scheduled,
-                   When = DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(1))
-               });
+                .GetScheduledMessageAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<Node>(),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(
+                    new Schedule
+                    {
+                        Name = $"{UserIdentity}-inputexpirationtime",
+                        Message = Message,
+                        Status = ScheduleStatus.Scheduled,
+                        When = DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(1)),
+                    }
+                );
 
             // Act
             await target.ProcessInputAsync(Message, flow, CancellationToken);
-            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns("ping");
+            StateManager
+                .GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>())
+                .Returns("ping");
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            ContextProvider.Received(2).CreateContext(UserIdentity, ApplicationIdentity, Arg.Is<LazyInput>(i => i.Content == input), flow);
+            ContextProvider
+                .Received(2)
+                .CreateContext(
+                    UserIdentity,
+                    ApplicationIdentity,
+                    Arg.Is<LazyInput>(i => i.Content == input),
+                    flow
+                );
             StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
-            StateManager.Received(1).SetStateIdAsync(Context, "ping2", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "ping2", Arg.Any<CancellationToken>());
             SchedulerExtension
                 .Received(1)
                 .ScheduleMessageAsync(
@@ -2271,16 +2379,19 @@ namespace Take.Blip.Builder.UnitTests
                         && m.To.ToIdentity().Equals(ApplicationIdentity)
                         && m.Type.ToString().Equals(messageType)
                         && m.Content is InputExpiration
-                        && UserIdentity.Equals((m.Content as InputExpiration).Identity)),
+                        && UserIdentity.Equals((m.Content as InputExpiration).Identity)
+                    ),
                     Arg.Any<DateTimeOffset>(),
                     Arg.Any<Node>(),
-                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested)
+                );
             SchedulerExtension
                 .Received(1)
                 .CancelScheduledMessageAsync(
                     Arg.Is<string>(s => s.Equals($"{UserIdentity}-inputexpirationtime")),
                     Arg.Any<Node>(),
-                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested));
+                    Arg.Is<CancellationToken>(c => !c.IsCancellationRequested)
+                );
 
             StateManager = Substitute.For<IStateManager>();
         }
@@ -2302,29 +2413,32 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-            new State
-            {
-                Id = stateId,
-                Root = true,
-                Input = new Input(),
-                LocalCustomActions = new[]
-                {
-                    new Action
+                    new State
                     {
-                        Id = actionId,
-                        Type = "ExecuteScript",
-                        Settings = new JRaw(
-                            new JObject()
+                        Id = stateId,
+                        Root = true,
+                        Input = new Input(),
+                        LocalCustomActions = new[]
+                        {
+                            new Action
                             {
-                                { "function", "run" },
-                                { "source", $"function run() {{ return {desiredScriptReturn}; }}" }, // Satisfying Input condition above
-                                { "outputVariable", variableName }
-                            }
-                        )
-                    }
-                }
-            }
-        }
+                                Id = actionId,
+                                Type = "ExecuteScript",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "function", "run" },
+                                        {
+                                            "source",
+                                            $"function run() {{ return {desiredScriptReturn}; }}"
+                                        }, // Satisfying Input condition above
+                                        { "outputVariable", variableName },
+                                    }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             var target = GetTarget();
@@ -2337,15 +2451,31 @@ namespace Take.Blip.Builder.UnitTests
             };
 
             // Mock the StateManager to return the expected state ID
-            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns(stateId);
+            StateManager
+                .GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>())
+                .Returns(stateId);
 
-            Context.GetContextVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(desiredScriptReturn);
+            Context
+                .GetContextVariableAsync(variableName, Arg.Any<CancellationToken>())
+                .Returns(desiredScriptReturn);
 
             // Act
-            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
+            var processCommandReturn = await target.ProcessCommandInputAsync(
+                message,
+                flow,
+                stateId,
+                actionId,
+                CancellationToken.None
+            );
 
             // Assert
-            Context.Received(1).SetVariableAsync(Arg.Is(variableName), Arg.Is(desiredScriptReturn), Arg.Any<CancellationToken>());
+            Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Is(variableName),
+                    Arg.Is(desiredScriptReturn),
+                    Arg.Any<CancellationToken>()
+                );
             processCommandReturn.Count.ShouldBe(1);
             processCommandReturn.ShouldContainKeyAndValue(variableName, desiredScriptReturn);
         }
@@ -2363,43 +2493,38 @@ namespace Take.Blip.Builder.UnitTests
             var httpBodyReponseVariableName = "customerApiResponse";
             var httpBodyReponseVariableValue = "{}";
 
-            var headers = new JObject
-    {
-        { "header1", "value1" },
-        { "header2", "value2" }
-    };
+            var headers = new JObject { { "header1", "value1" }, { "header2", "value2" } };
 
             var flow = new Flow()
             {
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-            new State
-            {
-                Id = stateId,
-                Root = true,
-                Input = new Input(),
-                LocalCustomActions = new[]
-                {
-                    new Action
+                    new State
                     {
-                        Id = actionId,
-                        Type = "ProcessHttp",
-                        Settings = new JRaw
-                        (
-                            new JObject()
+                        Id = stateId,
+                        Root = true,
+                        Input = new Input(),
+                        LocalCustomActions = new[]
+                        {
+                            new Action
                             {
-                                { "responseStatusVariable", statusCodeVariableName },
-                                { "responseBodyVariable", httpBodyReponseVariableName },
-                                { "method", "GET" },
-                                { "uri", "https://example.com/api/test" },
-                                { "headers", headers }
-                            }
-                        )
-                    }
-                }
-            }
-        }
+                                Id = actionId,
+                                Type = "ProcessHttp",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "responseStatusVariable", statusCodeVariableName },
+                                        { "responseBodyVariable", httpBodyReponseVariableName },
+                                        { "method", "GET" },
+                                        { "uri", "https://example.com/api/test" },
+                                        { "headers", headers },
+                                    }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             var target = GetTarget();
@@ -2412,37 +2537,67 @@ namespace Take.Blip.Builder.UnitTests
             };
 
             // Mock the StateManager to return the expected state ID
-            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns(stateId);
+            StateManager
+                .GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>())
+                .Returns(stateId);
 
-            Context.GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>()).Returns(httpBodyReponseVariableValue);
-            Context.GetContextVariableAsync(statusCodeVariableName, Arg.Any<CancellationToken>()).Returns(statusCodeVariableValue);
+            Context
+                .GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>())
+                .Returns(httpBodyReponseVariableValue);
+            Context
+                .GetContextVariableAsync(statusCodeVariableName, Arg.Any<CancellationToken>())
+                .Returns(statusCodeVariableValue);
 
             using var httpResponse = new HttpResponseMessage
             {
                 StatusCode = System.Net.HttpStatusCode.Accepted,
-                Content = new StringContent(httpBodyReponseVariableValue)
+                Content = new StringContent(httpBodyReponseVariableValue),
             };
 
-            HttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m =>
-                m.Method == HttpMethod.Get &&
-                m.RequestUri.ToString() == "https://example.com/api/test"),
-                Arg.Any<CancellationToken>())
+            HttpClient
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(m =>
+                        m.Method == HttpMethod.Get
+                        && m.RequestUri.ToString() == "https://example.com/api/test"
+                    ),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(httpResponse);
 
             // Act
-            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
+            var processCommandReturn = await target.ProcessCommandInputAsync(
+                message,
+                flow,
+                stateId,
+                actionId,
+                CancellationToken.None
+            );
 
             // Assert
             Context
                 .Received(1)
-                .SetVariableAsync(Arg.Is(httpBodyReponseVariableName), Arg.Is(httpBodyReponseVariableValue), Arg.Any<CancellationToken>());
+                .SetVariableAsync(
+                    Arg.Is(httpBodyReponseVariableName),
+                    Arg.Is(httpBodyReponseVariableValue),
+                    Arg.Any<CancellationToken>()
+                );
             Context
                 .Received(1)
-                .SetVariableAsync(Arg.Is(statusCodeVariableName), Arg.Is(statusCodeVariableValue), Arg.Any<CancellationToken>());
+                .SetVariableAsync(
+                    Arg.Is(statusCodeVariableName),
+                    Arg.Is(statusCodeVariableValue),
+                    Arg.Any<CancellationToken>()
+                );
 
             processCommandReturn.Count.ShouldBe(2);
-            processCommandReturn.ShouldContainKeyAndValue(httpBodyReponseVariableName, httpBodyReponseVariableValue);
-            processCommandReturn.ShouldContainKeyAndValue(statusCodeVariableName, statusCodeVariableValue);
+            processCommandReturn.ShouldContainKeyAndValue(
+                httpBodyReponseVariableName,
+                httpBodyReponseVariableValue
+            );
+            processCommandReturn.ShouldContainKeyAndValue(
+                statusCodeVariableName,
+                statusCodeVariableValue
+            );
         }
 
         [Fact]
@@ -2477,21 +2632,20 @@ namespace Take.Blip.Builder.UnitTests
                             {
                                 Id = actionId,
                                 Type = "ProcessHttp",
-                                Settings = new JRaw
-                                (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "responseStatusVariable", statusCodeVariableName },
                                         { "responseBodyVariable", httpBodyReponseVariableName },
                                         { "method", "GET" },
                                         { "uri", "https://example.com/api/test" },
-                                        { "headers", headers }
+                                        { "headers", headers },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             var target = GetTarget();
@@ -2504,32 +2658,54 @@ namespace Take.Blip.Builder.UnitTests
             };
 
             // Mock the StateManager to return the expected state ID
-            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns(stateId);
+            StateManager
+                .GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>())
+                .Returns(stateId);
 
-            Context.GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>()).Returns(httpBodyReponseVariableValue);
+            Context
+                .GetContextVariableAsync(httpBodyReponseVariableName, Arg.Any<CancellationToken>())
+                .Returns(httpBodyReponseVariableValue);
 
-            HttpClient.SendAsync(Arg.Is<HttpRequestMessage>(m =>
-                m.Method == HttpMethod.Get &&
-                m.RequestUri.ToString() == "https://example.com/api/test"),
-                Arg.Any<CancellationToken>())
-                .Returns(new HttpResponseMessage
-                {
-                    StatusCode = System.Net.HttpStatusCode.Accepted,
-                    Content = new StringContent(httpBodyReponseVariableValue)
-                });
+            HttpClient
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(m =>
+                        m.Method == HttpMethod.Get
+                        && m.RequestUri.ToString() == "https://example.com/api/test"
+                    ),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(
+                    new HttpResponseMessage
+                    {
+                        StatusCode = System.Net.HttpStatusCode.Accepted,
+                        Content = new StringContent(httpBodyReponseVariableValue),
+                    }
+                );
 
             // Act
-            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
+            var processCommandReturn = await target.ProcessCommandInputAsync(
+                message,
+                flow,
+                stateId,
+                actionId,
+                CancellationToken.None
+            );
 
             // Assert
             Context
                 .Received(1)
-                .SetVariableAsync(Arg.Is(httpBodyReponseVariableName), Arg.Is(httpBodyReponseVariableValue), Arg.Any<CancellationToken>());
+                .SetVariableAsync(
+                    Arg.Is(httpBodyReponseVariableName),
+                    Arg.Is(httpBodyReponseVariableValue),
+                    Arg.Any<CancellationToken>()
+                );
 
             processCommandReturn.Count.ShouldBe(1);
-            processCommandReturn.ShouldContainKeyAndValue(httpBodyReponseVariableName, httpBodyReponseVariableValue);
+            processCommandReturn.ShouldContainKeyAndValue(
+                httpBodyReponseVariableName,
+                httpBodyReponseVariableValue
+            );
         }
-
 
         [Fact]
         public async Task FlowWithAgentStateWithLocalCustomActionWithoutOutputVariableShouldAllowExecutionAsync()
@@ -2545,29 +2721,29 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-            new State
-            {
-                Id = stateId,
-                Root = true,
-                Input = new Input(),
-                LocalCustomActions = new[]
-                {
-                    new Action
+                    new State
                     {
-                        Id = actionId,
-                        Type = "TrackEvent",
-                        Settings = new JRaw(
-                            new JObject()
+                        Id = stateId,
+                        Root = true,
+                        Input = new Input(),
+                        LocalCustomActions = new[]
+                        {
+                            new Action
                             {
-                                { "extras", "" },
-                                { "category", categoryName },
-                                { "action", actionName }
-                            }
-                        )
-                    }
-                }
-            }
-        }
+                                Id = actionId,
+                                Type = "TrackEvent",
+                                Settings = new JRaw(
+                                    new JObject()
+                                    {
+                                        { "extras", "" },
+                                        { "category", categoryName },
+                                        { "action", actionName },
+                                    }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
 
             var target = GetTarget();
@@ -2580,10 +2756,18 @@ namespace Take.Blip.Builder.UnitTests
             };
 
             // Mock the StateManager to return the expected state ID
-            StateManager.GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>()).Returns(stateId);
+            StateManager
+                .GetStateIdAsync(Arg.Any<IContext>(), Arg.Any<CancellationToken>())
+                .Returns(stateId);
 
             // Act
-            var processCommandReturn = await target.ProcessCommandInputAsync(message, flow, stateId, actionId, CancellationToken.None);
+            var processCommandReturn = await target.ProcessCommandInputAsync(
+                message,
+                flow,
+                stateId,
+                actionId,
+                CancellationToken.None
+            );
 
             // Assert
             processCommandReturn.ShouldBeNull();
@@ -2604,12 +2788,13 @@ namespace Take.Blip.Builder.UnitTests
 
             Message.Metadata = new Dictionary<string, string>
             {
-            { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
+                { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
                 { TraceSettings.BUILDER_TRACE_MODE, "All" },
-                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" }
+                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" },
             };
 
-            Context.GetVariableAsync(statusVarName, Arg.Any<CancellationToken>(), Arg.Any<string>())
+            Context
+                .GetVariableAsync(statusVarName, Arg.Any<CancellationToken>(), Arg.Any<string>())
                 .Returns(statusVarValue);
 
             var flow = new Flow
@@ -2617,21 +2802,28 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State { Id = "root", Root = true, Input = new Input() }
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                    },
                 },
                 InputActions = new[]
                 {
                     new Action
                     {
                         Type = "ProcessHttp",
-                        Settings = new JRaw(new JObject
-                        {
-                            { "method", "GET" },
-                            { "uri", "https://example.com" },
-                            { "responseStatusVariable", statusVarName }
-                        })
-                    }
-                }
+                        Settings = new JRaw(
+                            new JObject
+                            {
+                                { "method", "GET" },
+                                { "uri", "https://example.com" },
+                                { "responseStatusVariable", statusVarName },
+                            }
+                        ),
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -2649,9 +2841,9 @@ namespace Take.Blip.Builder.UnitTests
             Message.Content = new PlainText { Text = "test" };
             Message.Metadata = new Dictionary<string, string>
             {
-            { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
+                { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
                 { TraceSettings.BUILDER_TRACE_MODE, "All" },
-                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" }
+                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" },
             };
 
             var flow = new Flow
@@ -2659,20 +2851,23 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State { Id = "root", Root = true, Input = new Input() }
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                    },
                 },
                 InputActions = new[]
                 {
                     new Action
                     {
                         Type = "SendMessage",
-                        Settings = new JRaw(new JObject
-                        {
-                            { "type", "text/plain" },
-                            { "content", "hello" }
-                        })
-                    }
-                }
+                        Settings = new JRaw(
+                            new JObject { { "type", "text/plain" }, { "content", "hello" } }
+                        ),
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -2680,9 +2875,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert: GetVariableAsync should NOT be called for enrichment (SendMessage has no responseStatusVariable)
-            await Context.DidNotReceive().GetVariableAsync(
-                Arg.Is<string>(v => v != null),
-                Arg.Any<CancellationToken>());
+            await Context
+                .DidNotReceive()
+                .GetVariableAsync(Arg.Is<string>(v => v != null), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -2692,9 +2887,9 @@ namespace Take.Blip.Builder.UnitTests
             Message.Content = new PlainText { Text = "test" };
             Message.Metadata = new Dictionary<string, string>
             {
-            { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
+                { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
                 { TraceSettings.BUILDER_TRACE_MODE, "All" },
-                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" }
+                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" },
             };
 
             var flow = new Flow
@@ -2702,21 +2897,28 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State { Id = "root", Root = true, Input = new Input() }
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                    },
                 },
                 InputActions = new[]
                 {
                     new Action
                     {
                         Type = "ProcessHttp",
-                        Settings = new JRaw(new JObject
-                        {
-                            { "method", "GET" },
-                            { "uri", "https://example.com" }
-                            // no responseStatusVariable
-                        })
-                    }
-                }
+                        Settings = new JRaw(
+                            new JObject
+                            {
+                                { "method", "GET" },
+                                { "uri", "https://example.com" },
+                                // no responseStatusVariable
+                            }
+                        ),
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -2724,9 +2926,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert: GetVariableAsync not called for enrichment since variableName is null/empty
-            await Context.DidNotReceive().GetVariableAsync(
-                Arg.Is<string>(v => v != null),
-                Arg.Any<CancellationToken>());
+            await Context
+                .DidNotReceive()
+                .GetVariableAsync(Arg.Is<string>(v => v != null), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -2739,12 +2941,14 @@ namespace Take.Blip.Builder.UnitTests
             {
                 { TraceSettings.BUILDER_TRACE_TARGET, "http://trace.example.com" },
                 { TraceSettings.BUILDER_TRACE_MODE, "All" },
-                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" }
+                { TraceSettings.BUILDER_TRACE_TARGET_TYPE, "Http" },
             };
 
-            Context.GetVariableAsync(statusVarName, Arg.Any<CancellationToken>(), Arg.Any<string>())
+            Context
+                .GetVariableAsync(statusVarName, Arg.Any<CancellationToken>(), Arg.Any<string>())
                 .Returns(Task.FromException<string>(new Exception("context error")));
-            Context.GetVariableAsync(statusVarName, Arg.Any<CancellationToken>())
+            Context
+                .GetVariableAsync(statusVarName, Arg.Any<CancellationToken>())
                 .Returns(Task.FromException<string>(new Exception("context error")));
 
             var flow = new Flow
@@ -2752,21 +2956,28 @@ namespace Take.Blip.Builder.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 States = new[]
                 {
-                    new State { Id = "root", Root = true, Input = new Input() }
+                    new State
+                    {
+                        Id = "root",
+                        Root = true,
+                        Input = new Input(),
+                    },
                 },
                 InputActions = new[]
                 {
                     new Action
                     {
                         Type = "ProcessHttp",
-                        Settings = new JRaw(new JObject
-                        {
-                            { "method", "GET" },
-                            { "uri", "https://example.com" },
-                            { "responseStatusVariable", statusVarName }
-                        })
-                    }
-                }
+                        Settings = new JRaw(
+                            new JObject
+                            {
+                                { "method", "GET" },
+                                { "uri", "https://example.com" },
+                                { "responseStatusVariable", statusVarName },
+                            }
+                        ),
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -2796,7 +3007,6 @@ namespace Take.Blip.Builder.UnitTests
 
             public List<Message> SentMessages { get; }
 
-
             public async Task SendMessageAsync(Message message, CancellationToken cancellationToken)
             {
                 await Task.Delay(_delay, cancellationToken);
@@ -2805,7 +3015,10 @@ namespace Take.Blip.Builder.UnitTests
                 SentMessages.Add(message);
             }
 
-            public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken)
+            public Task SendNotificationAsync(
+                Notification notification,
+                CancellationToken cancellationToken
+            )
             {
                 throw new NotImplementedException();
             }
@@ -2815,7 +3028,10 @@ namespace Take.Blip.Builder.UnitTests
                 throw new NotImplementedException();
             }
 
-            public Task<Command> ProcessCommandAsync(Command requestCommand, CancellationToken cancellationToken)
+            public Task<Command> ProcessCommandAsync(
+                Command requestCommand,
+                CancellationToken cancellationToken
+            )
             {
                 throw new NotImplementedException();
             }

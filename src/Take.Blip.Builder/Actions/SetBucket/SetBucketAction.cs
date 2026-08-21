@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
+using Newtonsoft.Json.Linq;
 using Take.Blip.Client.Extensions.Bucket;
 
 namespace Take.Blip.Builder.Actions.SetBucket
@@ -15,14 +15,21 @@ namespace Take.Blip.Builder.Actions.SetBucket
         private readonly IBucketExtension _bucketExtension;
         private readonly IBlipLogger _blipMonitoringLogger;
 
-        public SetBucketAction(IBucketExtension bucketExtension, IBlipLogger? blipMonitoringLogger = null)
+        public SetBucketAction(
+            IBucketExtension bucketExtension,
+            IBlipLogger? blipMonitoringLogger = null
+        )
             : base(nameof(SetBucket))
         {
             _bucketExtension = bucketExtension;
             _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
-        public override async Task ExecuteAsync(IContext context, SetBucketSettings settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(
+            IContext context,
+            SetBucketSettings settings,
+            CancellationToken cancellationToken
+        )
         {
             var sw = Stopwatch.StartNew();
             var expiration = settings.Expiration.HasValue
@@ -35,23 +42,33 @@ namespace Take.Blip.Builder.Actions.SetBucket
                     settings.Id,
                     settings.ToDocument(),
                     expiration,
-                    cancellationToken);
+                    cancellationToken
+                );
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
-                {
-                    ["bucketId"] = settings.Id,
-                    ["expiration"] = settings.Expiration,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
+                this.LogExecution(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["bucketId"] = settings.Id,
+                        ["expiration"] = settings.Expiration,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    }
+                );
             }
             catch (Exception ex)
             {
-                this.LogError(_blipMonitoringLogger, context, new JObject
-                {
-                    ["bucketId"] = settings.Id,
-                    ["expiration"] = settings.Expiration,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, ex);
+                this.LogError(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["bucketId"] = settings.Id,
+                        ["expiration"] = settings.Expiration,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    },
+                    ex
+                );
                 throw;
             }
         }

@@ -35,15 +35,20 @@ namespace Take.Blip.Client.Activation
                     Trace.TraceError(ex.ToString());
                 }
 
-                if (assembly != null) yield return assembly;
+                if (assembly != null)
+                    yield return assembly;
             }
-        }        
+        }
 
         private static Assembly LoadAssembly(string assemblyPath)
         {
             var fileName = Path.GetFileNameWithoutExtension(assemblyPath);
-            var runtimeLibrary = Microsoft.Extensions.DependencyModel.DependencyContext.Default.RuntimeLibraries.FirstOrDefault(l => l.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
-            if (runtimeLibrary != null) return Assembly.Load(new AssemblyName(runtimeLibrary.Name));
+            var runtimeLibrary =
+                Microsoft.Extensions.DependencyModel.DependencyContext.Default.RuntimeLibraries.FirstOrDefault(
+                    l => l.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase)
+                );
+            if (runtimeLibrary != null)
+                return Assembly.Load(new AssemblyName(runtimeLibrary.Name));
             return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
         }
     }

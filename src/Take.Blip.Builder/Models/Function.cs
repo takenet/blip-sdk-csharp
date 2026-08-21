@@ -15,7 +15,8 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="Function"/> class.
         /// </summary>
-        public Function() : base(MediaType) { }
+        public Function()
+            : base(MediaType) { }
 
         /// <summary>
         /// The function's id

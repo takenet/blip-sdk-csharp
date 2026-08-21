@@ -11,24 +11,29 @@ namespace Take.Blip.Client.Extensions.ContactsJourney
         private const string CONTACTS_JOURNEY_URI = "/contacts-journey";
         private const string DEFAULT_ANALYTICS_DOMAIN = "analytics." + Constants.DEFAULT_DOMAIN;
 
-        private readonly Node AnalyticsAddress = new Node(Constants.POSTMASTER, DEFAULT_ANALYTICS_DOMAIN, null);
+        private readonly Node AnalyticsAddress = new Node(
+            Constants.POSTMASTER,
+            DEFAULT_ANALYTICS_DOMAIN,
+            null
+        );
 
         public ContactsJourneyExtension(ISender sender)
-            : base(sender)
-        {
-        }
+            : base(sender) { }
 
         public Task AddAsync(
-            string stateId, 
-            string stateName, 
-            string previousStateId = null, 
-            string previousStateName = null, 
-            string contactIdentity = null, 
-            bool fireAndForget = false, 
-            CancellationToken cancellationToken = default)
+            string stateId,
+            string stateName,
+            string previousStateId = null,
+            string previousStateName = null,
+            string contactIdentity = null,
+            bool fireAndForget = false,
+            CancellationToken cancellationToken = default
+        )
         {
-            if (string.IsNullOrEmpty(stateId)) throw new ArgumentNullException(nameof(stateId));
-            if (string.IsNullOrEmpty(stateName)) throw new ArgumentNullException(nameof(stateName));
+            if (string.IsNullOrEmpty(stateId))
+                throw new ArgumentNullException(nameof(stateId));
+            if (string.IsNullOrEmpty(stateName))
+                throw new ArgumentNullException(nameof(stateName));
 
             var requestCommand = new Command(null)
             {
@@ -41,8 +46,8 @@ namespace Take.Blip.Client.Extensions.ContactsJourney
                     PreviousStateId = previousStateId,
                     PreviousStateName = previousStateName,
                     ContactIdentity = contactIdentity,
-                    StorageDate = DateTimeOffset.Now
-                }
+                    StorageDate = DateTimeOffset.Now,
+                },
             };
 
             if (fireAndForget)

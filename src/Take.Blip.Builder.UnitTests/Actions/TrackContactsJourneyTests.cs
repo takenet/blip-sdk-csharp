@@ -29,24 +29,23 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Context.UserIdentity.Returns(identity);
 
             var contactsJourneyAction = new TrackContactsJourneyAction(ContactsJourneyExtension);
-            var settings = new JObject
-            {
-                ["stateId"] = stateId,
-                ["stateName"] = stateName,
-            };
+            var settings = new JObject { ["stateId"] = stateId, ["stateName"] = stateName };
 
             // Act
             await contactsJourneyAction.ExecuteAsync(Context, settings, CancellationToken);
 
             // Assert
-            await ContactsJourneyExtension.Received(1).AddAsync(
-                stateId,
-                stateName,
-                previousStateId: null,
-                previousStateName: null,
-                contactIdentity: identity,
-                fireAndForget: true,
-                cancellationToken: CancellationToken);
+            await ContactsJourneyExtension
+                .Received(1)
+                .AddAsync(
+                    stateId,
+                    stateName,
+                    previousStateId: null,
+                    previousStateName: null,
+                    contactIdentity: identity,
+                    fireAndForget: true,
+                    cancellationToken: CancellationToken
+                );
         }
 
         [Fact]
@@ -74,14 +73,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await contactsJourneyAction.ExecuteAsync(Context, settings, CancellationToken);
 
             // Assert
-            await ContactsJourneyExtension.Received(1).AddAsync(
-                stateId,
-                stateName,
-                previousStateId,
-                previousStateName,
-                contactIdentity: identity,
-                fireAndForget: true,
-                cancellationToken: CancellationToken);
+            await ContactsJourneyExtension
+                .Received(1)
+                .AddAsync(
+                    stateId,
+                    stateName,
+                    previousStateId,
+                    previousStateName,
+                    contactIdentity: identity,
+                    fireAndForget: true,
+                    cancellationToken: CancellationToken
+                );
         }
 
         [Fact]
@@ -106,7 +108,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             var exception = await Should.ThrowAsync<ArgumentException>(
                 // Act
-                async () => await contactsJourneyAction.ExecuteAsync(Context, settings, CancellationToken)
+                async () =>
+                    await contactsJourneyAction.ExecuteAsync(Context, settings, CancellationToken)
             );
             exception.Message.ShouldContain("stateId");
         }
@@ -133,7 +136,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Assert
             var exception = await Should.ThrowAsync<ArgumentException>(
                 // Act
-                async () => await contactsJourneyAction.ExecuteAsync(Context, settings, CancellationToken)
+                async () =>
+                    await contactsJourneyAction.ExecuteAsync(Context, settings, CancellationToken)
             );
             exception.Message.ShouldContain("stateName");
         }

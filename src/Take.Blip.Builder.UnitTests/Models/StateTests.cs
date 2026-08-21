@@ -12,12 +12,9 @@ namespace Take.Blip.Builder.UnitTests.Models
         public void ValidateValidStateShouldSucceed()
         {
             // Arrange
-            var state = new State
-            {
-                Id = "0"
-            };
+            var state = new State { Id = "0" };
 
-            // Act 
+            // Act
             state.Validate();
         }
 
@@ -25,11 +22,7 @@ namespace Take.Blip.Builder.UnitTests.Models
         public void ValidateWithoutIdShouldFail()
         {
             // Arrange
-            var state = new State
-            {
-                Root = true,
-                Input = new Input()
-            };
+            var state = new State { Root = true, Input = new Input() };
 
             // Act
             try

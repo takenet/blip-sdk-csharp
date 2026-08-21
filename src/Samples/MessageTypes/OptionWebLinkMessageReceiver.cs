@@ -19,16 +19,16 @@ namespace MessageTypes
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             var url = new Uri("http://limeprotocol.org/content-types.html#web-link");
-            var previewUri =
-                new Uri(
-                    "https://techbeacon.scdn7.secure.raxcdn.com/sites/default/files/styles/article_hero_image/public/documents-stack-documentation-agile-devops.jpg?itok=cFDq9Y95");
+            var previewUri = new Uri(
+                "https://techbeacon.scdn7.secure.raxcdn.com/sites/default/files/styles/article_hero_image/public/documents-stack-documentation-agile-devops.jpg?itok=cFDq9Y95"
+            );
 
             var document = new WebLink
             {
                 Text = "Here is a documentation weblink",
                 Target = WebLinkTarget.Self,
                 PreviewUri = previewUri,
-                Uri = url
+                Uri = url,
             };
 
             await _sender.SendMessageAsync(document, message.From, cancellationToken);

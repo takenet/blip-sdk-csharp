@@ -16,14 +16,13 @@ namespace Take.Blip.Builder.UnitTests
 {
     public class InputValidationsTests : FlowManagerTestsBase
     {
-     
         [Fact]
         public async Task FlowWithRegexInputValidationShouldChangeStateProperly()
         {
             // Arrange
             var input = new PlainText() { Text = "hi" };
             Message.Content = input;
-            
+
             var messageType = "text/plain";
             var messageContent = "Hi for you to!";
             var validationMessageContent = "Invalid message content";
@@ -43,16 +42,10 @@ namespace Take.Blip.Builder.UnitTests
                             {
                                 Rule = InputValidationRule.Regex,
                                 Regex = "(hi)",
-                                Error = validationMessageContent
-                            }
+                                Error = validationMessageContent,
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "state2"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "state2" } },
                     },
                     new State
                     {
@@ -62,17 +55,17 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -80,7 +73,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
 
             Sender
@@ -90,8 +85,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == messageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -120,16 +117,10 @@ namespace Take.Blip.Builder.UnitTests
                             {
                                 Rule = InputValidationRule.Regex,
                                 Regex = "(xpto)",
-                                Error = validationMessageContent
-                            }
+                                Error = validationMessageContent,
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "state2"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "state2" } },
                     },
                     new State
                     {
@@ -139,17 +130,17 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -157,7 +148,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(0).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(0)
+                .SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
             StateManager.Received(0).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
 
             Sender
@@ -167,8 +160,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == validationMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == validationMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -196,16 +191,10 @@ namespace Take.Blip.Builder.UnitTests
                             Validation = new InputValidation
                             {
                                 Rule = InputValidationRule.Number,
-                                Error = validationMessageContent
-                            }
+                                Error = validationMessageContent,
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "state2"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "state2" } },
                     },
                     new State
                     {
@@ -215,17 +204,17 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -233,7 +222,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
 
             Sender
@@ -243,8 +234,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == messageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -272,16 +265,10 @@ namespace Take.Blip.Builder.UnitTests
                             Validation = new InputValidation
                             {
                                 Rule = InputValidationRule.Number,
-                                Error = validationMessageContent
-                            }
+                                Error = validationMessageContent,
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "state2"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "state2" } },
                     },
                     new State
                     {
@@ -291,17 +278,17 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -309,7 +296,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(0).SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(0)
+                .SetStateIdAsync(Context, "state2", Arg.Any<CancellationToken>());
             StateManager.Received(0).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
 
             Sender
@@ -319,8 +308,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == validationMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == validationMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -333,7 +324,7 @@ namespace Take.Blip.Builder.UnitTests
             {
                 From = UserIdentity.ToNode(),
                 To = ApplicationIdentity.ToNode(),
-                Content = new MediaLink()
+                Content = new MediaLink(),
             };
             var messageType = "text/plain";
             var messageContent = "Pong!";
@@ -354,16 +345,10 @@ namespace Take.Blip.Builder.UnitTests
                             {
                                 Rule = InputValidationRule.Type,
                                 Type = PlainText.MediaType,
-                                Error = validationMessageContent
-                            }
+                                Error = validationMessageContent,
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -373,17 +358,17 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -392,7 +377,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
@@ -401,8 +388,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == validationMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == validationMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -410,8 +399,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == messageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -424,7 +415,7 @@ namespace Take.Blip.Builder.UnitTests
             {
                 From = UserIdentity.ToNode(),
                 To = ApplicationIdentity.ToNode(),
-                Content = new MediaLink()
+                Content = new MediaLink(),
             };
             var messageType = "text/plain";
             var messageContent = "Pong!";
@@ -445,16 +436,10 @@ namespace Take.Blip.Builder.UnitTests
                             {
                                 Rule = InputValidationRule.Type,
                                 Type = PlainText.MediaType,
-                                Error = validationMessageContent
-                            }
+                                Error = validationMessageContent,
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -464,17 +449,17 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -483,7 +468,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
             Sender
                 .Received(1)
@@ -492,8 +479,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == validationMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == validationMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
             Sender
                 .Received(1)
                 .SendMessageAsync(
@@ -501,8 +490,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == messageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Theory]
@@ -540,16 +531,10 @@ namespace Take.Blip.Builder.UnitTests
                             Validation = new InputValidation
                             {
                                 Rule = InputValidationRule.Date,
-                                Error = validationMessageContent
-                            }
+                                Error = validationMessageContent,
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -559,17 +544,17 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -577,7 +562,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(1).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(1)
+                .SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(1).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
 
             Sender
@@ -587,8 +574,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == messageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == messageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -616,16 +605,10 @@ namespace Take.Blip.Builder.UnitTests
                             Validation = new InputValidation
                             {
                                 Rule = InputValidationRule.Date,
-                                Error = validationMessageContent
-                            }
+                                Error = validationMessageContent,
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -635,17 +618,17 @@ namespace Take.Blip.Builder.UnitTests
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -653,7 +636,9 @@ namespace Take.Blip.Builder.UnitTests
             await target.ProcessInputAsync(Message, flow, CancellationToken);
 
             // Assert
-            StateManager.Received(0).SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
+            StateManager
+                .Received(0)
+                .SetStateIdAsync(Context, "ping", Arg.Any<CancellationToken>());
             StateManager.Received(0).DeleteStateIdAsync(Context, Arg.Any<CancellationToken>());
 
             Sender
@@ -663,8 +648,10 @@ namespace Take.Blip.Builder.UnitTests
                         m.Id != null
                         && m.To.ToIdentity().Equals(UserIdentity)
                         && m.Type.ToString().Equals(messageType)
-                        && m.Content.ToString() == validationMessageContent),
-                    Arg.Any<CancellationToken>());
+                        && m.Content.ToString() == validationMessageContent
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
     }
 }

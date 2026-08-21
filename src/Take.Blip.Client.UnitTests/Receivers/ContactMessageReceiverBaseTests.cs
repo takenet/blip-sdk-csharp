@@ -22,15 +22,15 @@ namespace Take.Blip.Client.UnitTests.Receivers
             DirectoryExtension = Substitute.For<IDirectoryExtension>();
             CacheExpiration = TimeSpan.FromMilliseconds(250);
         }
-        
+
         public IContactExtension ContactExtension { get; }
-        
+
         public IDirectoryExtension DirectoryExtension { get; set; }
 
         public bool CacheLocally { get; set; }
 
         public TimeSpan CacheExpiration { get; set; }
-        
+
         public TestContactMessageReceiver GetTarget()
         {
             return new TestContactMessageReceiver(
@@ -39,9 +39,9 @@ namespace Take.Blip.Client.UnitTests.Receivers
                 Substitute.For<ILogger>(),
                 CacheLocally,
                 CacheExpiration
-                );
+            );
         }
-        
+
         [Fact]
         public async Task ReceiveMessageShouldGetContactFromContacts()
         {
@@ -50,12 +50,10 @@ namespace Take.Blip.Client.UnitTests.Receivers
             var identity = message.From.ToIdentity();
             var contact = Dummy.CreateContact();
             contact.Identity = identity;
-            ContactExtension
-                .GetAsync(identity, Arg.Any<CancellationToken>())
-                .Returns(contact);
+            ContactExtension.GetAsync(identity, Arg.Any<CancellationToken>()).Returns(contact);
 
             var target = GetTarget();
-            
+
             // Act
             await target.ReceiveAsync(message, CancellationToken);
 
@@ -66,13 +64,10 @@ namespace Take.Blip.Client.UnitTests.Receivers
             actualContact.ShouldNotBeNull();
             foreach (var property in typeof(Contact).GetProperties())
             {
-                property
-                    .GetValue(actualContact)
-                    .ShouldBe(
-                        property.GetValue(contact));
+                property.GetValue(actualContact).ShouldBe(property.GetValue(contact));
             }
         }
-        
+
         [Fact]
         public async Task ReceiveMessageShouldGetContactFromDirectoryWhenNotInContacts()
         {
@@ -86,7 +81,7 @@ namespace Take.Blip.Client.UnitTests.Receivers
                 .Returns(account);
 
             var target = GetTarget();
-            
+
             // Act
             await target.ReceiveAsync(message, CancellationToken);
 
@@ -96,16 +91,13 @@ namespace Take.Blip.Client.UnitTests.Receivers
             var actualContact = target.ReceivedItems[0].contact;
             actualContact.ShouldNotBeNull();
             actualContact.Name.ShouldBe(account.FullName);
-            
+
             foreach (var property in typeof(ContactDocument).GetProperties())
             {
-                property
-                    .GetValue(actualContact)
-                    .ShouldBe(
-                        property.GetValue(account));
+                property.GetValue(actualContact).ShouldBe(property.GetValue(account));
             }
         }
-        
+
         [Fact]
         public async Task ReceiveMessageTwiceShouldGetContactFromCacheOnSecondTime()
         {
@@ -115,12 +107,10 @@ namespace Take.Blip.Client.UnitTests.Receivers
             var identity = message.From.ToIdentity();
             var contact = Dummy.CreateContact();
             contact.Identity = identity;
-            ContactExtension
-                .GetAsync(identity, Arg.Any<CancellationToken>())
-                .Returns(contact);
+            ContactExtension.GetAsync(identity, Arg.Any<CancellationToken>()).Returns(contact);
 
             var target = GetTarget();
-            
+
             // Act
             await target.ReceiveAsync(message, CancellationToken);
             await target.ReceiveAsync(message, CancellationToken);
@@ -129,7 +119,7 @@ namespace Take.Blip.Client.UnitTests.Receivers
 
             ContactExtension.Received(1).GetAsync(identity, CancellationToken);
         }
-        
+
         [Fact]
         public async Task ReceiveMessageTwiceShouldGetContactFromContactsTwiceWhenCaseIsDisabled()
         {
@@ -139,12 +129,10 @@ namespace Take.Blip.Client.UnitTests.Receivers
             var identity = message.From.ToIdentity();
             var contact = Dummy.CreateContact();
             contact.Identity = identity;
-            ContactExtension
-                .GetAsync(identity, Arg.Any<CancellationToken>())
-                .Returns(contact);
+            ContactExtension.GetAsync(identity, Arg.Any<CancellationToken>()).Returns(contact);
 
             var target = GetTarget();
-            
+
             // Act
             await target.ReceiveAsync(message, CancellationToken);
             await target.ReceiveAsync(message, CancellationToken);
@@ -153,7 +141,7 @@ namespace Take.Blip.Client.UnitTests.Receivers
 
             ContactExtension.Received(2).GetAsync(identity, CancellationToken);
         }
-        
+
         [Fact]
         public async Task ReceiveMessageTwiceShouldGetContactFromContactsTwiceWhenCaseExpires()
         {
@@ -163,12 +151,10 @@ namespace Take.Blip.Client.UnitTests.Receivers
             var identity = message.From.ToIdentity();
             var contact = Dummy.CreateContact();
             contact.Identity = identity;
-            ContactExtension
-                .GetAsync(identity, Arg.Any<CancellationToken>())
-                .Returns(contact);
+            ContactExtension.GetAsync(identity, Arg.Any<CancellationToken>()).Returns(contact);
 
             var target = GetTarget();
-            
+
             // Act
             await target.ReceiveAsync(message, CancellationToken);
             await Task.Delay(CacheExpiration + CacheExpiration);
@@ -187,18 +173,20 @@ namespace Take.Blip.Client.UnitTests.Receivers
             IDirectoryExtension directoryExtension,
             ILogger logger,
             bool cacheLocally = true,
-            TimeSpan cacheExpiration = default) : base(contactExtension,
-            directoryExtension,
-            logger,
-            cacheLocally,
-            cacheExpiration)
+            TimeSpan cacheExpiration = default
+        )
+            : base(contactExtension, directoryExtension, logger, cacheLocally, cacheExpiration)
         {
             ReceivedItems = new List<(Message, Contact)>();
         }
-        
+
         public List<(Message message, Contact contact)> ReceivedItems { get; }
 
-        protected override Task ReceiveAsync(Message message, Contact contact, CancellationToken cancellationToken = default(CancellationToken))
+        protected override Task ReceiveAsync(
+            Message message,
+            Contact contact,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             ReceivedItems.Add((message, contact));
             return Task.CompletedTask;

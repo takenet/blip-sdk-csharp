@@ -11,7 +11,7 @@ namespace Take.Blip.Builder
     /// Defines a conversation context.
     /// </summary>
     public interface IContext
-    {        
+    {
         /// <summary>
         /// The identity of the user in the conversation.
         /// </summary>
@@ -46,7 +46,12 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken"></param>
         /// <param name="expiration"></param>
         /// <returns></returns>
-        Task SetVariableAsync(string name, string value, CancellationToken cancellationToken, TimeSpan expiration = default(TimeSpan));
+        Task SetVariableAsync(
+            string name,
+            string value,
+            CancellationToken cancellationToken,
+            TimeSpan expiration = default(TimeSpan)
+        );
 
         /// <summary>
         /// Gets a defined context variable value.
@@ -55,7 +60,11 @@ namespace Take.Blip.Builder
         /// <param name="cancellationToken"></param>
         /// <param name="stateActionType"></param>
         /// <returns></returns>
-        Task<string> GetVariableAsync(string name, CancellationToken cancellationToken, string stateActionType = null);
+        Task<string> GetVariableAsync(
+            string name,
+            CancellationToken cancellationToken,
+            string stateActionType = null
+        );
 
         /// <summary>
         /// Gets a variable directly from the context, without parsing the source and properties from variable the name.

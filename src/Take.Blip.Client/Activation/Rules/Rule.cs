@@ -6,9 +6,9 @@ namespace Take.Blip.Client.Activation.Rules
     public class Rule
     {
         /// <summary>
-        /// Gets or sets the receiver priority related to the others. 
-        /// Lower values have higher priority. 
-        /// This value can be repeated among receivers. 
+        /// Gets or sets the receiver priority related to the others.
+        /// Lower values have higher priority.
+        /// This value can be repeated among receivers.
         /// In this cases, the receivers are evaluated in parallel.
         /// </summary>
         public int Priority { get; set; }
@@ -17,7 +17,6 @@ namespace Take.Blip.Client.Activation.Rules
 
         public Do Do { get; set; }
     }
-
 
     public class When
     {
@@ -56,14 +55,14 @@ namespace Take.Blip.Client.Activation.Rules
 
         /// <summary>
         /// Gets or sets the content filter. It can be a regex.
-        /// </summary>        
+        /// </summary>
         public string Content { get; set; }
     }
 
     public class WhenNotification : WhenEnvelope
     {
         /// <summary>
-        /// Gets or sets the type of the event. 
+        /// Gets or sets the type of the event.
         /// </summary>
         /// <value>
         /// The type of the event.

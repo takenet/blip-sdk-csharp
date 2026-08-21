@@ -10,7 +10,6 @@ namespace Take.Blip.Builder.Models
     /// <summary>
     /// Defines a state in the conversation state machine.
     /// </summary>
-    
     [DebuggerDisplay("{" + nameof(Id) + "}")]
     public class State : IValidable
     {
@@ -19,7 +18,7 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         [Required(ErrorMessage = "The state id is required")]
         public string Id { get; set; }
-        
+
         /// <summary>
         /// Indicates if this is the root state if the user has no active conversation. Optional.
         /// </summary>
@@ -108,11 +107,7 @@ namespace Take.Blip.Builder.Models
 
         public StateTrace ToTrace()
         {
-            return new StateTrace()
-            {
-                Id = Id,
-                ExtensionData = ExtensionData
-            };
+            return new StateTrace() { Id = Id, ExtensionData = ExtensionData };
         }
     }
 }

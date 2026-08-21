@@ -1,11 +1,11 @@
-﻿using Lime.Messaging.Contents;
-using Lime.Protocol;
-using Lime.Protocol.Network;
-using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
+using Lime.Protocol.Network;
+using Serilog;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -23,7 +23,8 @@ namespace Take.Blip.Builder
         public const string STATE_ID = "inputExpiration.stateId";
         public const string IDENTITY = "inputExpiration.identity";
         public const string CURRENT_SESSION_STATE = "inputExpiration.currentSessionState";
-        private const string IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT = "isInputExpirationFromSubflowRedirect";
+        private const string IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT =
+            "isInputExpirationFromSubflowRedirect";
 
         private readonly Document _emptyContent = new PlainText() { Text = string.Empty };
         private readonly ISchedulerExtension _schedulerExtension;
@@ -35,7 +36,12 @@ namespace Take.Blip.Builder
         /// Constructor
         /// </summary>
         /// <param name="schedulerExtension"></param>
-        public InputExpirationHandler(ISchedulerExtension schedulerExtension, ILogger logger, IInputExpirationCount inputExpirationCount, IConfiguration configuration)
+        public InputExpirationHandler(
+            ISchedulerExtension schedulerExtension,
+            ILogger logger,
+            IInputExpirationCount inputExpirationCount,
+            IConfiguration configuration
+        )
         {
             _schedulerExtension = schedulerExtension;
             _logger = logger;
@@ -51,7 +57,12 @@ namespace Take.Blip.Builder
         /// <param name="from"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task OnFlowPreProcessingAsync(State state, Message message, Node from, CancellationToken cancellationToken)
+        public async Task OnFlowPreProcessingAsync(
+            State state,
+            Message message,
+            Node from,
+            CancellationToken cancellationToken
+        )
         {
             if (!IsMessageFromExpiration(message))
             {
@@ -67,26 +78,42 @@ namespace Take.Blip.Builder
 
                 try
                 {
-                    scheduledMessage = await _schedulerExtension.GetScheduledMessageAsync(messageId, from, cancellationToken);
+                    scheduledMessage = await _schedulerExtension.GetScheduledMessageAsync(
+                        messageId,
+                        from,
+                        cancellationToken
+                    );
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warning(ex, "Scheduled message with id '{MessageId}' not scheduled", messageId);
+                    _logger.Warning(
+                        ex,
+                        "Scheduled message with id '{MessageId}' not scheduled",
+                        messageId
+                    );
                 }
 
                 if (scheduledMessage != null)
                 {
                     try
                     {
-                        await _schedulerExtension.CancelScheduledMessageAsync(messageId, from, cancellationToken);
+                        await _schedulerExtension.CancelScheduledMessageAsync(
+                            messageId,
+                            from,
+                            cancellationToken
+                        );
                     }
-                    catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
+                    catch (LimeException ex)
+                        when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
                     {
                         // Timer was already executed or cancelled by a concurrent pod — safe to ignore
-                        _logger.Warning(ex, "Scheduled message with id '{MessageId}' was already cancelled or executed", messageId);
+                        _logger.Warning(
+                            ex,
+                            "Scheduled message with id '{MessageId}' was already cancelled or executed",
+                            messageId
+                        );
                     }
                 }
-
             }
         }
 
@@ -99,13 +126,35 @@ namespace Take.Blip.Builder
         /// <param name="from"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task OnFlowProcessedAsync(State state, Flow flow, Message message, Node from, IContext context, CancellationToken cancellationToken)
+        public async Task OnFlowProcessedAsync(
+            State state,
+            Flow flow,
+            Message message,
+            Node from,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
-
             // Schedule expiration time if input is configured
-            if (state.HasInputExpiration() && await ValidateInputExirationCountAsync(state, message, from, context, cancellationToken))
+            if (
+                state.HasInputExpiration()
+                && await ValidateInputExirationCountAsync(
+                    state,
+                    message,
+                    from,
+                    context,
+                    cancellationToken
+                )
+            )
             {
-                await ScheduleInputExpirationAsync(state, flow, message, from, context, cancellationToken);
+                await ScheduleInputExpirationAsync(
+                    state,
+                    flow,
+                    message,
+                    from,
+                    context,
+                    cancellationToken
+                );
             }
         }
 
@@ -116,21 +165,26 @@ namespace Take.Blip.Builder
         /// <returns></returns>
         public (bool MessageHasChanged, Message NewMessage) HandleMessage(Message message)
         {
-
             if (message.Content is InputExpiration inputExpiration)
             {
-
                 if (string.IsNullOrWhiteSpace(inputExpiration?.Identity?.ToString()))
                 {
-                    throw new ArgumentException("Message content 'Identity' must be present", nameof(InputExpiration.Identity));
+                    throw new ArgumentException(
+                        "Message content 'Identity' must be present",
+                        nameof(InputExpiration.Identity)
+                    );
                 }
 
                 if (string.IsNullOrWhiteSpace(inputExpiration?.StateId))
                 {
-                    throw new ArgumentException("Message content 'StateId' must be present", nameof(InputExpiration.StateId));
+                    throw new ArgumentException(
+                        "Message content 'StateId' must be present",
+                        nameof(InputExpiration.StateId)
+                    );
                 }
 
-                var messageMetadata = GetTraceSettings(message)?.GetDictionary() ?? new Dictionary<string, string>();
+                var messageMetadata =
+                    GetTraceSettings(message)?.GetDictionary() ?? new Dictionary<string, string>();
                 messageMetadata.Add(STATE_ID, inputExpiration.StateId);
                 messageMetadata.Add(IDENTITY, inputExpiration.Identity);
                 messageMetadata.Add(CURRENT_SESSION_STATE, inputExpiration.CurrentSessionState);
@@ -140,7 +194,7 @@ namespace Take.Blip.Builder
                     To = message.To,
                     From = inputExpiration.Identity.ToNode(),
                     Content = _emptyContent,
-                    Metadata = messageMetadata
+                    Metadata = messageMetadata,
                 };
 
                 return (true, message);
@@ -166,16 +220,26 @@ namespace Take.Blip.Builder
             string stateToGo = string.Empty;
             string currentSessionState = string.Empty;
 
-            return message?.Metadata?.TryGetValue(STATE_ID, out stateToGo) != true ||
-                            string.IsNullOrEmpty(stateToGo) ||
-                            stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
-                           ((state?.Id == stateToGo) && message?.Metadata?.TryGetValue(CURRENT_SESSION_STATE, out currentSessionState) != true) ||
-                            string.IsNullOrEmpty(stateToGo) ||
-                            stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT ||
-                            (flow?.SessionState == currentSessionState);
+            return message?.Metadata?.TryGetValue(STATE_ID, out stateToGo) != true
+                || string.IsNullOrEmpty(stateToGo)
+                || stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT
+                || (
+                    (state?.Id == stateToGo)
+                    && message?.Metadata?.TryGetValue(
+                        CURRENT_SESSION_STATE,
+                        out currentSessionState
+                    ) != true
+                )
+                || string.IsNullOrEmpty(stateToGo)
+                || stateToGo == IS_INPUT_EXPIRATION_FROM_SUBFLOW_REDIRECT
+                || (flow?.SessionState == currentSessionState);
         }
 
-        private Message CreateInputExirationMessage(Message message, string stateId, string currentSessionState)
+        private Message CreateInputExirationMessage(
+            Message message,
+            string stateId,
+            string currentSessionState
+        )
         {
             var idMessage = GetInputExirationIdMessage(message);
 
@@ -188,16 +252,18 @@ namespace Take.Blip.Builder
                 {
                     Identity = message.From,
                     StateId = stateId,
-                    CurrentSessionState = currentSessionState
+                    CurrentSessionState = currentSessionState,
                 },
-                Metadata = traceSettings?.GetDictionary()
+                Metadata = traceSettings?.GetDictionary(),
             };
         }
 
         private static TraceSettings GetTraceSettings(Message message)
         {
-            if (message.Metadata != null &&
-                message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET))
+            if (
+                message.Metadata != null
+                && message.Metadata.Keys.Contains(TraceSettings.BUILDER_TRACE_TARGET)
+            )
             {
                 return new TraceSettings(message.Metadata);
             }
@@ -210,21 +276,46 @@ namespace Take.Blip.Builder
             return $"{message.From.ToIdentity()}-inputexpirationtime";
         }
 
-        private async Task ScheduleInputExpirationAsync(State state, Flow flow, Message message, Node from, IContext context, CancellationToken cancellationToken)
+        private async Task ScheduleInputExpirationAsync(
+            State state,
+            Flow flow,
+            Message message,
+            Node from,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
             var scheduleMessage = CreateInputExirationMessage(message, state.Id, flow.SessionState);
-            var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(state.Input.Expiration.Value.TotalMinutes);
+            var scheduleTime = DateTimeOffset.UtcNow.AddMinutes(
+                state.Input.Expiration.Value.TotalMinutes
+            );
             try
             {
-                await _schedulerExtension.ScheduleMessageAsync(scheduleMessage, scheduleTime, from, cancellationToken);
+                await _schedulerExtension.ScheduleMessageAsync(
+                    scheduleMessage,
+                    scheduleTime,
+                    from,
+                    cancellationToken
+                );
             }
             catch (LimeException ex)
             {
                 // Duplicate schedule from a concurrent pod — the job is already queued, so this is a no-op
-                _logger.Warning(ex, "Could not schedule expiration message with id '{MessageId}' — may already exist", scheduleMessage.Id);
+                _logger.Warning(
+                    ex,
+                    "Could not schedule expiration message with id '{MessageId}' — may already exist",
+                    scheduleMessage.Id
+                );
             }
         }
-        private async Task<bool> ValidateInputExirationCountAsync(State state, Message message, Node from, IContext context, CancellationToken cancellationToken)
+
+        private async Task<bool> ValidateInputExirationCountAsync(
+            State state,
+            Message message,
+            Node from,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
             message.Metadata.TryGetValue(STATE_ID, out string stateIdInputExpiration);
             if (stateIdInputExpiration != null && stateIdInputExpiration == state.Id)
@@ -233,8 +324,11 @@ namespace Take.Blip.Builder
                 if (inputExpirationCount > _configuration.MaximumInputExpirationLoop)
                 {
                     await _inputExpirationCount.TryRemoveAsync(message);
-                    _logger.Warning("[{Source}] [FlowConstruction] Max input expiration transitions of {MaximumInputExpirationLoop} was reached",
-                     nameof(InputExpirationHandler), _configuration.MaximumInputExpirationLoop);
+                    _logger.Warning(
+                        "[{Source}] [FlowConstruction] Max input expiration transitions of {MaximumInputExpirationLoop} was reached",
+                        nameof(InputExpirationHandler),
+                        _configuration.MaximumInputExpirationLoop
+                    );
                     return false;
                 }
             }

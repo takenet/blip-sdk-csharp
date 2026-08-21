@@ -2,7 +2,7 @@ namespace bot_flash_cards_blip_sdk_csharp
 {
     using System.Runtime.Serialization;
 
-    public class Answer 
+    public class Answer
     {
         public bool IsCorrect { get; set; }
 
