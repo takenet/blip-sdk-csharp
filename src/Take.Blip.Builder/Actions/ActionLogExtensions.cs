@@ -55,14 +55,14 @@ namespace Take.Blip.Builder.Actions
         {
             if (stateId == null)
             {
-                return true;
+                return false;
             }
             if (stateId.StartsWith(AGENT_STATE_PREFIX))
             {
-                return true;
+                return false;
             }
 
-            return false;
+            return true;
         }
     }
 }
