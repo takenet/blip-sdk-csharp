@@ -12,7 +12,7 @@ namespace Take.Blip.Builder.Utils
 
         public static LogInput ToActionLog(this IContext context, string title, JObject data, JObject sensitiveData = null)
         {
-            var stateId = context.GetCurrentStateId();
+            var stateId = context?.GetCurrentStateId();
             data = EnsureAgentFlag(stateId, data);
 
             return new LogInput
@@ -21,12 +21,12 @@ namespace Take.Blip.Builder.Utils
                 EventType = ACTION_EXECUTION_EVENT_TYPE,
                 Operation = string.Empty,
                 StateId = stateId,
-                Channel = context.Input.Message?.From?.Domain,
-                IdMessage = context.Input.Message?.Id,
-                From = context.UserIdentity?.ToString(),
-                To = context.OwnerIdentity?.ToString(),
-                OriginalFrom = context.Input.Message?.From,
-                OriginalTo = context.Input.Message?.To,
+                Channel = context?.Input?.Message?.From?.Domain,
+                IdMessage = context?.Input?.Message?.Id,
+                From = context?.UserIdentity?.ToString(),
+                To = context?.OwnerIdentity?.ToString(),
+                OriginalFrom = context?.Input?.Message?.From,
+                OriginalTo = context?.Input?.Message?.To,
                 Data = data,
                 FlowVersion = context?.Flow?.Version ?? 1,
                 SensitiveData = sensitiveData,
