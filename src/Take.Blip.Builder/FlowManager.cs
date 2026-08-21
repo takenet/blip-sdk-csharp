@@ -1769,6 +1769,7 @@ namespace Take.Blip.Builder
                             state
                         );
 
+                        context.SetCurrentStateId(stateId);
                         // Process the Local Custom Action
                         var outputVariablesProperties = await ProcessStateLocalCustomActionAsync(
                             state,
@@ -1789,20 +1790,6 @@ namespace Take.Blip.Builder
                             outputVariablesProperties,
                             context,
                             linkedCts.Token
-                        );
-
-                        _blipMonitoringLogger.ConversationalFlow(
-                            CreateStateExecutionLog(
-                                LogTitles.Flow.CommandInput,
-                                stateId,
-                                context,
-                                new JObject
-                                {
-                                    ["stateId"] = stateId,
-                                    ["actionId"] = actionId,
-                                    ["success"] = true,
-                                }
-                            )
                         );
 
                         return outputVariables;
