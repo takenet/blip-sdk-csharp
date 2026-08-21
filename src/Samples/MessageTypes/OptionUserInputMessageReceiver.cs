@@ -15,6 +15,7 @@ namespace MessageTypes
         {
             _sender = sender;
         }
+
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             Document document;
@@ -32,31 +33,23 @@ namespace MessageTypes
             {
                 Label = new DocumentContainer
                 {
-                    Value = new PlainText 
-                    {
-                       Text = "What is your name?"
-                    } 
+                    Value = new PlainText { Text = "What is your name?" },
                 },
-                Validation = new InputValidation
-                {
-                    Rule = InputValidationRule.Text
-                } 
+                Validation = new InputValidation { Rule = InputValidationRule.Text },
             };
             return document;
         }
+
         public Input getUserInputLocation()
         {
             var document = new Input
             {
-                Label = new DocumentContainer
-                {
-                    Value = "Send your location please!"
-                },
+                Label = new DocumentContainer { Value = "Send your location please!" },
                 Validation = new InputValidation
                 {
                     Rule = InputValidationRule.Type,
-                    Type = "application/vnd.lime.location+json"
-                } 
+                    Type = "application/vnd.lime.location+json",
+                },
             };
             return document;
         }

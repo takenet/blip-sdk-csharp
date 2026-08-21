@@ -6,17 +6,19 @@ namespace Take.Blip.Builder.Utils
 {
     public class OrderedCamelCasePropertyNamesContractResolver : DefaultContractResolver
     {
-
         public OrderedCamelCasePropertyNamesContractResolver()
         {
             base.NamingStrategy = new CamelCaseNamingStrategy
             {
                 ProcessDictionaryKeys = false,
-                OverrideSpecifiedNames = true
+                OverrideSpecifiedNames = true,
             };
         }
 
-        protected override System.Collections.Generic.IList<JsonProperty> CreateProperties(System.Type type, MemberSerialization memberSerialization)
+        protected override System.Collections.Generic.IList<JsonProperty> CreateProperties(
+            System.Type type,
+            MemberSerialization memberSerialization
+        )
         {
             var @base = base.CreateProperties(type, memberSerialization);
             var ordered = @base

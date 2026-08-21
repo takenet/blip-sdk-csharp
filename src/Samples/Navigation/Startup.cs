@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using System;
 using Lime.Protocol.Server;
 using Take.Blip.Client;
 
@@ -21,7 +21,7 @@ namespace Navigation
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+            Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
             return Task.CompletedTask;
         }
     }

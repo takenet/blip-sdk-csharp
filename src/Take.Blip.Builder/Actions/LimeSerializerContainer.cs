@@ -7,10 +7,15 @@ namespace Take.Blip.Builder.Actions
 {
     public static class LimeSerializerContainer
     {
-        public static readonly IDocumentTypeResolver DocumentTypeResolver = new DocumentTypeResolver().WithMessagingDocuments();
+        public static readonly IDocumentTypeResolver DocumentTypeResolver =
+            new DocumentTypeResolver().WithMessagingDocuments();
 
-        public static readonly EnvelopeSerializer EnvelopeSerializer = new EnvelopeSerializer(DocumentTypeResolver);
+        public static readonly EnvelopeSerializer EnvelopeSerializer = new EnvelopeSerializer(
+            DocumentTypeResolver
+        );
 
-        public static readonly JsonSerializer Serializer = JsonSerializer.Create(EnvelopeSerializer.Settings);
+        public static readonly JsonSerializer Serializer = JsonSerializer.Create(
+            EnvelopeSerializer.Settings
+        );
     }
 }

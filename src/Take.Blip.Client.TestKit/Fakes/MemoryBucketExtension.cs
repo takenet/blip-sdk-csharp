@@ -18,10 +18,19 @@ namespace Take.Blip.Client.TestKit.Fakes
             _cache = new ConcurrentDictionary<string, CacheDocument>();
         }
 
-        public Task<T> GetAsync<T>(string id, CancellationToken cancellationToken = new CancellationToken()) where T : Document
+        public Task<T> GetAsync<T>(
+            string id,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
+            where T : Document
         {
-            if (_cache.TryGetValue(id, out var cacheDocument)
-                && (cacheDocument.Expiration == null || cacheDocument.Expiration >= DateTimeOffset.UtcNow))
+            if (
+                _cache.TryGetValue(id, out var cacheDocument)
+                && (
+                    cacheDocument.Expiration == null
+                    || cacheDocument.Expiration >= DateTimeOffset.UtcNow
+                )
+            )
             {
                 return Task.FromResult((T)cacheDocument.Document);
             }
@@ -29,11 +38,17 @@ namespace Take.Blip.Client.TestKit.Fakes
             return Task.FromResult(default(T));
         }
 
-        public Task<DocumentCollection> GetIdsAsync(int skip = 0, int take = 100, CancellationToken cancellationToken = new CancellationToken())
+        public Task<DocumentCollection> GetIdsAsync(
+            int skip = 0,
+            int take = 100,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
             var ids = _cache
-                .Where(d => d.Value.Expiration == null || d.Value.Expiration >= DateTimeOffset.UtcNow)
-                .Select(pair => pair.Key)                
+                .Where(d =>
+                    d.Value.Expiration == null || d.Value.Expiration >= DateTimeOffset.UtcNow
+                )
+                .Select(pair => pair.Key)
                 .Skip(skip)
                 .Take(take)
                 .ToArray();
@@ -41,22 +56,29 @@ namespace Take.Blip.Client.TestKit.Fakes
             var result = new DocumentCollection
             {
                 ItemType = PlainText.MediaType,
-                Items = ids
-                    .Select(id => new PlainText { Text = id.ToString() })
-                    .ToArray(),
-                Total = ids.Length
+                Items = ids.Select(id => new PlainText { Text = id.ToString() }).ToArray(),
+                Total = ids.Length,
             };
 
             return Task.FromResult(result);
         }
 
-        public Task SetAsync<T>(string id, T document, TimeSpan expiration = new TimeSpan(), CancellationToken cancellationToken = new CancellationToken()) where T : Document
+        public Task SetAsync<T>(
+            string id,
+            T document,
+            TimeSpan expiration = new TimeSpan(),
+            CancellationToken cancellationToken = new CancellationToken()
+        )
+            where T : Document
         {
             _cache[id] = new CacheDocument(document, DateTimeOffset.UtcNow.Add(expiration));
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(string id, CancellationToken cancellationToken = new CancellationToken())
+        public Task DeleteAsync(
+            string id,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
             _cache.TryRemove(id, out _);
             return Task.CompletedTask;

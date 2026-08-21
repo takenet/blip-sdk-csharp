@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.SendCommand
@@ -26,11 +26,20 @@ namespace Take.Blip.Builder.Actions.SendCommand
 
         public string[]? OutputVariables => null;
 
-        public async Task ExecuteAsync(IContext context, JObject settings, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(
+            IContext context,
+            JObject settings,
+            CancellationToken cancellationToken
+        )
         {
             var sw = Stopwatch.StartNew();
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (settings == null) throw new ArgumentNullException(nameof(settings), $"The settings are required for '{nameof(SendCommandAction)}' action");
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            if (settings == null)
+                throw new ArgumentNullException(
+                    nameof(settings),
+                    $"The settings are required for '{nameof(SendCommandAction)}' action"
+                );
 
             try
             {
@@ -39,22 +48,26 @@ namespace Take.Blip.Builder.Actions.SendCommand
 
                 await _sender.SendCommandAsync(command, cancellationToken);
 
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
-                {
-                    ["uri"] = command.Uri?.ToString(),
-                    ["method"] = command.Method.ToString(),
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, new JObject
-                {
-                    ["Command"] = settings
-                });
+                this.LogExecution(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["uri"] = command.Uri?.ToString(),
+                        ["method"] = command.Method.ToString(),
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    },
+                    new JObject { ["Command"] = settings }
+                );
             }
             catch (Exception ex)
             {
-                this.LogError(_blipMonitoringLogger, context, new JObject
-                {
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, ex);
+                this.LogError(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject { ["elapsedMilliseconds"] = sw.ElapsedMilliseconds },
+                    ex
+                );
                 throw;
             }
         }

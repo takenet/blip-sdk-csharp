@@ -10,24 +10,19 @@ namespace Take.Blip.Builder
     public class OutputProcessingException : BuilderException
     {
         /// <inheritdoc />
-        public OutputProcessingException()
-        {
-        }
+        public OutputProcessingException() { }
 
         /// <inheritdoc />
-        public OutputProcessingException(string message) : base(message)
-        {
-        }
+        public OutputProcessingException(string message)
+            : base(message) { }
 
         /// <inheritdoc />
-        public OutputProcessingException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+        public OutputProcessingException(string message, Exception innerException)
+            : base(message, innerException) { }
 
         /// <inheritdoc />
-        protected OutputProcessingException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        protected OutputProcessingException(SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
 
         public string OutputStateId { get; set; }
 

@@ -3,6 +3,6 @@
     public enum ReceiverLifetime
     {
         Singleton,
-        Scoped
+        Scoped,
     }
 }

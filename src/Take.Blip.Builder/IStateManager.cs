@@ -17,7 +17,10 @@ namespace Take.Blip.Builder
         /// <summary>
         /// Gets the current state for the user in the parent flow.
         /// </summary>
-        public Task<string> GetParentStateIdAsync(IContext context, CancellationToken cancellationToken);
+        public Task<string> GetParentStateIdAsync(
+            IContext context,
+            CancellationToken cancellationToken
+        );
 
         /// <summary>
         /// Gets the previous state for the user in the flow.
@@ -35,7 +38,11 @@ namespace Take.Blip.Builder
         /// This action is only informative and do not affect the user navigation.
         /// </summary>
         /// <returns></returns>
-        Task SetPreviousStateIdAsync(IContext context, string previousStateId, CancellationToken cancellationToken);
+        Task SetPreviousStateIdAsync(
+            IContext context,
+            string previousStateId,
+            CancellationToken cancellationToken
+        );
 
         /// <summary>
         /// Deletes the current state for the user in the flow.
@@ -51,7 +58,7 @@ namespace Take.Blip.Builder
         /// Deletes the current flow session for the user in the flow.
         /// </summary>
         Task DeleteCurrentFlowSessionAsync(IContext context, CancellationToken cancellationToken);
-        
+
         /// <summary>
         /// Deletes the current master state for the user in the flow.
         /// </summary>
@@ -61,6 +68,5 @@ namespace Take.Blip.Builder
         /// Clear states for the user in the flow.
         /// </summary>
         Task ResetUserState(IContext context, CancellationToken cancellationToken);
-
     }
 }

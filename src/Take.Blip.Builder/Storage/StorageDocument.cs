@@ -1,9 +1,9 @@
-﻿using Lime.Protocol;
+﻿using System;
+using System.Runtime.Serialization;
+using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Runtime.Serialization;
 
 namespace Take.Blip.Builder.Storage
 {
@@ -21,7 +21,10 @@ namespace Take.Blip.Builder.Storage
         [DataMember]
         public DateTimeOffset? Expiration { get; set; }
 
-        public Document ToDocument(IDocumentSerializer documentSerializer, JsonSerializer serializer)
+        public Document ToDocument(
+            IDocumentSerializer documentSerializer,
+            JsonSerializer serializer
+        )
         {
             var mediaType = Type;
             if (mediaType == null)

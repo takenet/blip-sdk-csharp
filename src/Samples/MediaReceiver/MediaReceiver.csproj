@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
-    <Version>1.0.0</Version>    
-    <OutputType>Exe</OutputType>    
+    <Version>1.0.0</Version>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
-  
-  <ItemGroup>    
+
+  <ItemGroup>
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="Take.Blip.Client" Version="0.7.544" />
     <PackageReference Include="Take.Blip.Client.Console" Version="0.7.544" />
@@ -14,11 +14,10 @@
   <PropertyGroup>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-    
+
   <ItemGroup>
     <None Update="application.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
 </Project>

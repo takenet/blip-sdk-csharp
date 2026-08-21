@@ -49,22 +49,26 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task SendWithPlainHttpContentShouldSucceed()
         {
             // Arrange
-            
+
             var uri = new Uri("https://myserver.com/content/id");
             var content = "This is a text content";
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(content)
+                Content = new StringContent(content),
             };
             HttpClient
-                .SendAsync(Arg.Is<HttpRequestMessage>(r => r.RequestUri == uri && r.Method == HttpMethod.Get),
-                    Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(r =>
+                        r.RequestUri == uri && r.Method == HttpMethod.Get
+                    ),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(httpResponseMessage);
             var settings = new SendMessageFromHttpSettings
             {
                 Uri = uri,
-                Type = PlainText.MIME_TYPE
+                Type = PlainText.MIME_TYPE,
             };
             var target = GetTarget();
 
@@ -72,8 +76,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Sender.Received(1).SendMessageAsync(Arg.Is<Message>(m =>
-                m.To.Equals(From) && m.Type == PlainText.MediaType && m.Content.ToString().Equals(content)), Arg.Any<CancellationToken>());
+            await Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.To.Equals(From)
+                        && m.Type == PlainText.MediaType
+                        && m.Content.ToString().Equals(content)
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -87,53 +99,48 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Scope = SelectScope.Immediate,
                 Options = new[]
                 {
-                    new SelectOption
-                    {
-                        Text = "This is the first option"
-                    },
-                    new SelectOption
-                    {
-                        Text = "This is the second option"
-                    },
-                    new SelectOption
-                    {
-                        Text = "This is the third option"
-                    }
-                }
+                    new SelectOption { Text = "This is the first option" },
+                    new SelectOption { Text = "This is the second option" },
+                    new SelectOption { Text = "This is the third option" },
+                },
             };
 
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(DocumentSerializer.Serialize(content))
+                Content = new StringContent(DocumentSerializer.Serialize(content)),
             };
             HttpClient
-                .SendAsync(Arg.Is<HttpRequestMessage>(r => r.RequestUri == uri && r.Method == HttpMethod.Get),
-                    Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(r =>
+                        r.RequestUri == uri && r.Method == HttpMethod.Get
+                    ),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(httpResponseMessage);
-            var settings = new SendMessageFromHttpSettings
-            {
-                Uri = uri,
-                Type = Select.MIME_TYPE
-            };
+            var settings = new SendMessageFromHttpSettings { Uri = uri, Type = Select.MIME_TYPE };
             var target = GetTarget();
 
             // Act
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Sender.Received(1).SendMessageAsync(
-                Arg.Is<Message>(m =>
-                    m.To.ToIdentity().Equals(From)
-                    && m.Type == Select.MediaType
-                    && m.Content is Select
-                    && ((Select)m.Content).Text == content.Text
-                    && ((Select)m.Content).Scope == SelectScope.Immediate
-                    && ((Select)m.Content).Options.Length == content.Options.Length
-                    && ((Select)m.Content).Options[0].Text == content.Options[0].Text
-                    && ((Select)m.Content).Options[1].Text == content.Options[1].Text
-                    && ((Select)m.Content).Options[2].Text == content.Options[2].Text),
-                Arg.Any<CancellationToken>());
+            await Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.To.ToIdentity().Equals(From)
+                        && m.Type == Select.MediaType
+                        && m.Content is Select
+                        && ((Select)m.Content).Text == content.Text
+                        && ((Select)m.Content).Scope == SelectScope.Immediate
+                        && ((Select)m.Content).Options.Length == content.Options.Length
+                        && ((Select)m.Content).Options[0].Text == content.Options[0].Text
+                        && ((Select)m.Content).Options[1].Text == content.Options[1].Text
+                        && ((Select)m.Content).Options[2].Text == content.Options[2].Text
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
     }
 }

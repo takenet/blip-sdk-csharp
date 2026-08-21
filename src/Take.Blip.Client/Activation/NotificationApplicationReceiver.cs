@@ -8,7 +8,7 @@ namespace Take.Blip.Client.Activation
     public class NotificationApplicationReceiver : ApplicationReceiver
     {
         /// <summary>
-        /// Gets or sets the type of the event. 
+        /// Gets or sets the type of the event.
         /// </summary>
         /// <value>
         /// The type of the event.

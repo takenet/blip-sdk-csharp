@@ -24,13 +24,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
     {
         private const string USER_IDENTITY = "user@domain.local";
         private const string BOT_IDENTITY = "papagaio@msging.net";
-        private const string BOT_IDENTIFIER_CONFIG_VARIABLE_NAME = "processHttpAddBotIdentityToRequestHeader";
-        private const string SEND_HEADERS_TO_TRACE_COLLECTOR_VARIABLE_NAME = "sendHeadersToTraceCollector";
+        private const string BOT_IDENTIFIER_CONFIG_VARIABLE_NAME =
+            "processHttpAddBotIdentityToRequestHeader";
+        private const string SEND_HEADERS_TO_TRACE_COLLECTOR_VARIABLE_NAME =
+            "sendHeadersToTraceCollector";
 
         public ProcessHttpActionTests()
         {
             HttpClient = Substitute.For<IHttpClient>();
-            Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
+            Context.Flow.Returns(
+                new Builder.Models.Flow { Configuration = new Dictionary<string, string>() }
+            );
             configuration = Substitute.For<IConfiguration>();
             variableReplacer = Substitute.For<IVariableReplacer>();
             sensitiveInfoReplacer = new SensitiveInfoReplacer();
@@ -43,7 +47,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         private ProcessHttpAction GetTarget()
         {
-            return new ProcessHttpAction(HttpClient, Substitute.For<ILogger>(), configuration, sensitiveInfoReplacer, variableReplacer);
+            return new ProcessHttpAction(
+                HttpClient,
+                Substitute.For<ILogger>(),
+                configuration,
+                sensitiveInfoReplacer,
+                variableReplacer
+            );
         }
 
         [Fact]
@@ -57,12 +67,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -70,21 +79,38 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
-            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>()).Returns(httpResponseMessage);
+            HttpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(httpResponseMessage);
 
             // Act
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
 
-            await Context.Received(1).SetVariableAsync(settings.ResponseStatusVariable, ((int)HttpStatusCode.Accepted).ToString(), Arg.Any<CancellationToken>());
-            await Context.Received(1).SetVariableAsync(settings.ResponseBodyVariable, "Some result", Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    settings.ResponseStatusVariable,
+                    ((int)HttpStatusCode.Accepted).ToString(),
+                    Arg.Any<CancellationToken>()
+                );
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    settings.ResponseBodyVariable,
+                    "Some result",
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -97,8 +123,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
             };
 
@@ -107,10 +133,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.InternalServerError,
-                Content = new StringContent("Error")
+                Content = new StringContent("Error"),
             };
 
-            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>()).Returns(httpResponseMessage);
+            HttpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(httpResponseMessage);
 
             // Act
             try
@@ -121,9 +149,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             catch (ValidationException exception)
             {
                 // Assert
-                await HttpClient.DidNotReceive().SendAsync(
-                    Arg.Is<HttpRequestMessage>(
-                        h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+                await HttpClient
+                    .DidNotReceive()
+                    .SendAsync(
+                        Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                        Arg.Any<CancellationToken>()
+                    );
             }
         }
 
@@ -143,12 +174,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -156,12 +186,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -172,9 +205,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
             requestMessage.Headers.GetValues("X-Blip-User").First().ShouldBe(userIdentity);
 
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -183,7 +219,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             const string userIdentity = "user@domain.local";
             const string botIdentity = "papagaio@msging.net";
-            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
+            const string botIdentifierConfigVariableName =
+                "processHttpAddBotIdentityToRequestHeader";
             Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
             Context.UserIdentity.Returns(Identity.Parse(userIdentity));
             Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
@@ -195,12 +232,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -208,12 +244,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -224,10 +263,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
             requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(botIdentity);
 
-
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -241,17 +282,17 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
 
-            HttpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            HttpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(async token =>
                 {
                     await Task.Delay(TimeSpan.FromMilliseconds(20), token.Arg<CancellationToken>());
@@ -263,7 +304,13 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 await target.ExecuteAsync(Context, JObject.FromObject(settings), cts.Token);
 
             //Assert
-            await Context.DidNotReceive().SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            await Context
+                .DidNotReceive()
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Theory]
@@ -271,13 +318,20 @@ namespace Take.Blip.Builder.UnitTests.Actions
         [InlineData("false", false)]
         [InlineData("true", true)]
         [InlineData("", false)]
-        public async Task ProcessAction_CheckConfigurationVariableValues(string botIdentifierVariableValue, bool expectedResult)
+        public async Task ProcessAction_CheckConfigurationVariableValues(
+            string botIdentifierVariableValue,
+            bool expectedResult
+        )
         {
             // Arrange
             const string userIdentity = "user@domain.local";
             const string botIdentity = "papagaio@msging.net";
-            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
-            Context.Flow.Configuration.Add(botIdentifierConfigVariableName, botIdentifierVariableValue);
+            const string botIdentifierConfigVariableName =
+                "processHttpAddBotIdentityToRequestHeader";
+            Context.Flow.Configuration.Add(
+                botIdentifierConfigVariableName,
+                botIdentifierVariableValue
+            );
             Context.UserIdentity.Returns(Identity.Parse(userIdentity));
             Context.OwnerIdentity.Returns(Identity.Parse(botIdentity));
 
@@ -288,12 +342,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -301,12 +354,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -319,9 +375,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(botIdentity);
             }
 
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -337,12 +396,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -350,12 +408,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -365,9 +426,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
             requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
 
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -381,12 +445,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -394,12 +457,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -409,9 +475,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
             requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeFalse();
 
-            await HttpClient.Received(1).SendAsync(
-              Arg.Is<HttpRequestMessage>(
-                  h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -426,12 +495,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -439,12 +507,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -454,16 +525,20 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeTrue();
             requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeTrue();
 
-            await HttpClient.Received(1).SendAsync(
-              Arg.Is<HttpRequestMessage>(
-                  h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
         public async Task ProcessAction_CheckIfHeaderWillBeNotDuplicated()
         {
             // Arrange
-            const string botIdentifierConfigVariableName = "processHttpAddBotIdentityToRequestHeader";
+            const string botIdentifierConfigVariableName =
+                "processHttpAddBotIdentityToRequestHeader";
             configuration.InternalUris.Returns("msging.net");
             Context.Flow.Configuration.Add(botIdentifierConfigVariableName, "true");
 
@@ -474,12 +549,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -487,12 +561,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -502,9 +579,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             requestMessage.Headers.GetValues("X-Blip-Bot").Count().ShouldBe(1);
 
-            await HttpClient.Received(1).SendAsync(
-              Arg.Is<HttpRequestMessage>(
-                  h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -520,12 +600,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"Authorization", "Key askçjdhaklsdghasklgdasd="}
+                    { "Content-Type", "application/json" },
+                    { "Authorization", "Key askçjdhaklsdghasklgdasd=" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -533,12 +612,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -548,9 +630,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-Bot").ShouldBeFalse();
             requestMessage.Headers.Contains("X-Blip-StateId").ShouldBeFalse();
 
-            await HttpClient.Received(1).SendAsync(
-              Arg.Is<HttpRequestMessage>(
-                  h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -566,14 +651,18 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Order = 1,
                 Type = "ProcessHttp",
                 ContinueOnError = true,
-                ParsedSettings = new JRaw(@"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}")
+                ParsedSettings = new JRaw(
+                    @"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}"
+                ),
             };
 
-            Context.InputContext.TryGetValue("current-action-trace", out Arg.Any<object>()).Returns(x =>
-            {
-                x[1] = actionTrace;
-                return true;
-            });
+            Context
+                .InputContext.TryGetValue("current-action-trace", out Arg.Any<object>())
+                .Returns(x =>
+                {
+                    x[1] = actionTrace;
+                    return true;
+                });
 
             var settings = new ProcessHttpSettings
             {
@@ -582,13 +671,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"BotKey", "Key AAAAAAAAAAAAA"},
-                    {"OtherHeader", "OtherValue" }
+                    { "Content-Type", "application/json" },
+                    { "BotKey", "Key AAAAAAAAAAAAA" },
+                    { "OtherHeader", "OtherValue" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -596,12 +684,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -612,16 +703,21 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
             requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(BOT_IDENTITY);
 
-            var parsedSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(Context.GetCurrentActionTrace().ParsedSettings.ToString());
+            var parsedSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(
+                Context.GetCurrentActionTrace().ParsedSettings.ToString()
+            );
 
             parsedSettings.Headers.ShouldNotBeNull();
             parsedSettings.Headers.ShouldContainKeyAndValue("Content-Type", "***");
             parsedSettings.Headers.ShouldContainKeyAndValue("BotKey", "***");
             parsedSettings.Headers.ShouldContainKeyAndValue("OtherHeader", "***");
 
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -639,14 +735,18 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Order = 1,
                 Type = "ProcessHttp",
                 ContinueOnError = true,
-                ParsedSettings = new JRaw(@"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}")
+                ParsedSettings = new JRaw(
+                    @"{""headers"":{""BotKey"":""Key AAAAAAAAAAAAA"",""OtherHeader"":""OtherValue"",""Content-Type"":""application/json""},""method"":""GET"",""uri"":""https://enz557qv71nso.x.pipedream.net""}"
+                ),
             };
 
-            Context.InputContext.TryGetValue("current-action-trace", out Arg.Any<object>()).Returns(x =>
-            {
-                x[1] = actionTrace;
-                return true;
-            });
+            Context
+                .InputContext.TryGetValue("current-action-trace", out Arg.Any<object>())
+                .Returns(x =>
+                {
+                    x[1] = actionTrace;
+                    return true;
+                });
 
             var settings = new ProcessHttpSettings
             {
@@ -655,13 +755,12 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Body = "{\"plan\":\"Premium\",\"details\":{\"address\": \"Rua X\"}}",
                 Headers = new Dictionary<string, string>()
                 {
-                    {"Content-Type", "application/json"},
-                    {"BotKey", "Key AAAAAAAAAAAAA"},
-                    {"OtherHeader", "OtherValue" }
+                    { "Content-Type", "application/json" },
+                    { "BotKey", "Key AAAAAAAAAAAAA" },
+                    { "OtherHeader", "OtherValue" },
                 },
                 ResponseBodyVariable = "httpResultBody",
                 ResponseStatusVariable = "httpResultStatus",
-
             };
 
             var target = GetTarget();
@@ -669,12 +768,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var httpResponseMessage = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.Accepted,
-                Content = new StringContent("Some result")
+                Content = new StringContent("Some result"),
             };
 
             HttpRequestMessage requestMessage = null;
             HttpClient
-                .SendAsync(Arg.Do<HttpRequestMessage>(m => requestMessage = m), Arg.Any<CancellationToken>())
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(m => requestMessage = m),
+                    Arg.Any<CancellationToken>()
+                )
                 .ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
@@ -685,16 +787,21 @@ namespace Take.Blip.Builder.UnitTests.Actions
             requestMessage.Headers.Contains("X-Blip-User").ShouldBeFalse();
             requestMessage.Headers.GetValues("X-Blip-Bot").First().ShouldBe(BOT_IDENTITY);
 
-            var parsedSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(Context.GetCurrentActionTrace().ParsedSettings.ToString());
+            var parsedSettings = JsonConvert.DeserializeObject<ProcessHttpSettings>(
+                Context.GetCurrentActionTrace().ParsedSettings.ToString()
+            );
 
             parsedSettings.Headers.ShouldNotBeNull();
             parsedSettings.Headers.ShouldContainKeyAndValue("Content-Type", "application/json");
             parsedSettings.Headers.ShouldContainKeyAndValue("BotKey", "Key AAAAAAAAAAAAA");
             parsedSettings.Headers.ShouldContainKeyAndValue("OtherHeader", "OtherValue");
 
-            await HttpClient.Received(1).SendAsync(
-                Arg.Is<HttpRequestMessage>(
-                    h => h.RequestUri.Equals(settings.Uri)), Arg.Any<CancellationToken>());
+            await HttpClient
+                .Received(1)
+                .SendAsync(
+                    Arg.Is<HttpRequestMessage>(h => h.RequestUri.Equals(settings.Uri)),
+                    Arg.Any<CancellationToken>()
+                );
         }
     }
 }

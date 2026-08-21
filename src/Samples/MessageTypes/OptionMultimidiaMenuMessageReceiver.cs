@@ -1,4 +1,4 @@
-    using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +18,7 @@ namespace MessageTypes
         {
             _sender = sender;
         }
+
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
             Document document;
@@ -37,29 +38,29 @@ namespace MessageTypes
             {
                 Header = new DocumentContainer
                 {
-                    Value = new PlainText
-                    {
-                        Text = "Please, share your location"
-                    }
+                    Value = new PlainText { Text = "Please, share your location" },
                 },
-                Options = new DocumentSelectOption[]{
-                    new DocumentSelectOption {
-                        Label = new DocumentContainer{
-                            Value = new Input {
-                                Label = new DocumentContainer {
-                                    Value = new PlainText {
-                                        Text = "Press Button"
-                                    }
+                Options = new DocumentSelectOption[]
+                {
+                    new DocumentSelectOption
+                    {
+                        Label = new DocumentContainer
+                        {
+                            Value = new Input
+                            {
+                                Label = new DocumentContainer
+                                {
+                                    Value = new PlainText { Text = "Press Button" },
                                 },
                                 Validation = new InputValidation
                                 {
                                     Type = Location.MediaType,
-                                    Rule = InputValidationRule.Type
-                                }
-                            }
-                        }
-                    }
-                }
+                                    Rule = InputValidationRule.Type,
+                                },
+                            },
+                        },
+                    },
+                },
             };
         }
 
@@ -76,24 +77,20 @@ namespace MessageTypes
                         Value = new WebLink
                         {
                             Title = "Go to your site",
-                            Uri = new Uri("https://meusanimais.com.br/14-nomes-criativos-para-o-seu-gato/")
-                        }
-                    }
+                            Uri = new Uri(
+                                "https://meusanimais.com.br/14-nomes-criativos-para-o-seu-gato/"
+                            ),
+                        },
+                    },
                 },
                 new DocumentSelectOption
                 {
                     Label = new DocumentContainer
                     {
-                        Value = new PlainText
-                        {
-                            Text = "Show stock here!"
-                        }
+                        Value = new PlainText { Text = "Show stock here!" },
                     },
-                    Value = new DocumentContainer
-                    {
-                        Value = jsonDocuments
-                    }
-                }
+                    Value = new DocumentContainer { Value = jsonDocuments },
+                },
             };
 
             var document = new DocumentSelect
@@ -105,11 +102,13 @@ namespace MessageTypes
                         Title = "Welcome to mad hatter",
                         Text = "Here we have the best hats for your head.",
                         Type = "image/jpeg",
-                        Uri = new Uri("http://i.overboard.com.br/imagens/produtos/0741720126/Ampliada/chapeu-new-era-bucket-print-vibe.jpg"),
-                        AspectRatio = "1.1"
-                    }
+                        Uri = new Uri(
+                            "http://i.overboard.com.br/imagens/produtos/0741720126/Ampliada/chapeu-new-era-bucket-print-vibe.jpg"
+                        ),
+                        AspectRatio = "1.1",
+                    },
                 },
-                Options = document2
+                Options = document2,
             };
 
             return document;

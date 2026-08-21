@@ -10,7 +10,7 @@ namespace Take.Blip.Builder.Variables
     {
         private const string CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
         private readonly Random _random;
-        
+
         public RandomVariableProvider()
         {
             _random = new Random();
@@ -18,8 +18,11 @@ namespace Take.Blip.Builder.Variables
 
         public VariableSource Source => VariableSource.Random;
 
-        public Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken) 
-            => GetVariable(name).AsCompletedTask();
+        public Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        ) => GetVariable(name).AsCompletedTask();
 
         private string GetVariable(string name)
         {
@@ -33,9 +36,11 @@ namespace Take.Blip.Builder.Variables
 
                 case "string":
                     return new string(
-                        Enumerable.Repeat(CHARS, 10)
+                        Enumerable
+                            .Repeat(CHARS, 10)
                             .Select(s => s[_random.Next(s.Length)])
-                            .ToArray());
+                            .ToArray()
+                    );
             }
 
             return null;

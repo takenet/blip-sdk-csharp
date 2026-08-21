@@ -16,7 +16,11 @@ namespace Take.Blip.Builder.Variables
 
         public VariableSource Source => VariableSource.State;
 
-        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
             var names = name.ToLowerInvariant().Split('.').ToList();
 
@@ -27,7 +31,10 @@ namespace Take.Blip.Builder.Variables
                 switch (names[0])
                 {
                     case "previous":
-                        stateId = await _stateManager.GetPreviousStateIdAsync(context, cancellationToken);
+                        stateId = await _stateManager.GetPreviousStateIdAsync(
+                            context,
+                            cancellationToken
+                        );
                         break;
                     case "current":
                         stateId = await _stateManager.GetStateIdAsync(context, cancellationToken);
@@ -46,14 +53,18 @@ namespace Take.Blip.Builder.Variables
 
             var state = context.Flow.States.FirstOrDefault(s => s.Id.Equals(stateId));
 
-            if (state == null) return null;
+            if (state == null)
+                return null;
 
             var variableName = names[0];
 
             // Determine the state property
-            if (variableName == "id")  return state.Id;
-            if (state.ExtensionData != null &&
-                state.ExtensionData.TryGetValue(variableName, out var value))
+            if (variableName == "id")
+                return state.Id;
+            if (
+                state.ExtensionData != null
+                && state.ExtensionData.TryGetValue(variableName, out var value)
+            )
             {
                 return value.ToString(Formatting.None).Trim('"');
             }

@@ -8,7 +8,8 @@ namespace Take.Blip.Client
     /// Stores information about the envelope receiver that is currently being called.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static class EnvelopeReceiverContext<T> where T : Envelope
+    public static class EnvelopeReceiverContext<T>
+        where T : Envelope
     {
         private static readonly AsyncLocal<T> _envelope = new AsyncLocal<T>();
 
@@ -28,7 +29,7 @@ namespace Take.Blip.Client
             {
                 throw new InvalidOperationException("The envelope is already defined");
             }
-            
+
             // TODO: Create a stack to support multiple levels of contexts
             _envelope.Value = envelope;
             return new ClearEnvelopeReceiverContext();

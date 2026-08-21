@@ -15,6 +15,9 @@ namespace Take.Blip.Client.Extensions.Builder
         /// <param name="nameFunction">The name of the function to retrieve.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The function code as a Document.</returns>
-        Task<Document> GetFunctionOnBlipFunctionAsync(string nameFunction, CancellationToken cancellationToken);
+        Task<Document> GetFunctionOnBlipFunctionAsync(
+            string nameFunction,
+            CancellationToken cancellationToken
+        );
     }
 }

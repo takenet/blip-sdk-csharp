@@ -19,7 +19,13 @@ namespace Take.Blip.Builder.Variables
 
         public abstract VariableSource Source { get; }
 
-        protected ResourceVariableProviderBase(ISender sender, IDocumentSerializer documentSerializer, string resourceName, ILogger logger, string commandDestination = "")
+        protected ResourceVariableProviderBase(
+            ISender sender,
+            IDocumentSerializer documentSerializer,
+            string resourceName,
+            ILogger logger,
+            string commandDestination = ""
+        )
         {
             _sender = sender;
             _documentSerializer = documentSerializer;
@@ -28,16 +34,26 @@ namespace Take.Blip.Builder.Variables
             _commandDestination = commandDestination;
         }
 
-
-        public virtual async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+        public virtual async Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
-                var resourceCommandResult = await ExecuteGetResourceCommandAsync(name, cancellationToken);
+                var resourceCommandResult = await ExecuteGetResourceCommandAsync(
+                    name,
+                    cancellationToken
+                );
 
                 if (resourceCommandResult.Status != CommandStatus.Success)
                 {
-                    _logger.Warning("Variable {VariableName} from {ResourceName} not found", name, _resourceName);
+                    _logger.Warning(
+                        "Variable {VariableName} from {ResourceName} not found",
+                        name,
+                        _resourceName
+                    );
                     return null;
                 }
 
@@ -50,19 +66,28 @@ namespace Take.Blip.Builder.Variables
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
-                _logger.Warning(ex, "An exception occurred while obtaining variable {VariableName} from {ResourceName}", name, _resourceName);
+                _logger.Warning(
+                    ex,
+                    "An exception occurred while obtaining variable {VariableName} from {ResourceName}",
+                    name,
+                    _resourceName
+                );
                 return null;
             }
         }
 
-        private async Task<Command> ExecuteGetResourceCommandAsync(string name, CancellationToken cancellationToken)
+        private async Task<Command> ExecuteGetResourceCommandAsync(
+            string name,
+            CancellationToken cancellationToken
+        )
         {
             // We are sending the command directly here because the Extension requires us to know the type.
             var getResourceCommand = GenerateResourceCommand(name);
 
             var resourceCommandResult = await _sender.ProcessCommandAsync(
                 getResourceCommand,
-                cancellationToken);
+                cancellationToken
+            );
 
             return resourceCommandResult;
         }
@@ -72,7 +97,7 @@ namespace Take.Blip.Builder.Variables
             var command = new Command()
             {
                 Uri = new LimeUri($"/{_resourceName}/{Uri.EscapeDataString(name)}"),
-                Method = CommandMethod.Get
+                Method = CommandMethod.Get,
             };
 
             if (!string.IsNullOrEmpty(_commandDestination))

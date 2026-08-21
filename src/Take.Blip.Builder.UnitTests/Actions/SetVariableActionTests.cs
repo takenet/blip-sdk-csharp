@@ -12,9 +12,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             Settings = new SetVariableSettings();
         }
-        
+
         public SetVariableSettings Settings { get; }
-        
+
         private SetVariableAction GetTarget()
         {
             return new SetVariableAction();
@@ -27,14 +27,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Settings.Variable = "myVariable";
             Settings.Value = "myValue";
             var target = GetTarget();
-            
+
             // Act
             await target.ExecuteAsync(Context, Settings, CancellationToken);
-            
+
             // Assert
-            Context.Received(1).SetVariableAsync(Settings.Variable,  Settings.Value, CancellationToken, default);
+            Context
+                .Received(1)
+                .SetVariableAsync(Settings.Variable, Settings.Value, CancellationToken, default);
         }
-        
+
         [Fact]
         public async Task ExecuteWithExpirationShouldSetOnContext()
         {
@@ -44,12 +46,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Settings.Value = "myValue";
             Settings.Expiration = expiration.TotalSeconds;
             var target = GetTarget();
-            
+
             // Act
             await target.ExecuteAsync(Context, Settings, CancellationToken);
-            
+
             // Assert
-            Context.Received(1).SetVariableAsync(Settings.Variable,  Settings.Value, CancellationToken, expiration);
+            Context
+                .Received(1)
+                .SetVariableAsync(Settings.Variable, Settings.Value, CancellationToken, expiration);
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using Lime.Protocol;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -24,7 +24,10 @@ namespace Take.Blip.Client.Receivers
             _response = response ?? throw new System.ArgumentNullException(nameof(response));
         }
 
-        public virtual Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = new CancellationToken())
+        public virtual Task ReceiveAsync(
+            Message envelope,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
             return _sender.SendMessageAsync(_response, envelope.From, cancellationToken);
         }

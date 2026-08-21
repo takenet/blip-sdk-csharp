@@ -1,8 +1,8 @@
-﻿using Lime.Protocol;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 
 namespace Take.Blip.Client.Extensions.AttendanceForwarding
 {
@@ -23,11 +23,12 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
         public AttendanceReplyMessageReceiver(
             ISender sender,
             IAttendanceExtension attendanceExtension,
-            IDictionary<string, object> receiverSettings)
+            IDictionary<string, object> receiverSettings
+        )
         {
             _sender = sender;
             _attendanceExtension = attendanceExtension;
-            _operatorIdentity =  new Lazy<string>(GetOperatorIdentityFromReceiverSettings, true);
+            _operatorIdentity = new Lazy<string>(GetOperatorIdentityFromReceiverSettings, true);
             _receiverSettings = receiverSettings;
         }
 
@@ -47,9 +48,10 @@ namespace Take.Blip.Client.Extensions.AttendanceForwarding
         private string GetOperatorIdentityFromReceiverSettings()
         {
             if (!_receiverSettings.ContainsKey(AttendantSettingsKey))
-                throw new InvalidOperationException($"{nameof(AttendanceReplyMessageReceiver)} must supply property '{AttendantSettingsKey}' inside receiver settings");
+                throw new InvalidOperationException(
+                    $"{nameof(AttendanceReplyMessageReceiver)} must supply property '{AttendantSettingsKey}' inside receiver settings"
+                );
             return _receiverSettings[AttendantSettingsKey].ToString();
         }
-
     }
 }

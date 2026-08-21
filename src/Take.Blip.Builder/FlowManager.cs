@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
@@ -13,9 +16,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Context;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Builder.Actions;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
@@ -287,9 +287,11 @@ namespace Take.Blip.Builder
 
                         do
                         {
-                            var blockStateName = state?.ExtensionData != null && state.ExtensionData.TryGetValue("name", out var titleToken)
-                                ? titleToken?.ToString()
-                                : state?.Id;
+                            var blockStateName =
+                                state?.ExtensionData != null
+                                && state.ExtensionData.TryGetValue("name", out var titleToken)
+                                    ? titleToken?.ToString()
+                                    : state?.Id;
                             var blockStopwatch = Stopwatch.StartNew();
                             var startStateId = state?.Id;
                             var redirectToClientState = String.Empty;
@@ -302,14 +304,11 @@ namespace Take.Blip.Builder
                                         context,
                                         new JObject
                                         {
-                                            ["flowId"] = flow.Id,
+                                            ["flowId"] = flow?.Id,
                                             ["stateName"] = blockStateName,
                                         },
-                                        new JObject
-                                        {
-                                            ["input"] = message.Content.ToString(),
-                                        }
-                                     )
+                                        new JObject { ["input"] = message.Content.ToString() }
+                                    )
                                 );
 
                                 linkedCts.Token.ThrowIfCancellationRequested();
@@ -474,8 +473,8 @@ namespace Take.Blip.Builder
                                 if (transitions++ >= _configuration.MaxTransitionsByInput)
                                 {
                                     var ex = new FlowConstructionException(
-                                       $"Max state transitions of {_configuration.MaxTransitionsByInput} was reached"
-                                   );
+                                        $"Max state transitions of {_configuration.MaxTransitionsByInput} was reached"
+                                    );
                                     _blipMonitoringLogger.ErrorEvents(
                                         CreateStateExecutionLog(
                                             LogTitles.Flow.MaxTransitionsReached,
@@ -485,9 +484,10 @@ namespace Take.Blip.Builder
                                             {
                                                 ["transitionCount"] = transitions,
                                                 ["maxTransitions"] =
-                                                    _configuration.MaxTransitionsByInput
+                                                    _configuration.MaxTransitionsByInput,
                                             }
-                                        ), ex
+                                        ),
+                                        ex
                                     );
                                     throw ex;
                                 }
@@ -550,12 +550,18 @@ namespace Take.Blip.Builder
                                         new JObject
                                         {
                                             ["stateName"] = blockStateName,
-                                            ["flowId"] = flow.Id,
+                                            ["flowId"] = flow?.Id,
                                             ["nextStateId"] = state?.Id,
-                                            ["nextStateName"] = state?.ExtensionData != null && state.ExtensionData.TryGetValue("name", out var nextTitleToken)
-                                                ? nextTitleToken?.ToString()
-                                                : state?.Id,
-                                            ["elapsedMilliseconds"] = blockStopwatch.ElapsedMilliseconds,
+                                            ["nextStateName"] =
+                                                state?.ExtensionData != null
+                                                && state.ExtensionData.TryGetValue(
+                                                    "name",
+                                                    out var nextTitleToken
+                                                )
+                                                    ? nextTitleToken?.ToString()
+                                                    : state?.Id,
+                                            ["elapsedMilliseconds"] =
+                                                blockStopwatch.ElapsedMilliseconds,
                                             ["success"] = blockProcessingSucceeded,
                                         }
                                     )
@@ -634,24 +640,24 @@ namespace Take.Blip.Builder
                     }
 
                     _blipMonitoringLogger.ActionExecution(
-                           CreateStateExecutionLog(
-                               LogTitles.Flow.InputProcessing,
-                               state?.Id,
-                               context,
-                               new JObject
-                               {
-                                   ["stateId"] = state?.Id,
-                                   ["flowId"] = flow.Id,
-                                   ["input"] = message.Content.ToString(),
-                                   ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
-                                   ["error"] = inputTrace?.Error,
-                                   ["inputTrace"] =
-                                       inputTrace != null ? JToken.FromObject(inputTrace) : null,
-                                   ["traceSettings"] =
-                                       traceSettings != null ? JToken.FromObject(traceSettings) : null,
-                               }
-                           )
-                       );
+                        CreateStateExecutionLog(
+                            LogTitles.Flow.InputProcessing,
+                            state?.Id,
+                            context,
+                            new JObject
+                            {
+                                ["stateId"] = state?.Id,
+                                ["flowId"] = flow.Id,
+                                ["input"] = message.Content.ToString(),
+                                ["inputExecutionTime"] = inputStopwatch?.ElapsedMilliseconds ?? 0,
+                                ["error"] = inputTrace?.Error,
+                                ["inputTrace"] =
+                                    inputTrace != null ? JToken.FromObject(inputTrace) : null,
+                                ["traceSettings"] =
+                                    traceSettings != null ? JToken.FromObject(traceSettings) : null,
+                            }
+                        )
+                    );
                 }
 
                 ownerContext.Dispose();
@@ -1398,8 +1404,9 @@ namespace Take.Blip.Builder
                         }
 
                         var error = new OutputProcessingException(
-                         $"Failed to process output condition to state '{output.StateId}'",
-                         ex)
+                            $"Failed to process output condition to state '{output.StateId}'",
+                            ex
+                        )
                         {
                             OutputStateId = output.StateId,
                             OutputConditions = output.Conditions,
@@ -1417,7 +1424,8 @@ namespace Take.Blip.Builder
                                     ["outputOrder"] = output.Order,
                                     ["isDefaultOutput"] = output.Conditions == null,
                                 }
-                            ), error
+                            ),
+                            error
                         );
                         throw error;
                     }
@@ -1525,8 +1533,7 @@ namespace Take.Blip.Builder
             IContext context,
             JObject data,
             JObject sensitiveData = null
-        ) =>
-            context.ToStateLog(title, stateId, data, sensitiveData);
+        ) => context.ToStateLog(title, stateId, data, sensitiveData);
 
         private void AddStateIdToSettings(
             string actionType,
@@ -1769,6 +1776,8 @@ namespace Take.Blip.Builder
                             state
                         );
 
+                        context.SetCurrentStateId(stateId);
+
                         // Process the Local Custom Action
                         var outputVariablesProperties = await ProcessStateLocalCustomActionAsync(
                             state,
@@ -1791,20 +1800,6 @@ namespace Take.Blip.Builder
                             linkedCts.Token
                         );
 
-                        _blipMonitoringLogger.ConversationalFlow(
-                            CreateStateExecutionLog(
-                                LogTitles.Flow.CommandInput,
-                                stateId,
-                                context,
-                                new JObject
-                                {
-                                    ["stateId"] = stateId,
-                                    ["actionId"] = actionId,
-                                    ["success"] = true,
-                                }
-                            )
-                        );
-
                         return outputVariables;
                     }
                     finally
@@ -1816,6 +1811,14 @@ namespace Take.Blip.Builder
             }
             catch (Exception ex)
             {
+                _logger.Error(
+                    ex,
+                    "[{Source}] Error processing single action input with custom message id '{MessageId}' for user '{UserIdentity}' in state '{StateId}'",
+                    nameof(FlowManager),
+                    message.Id,
+                    userIdentity,
+                    stateId
+                );
                 ex = _analyzeBuilderExceptions.VerifyFlowConstructionException(ex);
 
                 if (inputTrace != null)
@@ -1840,11 +1843,7 @@ namespace Take.Blip.Builder
                         message,
                         userIdentity,
                         ownerIdentity,
-                        new JObject
-                        {
-                            ["stateId"] = stateId,
-                            ["actionId"] = actionId,
-                        }
+                        new JObject { ["stateId"] = stateId, ["actionId"] = actionId }
                     ),
                     ex
                 );
@@ -1952,7 +1951,9 @@ namespace Take.Blip.Builder
 
             // Trace infra
             var (actionTrace, actionStopwatch) =
-                actionTraces != null ? (stateAction.ToTrace(), Stopwatch.StartNew()) : (stateAction.ToTrace(), (Stopwatch)null);
+                actionTraces != null
+                    ? (stateAction.ToTrace(), Stopwatch.StartNew())
+                    : (stateAction.ToTrace(), (Stopwatch)null);
 
             context.SetCurrentActionTrace(actionTrace);
 

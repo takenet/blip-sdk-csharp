@@ -1,8 +1,8 @@
-﻿using Lime.Protocol;
-using Shouldly;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Lime.Protocol;
+using Shouldly;
 using Take.Blip.Builder.Diagnostics;
 using Xunit;
 
@@ -25,7 +25,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     { "builder.trace.targetType", targetType },
                     { "builder.trace.target", target },
                     { "builder.trace.slowThreshold", slowThreshold },
-                }
+                },
             };
 
             var traceSettings = new TraceSettings(message.Metadata);
@@ -48,7 +48,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                     { "builder.trace.mode", mode },
                     { "builder.trace.targetType", targetType },
                     { "builder.trace.target", target },
-                }
+                },
             };
 
             var traceSettings = new TraceSettings(message.Metadata);
@@ -70,7 +70,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 {
                     { "builder.trace.targetType", targetType },
                     { "builder.trace.target", target },
-                }
+                },
             };
             Should.Throw<ArgumentException>(() => new TraceSettings(message.Metadata));
         }
@@ -87,7 +87,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 {
                     { "builder.trace.mode", mode },
                     { "builder.trace.target", target },
-                }
+                },
             };
             Should.Throw<ArgumentException>(() => new TraceSettings(message.Metadata));
         }
@@ -104,7 +104,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                 {
                     { "builder.trace.mode", mode },
                     { "builder.trace.targetType", targetType },
-                }
+                },
             };
             Should.Throw<ArgumentException>(() => new TraceSettings(message.Metadata));
         }

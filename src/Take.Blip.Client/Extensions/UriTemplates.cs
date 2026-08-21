@@ -119,7 +119,8 @@ namespace Take.Blip.Client.Extensions
         /// <summary>
         /// Template for a specific linked contacts resource.
         /// </summary>
-        public const string LINKED_CONTACT = "/contacts/{contactIdentity}/linked/{linkedContactIdentity}";
+        public const string LINKED_CONTACT =
+            "/contacts/{contactIdentity}/linked/{linkedContactIdentity}";
 
         /// <summary>
         /// Template for the messages.
@@ -166,7 +167,8 @@ namespace Take.Blip.Client.Extensions
         /// <summary>
         /// Template for the remote envelope dispatch command.
         /// </summary>
-        public const string REMOTE_SESSION_DISPATCH = "/sessions/{sessionId}?expiration={expiration}";
+        public const string REMOTE_SESSION_DISPATCH =
+            "/sessions/{sessionId}?expiration={expiration}";
 
         /// <summary>
         /// Template for the session.

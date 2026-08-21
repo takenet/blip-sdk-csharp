@@ -7,9 +7,9 @@ namespace Take.Blip.Client.Activation
     public class ApplicationReceiver : SettingsContainer
     {
         /// <summary>
-        /// Gets or sets the receiver priority related to the others. 
-        /// Lower values have higher priority. 
-        /// This value can be repeated among receivers. 
+        /// Gets or sets the receiver priority related to the others.
+        /// Lower values have higher priority.
+        /// This value can be repeated among receivers.
         /// In this cases, the receivers are evaluated in parallel.
         /// </summary>
         /// <value>
@@ -34,7 +34,7 @@ namespace Take.Blip.Client.Activation
         public string OutState { get; set; }
 
         /// <summary>
-        /// Gets or sets the receiver .NET type. 
+        /// Gets or sets the receiver .NET type.
         /// The type constructor must be parameterless or receive only a <see cref="IServiceProvider"/> instance plus a <see cref="IDictionary{TKey,TValue}"/> settings instance.
         /// </summary>
         /// <value>

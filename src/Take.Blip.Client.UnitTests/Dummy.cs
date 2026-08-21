@@ -11,9 +11,10 @@ namespace Take.Blip.Client.UnitTests
 {
     public class Dummy
     {
-        private static readonly Random _random        = new Random();
-        private static readonly string _chars         = "abcdefghijklmnopqrstuvwxyz0123456789";
-        private static readonly string _extendedChars = _chars + "!@#$%¨&*()_+-=\"'{}[],.;/<>:?^~\\áéíóúàèìòùºç ";
+        private static readonly Random _random = new Random();
+        private static readonly string _chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        private static readonly string _extendedChars =
+            _chars + "!@#$%¨&*()_+-=\"'{}[],.;/<>:?^~\\áéíóúàèìòùºç ";
 
         public static int CreateRandomInt(int maxValue)
         {
@@ -33,9 +34,8 @@ namespace Take.Blip.Client.UnitTests
         private static string CreateRandomString(int size, string chars)
         {
             return new string(
-                Enumerable.Repeat(chars, size)
-                          .Select(s => s[_random.Next(s.Length)])
-                          .ToArray());
+                Enumerable.Repeat(chars, size).Select(s => s[_random.Next(s.Length)]).ToArray()
+            );
         }
 
         public static string CreateMessageJson()
@@ -63,7 +63,7 @@ namespace Take.Blip.Client.UnitTests
                 randomString1.Escape(),
                 randomKey2,
                 randomString2.Escape()
-                );
+            );
         }
 
         public static string CreateDomainName()
@@ -83,11 +83,7 @@ namespace Take.Blip.Client.UnitTests
 
         public static Identity CreateIdentity()
         {
-            return new Identity()
-            {
-                Name = CreateRandomString(8),
-                Domain = CreateDomainName()
-            };
+            return new Identity() { Name = CreateRandomString(8), Domain = CreateDomainName() };
         }
 
         public static Node CreateNode()
@@ -98,31 +94,30 @@ namespace Take.Blip.Client.UnitTests
             {
                 Name = identity.Name,
                 Domain = identity.Domain,
-                Instance = CreateInstanceName()
+                Instance = CreateInstanceName(),
             };
         }
 
         public static Dictionary<string, string> CreateMetadata()
         {
-            return new Dictionary<string, string>()
-            {
-                { "#uniqueId", Guid.NewGuid().ToString() }
-            };
+            return new Dictionary<string, string>() { { "#uniqueId", Guid.NewGuid().ToString() } };
         }
 
         public static LimeUri CreateAbsoluteLimeUri()
         {
             return new LimeUri(
-                string.Format("{0}://{1}/{2}",
-                LimeUri.LIME_URI_SCHEME,
-                CreateIdentity(),
-                CreateRandomString(10)));
+                string.Format(
+                    "{0}://{1}/{2}",
+                    LimeUri.LIME_URI_SCHEME,
+                    CreateIdentity(),
+                    CreateRandomString(10)
+                )
+            );
         }
 
         public static LimeUri CreateRelativeLimeUri()
         {
-            return new LimeUri(
-                string.Format("/{0}", CreateRandomString(10)));
+            return new LimeUri(string.Format("/{0}", CreateRandomString(10)));
         }
 
         public static Lime.Protocol.Session CreateSession(SessionState state = SessionState.New)
@@ -132,7 +127,7 @@ namespace Take.Blip.Client.UnitTests
                 Id = EnvelopeId.NewId(),
                 From = CreateNode(),
                 To = CreateNode(),
-                State = state
+                State = state,
             };
         }
 
@@ -141,7 +136,7 @@ namespace Take.Blip.Client.UnitTests
             return new Reason()
             {
                 Code = CreateRandomInt(100),
-                Description = CreateRandomString(100)
+                Description = CreateRandomString(100),
             };
         }
 
@@ -156,7 +151,6 @@ namespace Take.Blip.Client.UnitTests
                 default:
                     throw new ArgumentException("Unknown scheme");
             }
-
         }
 
         public static GuestAuthentication CreateGuestAuthentication()
@@ -181,7 +175,11 @@ namespace Take.Blip.Client.UnitTests
 
         public static AuthenticationScheme[] CreateSchemeOptions()
         {
-            return new AuthenticationScheme[] { AuthenticationScheme.Guest, AuthenticationScheme.Plain };
+            return new AuthenticationScheme[]
+            {
+                AuthenticationScheme.Guest,
+                AuthenticationScheme.Plain,
+            };
         }
 
         public static CancellationToken CreateCancellationToken()
@@ -211,32 +209,29 @@ namespace Take.Blip.Client.UnitTests
                 From = CreateNode(),
                 To = CreateNode(),
                 Content = content,
-                Metadata = CreateMetadata()
+                Metadata = CreateMetadata(),
             };
         }
 
         public static PlainText CreateTextContent()
         {
-            return new PlainText()
-            {
-                Text = CreateRandomStringExtended(150)
-            };
+            return new PlainText() { Text = CreateRandomStringExtended(150) };
         }
 
         public static JsonDocument CreateJsonDocument()
         {
-            return new JsonDocument(
-                CreateStringObjectDictionary(),
-                CreateJsonMediaType());
+            return new JsonDocument(CreateStringObjectDictionary(), CreateJsonMediaType());
         }
 
-        public static IDictionary<string, object> CreateStringObjectDictionary(bool includeDeepMembers = true)
+        public static IDictionary<string, object> CreateStringObjectDictionary(
+            bool includeDeepMembers = true
+        )
         {
             var dictionary = new Dictionary<string, object>
             {
-                {CreateRandomString(10), CreateRandomStringExtended(50)},
-                {CreateRandomString(10), CreateRandomInt(50)},
-                {CreateRandomString(10), DateTimeOffset.UtcNow},
+                { CreateRandomString(10), CreateRandomStringExtended(50) },
+                { CreateRandomString(10), CreateRandomInt(50) },
+                { CreateRandomString(10), DateTimeOffset.UtcNow },
             };
 
             if (includeDeepMembers)
@@ -247,7 +242,7 @@ namespace Take.Blip.Client.UnitTests
                 {
                     CreateStringObjectDictionary(false),
                     CreateStringObjectDictionary(false),
-                    CreateStringObjectDictionary(false)
+                    CreateStringObjectDictionary(false),
                 };
                 dictionary.Add(CreateRandomString(10), list);
             }
@@ -257,16 +252,14 @@ namespace Take.Blip.Client.UnitTests
 
         public static IDictionary<string, string> CreateStringStringDictionary()
         {
-            return CreateStringObjectDictionary(false).ToDictionary(d => d.Key, d => d.Value.ToString());
+            return CreateStringObjectDictionary(false)
+                .ToDictionary(d => d.Key, d => d.Value.ToString());
         }
 
         public static PlainDocument CreatePlainDocument()
         {
-            return new PlainDocument(
-                CreateRandomString(50),
-                CreatePlainMediaType());
+            return new PlainDocument(CreateRandomString(50), CreatePlainMediaType());
         }
-
 
         public static Notification CreateNotification() => CreateNotification(Event.Received);
 
@@ -276,11 +269,16 @@ namespace Take.Blip.Client.UnitTests
             {
                 From = CreateNode(),
                 To = CreateNode(),
-                Event = @event
+                Event = @event,
             };
         }
 
-        public static Command CreateCommand(Document resource = null, CommandMethod method = CommandMethod.Get, CommandStatus status = CommandStatus.Pending, LimeUri uri = null)
+        public static Command CreateCommand(
+            Document resource = null,
+            CommandMethod method = CommandMethod.Get,
+            CommandStatus status = CommandStatus.Pending,
+            LimeUri uri = null
+        )
         {
             return new Command()
             {
@@ -289,7 +287,7 @@ namespace Take.Blip.Client.UnitTests
                 Method = method,
                 Status = status,
                 Uri = uri,
-                Resource = resource
+                Resource = resource,
             };
         }
 
@@ -298,27 +296,23 @@ namespace Take.Blip.Client.UnitTests
             return new Ping();
         }
 
-        public static DocumentCollection CreateDocumentCollection<T>(params T[] documents) 
+        public static DocumentCollection CreateDocumentCollection<T>(params T[] documents)
             where T : Document, new()
         {
             var mediaType = new T().GetMediaType();
 
             return new DocumentCollection()
-            {                
+            {
                 ItemType = mediaType,
                 Total = documents.Length,
-                Items = documents
+                Items = documents,
             };
         }
 
-        public static DocumentContainer CreateDocumentContainer(Document document)    
-        {            
-            return new DocumentContainer()
-            {
-                Value = document
-            };
+        public static DocumentContainer CreateDocumentContainer(Document document)
+        {
+            return new DocumentContainer() { Value = document };
         }
-
 
         public static Presence CreatePresence()
         {
@@ -329,66 +323,46 @@ namespace Take.Blip.Client.UnitTests
                 RoutingRule = RoutingRule.Identity,
                 Status = PresenceStatus.Available,
                 LastSeen = DateTimeOffset.UtcNow,
-                FilterByDistance = true
+                FilterByDistance = true,
             };
         }
 
         public static MediaType CreatePlainMediaType()
         {
-            return new MediaType(
-                CreateRandomString(10),
-                CreateRandomString(10),
-                null
-                );
-
+            return new MediaType(CreateRandomString(10), CreateRandomString(10), null);
         }
 
         public static MediaType CreateJsonMediaType()
         {
-            return new MediaType(
-                "application",
-                CreateRandomString(10),
-                "json"
-                );
-
-
+            return new MediaType("application", CreateRandomString(10), "json");
         }
 
         public static Account CreateAccount()
         {
-            return new Account
-            {
-                FullName = CreateRandomString(20),
-                PhotoUri = CreateUri()
-            };
+            return new Account { FullName = CreateRandomString(20), PhotoUri = CreateUri() };
         }
 
         public static Contact CreateContact()
         {
-            return new Contact()
-            {
-                Identity = CreateIdentity(),
-                Name = CreateRandomString(100)
-
-            };
+            return new Contact() { Identity = CreateIdentity(), Name = CreateRandomString(100) };
         }
 
         public static Capability CreateCapability()
-        {           
+        {
             return new Capability()
             {
-                ContentTypes = new[] 
-                { 
+                ContentTypes = new[]
+                {
                     CreateJsonMediaType(),
                     CreateJsonMediaType(),
-                    CreateJsonMediaType()
+                    CreateJsonMediaType(),
                 },
-                ResourceTypes = new[] 
-                { 
+                ResourceTypes = new[]
+                {
                     CreateJsonMediaType(),
                     CreateJsonMediaType(),
-                    CreateJsonMediaType()
-                }
+                    CreateJsonMediaType(),
+                },
             };
         }
 
@@ -406,7 +380,7 @@ namespace Take.Blip.Client.UnitTests
                         Name = CreateRandomString(50),
                         IsPending = true,
                         ShareAccountInfo = false,
-                        SharePresence = true
+                        SharePresence = true,
                     },
                     new Contact()
                     {
@@ -414,7 +388,7 @@ namespace Take.Blip.Client.UnitTests
                         Name = CreateRandomString(50),
                         IsPending = false,
                         ShareAccountInfo = true,
-                        SharePresence = false
+                        SharePresence = false,
                     },
                     new Contact()
                     {
@@ -422,10 +396,9 @@ namespace Take.Blip.Client.UnitTests
                         Name = CreateRandomString(50),
                         IsPending = true,
                         ShareAccountInfo = true,
-                        SharePresence = false
+                        SharePresence = false,
                     },
-                }
-
+                },
             };
         }
 
@@ -434,7 +407,8 @@ namespace Take.Blip.Client.UnitTests
             return new Exception(CreateRandomString(50));
         }
 
-        public static T CreateException<T>() where T : Exception, new()
+        public static T CreateException<T>()
+            where T : Exception, new()
         {
             return new T();
         }
@@ -446,25 +420,17 @@ namespace Take.Blip.Client.UnitTests
                 port = CreateRandomInt(9999);
             }
 
-            return new Uri(
-                string.Format("{0}://{1}:{2}",
-                    scheme, CreateDomainName(), port));
+            return new Uri(string.Format("{0}://{1}:{2}", scheme, CreateDomainName(), port));
         }
 
         public static ChatState CreateChatState()
         {
-            return new ChatState()
-            {
-                State = ChatStateEvent.Composing
-            };
+            return new ChatState() { State = ChatStateEvent.Composing };
         }
 
         public static IdentityDocument CreateIdentityDocument()
         {
-            return new IdentityDocument
-            {
-                Value = CreateIdentity()
-            };
+            return new IdentityDocument { Value = CreateIdentity() };
         }
 
         public static Select CreateSelect()
@@ -475,18 +441,14 @@ namespace Take.Blip.Client.UnitTests
                 Options = new[]
                 {
                     CreateSelectOption(CreateTextContent()),
-                    CreateSelectOption(CreateJsonDocument())
-                }
+                    CreateSelectOption(CreateJsonDocument()),
+                },
             };
         }
 
         public static SelectOption CreateSelectOption(Document value)
         {
-            return new SelectOption()
-            {
-                Text = CreateRandomStringExtended(10),
-                Value = value
-            };
+            return new SelectOption() { Text = CreateRandomStringExtended(10), Value = value };
         }
 
         public static DocumentSelect CreateDocumentSelect()
@@ -497,17 +459,20 @@ namespace Take.Blip.Client.UnitTests
                 Options = new[]
                 {
                     CreateDocumentSelectOption(CreateTextContent(), null),
-                    CreateDocumentSelectOption(CreateJsonDocument(), CreateJsonDocument())
-                }
+                    CreateDocumentSelectOption(CreateJsonDocument(), CreateJsonDocument()),
+                },
             };
         }
 
-        public static DocumentSelectOption CreateDocumentSelectOption(Document label, Document value)
+        public static DocumentSelectOption CreateDocumentSelectOption(
+            Document label,
+            Document value
+        )
         {
             return new DocumentSelectOption()
             {
                 Label = CreateDocumentContainer(label),
-                Value = value != null ? CreateDocumentContainer(value): null
+                Value = value != null ? CreateDocumentContainer(value) : null,
             };
         }
 
@@ -518,7 +483,7 @@ namespace Take.Blip.Client.UnitTests
                 Uri = uri ?? CreateUri(),
                 PreviewType = CreatePlainMediaType(),
                 PreviewUri = CreateUri(),
-                Text = CreateRandomString(50)
+                Text = CreateRandomString(50),
             };
         }
 
@@ -531,7 +496,7 @@ namespace Take.Blip.Client.UnitTests
                 PreviewUri = CreateUri(),
                 Text = CreateRandomString(50),
                 Size = CreateRandomInt(100),
-                Type = CreatePlainMediaType()
+                Type = CreatePlainMediaType(),
             };
         }
 
@@ -543,8 +508,8 @@ namespace Take.Blip.Client.UnitTests
                 Validation = new InputValidation
                 {
                     Rule = InputValidationRule.Type,
-                    Type = CreateJsonMediaType()
-                }
+                    Type = CreateJsonMediaType(),
+                },
             };
         }
     }

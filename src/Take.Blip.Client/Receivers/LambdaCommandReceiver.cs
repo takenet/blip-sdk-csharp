@@ -14,11 +14,15 @@ namespace Take.Blip.Client.Receivers
 
         public LambdaCommandReceiver(Func<Command, CancellationToken, Task> onCommandReceived)
         {
-            if (onCommandReceived == null) throw new ArgumentNullException(nameof(onCommandReceived));
+            if (onCommandReceived == null)
+                throw new ArgumentNullException(nameof(onCommandReceived));
             OnCommandReceived = onCommandReceived;
         }
-        
-        public Task ReceiveAsync(Command envelope, CancellationToken cancellationToken = default(CancellationToken))
+
+        public Task ReceiveAsync(
+            Command envelope,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             return OnCommandReceived?.Invoke(envelope, cancellationToken);
         }

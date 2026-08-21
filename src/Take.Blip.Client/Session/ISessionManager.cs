@@ -33,7 +33,12 @@ namespace Take.Blip.Client.Session
         /// <param name="value">The value.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task AddVariableAsync(Node node, string key, string value, CancellationToken cancellationToken);
+        Task AddVariableAsync(
+            Node node,
+            string key,
+            string value,
+            CancellationToken cancellationToken
+        );
 
         /// <summary>
         /// Gets an existing variable from a node session.

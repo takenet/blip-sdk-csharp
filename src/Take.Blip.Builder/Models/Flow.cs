@@ -19,7 +19,7 @@ namespace Take.Blip.Builder.Models
 
         private bool _isValid;
         private BuilderConfiguration _builderConfiguration;
-        
+
         /// <summary>
         /// The unique identifier of the flow. Required.
         /// </summary>
@@ -45,7 +45,7 @@ namespace Take.Blip.Builder.Models
         /// Determine the global actions that should be executed before processing the input. Optional.
         /// </summary>
         public Action[] InputActions { get; set; }
-        
+
         /// <summary>
         /// The flow states. Required.
         /// </summary>
@@ -105,13 +105,16 @@ namespace Take.Blip.Builder.Models
         {
             // Optimization to avoid multiple validations.
             // It can lead to errors if any property is changed meanwhile...
-            if (_isValid) return;
+            if (_isValid)
+                return;
 
             this.ValidateObject();
 
             if (Type == FlowType.Subflow && Version < CURRENT_SUBFLOW_VERSION)
             {
-                throw new ValidationException($"The subflow version must be greater then or equal to {CURRENT_SUBFLOW_VERSION}");
+                throw new ValidationException(
+                    $"The subflow version must be greater then or equal to {CURRENT_SUBFLOW_VERSION}"
+                );
             }
 
             if (States.Count(s => s.Root) != 1)
@@ -129,8 +132,7 @@ namespace Take.Blip.Builder.Models
             {
                 throw new ValidationException("The root state must not have any conditions");
             }
-            
-            
+
             if (InputActions != null)
             {
                 foreach (var inputAction in InputActions)
@@ -145,7 +147,9 @@ namespace Take.Blip.Builder.Models
 
                 if (States.Count(s => s.Id == state.Id) > 1)
                 {
-                    throw new ValidationException($"The state id '{state.Id}' is not unique in the flow");
+                    throw new ValidationException(
+                        $"The state id '{state.Id}' is not unique in the flow"
+                    );
                 }
 
                 // Check if there's a direct path loop (without inputs) to this state in the flow.
@@ -153,38 +157,56 @@ namespace Take.Blip.Builder.Models
                 {
                     bool CanBeReached(State targetState, Output output, ISet<string> checkedStates)
                     {
-                        if (checkedStates.Contains(output.StateId)) return false;
+                        if (checkedStates.Contains(output.StateId))
+                            return false;
                         var outputState = States.FirstOrDefault(s => s.Id == output.StateId);
-                        if (outputState?.Outputs == null || outputState.Outputs.Length == 0) return false;
-                        if (outputState.Input != null && !outputState.Input.Bypass) return false;
-                        if (outputState.Outputs.Any(o => o.StateId == targetState.Id)) return true;
+                        if (outputState?.Outputs == null || outputState.Outputs.Length == 0)
+                            return false;
+                        if (outputState.Input != null && !outputState.Input.Bypass)
+                            return false;
+                        if (outputState.Outputs.Any(o => o.StateId == targetState.Id))
+                            return true;
                         checkedStates.Add(output.StateId);
-                        return outputState.Outputs.Any(o => CanBeReached(targetState, o, checkedStates));
+                        return outputState.Outputs.Any(o =>
+                            CanBeReached(targetState, o, checkedStates)
+                        );
                     }
-
                     ;
 
                     foreach (var output in state.Outputs)
                     {
-                        if (States.All(s => (s.Id != output.StateId) && !(output.StateId.StartsWith("{{") && output.StateId.EndsWith("}}"))))
+                        if (
+                            States.All(s =>
+                                (s.Id != output.StateId)
+                                && !(
+                                    output.StateId.StartsWith("{{") && output.StateId.EndsWith("}}")
+                                )
+                            )
+                        )
                         {
-                            throw new ValidationException($"The output state id '{output.StateId}' is invalid");
+                            throw new ValidationException(
+                                $"The output state id '{output.StateId}' is invalid"
+                            );
                         }
 
-                        if (state.Input == null || (Type != FlowType.Subflow && rootState.Input.Bypass))
+                        if (
+                            state.Input == null
+                            || (Type != FlowType.Subflow && rootState.Input.Bypass)
+                        )
                         {
                             var checkedStates = new HashSet<string>();
 
                             if (CanBeReached(state, output, checkedStates))
                             {
                                 throw new ValidationException(
-                                    $"There is a loop in the flow starting in the state {state.Id} that does not requires user input");
+                                    $"There is a loop in the flow starting in the state {state.Id} that does not requires user input"
+                                );
                             }
                         }
                     }
                 }
             }
-            
+
             if (OutputActions != null)
             {
                 foreach (var outputAction in OutputActions)
@@ -202,28 +224,35 @@ namespace Take.Blip.Builder.Models
             }
 
             // Try create trace settings from configuration keys
-            if (TraceSettings == null &&
-                Configuration != null &&
-                Configuration.TryGetValue("TraceMode", out var traceModeValue) &&
-                Enum.TryParse<TraceMode>(traceModeValue, true, out var traceMode) &&
-                Configuration.TryGetValue("TraceTargetType", out var traceTargetTypeValue) &&
-                Enum.TryParse<TraceTargetType>(traceTargetTypeValue, true, out var traceTargetType) &&
-                Configuration.TryGetValue("TraceTarget", out var traceTarget))
+            if (
+                TraceSettings == null
+                && Configuration != null
+                && Configuration.TryGetValue("TraceMode", out var traceModeValue)
+                && Enum.TryParse<TraceMode>(traceModeValue, true, out var traceMode)
+                && Configuration.TryGetValue("TraceTargetType", out var traceTargetTypeValue)
+                && Enum.TryParse<TraceTargetType>(
+                    traceTargetTypeValue,
+                    true,
+                    out var traceTargetType
+                )
+                && Configuration.TryGetValue("TraceTarget", out var traceTarget)
+            )
             {
                 TraceSettings = new TraceSettings
                 {
                     Mode = traceMode,
                     TargetType = traceTargetType,
-                    Target = traceTarget
+                    Target = traceTarget,
                 };
 
-                if (Configuration.TryGetValue("TraceSlowThreshold", out var traceSlowThresholdValue) &&
-                    int.TryParse(traceSlowThresholdValue, out var traceSlowThreshold))
+                if (
+                    Configuration.TryGetValue("TraceSlowThreshold", out var traceSlowThresholdValue)
+                    && int.TryParse(traceSlowThresholdValue, out var traceSlowThreshold)
+                )
                 {
                     TraceSettings.SlowThreshold = traceSlowThreshold;
                 }
             }
-
 
             _isValid = true;
         }
@@ -235,8 +264,12 @@ namespace Take.Blip.Builder.Models
         /// <returns></returns>
         public static Flow ParseFromJson(string json)
         {
-            if (json == null) throw new ArgumentNullException(nameof(json));
-            return JsonConvert.DeserializeObject<Flow>(json, JsonSerializerSettingsContainer.Settings);
+            if (json == null)
+                throw new ArgumentNullException(nameof(json));
+            return JsonConvert.DeserializeObject<Flow>(
+                json,
+                JsonSerializerSettingsContainer.Settings
+            );
         }
 
         /// <summary>
@@ -244,7 +277,8 @@ namespace Take.Blip.Builder.Models
         /// </summary>
         /// <param name="filePath">The path.</param>
         /// <returns></returns>
-        public static Flow ParseFromJsonFile(string filePath) => ParseFromJson(File.ReadAllText(filePath));
+        public static Flow ParseFromJsonFile(string filePath) =>
+            ParseFromJson(File.ReadAllText(filePath));
 
         /// <summary>
         /// Fully checks if a given config header should be added or not
@@ -253,10 +287,10 @@ namespace Take.Blip.Builder.Models
         /// <returns>Boolean indicating if the configuration is enabled</returns>
         public bool ConfigurationFlagIsEnabled(string configurationKey)
         {
-            return Configuration != null &&
-                Configuration.TryGetValue(configurationKey, out string configValue) &&
-                bool.TryParse(configValue, out bool isEnabled) &&
-                isEnabled;
+            return Configuration != null
+                && Configuration.TryGetValue(configurationKey, out string configValue)
+                && bool.TryParse(configValue, out bool isEnabled)
+                && isEnabled;
         }
     }
 }

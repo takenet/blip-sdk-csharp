@@ -1,7 +1,7 @@
-﻿using Lime.Messaging.Contents;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using Lime.Messaging.Contents;
 
 namespace Take.Blip.Builder.Models
 {
@@ -10,7 +10,11 @@ namespace Take.Blip.Builder.Models
     /// </summary>
     public class Input : IValidable
     {
-        private static readonly Regex VariableValidationRegex = new Regex("^([a-zA-Z0-9\\.]+)$", RegexOptions.Compiled, Constants.REGEX_TIMEOUT);
+        private static readonly Regex VariableValidationRegex = new Regex(
+            "^([a-zA-Z0-9\\.]+)$",
+            RegexOptions.Compiled,
+            Constants.REGEX_TIMEOUT
+        );
 
         /// <summary>
         /// Indicates that the state input should be skipped.
@@ -41,10 +45,14 @@ namespace Take.Blip.Builder.Models
         {
             if (Validation != null)
             {
-                if (Validation.Rule == InputValidationRule.Regex 
-                    && string.IsNullOrWhiteSpace(Validation.Regex))
+                if (
+                    Validation.Rule == InputValidationRule.Regex
+                    && string.IsNullOrWhiteSpace(Validation.Regex)
+                )
                 {
-                    throw new ValidationException("The regular expression should be provided when using the 'regex' validation rule");
+                    throw new ValidationException(
+                        "The regular expression should be provided when using the 'regex' validation rule"
+                    );
                 }
 
                 if (string.IsNullOrWhiteSpace(Validation.Error))
@@ -52,22 +60,22 @@ namespace Take.Blip.Builder.Models
                     throw new ValidationException("The validation error message is required");
                 }
 
-                if (Validation.Rule == InputValidationRule.Type
-                    && Validation.Type == null)
+                if (Validation.Rule == InputValidationRule.Type && Validation.Type == null)
                 {
-                    throw new ValidationException("The media type should be provided when using the 'type' validation rule");
+                    throw new ValidationException(
+                        "The media type should be provided when using the 'type' validation rule"
+                    );
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(Variable) 
-                && !VariableValidationRegex.IsMatch(Variable))
+            if (!string.IsNullOrWhiteSpace(Variable) && !VariableValidationRegex.IsMatch(Variable))
             {
-                throw new ValidationException("The input variable name should be composed only by letters, numbers and dots");
+                throw new ValidationException(
+                    "The input variable name should be composed only by letters, numbers and dots"
+                );
             }
         }
 
-        public bool HasExpiration() => !Bypass
-            && Expiration != null
-            && Expiration.Value.Ticks > 0;
+        public bool HasExpiration() => !Bypass && Expiration != null && Expiration.Value.Ticks > 0;
     }
 }

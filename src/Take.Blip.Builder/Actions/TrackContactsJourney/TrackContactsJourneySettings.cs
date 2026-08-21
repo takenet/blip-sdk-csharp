@@ -19,12 +19,16 @@ namespace Take.Blip.Builder.Actions.TrackContactsJourney
         {
             if (string.IsNullOrEmpty(StateId))
             {
-                throw new ArgumentException($"The '{nameof(StateId)}' settings value is required for '{nameof(TrackContactsJourneyAction)}' action");
+                throw new ArgumentException(
+                    $"The '{nameof(StateId)}' settings value is required for '{nameof(TrackContactsJourneyAction)}' action"
+                );
             }
 
             if (string.IsNullOrEmpty(StateName))
             {
-                throw new ArgumentException($"The '{nameof(StateName)}' settings value is required for '{nameof(TrackContactsJourneyAction)}' action");
+                throw new ArgumentException(
+                    $"The '{nameof(StateName)}' settings value is required for '{nameof(TrackContactsJourneyAction)}' action"
+                );
             }
         }
     }

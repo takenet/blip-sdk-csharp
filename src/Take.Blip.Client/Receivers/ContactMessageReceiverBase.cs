@@ -1,15 +1,15 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Lime.Protocol;
-using Lime.Messaging.Resources;
-using System;
+﻿using System;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Lime.Messaging.Resources;
+using Lime.Protocol;
 using Lime.Protocol.Network;
-using Take.Blip.Client.Extensions.Contacts;
-using Take.Blip.Client.Extensions.Directory;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 using Take.Blip.Client.Content;
+using Take.Blip.Client.Extensions.Contacts;
+using Take.Blip.Client.Extensions.Directory;
 
 namespace Take.Blip.Client.Receivers
 {
@@ -36,17 +36,22 @@ namespace Take.Blip.Client.Receivers
             IDirectoryExtension directoryExtension,
             ILogger logger,
             bool cacheLocally = true,
-            TimeSpan cacheExpiration = default)
+            TimeSpan cacheExpiration = default
+        )
         {
             _directoryExtension = directoryExtension;
             _contactExtension = contactExtension;
             _cacheLocally = cacheLocally;
             _logger = logger;
-            _cacheExpiration = cacheExpiration == default ? TimeSpan.FromMinutes(30) : cacheExpiration;
+            _cacheExpiration =
+                cacheExpiration == default ? TimeSpan.FromMinutes(30) : cacheExpiration;
             ContactCache = new MemoryCache(new MemoryCacheOptions());
         }
 
-        public virtual async Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task ReceiveAsync(
+            Message envelope,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             var identity = GetIdentity(envelope);
             var contact = await GetContactAsync(identity, cancellationToken);
@@ -55,7 +60,9 @@ namespace Take.Blip.Client.Receivers
 
         private static Identity GetIdentity(Message envelope)
         {
-            return envelope.Content is InputExpiration ? (envelope.Content as InputExpiration).Identity : envelope.From.ToIdentity();
+            return envelope.Content is InputExpiration
+                ? (envelope.Content as InputExpiration).Identity
+                : envelope.From.ToIdentity();
         }
 
         protected MemoryCache ContactCache { get; }
@@ -63,7 +70,10 @@ namespace Take.Blip.Client.Receivers
         /// <summary>
         /// Gets the contact for the specified identity.
         /// </summary>
-        protected virtual async Task<Contact> GetContactAsync(Identity identity, CancellationToken cancellationToken)
+        protected virtual async Task<Contact> GetContactAsync(
+            Identity identity,
+            CancellationToken cancellationToken
+        )
         {
             // First, tries get it from the cache, if configured.
             Contact contact = null;
@@ -77,29 +87,41 @@ namespace Take.Blip.Client.Receivers
                 try
                 {
                     // Second, try from the roster.
-                    contact = await _contactExtension.GetFromContactsOrDirectoryAsync(_directoryExtension, identity,
-                        cancellationToken);
+                    contact = await _contactExtension.GetFromContactsOrDirectoryAsync(
+                        _directoryExtension,
+                        identity,
+                        cancellationToken
+                    );
                 }
                 catch (LimeException ex)
                 {
-                    if (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND ||
-                        ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED)
+                    if (
+                        ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND
+                        || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED
+                    )
                     {
                         contact = null;
                         _logger.Warning(ex, "The contact was not found in directory");
                     }
                     else
                     {
-                        _logger.Error(ex, "Unexpected error while trying to get account from directory");
+                        _logger.Error(
+                            ex,
+                            "Unexpected error while trying to get account from directory"
+                        );
                         throw;
                     }
                 }
             }
-            
+
             // Stores in the cache, if configured.
             if (contact != null && _cacheLocally)
             {
-                ContactCache.Set(identity.ToString(), contact, DateTimeOffset.UtcNow.Add(_cacheExpiration));
+                ContactCache.Set(
+                    identity.ToString(),
+                    contact,
+                    DateTimeOffset.UtcNow.Add(_cacheExpiration)
+                );
             }
 
             return contact;
@@ -108,8 +130,12 @@ namespace Take.Blip.Client.Receivers
         /// <summary>
         /// Receives a message with the contact information.
         /// </summary>
-        protected abstract Task ReceiveAsync(Message message, Contact contact, CancellationToken cancellationToken = default(CancellationToken));
-        
+        protected abstract Task ReceiveAsync(
+            Message message,
+            Contact contact,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
+
         private bool _disposed;
 
         protected virtual void Dispose(bool disposing)

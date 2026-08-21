@@ -14,11 +14,12 @@ namespace Take.Blip.Client.Activation
 
         public AggregateTypeResolver(params ITypeResolver[] typeResolvers)
         {
-            _typeResolvers = typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
+            _typeResolvers =
+                typeResolvers ?? throw new ArgumentNullException(nameof(typeResolvers));
         }
 
-        public Type Resolve(string typeName) 
-            => _typeResolvers
+        public Type Resolve(string typeName) =>
+            _typeResolvers
                 .Select(typeResolver => typeResolver.Resolve(typeName))
                 .FirstOrDefault(type => type != null);
     }

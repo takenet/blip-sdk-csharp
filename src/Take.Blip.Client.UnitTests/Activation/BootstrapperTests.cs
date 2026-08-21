@@ -24,7 +24,12 @@ namespace Take.Blip.Client.UnitTests.Activation
         public DummyServer Server { get; }
 
         public ITypeResolver TypeResolver { get; } =
-            new TypeResolver(new AssemblyProvider(typeof(BootstrapperTests).GetTypeInfo().Assembly, typeof(BlipClient).GetTypeInfo().Assembly));
+            new TypeResolver(
+                new AssemblyProvider(
+                    typeof(BootstrapperTests).GetTypeInfo().Assembly,
+                    typeof(BlipClient).GetTypeInfo().Assembly
+                )
+            );
 
         [Fact]
         public void EnsureDefaultApplicationJsonValuesAreCorrect()
@@ -44,13 +49,14 @@ namespace Take.Blip.Client.UnitTests.Activation
         public async Task CreateWithNoCredentialAndNoReceiverShouldReturnInstance()
         {
             // Arrange
-            var application = new Application()
-            {
-                HostName = Server.ListenerUri.Host
-            };
+            var application = new Application() { HostName = Server.ListenerUri.Host };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -64,11 +70,15 @@ namespace Take.Blip.Client.UnitTests.Activation
             {
                 Identifier = "testlogin",
                 Password = "12345".ToBase64(),
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -82,11 +92,15 @@ namespace Take.Blip.Client.UnitTests.Activation
             {
                 Identifier = "testlogin",
                 AccessKey = "12345".ToBase64(),
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -101,11 +115,15 @@ namespace Take.Blip.Client.UnitTests.Activation
                 Identifier = "testlogin",
                 AccessKey = "12345".ToBase64(),
                 StartupType = typeof(TestStartable).Name,
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -124,13 +142,17 @@ namespace Take.Blip.Client.UnitTests.Activation
                 Settings = new Dictionary<string, object>()
                 {
                     { "setting1", "value1" },
-                    { "setting2", 2 }
+                    { "setting2", 2 },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -150,11 +172,15 @@ namespace Take.Blip.Client.UnitTests.Activation
                 Identifier = "testlogin",
                 AccessKey = "12345".ToBase64(),
                 StartupType = typeof(TestStartableFactory).AssemblyQualifiedName,
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -175,13 +201,17 @@ namespace Take.Blip.Client.UnitTests.Activation
                 Settings = new Dictionary<string, object>()
                 {
                     { "setting1", "value1" },
-                    { "setting2", 2 }
+                    { "setting2", 2 },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -205,23 +235,27 @@ namespace Take.Blip.Client.UnitTests.Activation
                     new MessageApplicationReceiver()
                     {
                         Type = typeof(TestMessageReceiver).Name,
-                        MediaType = "text/plain"
+                        MediaType = "text/plain",
                     },
                     new MessageApplicationReceiver()
                     {
                         Type = typeof(TestMessageReceiver).Name,
-                        MediaType = "application/json"
+                        MediaType = "application/json",
                     },
                     new MessageApplicationReceiver()
                     {
-                        Type = typeof(TestMessageReceiver).AssemblyQualifiedName
-                    }
+                        Type = typeof(TestMessageReceiver).AssemblyQualifiedName,
+                    },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -242,23 +276,27 @@ namespace Take.Blip.Client.UnitTests.Activation
                     {
                         Type = typeof(TestMessageReceiver).Name,
                         MediaType = "text/plain",
-                        Lifetime = ReceiverLifetime.Scoped
+                        Lifetime = ReceiverLifetime.Scoped,
                     },
                     new MessageApplicationReceiver()
                     {
                         Type = typeof(TestMessageReceiver).Name,
-                        MediaType = "application/json"
+                        MediaType = "application/json",
                     },
                     new MessageApplicationReceiver()
                     {
-                        Type = typeof(TestMessageReceiver).AssemblyQualifiedName
-                    }
+                        Type = typeof(TestMessageReceiver).AssemblyQualifiedName,
+                    },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -279,14 +317,18 @@ namespace Take.Blip.Client.UnitTests.Activation
                     new MessageApplicationReceiver()
                     {
                         Type = typeof(TestMessageReceiver).Name,
-                        MediaType = "text/plain"
-                    }
+                        MediaType = "text/plain",
+                    },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -304,16 +346,17 @@ namespace Take.Blip.Client.UnitTests.Activation
                 RegisterTunnelReceivers = true,
                 MessageReceivers = new[]
                 {
-                    new MessageApplicationReceiver()
-                    {
-                        ForwardTo = "bot@msging.net"
-                    }
+                    new MessageApplicationReceiver() { ForwardTo = "bot@msging.net" },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -337,21 +380,25 @@ namespace Take.Blip.Client.UnitTests.Activation
                         {
                             { "setting3", "value3" },
                             { "setting4", 4 },
-                            { "setting5", 55 }
-                        }
-                    }
+                            { "setting5", 55 },
+                        },
+                    },
                 },
                 Settings = new Dictionary<string, object>
                 {
                     { "setting1", "value1" },
                     { "setting2", 2 },
-                    { "setting5", 5 }
+                    { "setting5", 5 },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -372,18 +419,19 @@ namespace Take.Blip.Client.UnitTests.Activation
                 AccessKey = "12345".ToBase64(),
                 MessageReceivers = new[]
                 {
-                    new MessageApplicationReceiver
-                    {
-                        Type = typeof(InvalidReceiver).Name,
-                    }
+                    new MessageApplicationReceiver { Type = typeof(InvalidReceiver).Name },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act & Assert
             Should.Throw<Exception>(async () =>
             {
-                var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+                var actual = await Bootstrapper.StartAsync(
+                    CancellationToken,
+                    application,
+                    typeResolver: TypeResolver
+                );
             });
         }
 
@@ -397,18 +445,19 @@ namespace Take.Blip.Client.UnitTests.Activation
                 AccessKey = "12345".ToBase64(),
                 MessageReceivers = new[]
                 {
-                    new MessageApplicationReceiver
-                    {
-                        Type = typeof(DuplicatedReceiver).Name,
-                    }
+                    new MessageApplicationReceiver { Type = typeof(DuplicatedReceiver).Name },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act & Assert
             Should.Throw<Exception>(async () =>
             {
-                var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+                var actual = await Bootstrapper.StartAsync(
+                    CancellationToken,
+                    application,
+                    typeResolver: TypeResolver
+                );
             });
         }
 
@@ -425,23 +474,27 @@ namespace Take.Blip.Client.UnitTests.Activation
                     new NotificationApplicationReceiver()
                     {
                         Type = typeof(TestNotificationReceiver).AssemblyQualifiedName,
-                        EventType = Event.Accepted
+                        EventType = Event.Accepted,
                     },
                     new NotificationApplicationReceiver()
                     {
                         Type = typeof(TestNotificationReceiver).AssemblyQualifiedName,
-                        EventType = Event.Dispatched
+                        EventType = Event.Dispatched,
                     },
                     new NotificationApplicationReceiver()
                     {
-                        Type = typeof(TestNotificationReceiver).AssemblyQualifiedName
-                    }
+                        Type = typeof(TestNotificationReceiver).AssemblyQualifiedName,
+                    },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -459,12 +512,9 @@ namespace Take.Blip.Client.UnitTests.Activation
                 RegisterTunnelReceivers = true,
                 NotificationReceivers = new[]
                 {
-                    new NotificationApplicationReceiver()
-                    {
-                        ForwardTo = "bot@msging.net"
-                    }
+                    new NotificationApplicationReceiver() { ForwardTo = "bot@msging.net" },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
@@ -487,24 +537,28 @@ namespace Take.Blip.Client.UnitTests.Activation
                     new CommandApplicationReceiver()
                     {
                         Type = typeof(TestCommandReceiver).Name,
-                        Method = CommandMethod.Get
+                        Method = CommandMethod.Get,
                     },
                     new CommandApplicationReceiver()
                     {
                         Type = typeof(TestCommandReceiver).Name,
-                        Method = CommandMethod.Set
+                        Method = CommandMethod.Set,
                     },
                     new CommandApplicationReceiver()
                     {
                         Type = typeof(TestCommandReceiver).Name,
-                        Method = CommandMethod.Subscribe
-                    }
+                        Method = CommandMethod.Subscribe,
+                    },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -525,26 +579,30 @@ namespace Take.Blip.Client.UnitTests.Activation
                     {
                         Type = typeof(TestCommandReceiver).Name,
                         Method = CommandMethod.Get,
-                        ResourceUri = "/contacts"
+                        ResourceUri = "/contacts",
                     },
                     new CommandApplicationReceiver()
                     {
                         Type = typeof(TestCommandReceiver).Name,
                         Method = CommandMethod.Set,
-                        Uri = "lime://configuration/first"
+                        Uri = "lime://configuration/first",
                     },
                     new CommandApplicationReceiver()
                     {
                         Type = typeof(TestCommandReceiver).Name,
                         Method = CommandMethod.Subscribe,
-                        ResourceUri = "lime://configuration/second"
-                    }
+                        ResourceUri = "lime://configuration/second",
+                    },
                 },
-                HostName = Server.ListenerUri.Host
+                HostName = Server.ListenerUri.Host,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -564,15 +622,19 @@ namespace Take.Blip.Client.UnitTests.Activation
                     new MessageApplicationReceiver
                     {
                         Type = typeof(TestMessageReceiverWithCustomParameter).Name,
-                        MediaType = "text/plain"
-                    }
+                        MediaType = "text/plain",
+                    },
                 },
                 HostName = Server.ListenerUri.Host,
-                ServiceProviderType = typeof(TestServiceProvider).Name
+                ServiceProviderType = typeof(TestServiceProvider).Name,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -594,20 +656,27 @@ namespace Take.Blip.Client.UnitTests.Activation
                     new MessageApplicationReceiver
                     {
                         Type = nameof(SimpleMessageReceiver),
-                        MediaType = "text/plain"
-                    }
+                        MediaType = "text/plain",
+                    },
                 },
                 HostName = Server.ListenerUri.Host,
-                ServiceProviderType = nameof(TestServiceContainer)
+                ServiceProviderType = nameof(TestServiceContainer),
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
             TestServiceContainer.CurrentInstance.ShouldNotBeNull();
-            TestServiceContainer.CurrentInstance.Registrations.ShouldContainKeyAndValue(typeof(IServiceContainer), TestServiceContainer.CurrentInstance);
+            TestServiceContainer.CurrentInstance.Registrations.ShouldContainKeyAndValue(
+                typeof(IServiceContainer),
+                TestServiceContainer.CurrentInstance
+            );
             TestServiceContainer.CurrentInstance.Registrations.ShouldContainKey(typeof(ISender));
             TestServiceContainer.CurrentInstance.Registrations.Keys.Count.ShouldBeGreaterThan(10);
         }
@@ -625,21 +694,27 @@ namespace Take.Blip.Client.UnitTests.Activation
                     new MessageApplicationReceiver
                     {
                         Type = nameof(SimpleMessageReceiver),
-                        MediaType = "text/plain"
-                    }
+                        MediaType = "text/plain",
+                    },
                 },
                 HostName = Server.ListenerUri.Host,
                 StateManagerType = nameof(TestStateManager),
-                ServiceProviderType = nameof(TestServiceContainerWithStateManager)
+                ServiceProviderType = nameof(TestServiceContainerWithStateManager),
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
             TestStateManager.CurrentInstance.ShouldNotBeNull();
-            var factoryRegistration = TestServiceContainer.CurrentInstance.Registrations[typeof(IStateManager)];
+            var factoryRegistration = TestServiceContainer.CurrentInstance.Registrations[
+                typeof(IStateManager)
+            ];
             var factory = factoryRegistration.ShouldBeOfType<Func<object>>();
             var instance = factory();
             instance.ShouldBeOfType<TestStateManager>();
@@ -663,9 +738,9 @@ namespace Take.Blip.Client.UnitTests.Activation
                         Settings = new Dictionary<string, object>
                         {
                             { "setting1", "value1" },
-                            { "setting2", 22 }
-                        }
-                    }
+                            { "setting2", 22 },
+                        },
+                    },
                 },
                 HostName = Server.ListenerUri.Host,
                 ServiceProviderType = typeof(TestServiceProvider).Name,
@@ -673,13 +748,17 @@ namespace Take.Blip.Client.UnitTests.Activation
                 Settings = new Dictionary<string, object>
                 {
                     { "setting2", 2 },
-                    { "setting3", "3" }
+                    { "setting3", "3" },
                 },
-                StartupType = typeof(TestStartupWithCustomSettings).Name
+                StartupType = typeof(TestStartupWithCustomSettings).Name,
             };
 
             // Act
-            var actual = await Bootstrapper.StartAsync(CancellationToken, application, typeResolver: TypeResolver);
+            var actual = await Bootstrapper.StartAsync(
+                CancellationToken,
+                application,
+                typeResolver: TypeResolver
+            );
 
             // Assert
             actual.ShouldNotBeNull();
@@ -700,7 +779,9 @@ namespace Take.Blip.Client.UnitTests.Activation
             TestStartupWithCustomSettings.CustomSettings.Setting2.ShouldBe(2);
             TestStartupWithCustomSettings.CustomSettings.Setting3.ShouldBe("3");
 
-            TestMessageReceiverWithCustomSettings.TestApplicationSettings.ShouldBe(TestStartupWithCustomSettings.CustomSettings);
+            TestMessageReceiverWithCustomSettings.TestApplicationSettings.ShouldBe(
+                TestStartupWithCustomSettings.CustomSettings
+            );
         }
 
         public override void Dispose(bool disposing)
@@ -718,16 +799,12 @@ namespace Take.Blip.Client.UnitTests.Activation
         }
     }
 
-    public class InvalidReceiver
-    {
-    }
+    public class InvalidReceiver { }
 
     /// <summary>
     /// Another class with same name exists on folder Dummies
     /// </summary>
-    public class DuplicatedReceiver
-    {
-    }
+    public class DuplicatedReceiver { }
 
     public class TestStartupWithCustomSettings : IStartable
     {
@@ -736,7 +813,10 @@ namespace Take.Blip.Client.UnitTests.Activation
 
         public static int InstanceCount;
 
-        public TestStartupWithCustomSettings(IDictionary<string, object> defaultSettings, TestApplicationSettings customSettings)
+        public TestStartupWithCustomSettings(
+            IDictionary<string, object> defaultSettings,
+            TestApplicationSettings customSettings
+        )
         {
             DefaultSettings = defaultSettings;
             CustomSettings = customSettings;
@@ -757,7 +837,11 @@ namespace Take.Blip.Client.UnitTests.Activation
 
         public static int InstanceCount;
 
-        public TestMessageReceiverWithCustomSettings(TestMessageReceiverSettings customSettings, TestApplicationSettings testApplicationSettings, IDictionary<string, object> defaultSettings)
+        public TestMessageReceiverWithCustomSettings(
+            TestMessageReceiverSettings customSettings,
+            TestApplicationSettings testApplicationSettings,
+            IDictionary<string, object> defaultSettings
+        )
         {
             CustomSettings = customSettings;
             TestApplicationSettings = testApplicationSettings;
@@ -765,7 +849,10 @@ namespace Take.Blip.Client.UnitTests.Activation
             InstanceCount++;
         }
 
-        public Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = new CancellationToken())
+        public Task ReceiveAsync(
+            Message envelope,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
             return Task.CompletedTask;
         }
@@ -796,15 +883,16 @@ namespace Take.Blip.Client.UnitTests.Activation
             InstanceCount++;
         }
 
-        public Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = new CancellationToken())
+        public Task ReceiveAsync(
+            Message envelope,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
             return Task.CompletedTask;
         }
     }
 
-    public class TestCustomType
-    {
-    }
+    public class TestCustomType { }
 
     public class TestServiceProvider : IServiceProvider
     {
@@ -877,7 +965,11 @@ namespace Take.Blip.Client.UnitTests.Activation
             return Task.CompletedTask;
         }
 
-        public Task SetStateAsync(Identity identity, string state, CancellationToken cancellationToken)
+        public Task SetStateAsync(
+            Identity identity,
+            string state,
+            CancellationToken cancellationToken
+        )
         {
             return Task.CompletedTask;
         }
@@ -933,7 +1025,10 @@ namespace Take.Blip.Client.UnitTests.Activation
 
         public static IDictionary<string, object> Settings;
 
-        public Task<IStartable> CreateAsync(IServiceProvider serviceProvider, IDictionary<string, object> settings)
+        public Task<IStartable> CreateAsync(
+            IServiceProvider serviceProvider,
+            IDictionary<string, object> settings
+        )
         {
             ServiceProvider = serviceProvider;
             Settings = settings;
@@ -943,7 +1038,10 @@ namespace Take.Blip.Client.UnitTests.Activation
 
     public class SimpleMessageReceiver : IMessageReceiver
     {
-        public Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = default(CancellationToken))
+        public Task ReceiveAsync(
+            Message envelope,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             throw new NotImplementedException();
         }
@@ -994,7 +1092,10 @@ namespace Take.Blip.Client.UnitTests.Activation
             Settings = settings;
         }
 
-        public Task ReceiveAsync(Command envelope, CancellationToken cancellationToken = default(CancellationToken))
+        public Task ReceiveAsync(
+            Command envelope,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             throw new NotImplementedException();
         }

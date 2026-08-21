@@ -4,9 +4,9 @@ using HandlebarsDotNet;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Serilog;
+using Shouldly;
 using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Xunit;
-using Shouldly;
 
 namespace Take.Blip.Builder.UnitTests.Actions
 {
@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         private ExecuteTemplateAction GetTarget()
         {
-            return new ExecuteTemplateAction(Handlebars,Substitute.For<ILogger>());
+            return new ExecuteTemplateAction(Handlebars, Substitute.For<ILogger>());
         }
 
         [Fact]
@@ -25,92 +25,125 @@ namespace Take.Blip.Builder.UnitTests.Actions
             //Arrange
             var variableName = "TestName";
             var outputVariable = "";
-            Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);     
-            
+            Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
+
             var templateResult = "TemplateResult";
             var handlebarsTemplate = Substitute.For<HandlebarsTemplate<object, object>>();
             handlebarsTemplate(Arg.Any<object>()).Returns("TemplateResult");
             Handlebars.Compile(Arg.Any<string>()).Returns(handlebarsTemplate);
-            
+
             var settings = new ExecuteTemplateSettings
             {
-                InputVariables = new []{ nameof(variableName) },
+                InputVariables = new[] { nameof(variableName) },
                 Template = $"Name: {{{{{nameof(variableName)}}}}}",
-                OutputVariable = outputVariable
+                OutputVariable = outputVariable,
             };
-            
+
             //Act
             var action = GetTarget();
             await action.ExecuteAsync(Context, settings, CancellationToken);
-            
+
             // Assert
             Handlebars.Received(1).Compile(settings.Template);
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Is(templateResult), CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Is(templateResult),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
         }
-        
+
         [Fact]
         public async Task ExecuteTemplateWithObjectAsPropertyShouldSuccess()
         {
             //Arrange
-            var variableObj = "{ \"people\": [{\"name\": \"TestName\", \"city\": \"Aracaju\"}, {\"name\": \"TestName2\", \"city\": \"Bahia\"}] }";
+            var variableObj =
+                "{ \"people\": [{\"name\": \"TestName\", \"city\": \"Aracaju\"}, {\"name\": \"TestName2\", \"city\": \"Bahia\"}] }";
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableObj), CancellationToken).Returns(variableObj);
-            
+
             var templateResult = "TemplateResult";
             var handlebarsTemplate = Substitute.For<HandlebarsTemplate<object, object>>();
             handlebarsTemplate(Arg.Any<object>()).Returns("TemplateResult");
             Handlebars.Compile(Arg.Any<string>()).Returns(handlebarsTemplate);
-            
+
             var settings = new ExecuteTemplateSettings
             {
-                InputVariables = new []{ nameof(variableObj) },
+                InputVariables = new[] { nameof(variableObj) },
                 Template = "Names: {{#each people}}{{name}} living in {{city}} {{/each}}",
-                OutputVariable = outputVariable
+                OutputVariable = outputVariable,
             };
-            
+
             //Act
             var action = GetTarget();
             await action.ExecuteAsync(Context, settings, CancellationToken);
-            
+
             // Assert
             Handlebars.Received(1).Compile(settings.Template);
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Is(templateResult), CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Is(templateResult),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
         }
-        
+
         [Fact]
         public async Task ExecuteTemplateWithObjectAndStringVariablesAsPropertyShouldSuccess()
         {
             //Arrange
             var variableName = "Peoples:";
-            var variableObj = "{ \"people\": [{\"name\": \"TestName\", \"city\": \"London\"}, {\"name\": \"TestName2\", \"city\": \"Manchester\"}] }";
-            var arrayVariable = "[{\"city\": \"London\", \"street\": \"Baker Street\"},{\"city\": \"Manchester\", \"street\": \"Oxford Road\"}]";
+            var variableObj =
+                "{ \"people\": [{\"name\": \"TestName\", \"city\": \"London\"}, {\"name\": \"TestName2\", \"city\": \"Manchester\"}] }";
+            var arrayVariable =
+                "[{\"city\": \"London\", \"street\": \"Baker Street\"},{\"city\": \"Manchester\", \"street\": \"Oxford Road\"}]";
             var array = "[\"uno\", \"dos\", \"tres\"]";
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
             Context.GetVariableAsync(nameof(variableObj), CancellationToken).Returns(variableObj);
-            Context.GetVariableAsync(nameof(arrayVariable), CancellationToken).Returns(arrayVariable);
+            Context
+                .GetVariableAsync(nameof(arrayVariable), CancellationToken)
+                .Returns(arrayVariable);
             Context.GetVariableAsync(nameof(array), CancellationToken).Returns(array);
-            
+
             var templateResult = "TemplateResult";
             var handlebarsTemplate = Substitute.For<HandlebarsTemplate<object, object>>();
             handlebarsTemplate(Arg.Any<object>()).Returns("TemplateResult");
             Handlebars.Compile(Arg.Any<string>()).Returns(handlebarsTemplate);
             var settings = new ExecuteTemplateSettings
             {
-                InputVariables = new []{ nameof(variableName), nameof(variableObj), nameof(arrayVariable), nameof(array) },
-                Template = $"{{{{{nameof(variableName)}}}}} {{{{#each people}}}}{{{{name}}}} living in {{{{city}}}} {{{{/each}}}} {{{{{nameof(arrayVariable)}}}}}",
-                OutputVariable = outputVariable
+                InputVariables = new[]
+                {
+                    nameof(variableName),
+                    nameof(variableObj),
+                    nameof(arrayVariable),
+                    nameof(array),
+                },
+                Template =
+                    $"{{{{{nameof(variableName)}}}}} {{{{#each people}}}}{{{{name}}}} living in {{{{city}}}} {{{{/each}}}} {{{{{nameof(arrayVariable)}}}}}",
+                OutputVariable = outputVariable,
             };
-            
+
             //Act
             var action = GetTarget();
             await action.ExecuteAsync(Context, settings, CancellationToken);
-            
+
             // Assert
             Handlebars.Received(1).Compile(settings.Template);
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Is(templateResult), CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Is(templateResult),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
         }
-        
+
         [Fact]
         public async Task ExecuteTemplateErrorHandlebarsParseShouldFail()
         {
@@ -118,14 +151,18 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var variableName = "TestName";
             var outputVariable = "";
             Context.GetVariableAsync(nameof(variableName), CancellationToken).Returns(variableName);
-            Handlebars.Compile("").ThrowsForAnyArgs(new HandlebarsParserException("could not be converted to an expression"));
+            Handlebars
+                .Compile("")
+                .ThrowsForAnyArgs(
+                    new HandlebarsParserException("could not be converted to an expression")
+                );
             var settings = new ExecuteTemplateSettings
             {
-                InputVariables = new []{ nameof(variableName) },
+                InputVariables = new[] { nameof(variableName) },
                 Template = $"Name: {{{{nameof(variableName)}}}}",
-                OutputVariable = outputVariable
+                OutputVariable = outputVariable,
             };
-            
+
             //Act
             var action = GetTarget();
             try
@@ -136,11 +173,18 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 ex.Message.ShouldContain("could not be converted to an expression");
             }
-            
+
             Handlebars.Received(1).Compile(settings.Template);
-            await Context.Received(0).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(0)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
         }
-        
+
         [Fact]
         public async Task ExecuteTemplateErrorHandlebarsExecutionShouldFail()
         {
@@ -151,11 +195,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             Handlebars.Compile("").ThrowsForAnyArgs(new Exception("Error executing the template"));
             var settings = new ExecuteTemplateSettings
             {
-                InputVariables = new []{ nameof(variableName) },
+                InputVariables = new[] { nameof(variableName) },
                 Template = $"Name: {{{{nameof(variableName)}}}}",
-                OutputVariable = outputVariable
+                OutputVariable = outputVariable,
             };
-            
+
             //Act
             var action = GetTarget();
             try
@@ -166,9 +210,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 ex.Message.ShouldContain("Error executing the template");
             }
-            
+
             Handlebars.Received(1).Compile(settings.Template);
-            await Context.Received(0).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(0)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
         }
     }
 }

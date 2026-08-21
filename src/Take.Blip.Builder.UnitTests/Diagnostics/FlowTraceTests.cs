@@ -1,12 +1,12 @@
-﻿using Lime.Messaging.Contents;
-using Lime.Protocol;
-using Newtonsoft.Json.Linq;
-using NSubstitute;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
+using Newtonsoft.Json.Linq;
+using NSubstitute;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Models;
 using Xunit;
@@ -26,7 +26,9 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+            Context
+                .GetVariableAsync(variableName, Arg.Any<CancellationToken>())
+                .Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -43,13 +45,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -60,23 +56,23 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
+                                ),
+                            },
+                        },
+                    },
                 },
                 Configuration = new Dictionary<string, string>
                 {
                     { "TraceMode", "All" },
                     { "TraceTargetType", "Http" },
-                    { "TraceTarget", traceUrl }
-                }
+                    { "TraceTarget", traceUrl },
+                },
             };
             var target = GetTarget();
 
@@ -86,18 +82,21 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Assert
             await Task.Delay(100); // The trace is asynchronous
 
-            await TraceProcessor.Received(1).ProcessTraceAsync(
-                Arg.Is<TraceEvent>(e =>
-                    e.Settings.TargetType == TraceTargetType.Http &&
-                    e.Settings.Target == traceUrl &&
-                    e.Trace.Owner == ApplicationIdentity &&
-                    e.Trace.User == UserIdentity.ToString() &&
-                    e.Trace.Input == input &&
-                    e.Trace.States.Count == 2 &&
-                    e.Trace.States.ToArray()[0].Id == "root" &&
-                    e.Trace.States.ToArray()[1].Id == "ping"),
-
-                Arg.Any<CancellationToken>());
+            await TraceProcessor
+                .Received(1)
+                .ProcessTraceAsync(
+                    Arg.Is<TraceEvent>(e =>
+                        e.Settings.TargetType == TraceTargetType.Http
+                        && e.Settings.Target == traceUrl
+                        && e.Trace.Owner == ApplicationIdentity
+                        && e.Trace.User == UserIdentity.ToString()
+                        && e.Trace.Input == input
+                        && e.Trace.States.Count == 2
+                        && e.Trace.States.ToArray()[0].Id == "root"
+                        && e.Trace.States.ToArray()[1].Id == "ping"
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -109,7 +108,9 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+            Context
+                .GetVariableAsync(variableName, Arg.Any<CancellationToken>())
+                .Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -126,13 +127,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -143,23 +138,23 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
+                                ),
+                            },
+                        },
+                    },
                 },
                 Configuration = new Dictionary<string, string>
                 {
                     { "TraceMode", "All" },
                     { "TraceTargetType", "Lime" },
-                    { "TraceTarget", traceIndentity }
-                }
+                    { "TraceTarget", traceIndentity },
+                },
             };
             var target = GetTarget();
 
@@ -169,17 +164,21 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Assert
             await Task.Delay(100); // The trace is asynchronous
 
-            await TraceProcessor.Received(1).ProcessTraceAsync(
-                Arg.Is<TraceEvent>(e =>
-                    e.Settings.TargetType == TraceTargetType.Lime &&
-                    e.Settings.Target == traceIndentity &&
-                    e.Trace.Owner == ApplicationIdentity &&
-                    e.Trace.User == UserIdentity.ToString() &&
-                    e.Trace.Input == input &&
-                    e.Trace.States.Count == 2 &&
-                    e.Trace.States.ToArray()[0].Id == "root" &&
-                    e.Trace.States.ToArray()[1].Id == "ping"),
-                Arg.Any<CancellationToken>());
+            await TraceProcessor
+                .Received(1)
+                .ProcessTraceAsync(
+                    Arg.Is<TraceEvent>(e =>
+                        e.Settings.TargetType == TraceTargetType.Lime
+                        && e.Settings.Target == traceIndentity
+                        && e.Trace.Owner == ApplicationIdentity
+                        && e.Trace.User == UserIdentity.ToString()
+                        && e.Trace.Input == input
+                        && e.Trace.States.Count == 2
+                        && e.Trace.States.ToArray()[0].Id == "root"
+                        && e.Trace.States.ToArray()[1].Id == "ping"
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -189,7 +188,9 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+            Context
+                .GetVariableAsync(variableName, Arg.Any<CancellationToken>())
+                .Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -206,74 +207,68 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        },
+                        Outputs = new[] { new Output { StateId = "ping" } },
                         OutputActions = new[]
                         {
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
+                                ),
                             },
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
+                                ),
                             },
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
+                                ),
+                            },
                         },
                         AfterStateChangedActions = new[]
                         {
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
+                                ),
                             },
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -284,48 +279,48 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
+                                ),
+                            },
                         },
                         OutputActions = new[]
                         {
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
+                                ),
                             },
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
+                                ),
+                            },
+                        },
+                    },
                 },
                 Configuration = new Dictionary<string, string>
                 {
                     { "TraceMode", "All" },
                     { "TraceTargetType", "Lime" },
-                    { "TraceTarget", traceIndentity }
-                }
+                    { "TraceTarget", traceIndentity },
+                },
             };
             var target = GetTarget();
 
@@ -337,23 +332,27 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Assert
             await Task.Delay(100); // The trace is asynchronous
 
-            await TraceProcessor.Received(1).ProcessTraceAsync(
-                Arg.Is<TraceEvent>(e =>
-                    e.Settings.TargetType == TraceTargetType.Lime &&
-                    e.Settings.Target == traceIndentity &&
-                    e.Trace.Owner == ApplicationIdentity &&
-                    e.Trace.User == UserIdentity.ToString() &&
-                    e.Trace.Input == input &&
-                    e.Trace.States.Count == 2 &&
-                    e.Trace.States.ToArray()[0].Id == "root" &&
-                    e.Trace.States.ToArray()[0].InputActions.Count == 0 &&
-                    e.Trace.States.ToArray()[0].OutputActions.Count == 3 &&
-                    e.Trace.States.ToArray()[0].AfterStateChangedActions.Count == 2 &&
-                    e.Trace.States.ToArray()[1].Id == "ping" &&
-                    e.Trace.States.ToArray()[1].InputActions.Count == 1 &&
-                    e.Trace.States.ToArray()[1].OutputActions.Count == 0 &&
-                    e.Trace.States.ToArray()[1].AfterStateChangedActions.Count == 0),
-                Arg.Any<CancellationToken>());
+            await TraceProcessor
+                .Received(1)
+                .ProcessTraceAsync(
+                    Arg.Is<TraceEvent>(e =>
+                        e.Settings.TargetType == TraceTargetType.Lime
+                        && e.Settings.Target == traceIndentity
+                        && e.Trace.Owner == ApplicationIdentity
+                        && e.Trace.User == UserIdentity.ToString()
+                        && e.Trace.Input == input
+                        && e.Trace.States.Count == 2
+                        && e.Trace.States.ToArray()[0].Id == "root"
+                        && e.Trace.States.ToArray()[0].InputActions.Count == 0
+                        && e.Trace.States.ToArray()[0].OutputActions.Count == 3
+                        && e.Trace.States.ToArray()[0].AfterStateChangedActions.Count == 2
+                        && e.Trace.States.ToArray()[1].Id == "ping"
+                        && e.Trace.States.ToArray()[1].InputActions.Count == 1
+                        && e.Trace.States.ToArray()[1].OutputActions.Count == 0
+                        && e.Trace.States.ToArray()[1].AfterStateChangedActions.Count == 0
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -363,7 +362,9 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+            Context
+                .GetVariableAsync(variableName, Arg.Any<CancellationToken>())
+                .Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -380,49 +381,43 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        },
+                        Outputs = new[] { new Output { StateId = "ping" } },
                         OutputActions = new[]
                         {
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
+                                ),
                             },
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
+                                ),
                             },
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
+                                ),
+                            },
+                        },
                     },
                     new State
                     {
@@ -432,62 +427,62 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
+                                ),
+                            },
                         },
                         OutputActions = new[]
                         {
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
+                                ),
                             },
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
+                                ),
+                            },
                         },
                         AfterStateChangedActions = new[]
                         {
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
+                                ),
+                            },
+                        },
+                    },
                 },
                 Configuration = new Dictionary<string, string>
                 {
                     { "TraceMode", "All" },
                     { "TraceTargetType", "Lime" },
-                    { "TraceTarget", traceIndentity }
-                }
+                    { "TraceTarget", traceIndentity },
+                },
             };
             var target = GetTarget();
 
@@ -499,23 +494,27 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Assert
             await Task.Delay(100); // The trace is asynchronous
 
-            await TraceProcessor.Received(1).ProcessTraceAsync(
-                Arg.Is<TraceEvent>(e =>
-                    e.Settings.TargetType == TraceTargetType.Lime &&
-                    e.Settings.Target == traceIndentity &&
-                    e.Trace.Owner == ApplicationIdentity &&
-                    e.Trace.User == UserIdentity.ToString() &&
-                    e.Trace.Input == input &&
-                    e.Trace.States.Count == 2 &&
-                    e.Trace.States.ToArray()[0].Id == "root" &&
-                    e.Trace.States.ToArray()[0].InputActions.Count == 0 &&
-                    e.Trace.States.ToArray()[0].OutputActions.Count == 3 &&
-                    e.Trace.States.ToArray()[0].AfterStateChangedActions.Count == 0 &&
-                    e.Trace.States.ToArray()[1].Id == "ping" &&
-                    e.Trace.States.ToArray()[1].InputActions.Count == 1 &&
-                    e.Trace.States.ToArray()[1].OutputActions.Count == 2 &&
-                    e.Trace.States.ToArray()[1].AfterStateChangedActions.Count == 1),
-                Arg.Any<CancellationToken>());
+            await TraceProcessor
+                .Received(1)
+                .ProcessTraceAsync(
+                    Arg.Is<TraceEvent>(e =>
+                        e.Settings.TargetType == TraceTargetType.Lime
+                        && e.Settings.Target == traceIndentity
+                        && e.Trace.Owner == ApplicationIdentity
+                        && e.Trace.User == UserIdentity.ToString()
+                        && e.Trace.Input == input
+                        && e.Trace.States.Count == 2
+                        && e.Trace.States.ToArray()[0].Id == "root"
+                        && e.Trace.States.ToArray()[0].InputActions.Count == 0
+                        && e.Trace.States.ToArray()[0].OutputActions.Count == 3
+                        && e.Trace.States.ToArray()[0].AfterStateChangedActions.Count == 0
+                        && e.Trace.States.ToArray()[1].Id == "ping"
+                        && e.Trace.States.ToArray()[1].InputActions.Count == 1
+                        && e.Trace.States.ToArray()[1].OutputActions.Count == 2
+                        && e.Trace.States.ToArray()[1].AfterStateChangedActions.Count == 1
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -535,7 +534,9 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             var messageType = "text/plain";
             var variableName = "variableName1";
             var variableValue = "OutputVariable value 1";
-            Context.GetVariableAsync(variableName, Arg.Any<CancellationToken>()).Returns(variableValue);
+            Context
+                .GetVariableAsync(variableName, Arg.Any<CancellationToken>())
+                .Returns(variableValue);
 
             var messageContent = "Hello {{variableName1}}!";
             var expectedMessageContent = $"Hello {variableValue}!";
@@ -550,13 +551,7 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
@@ -567,17 +562,17 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                             new Action
                             {
                                 Type = "SendMessage",
-                                Settings = new JRaw (
+                                Settings = new JRaw(
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", messageContent }
+                                        { "content", messageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -589,18 +584,22 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Assert
             await Task.Delay(100); // The trace is asynchronous
 
-            await TraceProcessor.Received(1).ProcessTraceAsync(
-                Arg.Is<TraceEvent>(e =>
-                    e.Settings.Mode == TraceMode.All &&
-                    e.Settings.TargetType == TraceTargetType.Lime &&
-                    e.Settings.Target == traceIdentity &&
-                    e.Trace.Owner == ApplicationIdentity &&
-                    e.Trace.User == UserIdentity.ToString() &&
-                    e.Trace.Input == input &&
-                    e.Trace.States.Count == 2 &&
-                    e.Trace.States.ToArray()[0].Id == "root" &&
-                    e.Trace.States.ToArray()[1].Id == "ping"),
-                Arg.Any<CancellationToken>());
+            await TraceProcessor
+                .Received(1)
+                .ProcessTraceAsync(
+                    Arg.Is<TraceEvent>(e =>
+                        e.Settings.Mode == TraceMode.All
+                        && e.Settings.TargetType == TraceTargetType.Lime
+                        && e.Settings.Target == traceIdentity
+                        && e.Trace.Owner == ApplicationIdentity
+                        && e.Trace.User == UserIdentity.ToString()
+                        && e.Trace.Input == input
+                        && e.Trace.States.Count == 2
+                        && e.Trace.States.ToArray()[0].Id == "root"
+                        && e.Trace.States.ToArray()[1].Id == "ping"
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -631,20 +630,12 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
                         Id = "ping",
-                        Input = new Input{
-                            Bypass = true
-                        },
+                        Input = new Input { Bypass = true },
                         InputActions = new[]
                         {
                             new Action
@@ -654,18 +645,12 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", pingMessageContent }
+                                        { "content", pingMessageContent },
                                     }
-                                )
-                            }
+                                ),
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "pong"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "pong" } },
                     },
                     new State
                     {
@@ -680,13 +665,13 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", pongMessageContent }
+                                        { "content", pongMessageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -698,19 +683,23 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             // Assert
             await Task.Delay(100); // The trace is asynchronous
 
-            await TraceProcessor.Received(1).ProcessTraceAsync(
-                Arg.Is<TraceEvent>(e =>
-                    e.Settings.Mode == TraceMode.All &&
-                    e.Settings.TargetType == TraceTargetType.Lime &&
-                    e.Settings.Target == traceIdentity &&
-                    e.Trace.Owner == ApplicationIdentity &&
-                    e.Trace.User == UserIdentity.ToString() &&
-                    e.Trace.Input == input &&
-                    e.Trace.States.Count == 3 &&
-                    e.Trace.States.ToArray()[0].Id == "root" &&
-                    e.Trace.States.ToArray()[1].Id == "ping" &&
-                    e.Trace.States.ToArray()[2].Id == "pong"),
-                Arg.Any<CancellationToken>());
+            await TraceProcessor
+                .Received(1)
+                .ProcessTraceAsync(
+                    Arg.Is<TraceEvent>(e =>
+                        e.Settings.Mode == TraceMode.All
+                        && e.Settings.TargetType == TraceTargetType.Lime
+                        && e.Settings.Target == traceIdentity
+                        && e.Trace.Owner == ApplicationIdentity
+                        && e.Trace.User == UserIdentity.ToString()
+                        && e.Trace.Input == input
+                        && e.Trace.States.Count == 3
+                        && e.Trace.States.ToArray()[0].Id == "root"
+                        && e.Trace.States.ToArray()[1].Id == "ping"
+                        && e.Trace.States.ToArray()[2].Id == "pong"
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -741,20 +730,12 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                         Id = "root",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "ping"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "ping" } },
                     },
                     new State
                     {
                         Id = "ping",
-                        Input = new Input{
-                            Bypass = true
-                        },
+                        Input = new Input { Bypass = true },
                         InputActions = new[]
                         {
                             new Action
@@ -764,18 +745,12 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", pingMessageContent }
+                                        { "content", pingMessageContent },
                                     }
-                                )
-                            }
+                                ),
+                            },
                         },
-                        Outputs = new[]
-                        {
-                            new Output
-                            {
-                                StateId = "pong"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "pong" } },
                     },
                     new State
                     {
@@ -790,13 +765,13 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
                                     new JObject()
                                     {
                                         { "type", messageType },
-                                        { "content", pongMessageContent }
+                                        { "content", pongMessageContent },
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
+                                ),
+                            },
+                        },
+                    },
+                },
             };
             var target = GetTarget();
 
@@ -807,25 +782,26 @@ namespace Take.Blip.Builder.UnitTests.Diagnostics
             {
                 await target.ProcessInputAsync(Message, flow, CancellationToken);
             }
-            catch
-            {
-
-            }
+            catch { }
             // Assert
             await Task.Delay(100); // The trace is asynchronous
 
-            await TraceProcessor.Received(1).ProcessTraceAsync(
-                Arg.Is<TraceEvent>(e =>
-                    e.Settings.Mode == TraceMode.All &&
-                    e.Settings.TargetType == TraceTargetType.Lime &&
-                    e.Settings.Target == traceIdentity &&
-                    e.Trace.Owner == ApplicationIdentity &&
-                    e.Trace.User == UserIdentity.ToString() &&
-                    e.Trace.Input == input &&
-                    e.Trace.States.Count == 2 &&
-                    e.Trace.States.ToArray()[0].Id == "root" &&
-                    e.Trace.States.ToArray()[1].Id == "ping"),
-                Arg.Any<CancellationToken>());
+            await TraceProcessor
+                .Received(1)
+                .ProcessTraceAsync(
+                    Arg.Is<TraceEvent>(e =>
+                        e.Settings.Mode == TraceMode.All
+                        && e.Settings.TargetType == TraceTargetType.Lime
+                        && e.Settings.Target == traceIdentity
+                        && e.Trace.Owner == ApplicationIdentity
+                        && e.Trace.User == UserIdentity.ToString()
+                        && e.Trace.Input == input
+                        && e.Trace.States.Count == 2
+                        && e.Trace.States.ToArray()[0].Id == "root"
+                        && e.Trace.States.ToArray()[1].Id == "ping"
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
         }
     }
 }

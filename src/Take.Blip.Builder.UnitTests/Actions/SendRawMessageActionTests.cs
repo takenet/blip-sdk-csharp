@@ -41,7 +41,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new SendRawMessageSettings()
             {
                 Type = PlainText.MIME_TYPE,
-                RawContent = content
+                RawContent = content,
             };
             var target = GetTarget();
 
@@ -49,8 +49,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Sender.Received(1).SendMessageAsync(Arg.Is<Message>(m =>
-                m.To.Equals(From) && m.Type == PlainText.MediaType && m.Content.ToString().Equals(content)), CancellationToken);
+            await Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.To.Equals(From)
+                        && m.Type == PlainText.MediaType
+                        && m.Content.ToString().Equals(content)
+                    ),
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -63,19 +71,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 Scope = SelectScope.Immediate,
                 Options = new[]
                 {
-                    new SelectOption
-                    {
-                        Text = "This is the first option"
-                    },
-                    new SelectOption
-                    {
-                        Text = "This is the second option"
-                    },
-                    new SelectOption
-                    {
-                        Text = "This is the third option"
-                    }
-                }
+                    new SelectOption { Text = "This is the first option" },
+                    new SelectOption { Text = "This is the second option" },
+                    new SelectOption { Text = "This is the third option" },
+                },
             };
 
             var content = DocumentSerializer.Serialize(select);
@@ -83,7 +82,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new SendRawMessageSettings
             {
                 Type = Select.MIME_TYPE,
-                RawContent = content
+                RawContent = content,
             };
             var target = GetTarget();
 
@@ -91,18 +90,22 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Sender.Received(1).SendMessageAsync(
-                Arg.Is<Message>(m =>
-                    m.To.ToIdentity().Equals(From)
-                    && m.Type == Select.MediaType
-                    && m.Content is Select
-                    && ((Select)m.Content).Text == select.Text
-                    && ((Select)m.Content).Scope == SelectScope.Immediate
-                    && ((Select)m.Content).Options.Length == select.Options.Length
-                    && ((Select)m.Content).Options[0].Text == select.Options[0].Text
-                    && ((Select)m.Content).Options[1].Text == select.Options[1].Text
-                    && ((Select)m.Content).Options[2].Text == select.Options[2].Text),
-                CancellationToken);
+            await Sender
+                .Received(1)
+                .SendMessageAsync(
+                    Arg.Is<Message>(m =>
+                        m.To.ToIdentity().Equals(From)
+                        && m.Type == Select.MediaType
+                        && m.Content is Select
+                        && ((Select)m.Content).Text == select.Text
+                        && ((Select)m.Content).Scope == SelectScope.Immediate
+                        && ((Select)m.Content).Options.Length == select.Options.Length
+                        && ((Select)m.Content).Options[0].Text == select.Options[0].Text
+                        && ((Select)m.Content).Options[1].Text == select.Options[1].Text
+                        && ((Select)m.Content).Options[2].Text == select.Options[2].Text
+                    ),
+                    CancellationToken
+                );
         }
     }
 }

@@ -8,14 +8,18 @@ namespace Take.Blip.Builder
     /// <inheritdoc/>
     public class InputExpirationCount : IInputExpirationCount
     {
-        private readonly ConcurrentDictionary<FromToIdentityInputExpirationPair, long> _inputExpirationCounts;
+        private readonly ConcurrentDictionary<
+            FromToIdentityInputExpirationPair,
+            long
+        > _inputExpirationCounts;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public InputExpirationCount()
         {
-            _inputExpirationCounts = new ConcurrentDictionary<FromToIdentityInputExpirationPair, long>();
+            _inputExpirationCounts =
+                new ConcurrentDictionary<FromToIdentityInputExpirationPair, long>();
         }
 
         /// <inheritdoc/>
@@ -42,7 +46,7 @@ namespace Take.Blip.Builder
             return new FromToIdentityInputExpirationPair()
             {
                 FromIdentity = message.To.ToIdentity(),
-                ToIdentity = message.From.ToIdentity()
+                ToIdentity = message.From.ToIdentity(),
             };
         }
     }

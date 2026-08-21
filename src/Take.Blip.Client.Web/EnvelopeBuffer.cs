@@ -11,16 +11,18 @@ namespace Take.Blip.Client.Web
 
         public EnvelopeBuffer()
         {
-            _buffer = new BufferBlock<Envelope>(new ExecutionDataflowBlockOptions
-            {
-                MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded
-            });
+            _buffer = new BufferBlock<Envelope>(
+                new ExecutionDataflowBlockOptions
+                {
+                    MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
+                }
+            );
         }
 
-        public Task SendAsync(Envelope envelope, CancellationToken cancellationToken)
-            => _buffer.SendAsync(envelope, cancellationToken);
+        public Task SendAsync(Envelope envelope, CancellationToken cancellationToken) =>
+            _buffer.SendAsync(envelope, cancellationToken);
 
-        public Task<Envelope> ReceiveAsync(CancellationToken cancellationToken)
-            => _buffer.ReceiveAsync(cancellationToken);
+        public Task<Envelope> ReceiveAsync(CancellationToken cancellationToken) =>
+            _buffer.ReceiveAsync(cancellationToken);
     }
 }

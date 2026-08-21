@@ -19,10 +19,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 From = From,
                 To = To,
-                Content = new PlainText()
-                {
-                    Text = "Hello BLiP"
-                }
+                Content = new PlainText() { Text = "Hello BLiP" },
             };
             Input = new LazyInput(
                 Message,
@@ -31,18 +28,19 @@ namespace Take.Blip.Builder.UnitTests.Actions
                 new DocumentSerializer(new DocumentTypeResolver()),
                 new EnvelopeSerializer(new DocumentTypeResolver()),
                 null,
-                CancellationToken);
+                CancellationToken
+            );
             Context.Input.Returns(Input);
             Context.OwnerIdentity.Returns(OwnerIdentity);
             Context.UserIdentity.Returns(UserIdentity);
         }
-        
+
         public Node From { get; }
 
         public Node To { get; }
 
         public Message Message { get; }
-        
+
         public LazyInput Input { get; }
     }
 }

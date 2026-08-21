@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0</TargetFrameworks>
@@ -13,5 +12,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
-
 </Project>

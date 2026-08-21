@@ -18,17 +18,21 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         Task ForwardMessageToAgentAsync(Message message, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Check if a message is a reply from a BLIP HelpDesks application 
+        /// Check if a message is a reply from a BLIP HelpDesks application
         /// </summary>
         /// <param name="message">The Message that must be analyzed</param>
         bool IsFromAgent(Message message);
 
         /// <summary>
-        /// Check if a message is a reply from a BLIP HelpDesks application 
+        /// Check if a message is a reply from a BLIP HelpDesks application
         /// </summary>
         /// <param name="customerIdentity">The customer identity</param>
         /// <param name="context">The document to be send to agent as an initial context</param>
-        Task<Ticket> CreateTicketAsync(Identity customerIdentity, Document context, CancellationToken cancellationToken);
+        Task<Ticket> CreateTicketAsync(
+            Identity customerIdentity,
+            Document context,
+            CancellationToken cancellationToken
+        );
 
         /// <summary>
         /// Create a ticket.
@@ -44,7 +48,6 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         /// <param name="ticketId">The Ticket ID to be closed</param>
         Task CloseTicketAsUser(string ticketId, CancellationToken cancellationToken);
 
-
         /// <summary>
         /// Close ticket as a user without Desk send closed ticket redirect message to builder
         /// </summary>
@@ -56,14 +59,20 @@ namespace Take.Blip.Client.Extensions.HelpDesk
         /// </summary>
         /// <param name="customerIdentity">The customer identity</param>
         [Obsolete("Use 'GetCustomerTicketAsync' instead")]
-        Task<Ticket> GetUserOpenTicketsAsync(Identity customerIdentity, CancellationToken cancellationToken);
-        
+        Task<Ticket> GetUserOpenTicketsAsync(
+            Identity customerIdentity,
+            CancellationToken cancellationToken
+        );
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="customerIdentity"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Ticket> GetCustomerActiveTicketAsync(Identity customerIdentity, CancellationToken cancellationToken);
+        Task<Ticket> GetCustomerActiveTicketAsync(
+            Identity customerIdentity,
+            CancellationToken cancellationToken
+        );
     }
 }

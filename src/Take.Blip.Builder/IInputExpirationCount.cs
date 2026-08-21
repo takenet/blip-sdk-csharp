@@ -14,6 +14,7 @@ namespace Take.Blip.Builder
         /// <param name="message"></param>
         /// <returns></returns>
         Task<bool> TryRemoveAsync(Message message);
+
         /// <summary>
         /// Add to the counter.
         /// </summary>

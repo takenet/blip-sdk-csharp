@@ -9,13 +9,19 @@ namespace Take.Blip.Client.Receivers
     {
         private Func<Notification, CancellationToken, Task> OnNotificationReceived { get; }
 
-        public LambdaNotificationReceiver(Func<Notification, CancellationToken, Task> onNotificationReceived)
+        public LambdaNotificationReceiver(
+            Func<Notification, CancellationToken, Task> onNotificationReceived
+        )
         {
-            if (onNotificationReceived == null) throw new ArgumentNullException(nameof(onNotificationReceived));
+            if (onNotificationReceived == null)
+                throw new ArgumentNullException(nameof(onNotificationReceived));
             OnNotificationReceived = onNotificationReceived;
         }
 
-        public Task ReceiveAsync(Notification notification, CancellationToken cancellationToken = default(CancellationToken))
+        public Task ReceiveAsync(
+            Notification notification,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             return OnNotificationReceived?.Invoke(notification, cancellationToken);
         }

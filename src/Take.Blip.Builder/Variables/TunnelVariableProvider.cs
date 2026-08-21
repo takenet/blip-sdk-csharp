@@ -14,33 +14,45 @@ namespace Take.Blip.Builder.Variables
         {
             _tunnelExtension = tunnelExtension;
         }
-        
+
         public VariableSource Source => VariableSource.Tunnel;
-        
-        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+
+        public async Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
-            var tunnel = await _tunnelExtension.TryGetTunnelAsync(context.Input.Message, cancellationToken);
-            if (tunnel == null) return null;
-            
+            var tunnel = await _tunnelExtension.TryGetTunnelAsync(
+                context.Input.Message,
+                cancellationToken
+            );
+            if (tunnel == null)
+                return null;
+
             return GetVariable(name, tunnel, context.Input.Message.From.ToIdentity());
         }
 
-        private static string GetVariable(string name, Tunnel tunnelInformation, Identity tunnelIdentity)
+        private static string GetVariable(
+            string name,
+            Tunnel tunnelInformation,
+            Identity tunnelIdentity
+        )
         {
             switch (name)
             {
                 case "owner":
                     return tunnelInformation.Owner;
-                
+
                 case "originator":
                     return tunnelInformation.Originator;
-                
+
                 case "destination":
                     return tunnelInformation.Destination;
-                
+
                 case "identity":
                     return tunnelIdentity;
-                
+
                 default:
                     return null;
             }

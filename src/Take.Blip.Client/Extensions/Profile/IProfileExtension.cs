@@ -1,7 +1,7 @@
-﻿using Lime.Messaging.Contents;
-using Lime.Protocol;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
 
 namespace Take.Blip.Client.Extensions.Profile
 {
@@ -23,7 +23,10 @@ namespace Take.Blip.Client.Extensions.Profile
         /// <param name="persistentMenu"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SetPersistentMenuAsync(DocumentSelect persistentMenu, CancellationToken cancellationToken);
+        Task SetPersistentMenuAsync(
+            DocumentSelect persistentMenu,
+            CancellationToken cancellationToken
+        );
 
         /// <summary>
         /// Deletes the current persistent menu.

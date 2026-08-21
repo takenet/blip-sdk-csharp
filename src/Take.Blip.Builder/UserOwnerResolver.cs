@@ -20,16 +20,22 @@ namespace Take.Blip.Builder
             _applicationIdentity = application.Identity;
         }
 
-        public async Task<UserOwner> GetUserOwnerIdentitiesAsync<T>(T envelope, BuilderConfiguration builderConfiguration, CancellationToken cancellationToken) 
+        public async Task<UserOwner> GetUserOwnerIdentitiesAsync<T>(
+            T envelope,
+            BuilderConfiguration builderConfiguration,
+            CancellationToken cancellationToken
+        )
             where T : Envelope
         {
-            if (envelope == null) throw new ArgumentNullException(nameof(envelope));
+            if (envelope == null)
+                throw new ArgumentNullException(nameof(envelope));
             if (envelope.From == null)
             {
                 throw new ArgumentException("Envelope 'from' is required", nameof(envelope));
             }
-            if (builderConfiguration == null) throw new ArgumentNullException(nameof(builderConfiguration));
-            
+            if (builderConfiguration == null)
+                throw new ArgumentNullException(nameof(builderConfiguration));
+
             Identity userIdentity;
             Identity ownerIdentity;
             Tunnel tunnel = null;

@@ -10,7 +10,12 @@ namespace Take.Blip.Builder.Utils
         private static readonly string STATE_EXECUTION_EVENT_TYPE = "StateExecution";
         private const string AGENT_STATE_PREFIX = "ai-agent:";
 
-        public static LogInput ToActionLog(this IContext context, string title, JObject data, JObject sensitiveData = null)
+        public static LogInput ToActionLog(
+            this IContext context,
+            string title,
+            JObject data,
+            JObject sensitiveData = null
+        )
         {
             var stateId = context.GetCurrentStateId();
             data = EnsureAgentFlag(stateId, data);
@@ -20,21 +25,27 @@ namespace Take.Blip.Builder.Utils
                 Title = title,
                 EventType = ACTION_EXECUTION_EVENT_TYPE,
                 Operation = string.Empty,
-                StateId = stateId,
-                Channel = context.Input.Message?.From?.Domain,
-                IdMessage = context.Input.Message?.Id,
-                From = context.UserIdentity?.ToString(),
-                To = context.OwnerIdentity?.ToString(),
-                OriginalFrom = context.Input.Message?.From,
-                OriginalTo = context.Input.Message?.To,
+                StateId = stateId ?? string.Empty,
+                Channel = context?.Input?.Message?.From?.Domain ?? string.Empty,
+                IdMessage = context?.Input?.Message?.Id ?? string.Empty,
+                From = context?.UserIdentity?.ToString() ?? string.Empty,
+                To = context?.OwnerIdentity?.ToString() ?? string.Empty,
+                OriginalFrom = context?.Input?.Message?.From ?? string.Empty,
+                OriginalTo = context?.Input?.Message?.To ?? string.Empty,
                 Data = data,
                 FlowVersion = context?.Flow?.Version ?? 1,
                 SensitiveData = sensitiveData,
-                FlowId = context?.Flow?.Id
+                FlowId = context?.Flow?.Id ?? string.Empty,
             };
         }
 
-        public static LogInput ToStateLog(this IContext context, string title, string stateId, JObject data, JObject sensitiveData = null)
+        public static LogInput ToStateLog(
+            this IContext context,
+            string title,
+            string stateId,
+            JObject data,
+            JObject sensitiveData = null
+        )
         {
             data = EnsureAgentFlag(stateId, data);
 
@@ -53,7 +64,7 @@ namespace Take.Blip.Builder.Utils
                 Data = data,
                 FlowVersion = context?.Flow?.Version ?? 1,
                 SensitiveData = sensitiveData,
-                FlowId = context?.Flow?.Id
+                FlowId = context?.Flow?.Id,
             };
         }
 
@@ -63,7 +74,8 @@ namespace Take.Blip.Builder.Utils
             Message message,
             Identity userIdentity,
             Identity ownerIdentity,
-            JObject data)
+            JObject data
+        )
         {
             data = EnsureAgentFlag(stateId, data);
 
@@ -81,7 +93,7 @@ namespace Take.Blip.Builder.Utils
                 OriginalTo = message?.To,
                 Data = data,
                 FlowVersion = 1,
-                FlowId = null
+                FlowId = null,
             };
         }
 
@@ -90,7 +102,6 @@ namespace Take.Blip.Builder.Utils
             if (stateId == null || !stateId.StartsWith(AGENT_STATE_PREFIX))
             {
                 return data;
-            
             }
             data ??= new JObject();
             data["isAgent"] = true;

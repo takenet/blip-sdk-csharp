@@ -2,7 +2,6 @@
 
 namespace Take.Blip.Client.Receivers
 {
-
     /// <summary>
     /// Implements a <see cref="Message"/> receiver that call multiple receivers.
     /// </summary>
@@ -15,9 +14,6 @@ namespace Take.Blip.Client.Receivers
         /// </summary>
         /// <param name="receivers">The receivers.</param>
         public AggregateMessageReceiver(params IMessageReceiver[] receivers)
-            : base(receivers)
-        {
-
-        }
+            : base(receivers) { }
     }
 }

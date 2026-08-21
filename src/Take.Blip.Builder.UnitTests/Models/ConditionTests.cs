@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             {
                 Source = ValueSource.Context,
                 Variable = "variable",
-                Values = new[] { "value" }
+                Values = new[] { "value" },
             };
 
             // Act
@@ -27,11 +27,7 @@ namespace Take.Blip.Builder.UnitTests.Models
         public void ValidateWithoutValueShouldFail()
         {
             // Arrange
-            var condition = new Condition
-            {
-                Source = ValueSource.Context,
-                Variable = "variable"
-            };
+            var condition = new Condition { Source = ValueSource.Context, Variable = "variable" };
 
             // Act
             try
@@ -41,7 +37,9 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("The condition values should be provided if comparison is not Exists or NotExists");
+                ex.Message.ShouldBe(
+                    "The condition values should be provided if comparison is not Exists or NotExists"
+                );
             }
         }
 
@@ -52,7 +50,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             var condition = new Condition
             {
                 Source = ValueSource.Context,
-                Values = new[] { "value" }
+                Values = new[] { "value" },
             };
 
             // Act
@@ -63,7 +61,9 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("The variable name should be provided if the comparsion source is context");
+                ex.Message.ShouldBe(
+                    "The variable name should be provided if the comparsion source is context"
+                );
             }
         }
 
@@ -74,7 +74,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             var condition = new Condition
             {
                 Source = ValueSource.Entity,
-                Values = new[] { "value" }
+                Values = new[] { "value" },
             };
 
             // Act
@@ -85,7 +85,9 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("The entity name should be provided if the comparsion source is entity");
+                ex.Message.ShouldBe(
+                    "The entity name should be provided if the comparsion source is entity"
+                );
             }
         }
     }

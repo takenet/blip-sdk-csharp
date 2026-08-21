@@ -6,7 +6,8 @@ namespace Take.Blip.Client.Activation
 {
     public static class ServiceProviderExtensions
     {
-        public static T GetService<T>(this IServiceProvider serviceProvider) where T : class
+        public static T GetService<T>(this IServiceProvider serviceProvider)
+            where T : class
         {
             var service = serviceProvider.GetService(typeof(T));
             var factory = service as Func<T>;

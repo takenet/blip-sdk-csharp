@@ -3,6 +3,6 @@
     public enum ConditionOperator
     {
         Or,
-        And
+        And,
     }
 }

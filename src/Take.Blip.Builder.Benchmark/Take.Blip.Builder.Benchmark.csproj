@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -14,5 +13,4 @@
     <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.12" />
     <PackageReference Include="NSubstitute" Version="4.2.1" />
   </ItemGroup>
-
 </Project>

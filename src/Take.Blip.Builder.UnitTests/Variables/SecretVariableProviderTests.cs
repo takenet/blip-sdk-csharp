@@ -38,20 +38,25 @@ namespace Take.Blip.Builder.UnitTests.Variables
             {
                 Uri = new LimeUri($"/secrets/{Uri.EscapeDataString(SECRET_KEY)}"),
                 Method = CommandMethod.Get,
-                To = Node.Parse("postmaster@builder.msging.net")
+                To = Node.Parse("postmaster@builder.msging.net"),
             };
 
             var commandResult = new Command()
             {
                 Status = CommandStatus.Success,
-                Resource = PlainText.Parse(SECRET_VALUE)
+                Resource = PlainText.Parse(SECRET_VALUE),
             };
 
-            Sender.ProcessCommandAsync(Arg.Is<Command>(c => c.Id != null &&
-                                                            c.Method.Equals(command.Method) &&
-                                                            c.To.Equals(command.To) &&
-                                                            c.Uri.Equals(command.Uri)),
-                                      Arg.Any<CancellationToken>())
+            Sender
+                .ProcessCommandAsync(
+                    Arg.Is<Command>(c =>
+                        c.Id != null
+                        && c.Method.Equals(command.Method)
+                        && c.To.Equals(command.To)
+                        && c.Uri.Equals(command.Uri)
+                    ),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(commandResult);
         }
 
@@ -92,14 +97,17 @@ namespace Take.Blip.Builder.UnitTests.Variables
             var target = GetTarget();
 
             //Act
-            var attributeRestriction = target.GetType()
-                    .GetCustomAttribute(typeof(VariableProviderRestrictionAttribute)) as VariableProviderRestrictionAttribute;
+            var attributeRestriction =
+                target.GetType().GetCustomAttribute(typeof(VariableProviderRestrictionAttribute))
+                as VariableProviderRestrictionAttribute;
 
-            var allowed = ContextBase.IsAllowedVariableProviderRestriction(attributeRestriction, "SendMessage");
-            
+            var allowed = ContextBase.IsAllowedVariableProviderRestriction(
+                attributeRestriction,
+                "SendMessage"
+            );
+
             //Assert
             allowed.ShouldBeFalse();
         }
-
     }
 }

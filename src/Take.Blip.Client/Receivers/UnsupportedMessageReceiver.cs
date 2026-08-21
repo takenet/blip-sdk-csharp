@@ -11,12 +11,13 @@ namespace Take.Blip.Client.Receivers
     /// </summary>
     public class UnsupportedMessageReceiver : UnsupportedEnvelopeReceiver<Message>
     {
-        public UnsupportedMessageReceiver() : base(
-            new Reason
-            {
-                Code = ReasonCodes.MESSAGE_UNSUPPORTED_CONTENT_TYPE,
-                Description = "There's no processor available to handle the received message"
-            })
-        { }
+        public UnsupportedMessageReceiver()
+            : base(
+                new Reason
+                {
+                    Code = ReasonCodes.MESSAGE_UNSUPPORTED_CONTENT_TYPE,
+                    Description = "There's no processor available to handle the received message",
+                }
+            ) { }
     }
 }

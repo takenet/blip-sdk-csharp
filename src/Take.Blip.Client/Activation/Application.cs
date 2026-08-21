@@ -25,11 +25,9 @@ namespace Take.Blip.Client.Activation
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
             };
-            SerializerSettings.Converters.Add(new StringEnumConverter
-            {
-                CamelCaseText = true,
-                AllowIntegerValues = true
-            });
+            SerializerSettings.Converters.Add(
+                new StringEnumConverter { CamelCaseText = true, AllowIntegerValues = true }
+            );
         }
 
         /// <summary>
@@ -49,7 +47,7 @@ namespace Take.Blip.Client.Activation
         /// The domain.
         /// </value>
         public string Domain { get; set; }
-        
+
         /// <summary>
         /// Gets the application identity combining the <see cref="Instance"/> and <see cref="Domain"/>.
         /// </summary>
@@ -61,7 +59,7 @@ namespace Take.Blip.Client.Activation
         /// </summary>
         [IgnoreDataMember]
         public Node Node => new Node(Identifier, Domain ?? Constants.DEFAULT_DOMAIN, Instance);
-        
+
         /// <summary>
         /// Gets or sets the Uri scheme.
         /// </summary>
@@ -203,7 +201,7 @@ namespace Take.Blip.Client.Activation
         /// Define the presence status to be set when connected.
         /// </summary>
         public PresenceStatus? PresenceStatus { get; set; }
-        
+
         /// <summary>
         /// Indicates if the tunnel receivers for automatically forwarding envelopes
         /// should be registered.
@@ -219,7 +217,8 @@ namespace Take.Blip.Client.Activation
         /// <returns></returns>
         public static Application ParseFromJson(string json)
         {
-            if (json == null) throw new ArgumentNullException(nameof(json));
+            if (json == null)
+                throw new ArgumentNullException(nameof(json));
             return JsonConvert.DeserializeObject<Application>(json, SerializerSettings);
         }
 
@@ -228,6 +227,7 @@ namespace Take.Blip.Client.Activation
         /// </summary>
         /// <param name="filePath">The path.</param>
         /// <returns></returns>
-        public static Application ParseFromJsonFile(string filePath) => ParseFromJson(File.ReadAllText(filePath));
+        public static Application ParseFromJsonFile(string filePath) =>
+            ParseFromJson(File.ReadAllText(filePath));
     }
 }

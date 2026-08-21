@@ -31,13 +31,15 @@ namespace Take.Blip.Builder.Actions.ProcessHttp
             if (Uri == null)
             {
                 throw new ValidationException(
-                    $"The '{nameof(Uri)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
+                    $"The '{nameof(Uri)}' settings value is required for '{nameof(ProcessHttpAction)}' action"
+                );
             }
 
             if (Method == null)
             {
                 throw new ValidationException(
-                    $"The '{nameof(Method)}' settings value is required for '{nameof(ProcessHttpAction)}' action");
+                    $"The '{nameof(Method)}' settings value is required for '{nameof(ProcessHttpAction)}' action"
+                );
             }
         }
     }

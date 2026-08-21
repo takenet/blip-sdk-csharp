@@ -23,8 +23,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         /// <param name="time"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static async Task<string> ToStringAsync(object data, Time time,
-            CancellationToken cancellationToken)
+        public static async Task<string> ToStringAsync(
+            object data,
+            Time time,
+            CancellationToken cancellationToken
+        )
         {
             var resultData = await ConvertAsync(data, time, cancellationToken);
 
@@ -38,7 +41,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 int @int => @int.ToString(),
                 float @float => @float.ToString("R"),
                 bool @bool => @bool ? "true" : "false",
-                _ => JsonConvert.SerializeObject(resultData)
+                _ => JsonConvert.SerializeObject(resultData),
             };
         }
 
@@ -49,8 +52,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         /// <param name="time"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static async Task<object> ConvertAsync(object data, Time time,
-            CancellationToken cancellationToken)
+        public static async Task<object> ConvertAsync(
+            object data,
+            Time time,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -63,8 +69,7 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                         return time.DateOffsetToString(dateTimeOffset);
 
                     case ScriptObject scriptObject when scriptObject.PropertyNames.Any():
-                        return await ToDictionary(scriptObject, time,
-                            cancellationToken);
+                        return await ToDictionary(scriptObject, time, cancellationToken);
 
                     case ScriptObject scriptObject:
                         return scriptObject.PropertyIndices.Any()
@@ -84,18 +89,23 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                         if (completedTask.IsFaulted)
                         {
                             throw new ScriptEngineException(
-                                "An error occurred while executing the script.", task.Exception);
+                                "An error occurred while executing the script.",
+                                task.Exception
+                            );
                         }
 
                         if (completedTask.IsCanceled)
                         {
                             throw new OperationCanceledException(
-                                "The script execution was canceled.");
+                                "The script execution was canceled."
+                            );
                         }
 
-                        return await ConvertAsync(((Task<dynamic>)completedTask).Result,
+                        return await ConvertAsync(
+                            ((Task<dynamic>)completedTask).Result,
                             time,
-                            cancellationToken);
+                            cancellationToken
+                        );
                     }
                     default:
                         return data;
@@ -107,18 +117,22 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
             }
         }
 
-        private static async Task<List<object>> ToList(ScriptObject scriptObject,
+        private static async Task<List<object>> ToList(
+            ScriptObject scriptObject,
             Time time,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             var indexes = scriptObject.PropertyIndices.ToList();
             var results = new List<object>();
 
             foreach (var index in indexes)
             {
-                var result = await ConvertAsync(scriptObject.GetProperty(index),
+                var result = await ConvertAsync(
+                    scriptObject.GetProperty(index),
                     time,
-                    cancellationToken);
+                    cancellationToken
+                );
 
                 results.Add(result);
             }
@@ -127,8 +141,10 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
         }
 
         private static async Task<Dictionary<string, object>> ToDictionary(
-            ScriptObject scriptObject, Time time,
-            CancellationToken cancellationToken)
+            ScriptObject scriptObject,
+            Time time,
+            CancellationToken cancellationToken
+        )
         {
             var propertyNames = scriptObject.PropertyNames;
 
@@ -139,7 +155,8 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2
                 dictionary[propertyName] = await ConvertAsync(
                     scriptObject.GetProperty(propertyName),
                     time,
-                    cancellationToken);
+                    cancellationToken
+                );
             }
 
             return dictionary;

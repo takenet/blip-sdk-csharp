@@ -17,7 +17,9 @@ namespace Take.Blip.Client
 
         static TcpTransportFactory()
         {
-            DefaultSerializer = new EnvelopeSerializer(new DocumentTypeResolver().WithBlipDocuments());
+            DefaultSerializer = new EnvelopeSerializer(
+                new DocumentTypeResolver().WithBlipDocuments()
+            );
         }
 
         private readonly IEnvelopeSerializer _envelopeSerializer;
@@ -34,7 +36,10 @@ namespace Take.Blip.Client
                 throw new NotSupportedException($"Unsupported URI scheme '{endpoint.Scheme}'");
             }
 
-            return new TcpTransport(traceWriter: new TraceWriter(), envelopeSerializer: _envelopeSerializer);
+            return new TcpTransport(
+                traceWriter: new TraceWriter(),
+                envelopeSerializer: _envelopeSerializer
+            );
         }
 
         private class TraceWriter : ITraceWriter
@@ -45,7 +50,8 @@ namespace Take.Blip.Client
                 return Task.CompletedTask;
             }
 
-            public bool IsEnabled => Log.Logger != null && Log.Logger.IsEnabled(LogEventLevel.Verbose);
+            public bool IsEnabled =>
+                Log.Logger != null && Log.Logger.IsEnabled(LogEventLevel.Verbose);
         }
     }
 }

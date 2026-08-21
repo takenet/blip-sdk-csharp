@@ -16,36 +16,55 @@ namespace Take.Blip.Builder.Variables
     {
         public const string CONTACT_EXTRAS_VARIABLE_PREFIX = "extras.";
         public const string CONTACT_SERIALIZED_PROPERTY = "serialized";
-        
+
         private readonly IContactExtension _contactExtension;
         private readonly IDocumentSerializer _documentSerializer;
 
-        public ContactVariableProvider(IContactExtension contactExtension, IDocumentSerializer documentSerializer, ILogger logger)
+        public ContactVariableProvider(
+            IContactExtension contactExtension,
+            IDocumentSerializer documentSerializer,
+            ILogger logger
+        )
             : base(VariableSource.Contact, ContextExtensions.CONTACT_KEY, logger)
         {
             _contactExtension = contactExtension;
             _documentSerializer = documentSerializer;
         }
 
-        protected override Task<Contact> GetAsync(Identity userIdentity, CancellationToken cancellationToken) 
-            => _contactExtension.GetAsync(userIdentity, cancellationToken);
+        protected override Task<Contact> GetAsync(
+            Identity userIdentity,
+            CancellationToken cancellationToken
+        ) => _contactExtension.GetAsync(userIdentity, cancellationToken);
 
         protected override string GetProperty(Contact item, string propertyName)
         {
-            if (propertyName.StartsWith(CONTACT_EXTRAS_VARIABLE_PREFIX, StringComparison.OrdinalIgnoreCase))
+            if (
+                propertyName.StartsWith(
+                    CONTACT_EXTRAS_VARIABLE_PREFIX,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
             {
-                var extraVariableName = propertyName.Remove(0, CONTACT_EXTRAS_VARIABLE_PREFIX.Length);
-                if (item.Extras != null && item.Extras.TryGetValue(extraVariableName, out var extraVariableValue))
+                var extraVariableName = propertyName.Remove(
+                    0,
+                    CONTACT_EXTRAS_VARIABLE_PREFIX.Length
+                );
+                if (
+                    item.Extras != null
+                    && item.Extras.TryGetValue(extraVariableName, out var extraVariableValue)
+                )
                 {
                     return extraVariableValue;
                 }
                 return null;
             }
-            else if (propertyName.Equals(CONTACT_SERIALIZED_PROPERTY, StringComparison.OrdinalIgnoreCase))
+            else if (
+                propertyName.Equals(CONTACT_SERIALIZED_PROPERTY, StringComparison.OrdinalIgnoreCase)
+            )
             {
                 return _documentSerializer.Serialize(item);
             }
-            
+
             return base.GetProperty(item, propertyName);
         }
     }

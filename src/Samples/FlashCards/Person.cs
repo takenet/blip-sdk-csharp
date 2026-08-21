@@ -1,4 +1,4 @@
-namespace  bot_flash_cards_blip_sdk_csharp
+namespace bot_flash_cards_blip_sdk_csharp
 {
     using System;
     using Lime.Protocol;

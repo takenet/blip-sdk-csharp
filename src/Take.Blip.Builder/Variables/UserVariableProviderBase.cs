@@ -19,7 +19,11 @@ namespace Take.Blip.Builder.Variables
         private readonly string _inputContextKey;
         private readonly ILogger _logger;
 
-        protected UserVariableProviderBase(VariableSource source, string inputContextKey, ILogger logger)
+        protected UserVariableProviderBase(
+            VariableSource source,
+            string inputContextKey,
+            ILogger logger
+        )
         {
             Source = source;
             _inputContextKey = inputContextKey;
@@ -29,7 +33,11 @@ namespace Take.Blip.Builder.Variables
 
         public VariableSource Source { get; }
 
-        public async Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken)
+        public async Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        )
         {
             T item;
             try
@@ -41,24 +49,34 @@ namespace Take.Blip.Builder.Variables
                     context.SetValue(_inputContextKey, item);
                 }
 
-                if (item == null) return null;
-                
+                if (item == null)
+                    return null;
+
                 return GetProperty(item, name);
             }
             catch (LimeException ex) when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND)
             {
                 context.RemoveValue(_inputContextKey);
-                _logger.Warning(ex, "An exception occurred while obtaining variable {VariableName} from {InputContextKey}", name, _inputContextKey);
+                _logger.Warning(
+                    ex,
+                    "An exception occurred while obtaining variable {VariableName} from {InputContextKey}",
+                    name,
+                    _inputContextKey
+                );
                 return null;
             }
         }
 
-        protected abstract Task<T> GetAsync(Identity userIdentity, CancellationToken cancellationToken);
+        protected abstract Task<T> GetAsync(
+            Identity userIdentity,
+            CancellationToken cancellationToken
+        );
 
         protected virtual string GetProperty(T item, string propertyName)
         {
             var itemPropertyInfo = GetPropertyInfo(propertyName.ToLowerInvariant());
-            if (itemPropertyInfo != null) return itemPropertyInfo.GetValue(item)?.ToString();
+            if (itemPropertyInfo != null)
+                return itemPropertyInfo.GetValue(item)?.ToString();
             return null;
         }
 
@@ -67,8 +85,12 @@ namespace Take.Blip.Builder.Variables
             // Caches the properties to reduce the reflection overhead
             return _propertyCacheDictionary.GetOrAdd(
                 propertyName,
-                p => typeof(T).GetProperty(propertyName,
-                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance));
+                p =>
+                    typeof(T).GetProperty(
+                        propertyName,
+                        BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+                    )
+            );
         }
     }
 }

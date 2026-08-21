@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using NSubstitute;
 using Serilog;
 using SimpleInjector;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Models;
@@ -41,7 +41,7 @@ namespace Take.Blip.Builder.UnitTests
             ContactExtension = Substitute.For<IContactExtension>();
             HelpDeskExtension = Substitute.For<IHelpDeskExtension>();
             TunnelExtension = Substitute.For<ITunnelExtension>();
-            BuilderExtension = Substitute.For<IBuilderExtension>(); 
+            BuilderExtension = Substitute.For<IBuilderExtension>();
             Sender = Substitute.For<ISender>();
             StateManager = Substitute.For<IStateManager>();
             StateSessionManager = Substitute.For<Client.Session.IStateManager>();
@@ -51,20 +51,25 @@ namespace Take.Blip.Builder.UnitTests
             HttpClient = Substitute.For<IHttpClient>();
             blipLogger = Substitute.For<IBlipLogger>();
             ContextProvider
-                .CreateContext(Arg.Any<Identity>(), Arg.Any<Identity>(), Arg.Any<LazyInput>(), Arg.Any<Flow>())
+                .CreateContext(
+                    Arg.Any<Identity>(),
+                    Arg.Any<Identity>(),
+                    Arg.Any<LazyInput>(),
+                    Arg.Any<Flow>()
+                )
                 .Returns(Context);
             UserIdentity = new Identity("user", "domain");
             ApplicationIdentity = new Identity("application", "domain");
             Application = new Application()
             {
                 Identifier = ApplicationIdentity.Name,
-                Domain = ApplicationIdentity.Domain
+                Domain = ApplicationIdentity.Domain,
             };
             Message = new Message()
             {
                 From = UserIdentity.ToNode(),
                 To = ApplicationIdentity.ToNode(),
-                Metadata = new Dictionary<string, string>()
+                Metadata = new Dictionary<string, string>(),
             };
             Context.UserIdentity.Returns(UserIdentity);
             Input = new LazyInput(
@@ -74,20 +79,35 @@ namespace Take.Blip.Builder.UnitTests
                 Substitute.For<IDocumentSerializer>(),
                 Substitute.For<IEnvelopeSerializer>(),
                 ArtificialIntelligenceExtension,
-                CancellationToken);
+                CancellationToken
+            );
             Context.Input.Returns(Input);
 
-            var Flow = new Flow() { Configuration = new Dictionary<string, string> { { "builder:#localTimeZone", "America/Sao_Paulo" } } };
+            var Flow = new Flow()
+            {
+                Configuration = new Dictionary<string, string>
+                {
+                    { "builder:#localTimeZone", "America/Sao_Paulo" },
+                },
+            };
 
             Context.Flow.Returns(Flow);
 
             TraceProcessor = Substitute.For<ITraceProcessor>();
             UserOwnerResolver = Substitute.For<IUserOwnerResolver>();
             UserOwnerResolver
-                .GetUserOwnerIdentitiesAsync(Arg.Any<Message>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
+                .GetUserOwnerIdentitiesAsync(
+                    Arg.Any<Message>(),
+                    Arg.Any<BuilderConfiguration>(),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(new UserOwner(UserIdentity, ApplicationIdentity));
             UserOwnerResolver
-                .GetUserOwnerIdentitiesAsync(Arg.Any<Command>(), Arg.Any<BuilderConfiguration>(), Arg.Any<CancellationToken>())
+                .GetUserOwnerIdentitiesAsync(
+                    Arg.Any<Command>(),
+                    Arg.Any<BuilderConfiguration>(),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(new UserOwner(UserIdentity, ApplicationIdentity));
 
             FlowLoader = Substitute.For<IFlowLoader>();

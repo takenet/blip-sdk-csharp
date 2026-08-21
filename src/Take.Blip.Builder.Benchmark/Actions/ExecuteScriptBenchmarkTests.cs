@@ -40,8 +40,11 @@ namespace Take.Blip.Builder.Benchmark.Actions
             configuration.ExecuteScriptLimitRecursion = 100000;
             configuration.ExecuteScriptMaxStatements = 0;
 
-            _v2Action = new ExecuteScriptV2Action(configuration, Substitute.For<IHttpClient>(),
-                Substitute.For<ILogger>());
+            _v2Action = new ExecuteScriptV2Action(
+                configuration,
+                Substitute.For<IHttpClient>(),
+                Substitute.For<ILogger>()
+            );
 
             _v1Action = new ExecuteScriptAction(configuration, Substitute.For<ILogger>());
         }
@@ -124,8 +127,11 @@ namespace Take.Blip.Builder.Benchmark.Actions
         [Benchmark]
         public async Task ExecuteScriptV1RecursionLoopScript()
         {
-            await _v1Action.ExecuteAsync(Context, Settings._v1RecursionLoopSettings,
-                CancellationToken);
+            await _v1Action.ExecuteAsync(
+                Context,
+                Settings._v1RecursionLoopSettings,
+                CancellationToken
+            );
         }
 
         /// <summary>
@@ -134,8 +140,11 @@ namespace Take.Blip.Builder.Benchmark.Actions
         [Benchmark]
         public async Task ExecuteScriptV2RecursionLoopScript()
         {
-            await _v2Action.ExecuteAsync(Context, Settings._v2RecursionLoopSettings,
-                CancellationToken);
+            await _v2Action.ExecuteAsync(
+                Context,
+                Settings._v2RecursionLoopSettings,
+                CancellationToken
+            );
         }
     }
 }

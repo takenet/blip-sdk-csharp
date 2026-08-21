@@ -1,13 +1,13 @@
-﻿using Lime.Messaging.Resources;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Lime.Messaging.Resources;
 using Lime.Protocol;
 using Lime.Protocol.Client;
 using Lime.Protocol.Network;
 using Lime.Protocol.Network.Modules;
 using Lime.Protocol.Security;
 using Serilog;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Take.Blip.Client
 {
@@ -20,13 +20,12 @@ namespace Take.Blip.Client
         private readonly ILogger _logger;
 
         public BlipClientBuilder()
-            : this(new TcpTransportFactory())
-        {
-        }
+            : this(new TcpTransportFactory()) { }
 
         public BlipClientBuilder(ITransportFactory transportFactory, ILogger logger = null)
         {
-            _transportFactory = transportFactory ?? throw new ArgumentNullException(nameof(transportFactory));
+            _transportFactory =
+                transportFactory ?? throw new ArgumentNullException(nameof(transportFactory));
             _logger = logger;
 
             // Initialize the defaults
@@ -42,7 +41,14 @@ namespace Take.Blip.Client
             RoundRobin = true;
             AutoNotify = true;
             ChannelCount = 1;
-            ReceiptEvents = new[] { Event.Accepted, Event.Dispatched, Event.Received, Event.Consumed, Event.Failed };
+            ReceiptEvents = new[]
+            {
+                Event.Accepted,
+                Event.Dispatched,
+                Event.Received,
+                Event.Consumed,
+                Event.Failed,
+            };
             PresenceStatus = PresenceStatus.Available;
             EnvelopeBufferSize = 100;
         }
@@ -96,8 +102,10 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder UsingPassword(string identifier, string password)
         {
-            if (string.IsNullOrEmpty(identifier)) throw new ArgumentNullException(nameof(identifier));
-            if (string.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
+            if (string.IsNullOrEmpty(identifier))
+                throw new ArgumentNullException(nameof(identifier));
+            if (string.IsNullOrEmpty(password))
+                throw new ArgumentNullException(nameof(password));
 
             Identifier = identifier;
             Password = password;
@@ -107,15 +115,16 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder UsingGuest()
         {
-            Identifier = Guid.NewGuid()
-                .ToString();
+            Identifier = Guid.NewGuid().ToString();
             return this;
         }
 
         public BlipClientBuilder UsingAccessKey(string identifier, string accessKey)
         {
-            if (string.IsNullOrEmpty(identifier)) throw new ArgumentNullException(nameof(identifier));
-            if (string.IsNullOrEmpty(accessKey)) throw new ArgumentNullException(nameof(accessKey));
+            if (string.IsNullOrEmpty(identifier))
+                throw new ArgumentNullException(nameof(identifier));
+            if (string.IsNullOrEmpty(accessKey))
+                throw new ArgumentNullException(nameof(accessKey));
             Identifier = identifier;
             AccessKey = accessKey;
             return this;
@@ -123,9 +132,12 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder UsingExternal(string identifier, string token, string issuer)
         {
-            if (string.IsNullOrEmpty(identifier)) throw new ArgumentNullException(nameof(identifier));
-            if (string.IsNullOrEmpty(token)) throw new ArgumentNullException(nameof(token));
-            if (string.IsNullOrEmpty(issuer)) throw new ArgumentNullException(nameof(issuer));
+            if (string.IsNullOrEmpty(identifier))
+                throw new ArgumentNullException(nameof(identifier));
+            if (string.IsNullOrEmpty(token))
+                throw new ArgumentNullException(nameof(token));
+            if (string.IsNullOrEmpty(issuer))
+                throw new ArgumentNullException(nameof(issuer));
             Identifier = identifier;
             Token = token;
             Issuer = issuer;
@@ -152,28 +164,32 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder UsingScheme(string scheme)
         {
-            if (string.IsNullOrEmpty(scheme)) throw new ArgumentNullException(nameof(scheme));
+            if (string.IsNullOrEmpty(scheme))
+                throw new ArgumentNullException(nameof(scheme));
             Scheme = scheme;
             return this;
         }
 
         public BlipClientBuilder UsingHostName(string hostName)
         {
-            if (string.IsNullOrEmpty(hostName)) throw new ArgumentNullException(nameof(hostName));
+            if (string.IsNullOrEmpty(hostName))
+                throw new ArgumentNullException(nameof(hostName));
             HostName = hostName;
             return this;
         }
 
         public BlipClientBuilder UsingPort(int port)
         {
-            if (port <= 0) throw new ArgumentOutOfRangeException(nameof(port));
+            if (port <= 0)
+                throw new ArgumentOutOfRangeException(nameof(port));
             Port = port;
             return this;
         }
 
         public BlipClientBuilder UsingDomain(string domain)
         {
-            if (string.IsNullOrEmpty(domain)) throw new ArgumentNullException(nameof(domain));
+            if (string.IsNullOrEmpty(domain))
+                throw new ArgumentNullException(nameof(domain));
             Domain = domain;
             return this;
         }
@@ -192,14 +208,16 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder WithChannelCount(int channelCount)
         {
-            if (channelCount <= 0) throw new ArgumentOutOfRangeException(nameof(channelCount));
+            if (channelCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(channelCount));
             ChannelCount = channelCount;
             return this;
         }
 
         public BlipClientBuilder WithSendTimeout(TimeSpan timeout)
         {
-            if (timeout == default(TimeSpan)) throw new ArgumentOutOfRangeException(nameof(timeout));
+            if (timeout == default(TimeSpan))
+                throw new ArgumentOutOfRangeException(nameof(timeout));
             SendTimeout = timeout;
             return this;
         }
@@ -218,8 +236,10 @@ namespace Take.Blip.Client
 
         public BlipClientBuilder WithMaxConnectionRetries(int maxConnectionRetries)
         {
-            if (maxConnectionRetries < 1) throw new ArgumentOutOfRangeException(nameof(maxConnectionRetries));
-            if (maxConnectionRetries > 5) throw new ArgumentOutOfRangeException(nameof(maxConnectionRetries));
+            if (maxConnectionRetries < 1)
+                throw new ArgumentOutOfRangeException(nameof(maxConnectionRetries));
+            if (maxConnectionRetries > 5)
+                throw new ArgumentOutOfRangeException(nameof(maxConnectionRetries));
 
             MaxConnectionRetries = maxConnectionRetries;
             return this;
@@ -253,19 +273,25 @@ namespace Take.Blip.Client
                 .WithSendTimeout(SendTimeout)
                 .WithEnvelopeBufferSize(EnvelopeBufferSize)
                 .AddCommandModule(c => new ReplyPingChannelModule(c))
-                .AddBuiltHandler((c, t) =>
-                {
-                    FillEnvelopeRecipientsChannelModule.CreateAndRegister(c);
-                    return Task.CompletedTask;
-                })
                 .AddBuiltHandler(
                     (c, t) =>
                     {
-                        if (Throughput > 0) ThroughputControlChannelModule.CreateAndRegister(c, Throughput);
+                        FillEnvelopeRecipientsChannelModule.CreateAndRegister(c);
                         return Task.CompletedTask;
-                    });
+                    }
+                )
+                .AddBuiltHandler(
+                    (c, t) =>
+                    {
+                        if (Throughput > 0)
+                            ThroughputControlChannelModule.CreateAndRegister(c, Throughput);
+                        return Task.CompletedTask;
+                    }
+                );
 
-            var establishedClientChannelBuilder = new EstablishedClientChannelBuilder(channelBuilder)
+            var establishedClientChannelBuilder = new EstablishedClientChannelBuilder(
+                channelBuilder
+            )
                 .WithIdentity(Identity)
                 .WithAuthentication(GetAuthenticationScheme())
                 .WithCompression(Compression)
@@ -275,10 +301,14 @@ namespace Take.Blip.Client
 
             if (Instance != null)
             {
-                establishedClientChannelBuilder = establishedClientChannelBuilder.WithInstance(Instance);
+                establishedClientChannelBuilder = establishedClientChannelBuilder.WithInstance(
+                    Instance
+                );
             }
 
-            var onDemandClientChannel = CreateOnDemandClientChannel(establishedClientChannelBuilder);
+            var onDemandClientChannel = CreateOnDemandClientChannel(
+                establishedClientChannelBuilder
+            );
             return new BlipClient(onDemandClientChannel, _logger);
         }
 
@@ -293,10 +323,7 @@ namespace Take.Blip.Client
 
             if (Password != null)
             {
-                result = new PlainAuthentication()
-                {
-                    Password = Password
-                };
+                result = new PlainAuthentication() { Password = Password };
             }
 
             if (AccessKey != null)
@@ -312,51 +339,64 @@ namespace Take.Blip.Client
             if (result == null)
             {
                 throw new InvalidOperationException(
-                    $"A password or accessKey should be defined. Please use the '{nameof(UsingPassword)}' or '{nameof(UsingAccessKey)}' methods for that.");
+                    $"A password or accessKey should be defined. Please use the '{nameof(UsingPassword)}' or '{nameof(UsingAccessKey)}' methods for that."
+                );
             }
 
             return result;
         }
 
-        private async Task SetPresenceAsync(IClientChannel clientChannel,
-            CancellationToken cancellationToken = default(CancellationToken))
+        private async Task SetPresenceAsync(
+            IClientChannel clientChannel,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
-            if (IsGuest(clientChannel.LocalNode.Name) || PresenceStatus == PresenceStatus.Unavailable)
+            if (
+                IsGuest(clientChannel.LocalNode.Name)
+                || PresenceStatus == PresenceStatus.Unavailable
+            )
             {
                 return;
             }
 
-            await clientChannel.SetResourceAsync(
+            await clientChannel
+                .SetResourceAsync(
                     LimeUri.Parse(UriTemplates.PRESENCE),
                     new Presence
                     {
                         Status = PresenceStatus,
                         RoutingRule = RoutingRule,
-                        RoundRobin = RoundRobin
+                        RoundRobin = RoundRobin,
                     },
-                    cancellationToken)
+                    cancellationToken
+                )
                 .ConfigureAwait(false);
         }
 
-        private async Task SetReceiptAsync(IClientChannel clientChannel,
-            CancellationToken cancellationToken = default(CancellationToken))
+        private async Task SetReceiptAsync(
+            IClientChannel clientChannel,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             if (IsGuest(clientChannel.LocalNode.Name) || ReceiptEvents.Length == 0)
             {
                 return;
             }
 
-            await clientChannel.SetResourceAsync(
+            await clientChannel
+                .SetResourceAsync(
                     LimeUri.Parse(UriTemplates.RECEIPT),
                     new Receipt { Events = ReceiptEvents },
-                    cancellationToken)
+                    cancellationToken
+                )
                 .ConfigureAwait(false);
         }
 
         private static bool IsGuest(string name) => Guid.TryParse(name, out var _);
 
         private IOnDemandClientChannel CreateOnDemandClientChannel(
-            IEstablishedClientChannelBuilder establishedClientChannelBuilder)
+            IEstablishedClientChannelBuilder establishedClientChannelBuilder
+        )
         {
             IOnDemandClientChannel onDemandClientChannel;
 
@@ -367,7 +407,10 @@ namespace Take.Blip.Client
             }
             else
             {
-                onDemandClientChannel = new MultiplexerClientChannel(establishedClientChannelBuilder, ChannelCount);
+                onDemandClientChannel = new MultiplexerClientChannel(
+                    establishedClientChannelBuilder,
+                    ChannelCount
+                );
             }
 
             return onDemandClientChannel;

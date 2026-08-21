@@ -10,12 +10,19 @@ namespace Take.Blip.Builder.Variables
 {
     public class CalendarVariableProvider : IVariableProvider
     {
-        private static Regex DateOperationRegex = new Regex("(?<operation>plus|minus)(?<value>\\d+)(?<period>millisecond(s)?|second(s)?|minute(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)", RegexOptions.IgnoreCase | RegexOptions.Compiled, Constants.REGEX_TIMEOUT);
+        private static Regex DateOperationRegex = new Regex(
+            "(?<operation>plus|minus)(?<value>\\d+)(?<period>millisecond(s)?|second(s)?|minute(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            Constants.REGEX_TIMEOUT
+        );
 
         public VariableSource Source => VariableSource.Calendar;
 
-        public Task<string> GetVariableAsync(string name, IContext context, CancellationToken cancellationToken) =>
-            GetVariable(name).AsCompletedTask();
+        public Task<string> GetVariableAsync(
+            string name,
+            IContext context,
+            CancellationToken cancellationToken
+        ) => GetVariable(name).AsCompletedTask();
 
         private string GetVariable(string name)
         {
@@ -39,7 +46,7 @@ namespace Take.Blip.Builder.Variables
                     case "today":
                         names.Remove("today");
                         break;
-                }                
+                }
             }
 
             if (names.Count > 1)
@@ -98,7 +105,12 @@ namespace Take.Blip.Builder.Variables
             return null;
         }
 
-        private DateTimeOffset GetDateFromOperationVariable(DateTimeOffset dateTime, string operation, string period, int value)
+        private DateTimeOffset GetDateFromOperationVariable(
+            DateTimeOffset dateTime,
+            string operation,
+            string period,
+            int value
+        )
         {
             TimeSpan interval;
 
@@ -111,22 +123,22 @@ namespace Take.Blip.Builder.Variables
 
                 case "seconds":
                 case "second":
-                    interval = TimeSpan.FromSeconds(value);                    
+                    interval = TimeSpan.FromSeconds(value);
                     break;
 
                 case "minutes":
                 case "minute":
-                    interval = TimeSpan.FromMinutes(value);                    
+                    interval = TimeSpan.FromMinutes(value);
                     break;
 
                 case "hours":
                 case "hour":
-                    interval = TimeSpan.FromHours(value);                    
+                    interval = TimeSpan.FromHours(value);
                     break;
 
                 case "days":
                 case "day":
-                    interval = TimeSpan.FromDays(value);                    
+                    interval = TimeSpan.FromDays(value);
                     break;
 
                 case "weeks":
@@ -147,7 +159,7 @@ namespace Take.Blip.Builder.Variables
                 default:
                     return dateTime;
             }
-           
+
             switch (operation)
             {
                 case "plus":

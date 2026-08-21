@@ -37,11 +37,15 @@ namespace Take.Blip.Builder.Actions.ProcessContentAssistant
         {
             if (string.IsNullOrEmpty(Text))
             {
-                throw new ArgumentException($"The '{nameof(Text)}' settings value is required for '{nameof(ProcessContentAssistantSettings)}' action");
+                throw new ArgumentException(
+                    $"The '{nameof(Text)}' settings value is required for '{nameof(ProcessContentAssistantSettings)}' action"
+                );
             }
             if (string.IsNullOrEmpty(OutputVariable))
             {
-                throw new ArgumentException($"The '{nameof(OutputVariable)}' settings value is required for '{nameof(ProcessContentAssistantSettings)}' action");
+                throw new ArgumentException(
+                    $"The '{nameof(OutputVariable)}' settings value is required for '{nameof(ProcessContentAssistantSettings)}' action"
+                );
             }
         }
     }

@@ -12,7 +12,8 @@ namespace Take.Blip.Client.UnitTests
 {
     public class BlipClientTests : TestsBase
     {
-        public IOnDemandClientChannel OnDemandClientChannel { get; } = Substitute.For<IOnDemandClientChannel>();
+        public IOnDemandClientChannel OnDemandClientChannel { get; } =
+            Substitute.For<IOnDemandClientChannel>();
 
         public IChannelListener ChannelListener { get; set; } = Substitute.For<IChannelListener>();
 
@@ -45,9 +46,11 @@ namespace Take.Blip.Client.UnitTests
             // Arrange
             var target = GetTarget();
 
-            // Act                        
+            // Act
             await target.StartAsync(ChannelListener, CancellationToken);
-            await target.StartAsync(ChannelListener, CancellationToken).ShouldThrowAsync<InvalidOperationException>();           
+            await target
+                .StartAsync(ChannelListener, CancellationToken)
+                .ShouldThrowAsync<InvalidOperationException>();
         }
 
         [Fact]
@@ -138,7 +141,9 @@ namespace Take.Blip.Client.UnitTests
             await target.SendNotificationAsync(notification, CancellationToken);
 
             // Assert
-            OnDemandClientChannel.Received(1).SendNotificationAsync(notification, CancellationToken);
+            OnDemandClientChannel
+                .Received(1)
+                .SendNotificationAsync(notification, CancellationToken);
         }
 
         public void Dispose()

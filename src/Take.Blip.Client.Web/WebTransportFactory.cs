@@ -13,7 +13,11 @@ namespace Take.Blip.Client.Web
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly Application _application;
 
-        public WebTransportFactory(IEnvelopeBuffer envelopeBuffer, IEnvelopeSerializer envelopeSerializer, Application application)
+        public WebTransportFactory(
+            IEnvelopeBuffer envelopeBuffer,
+            IEnvelopeSerializer envelopeSerializer,
+            Application application
+        )
         {
             _envelopeBuffer = envelopeBuffer;
             _envelopeSerializer = envelopeSerializer;
@@ -22,8 +26,7 @@ namespace Take.Blip.Client.Web
 
         public ITransport Create(Uri endpoint)
         {
-            if (endpoint.Scheme != Uri.UriSchemeHttp
-                && endpoint.Scheme != Uri.UriSchemeHttps)
+            if (endpoint.Scheme != Uri.UriSchemeHttp && endpoint.Scheme != Uri.UriSchemeHttps)
             {
                 throw new NotSupportedException($"Unsupported URI scheme '{endpoint.Scheme}'");
             }

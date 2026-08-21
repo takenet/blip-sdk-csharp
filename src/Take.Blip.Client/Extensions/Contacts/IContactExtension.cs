@@ -1,10 +1,10 @@
-﻿using Lime.Messaging.Resources;
-using Lime.Protocol;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Resources;
+using Lime.Protocol;
 using Lime.Protocol.Network;
 using Take.Blip.Client.Extensions.Directory;
 
@@ -49,43 +49,54 @@ namespace Take.Blip.Client.Extensions.Contacts
             this IContactExtension contactExtension,
             IDirectoryExtension directoryExtension,
             Identity identity,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
-            if (contactExtension == null) throw new ArgumentNullException(nameof(contactExtension));
-            if (directoryExtension == null) throw new ArgumentNullException(nameof(directoryExtension));
-            if (identity == null) throw new ArgumentNullException(nameof(identity));
-            
+            if (contactExtension == null)
+                throw new ArgumentNullException(nameof(contactExtension));
+            if (directoryExtension == null)
+                throw new ArgumentNullException(nameof(directoryExtension));
+            if (identity == null)
+                throw new ArgumentNullException(nameof(identity));
+
             Contact contact = null;
             try
             {
                 // try from the roster.
                 contact = await contactExtension.GetAsync(identity, cancellationToken);
             }
-            catch (LimeException ex) when (
-                ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND || 
-                ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED) { }
+            catch (LimeException ex)
+                when (ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_FOUND
+                    || ex.Reason.Code == ReasonCodes.COMMAND_RESOURCE_NOT_SUPPORTED
+                ) { }
 
             if (contact == null)
             {
                 // Try from the directory.
-                var account = await directoryExtension.GetDirectoryAccountAsync(identity, cancellationToken);
+                var account = await directoryExtension.GetDirectoryAccountAsync(
+                    identity,
+                    cancellationToken
+                );
                 if (account == null) // Should never occur because the extension should throw the exception itself
                 {
-                    throw new LimeException(ReasonCodes.COMMAND_RESOURCE_NOT_FOUND, "The account was not found in the directory");
+                    throw new LimeException(
+                        ReasonCodes.COMMAND_RESOURCE_NOT_FOUND,
+                        "The account was not found in the directory"
+                    );
                 }
-                
-                contact = new Contact
-                {
-                    Identity = identity,
-                    Name = account.FullName
-                };
+
+                contact = new Contact { Identity = identity, Name = account.FullName };
 
                 if (account.Source != string.Empty)
                 {
                     contact.Source = account.Source;
                 }
-                
-                foreach (var property in typeof(ContactDocument).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+
+                foreach (
+                    var property in typeof(ContactDocument).GetProperties(
+                        BindingFlags.Public | BindingFlags.Instance
+                    )
+                )
                 {
                     var accountValue = property.GetValue(account);
                     property.SetValue(contact, accountValue);
@@ -93,6 +104,6 @@ namespace Take.Blip.Client.Extensions.Contacts
             }
 
             return contact;
-        } 
+        }
     }
 }

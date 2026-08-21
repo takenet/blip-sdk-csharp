@@ -26,10 +26,12 @@ namespace Take.Blip.Client.Activation
         /// <exception cref="System.ArgumentNullException"></exception>
         public virtual object GetService(Type serviceType)
         {
-            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+            if (serviceType == null)
+                throw new ArgumentNullException(nameof(serviceType));
             object result;
-            var service = TypeDictionary.TryGetValue(serviceType, out result) ?
-                result : SecondaryServiceProvider?.GetService(serviceType);
+            var service = TypeDictionary.TryGetValue(serviceType, out result)
+                ? result
+                : SecondaryServiceProvider?.GetService(serviceType);
 
             var factory = service as Func<object>;
             if (factory != null)
@@ -49,16 +51,23 @@ namespace Take.Blip.Client.Activation
         /// </exception>
         public virtual void RegisterService(Type serviceType, object instance)
         {
-            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
-            TypeDictionary[serviceType] = instance ?? throw new ArgumentNullException(nameof(instance));
+            if (serviceType == null)
+                throw new ArgumentNullException(nameof(serviceType));
+            TypeDictionary[serviceType] =
+                instance ?? throw new ArgumentNullException(nameof(instance));
             (SecondaryServiceProvider as IServiceContainer)?.RegisterService(serviceType, instance);
         }
 
         public virtual void RegisterService(Type serviceType, Func<object> instanceFactory)
         {
-            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
-            TypeDictionary[serviceType] = instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
-            (SecondaryServiceProvider as IServiceContainer)?.RegisterService(serviceType, instanceFactory);
+            if (serviceType == null)
+                throw new ArgumentNullException(nameof(serviceType));
+            TypeDictionary[serviceType] =
+                instanceFactory ?? throw new ArgumentNullException(nameof(instanceFactory));
+            (SecondaryServiceProvider as IServiceContainer)?.RegisterService(
+                serviceType,
+                instanceFactory
+            );
         }
     }
 }

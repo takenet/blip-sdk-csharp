@@ -41,7 +41,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Act
             target(value1, value2).ShouldBeTrue();
         }
-    
+
         [Fact]
         public void EqualsComparisonWithEqualsValuesWithAccentShouldSucceed()
         {
@@ -53,6 +53,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Act
             target(value1, value2).ShouldBeTrue();
         }
+
         [Fact]
         public void EqualsComparisonWithUnequalsValuesShouldFail()
         {
@@ -100,6 +101,7 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Act
             target(value1, value2).ShouldBeFalse();
         }
+
         [Fact]
         public void NotEqualsComparisonWithUnequalsValuesShouldSucceed()
         {
@@ -159,7 +161,6 @@ namespace Take.Blip.Builder.UnitTests.Models
             // Act
             target(value1, value2).ShouldBeFalse();
         }
-
 
         [Fact]
         public void GreaterThanWithComparisonWithBiggerValuesShouldSucceed()

@@ -32,8 +32,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             configuration.ExecuteScriptV2MaxRuntimeStackUsage =
                 conventions.ExecuteScriptV2MaxRuntimeStackUsage;
 
-            return new ExecuteScriptV2Action(configuration, client ?? Substitute.For<IHttpClient>(),
-                Substitute.For<ILogger>());
+            return new ExecuteScriptV2Action(
+                configuration,
+                client ?? Substitute.For<IHttpClient>(),
+                Substitute.For<ILogger>()
+            );
         }
 
         [Fact]
@@ -45,7 +48,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var settings = new ExecuteScriptV2Settings
             {
                 Source = $"function run() {{ return '{variableValue}'; }}",
-                OutputVariable = variableName
+                OutputVariable = variableName,
             };
             var target = GetTarget();
 
@@ -53,8 +56,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(variableName, variableValue,
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(variableName, variableValue, CancellationToken);
             await Context.Received(0).DeleteVariableAsync(variableName, CancellationToken);
         }
 
@@ -64,7 +68,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 function run() {
     let numberTest = new Array(100000).join('Z');
 
@@ -73,7 +78,7 @@ function run() {
     return convert;
 }
 ",
-                OutputVariable = "test"
+                OutputVariable = "test",
             };
             var target = GetTarget();
 
@@ -90,7 +95,8 @@ function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 const matchEmailRegex = (input) => {
     const pattern = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/gmi;
     return input.match(pattern, 'gmi');
@@ -100,7 +106,7 @@ function run() {
     return matchEmailRegex('test@blip.ai');
 }
 ",
-                OutputVariable = "test"
+                OutputVariable = "test",
             };
             var target = GetTarget();
 
@@ -108,7 +114,9 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("test", "[\"test@blip.ai\"]", CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync("test", "[\"test@blip.ai\"]", CancellationToken);
         }
 
         [Fact]
@@ -121,7 +129,7 @@ function run() {
                 Source =
                     "function run() { return time.parseDate('2021-01-01T00:00:10').toDateString() + ' ' + time.parseDate('2021-01-01T00:00:10').toTimeString(); }",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
@@ -132,10 +140,13 @@ function run() {
 
             // Assert
             // The result should contain the timezone offset and time, but the day/month names may vary by locale
-            await Context.Received(1).SetVariableAsync(
-                Arg.Is<string>(s => s == "test"),
-                Arg.Is<string>(s => s.Contains("2021 11:00:10 GMT+08:00")),
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Is<string>(s => s == "test"),
+                    Arg.Is<string>(s => s.Contains("2021 11:00:10 GMT+08:00")),
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -148,7 +159,7 @@ function run() {
                 Source =
                     "function run() { return time.parseDate('2021-01-01T00:00:10').toDateString() + ' ' + time.parseDate('2021-01-01T00:00:10').toTimeString(); }",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
@@ -159,8 +170,13 @@ function run() {
 
             // Assert
             // Jint doesn't support toLocaleString, so it will return the default date format
-            await Context.Received(1).SetVariableAsync("test",
-                "sex. jan. 01 2021 00:00:10 GMT-03:00", CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    "test",
+                    "sex. jan. 01 2021 00:00:10 GMT-03:00",
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -170,14 +186,15 @@ function run() {
             var settings = new ExecuteScriptV2Settings
             {
                 // Fixed date to test timezone
-                Source = @"
+                Source =
+                    @"
 function run() {
     var parsedDate = time.parseDate('2021-01-01T00:00:10');
 
     return (parsedDate.toDateString() + ' ' + parsedDate.toTimeString()) == parsedDate.toString();
 }",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
@@ -191,7 +208,6 @@ function run() {
             await Context.Received(1).SetVariableAsync("test", "true", CancellationToken);
         }
 
-
         [Fact]
         public async Task ExecuteThrowExceptionTest()
         {
@@ -201,7 +217,7 @@ function run() {
                 Source = $"function run() {{ throw new Error('Test error'); }}",
                 OutputVariable = "variable1",
                 CaptureExceptions = true,
-                ExceptionVariable = "exception"
+                ExceptionVariable = "exception",
             };
             var target = GetTarget();
 
@@ -209,8 +225,9 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("exception", "Error: Test error",
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync("exception", "Error: Test error", CancellationToken);
         }
 
         [Fact]
@@ -225,11 +242,12 @@ function run() {
             var settings = new ExecuteScriptV2Settings
             {
                 InputVariables = new[] { nameof(number1), nameof(number2) },
-                Source = @"
+                Source =
+                    @"
 function run(number1, number2) {
     return parseInt(number1) + parseInt(number2);
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -237,8 +255,14 @@ function run(number1, number2) {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
-                CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
             await Context.Received(1).SetVariableAsync("result", "350", CancellationToken);
         }
 
@@ -248,13 +272,14 @@ function run(number1, number2) {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 async function run() {
     await context.setVariableAsync('test', 100);
 
     return true;
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -263,7 +288,8 @@ async function run() {
 
             // Assert
             await Context.Received(1).SetVariableAsync("test", "100", Arg.Any<CancellationToken>());
-            await Context.Received(1)
+            await Context
+                .Received(1)
                 .SetVariableAsync("result", "true", Arg.Any<CancellationToken>());
         }
 
@@ -273,7 +299,8 @@ async function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 async function testNum() {
     return 1;
 }
@@ -293,7 +320,7 @@ async function run() {
         'recursive': testRecursiveAsync()
     };
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -301,8 +328,13 @@ async function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("result",
-                "{\"num\":1,\"str\":\"bla\",\"recursive\":\"bla\"}", Arg.Any<CancellationToken>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    "result",
+                    "{\"num\":1,\"str\":\"bla\",\"recursive\":\"bla\"}",
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
@@ -317,11 +349,12 @@ async function run() {
             var settings = new ExecuteScriptV2Settings
             {
                 InputVariables = new[] { nameof(number1), nameof(number2) },
-                Source = @"
+                Source =
+                    @"
 function run(number1, number2, number3) {
     return parseInt(number1) + parseInt(number2) + (number3 || 150);
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -329,8 +362,14 @@ function run(number1, number2, number3) {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
-                CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
             await Context.Received(1).SetVariableAsync("result", "500", CancellationToken);
         }
 
@@ -341,7 +380,8 @@ function run(number1, number2, number3) {
             var settings = new ExecuteScriptV2Settings
             {
                 InputVariables = Array.Empty<string>(),
-                Source = @"
+                Source =
+                    @"
 function scopedFunc() {
     let x = 1;
     const y = 'my value';
@@ -352,7 +392,7 @@ function run() {
     var scopedReturn = scopedFunc();
     return typeof x === 'undefined' && typeof y === 'undefined' && scopedReturn.x === 1 && scopedReturn.y === 'my value';
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -376,11 +416,12 @@ function run() {
             {
                 Function = "executeFunc",
                 InputVariables = new[] { nameof(number1), nameof(number2) },
-                Source = @"
+                Source =
+                    @"
 function executeFunc(number1, number2) {
     return parseInt(number1) + parseInt(number2);
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -388,8 +429,14 @@ function executeFunc(number1, number2) {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
-                CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
             await Context.Received(1).SetVariableAsync("result", "350", CancellationToken);
         }
 
@@ -401,7 +448,8 @@ function executeFunc(number1, number2) {
                 "{\"id\":1,\"valid\":true,\"options\":[1,2,3],\"names\":[\"a\",\"b\",\"c\"],\"others\":[{\"a\":\"value1\"},{\"b\":\"value2\"}],\"content\":{\"uri\":\"https://server.com/image.jpeg\",\"type\":\"image/jpeg\"}}";
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 function run() {
     return {
         id: 1,
@@ -416,7 +464,7 @@ function run() {
     };
 }
 ",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -424,8 +472,14 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
-                CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
             await Context.Received(1).SetVariableAsync("result", result, CancellationToken);
         }
 
@@ -436,12 +490,13 @@ function run() {
             const string result = "[1,2,3]";
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 function run() {
     return [1, 2, 3];
 }
 ",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -449,8 +504,14 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
-                CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
             await Context.Received(1).SetVariableAsync("result", result, CancellationToken);
         }
 
@@ -460,7 +521,8 @@ function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 function run() {
     var value = 0;
     while (true) {
@@ -468,7 +530,7 @@ function run() {
     }
     return value;
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -484,7 +546,6 @@ function run() {
             }
         }
 
-
         [Fact]
         public async Task ExecuteWithDefaultTimeZoneShouldWork()
         {
@@ -494,7 +555,7 @@ function run() {
                 // Test date parsing and also converting to specific format and timezone
                 Source =
                     "function run() { return time.parseDate('2021-01-01T00:00:00Z', {format:'yyyy-MM-ddTHH:mm:ssZ'}).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }); }",
-                OutputVariable = "test"
+                OutputVariable = "test",
             };
             var target = GetTarget();
 
@@ -502,7 +563,8 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1)
+            await Context
+                .Received(1)
                 .SetVariableAsync("test", "31/12/2020, 21:00:00", CancellationToken);
         }
 
@@ -522,7 +584,7 @@ function run() {
         'parseDateWithFormatAndCulture': time.parseDate('01/01/2021', {format: 'MM/dd/yyyy', culture: 'pt-BR'}),
     }
 }",
-                OutputVariable = "test"
+                OutputVariable = "test",
             };
             var target = GetTarget();
 
@@ -530,10 +592,13 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1)
-                .SetVariableAsync("test",
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    "test",
                     "{\"parseDate\":\"2021-01-01T08:01:01.0000000-03:00\",\"parseDateWithFormat\":\"2021-01-02T00:00:00.0000000-03:00\",\"parseDateWithFormatAndCulture\":\"2021-01-01T00:00:00.0000000-03:00\"}",
-                    CancellationToken);
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -546,7 +611,7 @@ function run() {
                 Source =
                     "function run() { return time.parseDate('2021-01-01T00:00:00Z', {format:'yyyy-MM-ddTHH:mm:ssZ'}).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }); }",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
@@ -556,8 +621,9 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("test", "12/31/2020, 9:00:00 PM",
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync("test", "12/31/2020, 9:00:00 PM", CancellationToken);
         }
 
         [Fact]
@@ -577,7 +643,7 @@ async function run() {
 }
 ",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
@@ -601,7 +667,7 @@ run = async () => {
 }
 ",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
@@ -622,7 +688,7 @@ run = async () => {
                 Source =
                     "function run() { return time.dateToString(time.parseDate('2021-01-01T00:00:00Z', {'format':'yyyy-MM-ddTHH:mm:ssZ'})); }",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
@@ -632,8 +698,9 @@ run = async () => {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("test", "2021-01-01T08:00:00.0000000+08:00",
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync("test", "2021-01-01T08:00:00.0000000+08:00", CancellationToken);
         }
 
         [Fact]
@@ -656,7 +723,7 @@ function run() {
     }
 }",
                 OutputVariable = "test",
-                LocalTimeZoneEnabled = true
+                LocalTimeZoneEnabled = true,
             };
             var target = GetTarget();
 
@@ -666,9 +733,13 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("test",
-                "{\"parsed\":\"2021-01-01T19:00:00.0000000-03:00\",\"stringDate\":\"2021-01-01T19:00:00.0000000-03:00\"}",
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    "test",
+                    "{\"parsed\":\"2021-01-01T19:00:00.0000000-03:00\",\"stringDate\":\"2021-01-01T19:00:00.0000000-03:00\"}",
+                    CancellationToken
+                );
         }
 
         [Fact]
@@ -677,13 +748,14 @@ function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 function run() {
     time.sleep(1000000000);
 
     return value;
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -709,7 +781,8 @@ function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 function run() {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -720,7 +793,7 @@ function run() {
     xhr.open('GET', 'https://example.com', true);
     xhr.send(null);                    
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -743,7 +816,8 @@ function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 async function run() {
     var response = await request.fetchAsync('https://mock.com', {
         'method': 'POST',
@@ -757,7 +831,7 @@ async function run() {
 
     return response;
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
 
             using var response = new HttpResponseMessage();
@@ -769,24 +843,29 @@ async function run() {
             var httpClient = Substitute.For<IHttpClient>();
 
             HttpRequestMessage resultMessage = null;
-            httpClient.SendAsync(Arg.Do<HttpRequestMessage>(message =>
-                {
-                    resultMessage = new HttpRequestMessage
+            httpClient
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(message =>
                     {
-                        Method = message.Method,
-                        RequestUri = message.RequestUri,
-                        Content = new StringContent(message.Content!.ReadAsStringAsync()
-                                .GetAwaiter()
-                                .GetResult(), Encoding.UTF8,
-                            message.Content.Headers.ContentType?.MediaType!)
-                    };
+                        resultMessage = new HttpRequestMessage
+                        {
+                            Method = message.Method,
+                            RequestUri = message.RequestUri,
+                            Content = new StringContent(
+                                message.Content!.ReadAsStringAsync().GetAwaiter().GetResult(),
+                                Encoding.UTF8,
+                                message.Content.Headers.ContentType?.MediaType!
+                            ),
+                        };
 
-                    for (var i = 0; i < message.Headers.Count(); i++)
-                    {
-                        var header = message.Headers.ElementAt(i);
-                        resultMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                    }
-                }), Arg.Any<CancellationToken>())
+                        for (var i = 0; i < message.Headers.Count(); i++)
+                        {
+                            var header = message.Headers.ElementAt(i);
+                            resultMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        }
+                    }),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(response);
 
             var target = GetTarget(httpClient);
@@ -795,9 +874,13 @@ async function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("result",
-                "{\"status\":200,\"success\":true,\"body\":\"{\\\"result\\\": \\\"bla\\\"}\",\"headers\":{\"test\":[\"test2\"],\"test2\":[\"bla\",\"bla2\"]}}",
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    "result",
+                    "{\"status\":200,\"success\":true,\"body\":\"{\\\"result\\\": \\\"bla\\\"}\",\"headers\":{\"test\":[\"test2\"],\"test2\":[\"bla\",\"bla2\"]}}",
+                    CancellationToken
+                );
 
             resultMessage.Method.ShouldBe(HttpMethod.Post);
             resultMessage.RequestUri.ShouldBe(new Uri("https://mock.com"));
@@ -819,7 +902,8 @@ async function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
                 async function run() {
                     var response = await request.fetchAsync('https://mock.com', {
                         'method': 'POST',
@@ -831,7 +915,7 @@ async function run() {
 
                     return response;
                 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
 
             using var response = new HttpResponseMessage();
@@ -841,25 +925,34 @@ async function run() {
             var httpClient = Substitute.For<IHttpClient>();
 
             HttpRequestMessage resultMessage = null;
-            httpClient.SendAsync(Arg.Do<HttpRequestMessage>(message =>
-            {
-                resultMessage = new HttpRequestMessage
-                {
-                    Method = message.Method,
-                    RequestUri = message.RequestUri,
-                    Content = new ByteArrayContent(Encoding.UTF8.GetBytes(message.Content!.ReadAsStringAsync()
-                        .GetAwaiter()
-                        .GetResult()))
-                };
+            httpClient
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(message =>
+                    {
+                        resultMessage = new HttpRequestMessage
+                        {
+                            Method = message.Method,
+                            RequestUri = message.RequestUri,
+                            Content = new ByteArrayContent(
+                                Encoding.UTF8.GetBytes(
+                                    message.Content!.ReadAsStringAsync().GetAwaiter().GetResult()
+                                )
+                            ),
+                        };
 
-                foreach (var header in message.Headers)
-                {
-                    resultMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                }
+                        foreach (var header in message.Headers)
+                        {
+                            resultMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        }
 
-                resultMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            }), Arg.Any<CancellationToken>())
-            .Returns(response);
+                        resultMessage.Content.Headers.ContentType =
+                            new System.Net.Http.Headers.MediaTypeHeaderValue(
+                                "application/x-www-form-urlencoded"
+                            );
+                    }),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(response);
 
             var target = GetTarget(httpClient);
 
@@ -867,11 +960,17 @@ async function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("result",
-                Arg.Is<string>(s => s.Contains("\"status\":200") &&
-                                    s.Contains("\"success\":true") &&
-                                    s.Contains("\"body\":\"{\\\"result\\\": \\\"form-response\\\"}\"")),
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    "result",
+                    Arg.Is<string>(s =>
+                        s.Contains("\"status\":200")
+                        && s.Contains("\"success\":true")
+                        && s.Contains("\"body\":\"{\\\"result\\\": \\\"form-response\\\"}\"")
+                    ),
+                    CancellationToken
+                );
 
             resultMessage.ShouldNotBeNull();
             resultMessage.Method.ShouldBe(HttpMethod.Post);
@@ -880,7 +979,9 @@ async function run() {
             var requestBody = await resultMessage.Content!.ReadAsStringAsync();
             requestBody.ShouldBe("key1=value1&key2=value2");
 
-            resultMessage.Content.Headers.ContentType!.ToString().ShouldContain("application/x-www-form-urlencoded");
+            resultMessage
+                .Content.Headers.ContentType!.ToString()
+                .ShouldContain("application/x-www-form-urlencoded");
             resultMessage.Content.Headers.ContentType!.ToString().ShouldNotContain("charset=utf-8");
 
             resultMessage.Content.ShouldBeOfType<ByteArrayContent>();
@@ -893,7 +994,8 @@ async function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 async function run() {
     var response = await request.fetchAsync('https://mock.com', {
         'method': 'POST',
@@ -907,19 +1009,23 @@ async function run() {
 
     return await response.jsonAsync();
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
 
             using var response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
-            response.Content =
-                new StringContent("{\"result\": \"bla\"}", Encoding.UTF8, "application/json");
+            response.Content = new StringContent(
+                "{\"result\": \"bla\"}",
+                Encoding.UTF8,
+                "application/json"
+            );
             response.Headers.Add("test", "test2");
             response.Headers.Add("test2", new[] { "bla", "bla2" });
 
             var httpClient = Substitute.For<IHttpClient>();
 
-            httpClient.SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            httpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(response);
 
             var target = GetTarget(httpClient);
@@ -928,9 +1034,9 @@ async function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("result",
-                "{\"result\":\"bla\"}",
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync("result", "{\"result\":\"bla\"}", CancellationToken);
         }
 
         [Fact]
@@ -940,13 +1046,14 @@ async function run() {
             // Arrange
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 async function run() {
     var response = await request.fetchAsync('https://mock.com');
 
     return response;
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
 
             using var response = new HttpResponseMessage();
@@ -958,21 +1065,25 @@ async function run() {
             var httpClient = Substitute.For<IHttpClient>();
 
             HttpRequestMessage resultMessage = null;
-            httpClient.SendAsync(Arg.Do<HttpRequestMessage>(message =>
-                {
-                    resultMessage = new HttpRequestMessage
+            httpClient
+                .SendAsync(
+                    Arg.Do<HttpRequestMessage>(message =>
                     {
-                        Method = message.Method,
-                        RequestUri = message.RequestUri,
-                        Content = message.Content,
-                    };
+                        resultMessage = new HttpRequestMessage
+                        {
+                            Method = message.Method,
+                            RequestUri = message.RequestUri,
+                            Content = message.Content,
+                        };
 
-                    for (var i = 0; i < message.Headers.Count(); i++)
-                    {
-                        var header = message.Headers.ElementAt(i);
-                        resultMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                    }
-                }), Arg.Any<CancellationToken>())
+                        for (var i = 0; i < message.Headers.Count(); i++)
+                        {
+                            var header = message.Headers.ElementAt(i);
+                            resultMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        }
+                    }),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(response);
 
             var target = GetTarget(httpClient);
@@ -981,15 +1092,18 @@ async function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync("result",
-                "{\"status\":200,\"success\":true,\"body\":\"{\\\"result\\\": \\\"bla\\\"}\",\"headers\":{\"test\":[\"test2\"],\"test2\":[\"bla\",\"bla2\"]}}",
-                CancellationToken);
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    "result",
+                    "{\"status\":200,\"success\":true,\"body\":\"{\\\"result\\\": \\\"bla\\\"}\",\"headers\":{\"test\":[\"test2\"],\"test2\":[\"bla\",\"bla2\"]}}",
+                    CancellationToken
+                );
 
             resultMessage.Method.ShouldBe(HttpMethod.Get);
             resultMessage.RequestUri.ShouldBe(new Uri("https://mock.com"));
             resultMessage.Content.ShouldBeNull();
         }
-
 
         [Fact]
         public async Task ExecuteScriptParseIntWithExceededLengthShouldSucceed()
@@ -998,13 +1112,14 @@ async function run() {
             var result = "NaN";
             var settings = new ExecuteScriptV2Settings
             {
-                Source = @"
+                Source =
+                    @"
 function run() {
     let numberTest = new Array(100000).join('Z');
     let convert = parseInt(numberTest);
     return convert;
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
             var target = GetTarget();
 
@@ -1012,8 +1127,14 @@ function run() {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
-                CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
             await Context.Received(1).SetVariableAsync("result", result, CancellationToken);
         }
 
@@ -1022,14 +1143,16 @@ function run() {
         {
             // Arrange
             var invalidCharacter = "?";
-            Context.GetVariableAsync(nameof(invalidCharacter), CancellationToken)
+            Context
+                .GetVariableAsync(nameof(invalidCharacter), CancellationToken)
                 .Returns(invalidCharacter);
             var result = "{\"value\":\"\"}";
 
             var settings = new ExecuteScriptV2Settings
             {
                 InputVariables = new[] { nameof(invalidCharacter) },
-                Source = @"
+                Source =
+                    @"
 function run (input) {
     try {
         return JSON.parse(input);
@@ -1039,7 +1162,7 @@ function run (input) {
         };
     }
 }",
-                OutputVariable = "result"
+                OutputVariable = "result",
             };
 
             var target = GetTarget();
@@ -1048,8 +1171,14 @@ function run (input) {
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
             // Assert
-            await Context.Received(1).SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(),
-                CancellationToken, Arg.Any<TimeSpan>());
+            await Context
+                .Received(1)
+                .SetVariableAsync(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    CancellationToken,
+                    Arg.Any<TimeSpan>()
+                );
             await Context.Received(1).SetVariableAsync("result", result, CancellationToken);
         }
 

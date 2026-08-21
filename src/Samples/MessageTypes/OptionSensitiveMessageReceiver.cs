@@ -29,10 +29,7 @@ namespace MessageTypes
 
         public Document getSensitivePassword()
         {
-            var document = new SensitiveContainer
-            {
-                Value = "Your password is 123456"
-            };
+            var document = new SensitiveContainer { Value = "Your password is 123456" };
             return document;
         }
 
@@ -44,8 +41,8 @@ namespace MessageTypes
                 Value = new WebLink
                 {
                     Text = "Please follow this link for the checkout",
-                    Uri = url
-                }
+                    Uri = url,
+                },
             };
             return document;
         }

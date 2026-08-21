@@ -49,7 +49,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
             var redirect = new JObject();
             redirect.Add("address", "bot1");
-            Context.Input.Message.Metadata = new Dictionary<string, string> { { "REDIRECT_TEST_LOG", "bot1"  } };
+            Context.Input.Message.Metadata = new Dictionary<string, string>
+            {
+                { "REDIRECT_TEST_LOG", "bot1" },
+            };
 
             // Act
             await target.ExecuteAsync(Context, redirect, CancellationToken);
@@ -69,7 +72,8 @@ namespace Take.Blip.Builder.UnitTests.Actions
             {
                 await target.ExecuteAsync(Context, null, CancellationToken);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Context.DidNotReceive();
             }
         }

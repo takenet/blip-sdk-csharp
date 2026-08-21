@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
-using System.Diagnostics;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Models;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Builder.Utils;
 using Take.Blip.Client;
 
@@ -28,7 +28,12 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
         private readonly IDocumentSerializer _documentSerializer;
         private readonly IBlipLogger _blipMonitoringLogger;
 
-        public SendMessageFromHttpAction(ISender sender, IHttpClient httpClient, IDocumentSerializer documentSerializer, IBlipLogger? blipMonitoringLogger = null)
+        public SendMessageFromHttpAction(
+            ISender sender,
+            IHttpClient httpClient,
+            IDocumentSerializer documentSerializer,
+            IBlipLogger? blipMonitoringLogger = null
+        )
             : base(nameof(SendMessageFromHttp))
         {
             _sender = sender;
@@ -37,7 +42,11 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
             _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
-        public override async Task ExecuteAsync(IContext context, SendMessageFromHttpSettings settings, CancellationToken cancellationToken)
+        public override async Task ExecuteAsync(
+            IContext context,
+            SendMessageFromHttpSettings settings,
+            CancellationToken cancellationToken
+        )
         {
             var sw = Stopwatch.StartNew();
             int responseStatus = 0;
@@ -48,17 +57,35 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                 {
                     foreach (var header in settings.Headers)
                     {
-                        httpRequestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        httpRequestMessage.Headers.TryAddWithoutValidation(
+                            header.Key,
+                            header.Value
+                        );
                     }
                 }
                 else
                 {
-                    httpRequestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(settings.Type));
+                    httpRequestMessage.Headers.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue(settings.Type)
+                    );
                 }
 
-                using (var cts = new CancellationTokenSource(settings.RequestTimeout ?? DefaultRequestTimeout))
-                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token))
-                using (var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, linkedCts.Token).ConfigureAwait(false))
+                using (
+                    var cts = new CancellationTokenSource(
+                        settings.RequestTimeout ?? DefaultRequestTimeout
+                    )
+                )
+                using (
+                    var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                        cancellationToken,
+                        cts.Token
+                    )
+                )
+                using (
+                    var httpResponseMessage = await _httpClient
+                        .SendAsync(httpRequestMessage, linkedCts.Token)
+                        .ConfigureAwait(false)
+                )
                 {
                     responseStatus = (int)httpResponseMessage.StatusCode;
                     httpResponseMessage.EnsureSuccessStatusCode();
@@ -68,19 +95,29 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     {
                         Id = EnvelopeId.NewId(),
                         To = context.Input.Message.From,
-                        Content = _documentSerializer.Deserialize(body, settings.MediaType)
+                        Content = _documentSerializer.Deserialize(body, settings.MediaType),
                     };
 
                     if (context.Input.Message.From.Domain.Equals("tunnel.msging.net"))
                     {
                         message.Metadata ??= new Dictionary<string, string>();
 
-                        if (context.Input.Message.Metadata.TryGetValue("#tunnel.owner", out string owner))
+                        if (
+                            context.Input.Message.Metadata.TryGetValue(
+                                "#tunnel.owner",
+                                out string owner
+                            )
+                        )
                         {
                             message.Metadata.Add("#tunnel.owner", owner);
                         }
 
-                        if (context.Input.Message.Metadata.TryGetValue("#tunnel.originator", out string originator))
+                        if (
+                            context.Input.Message.Metadata.TryGetValue(
+                                "#tunnel.originator",
+                                out string originator
+                            )
+                        )
                         {
                             message.Metadata.Add("#tunnel.originator", originator);
                         }
@@ -89,21 +126,30 @@ namespace Take.Blip.Builder.Actions.SendMessageFromHttp
                     await _sender.SendMessageAsync(message, cancellationToken);
                 }
 
-                this.LogDelivery(_blipMonitoringLogger, context, new JObject
-                {
-                    ["uri"] = settings.Uri?.ToString(),
-                    ["responseStatus"] = responseStatus,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
+                this.LogDelivery(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["uri"] = settings.Uri?.ToString(),
+                        ["responseStatus"] = responseStatus,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    }
+                );
             }
             catch (Exception ex)
             {
-                this.LogError(_blipMonitoringLogger, context, new JObject
-                {
-                    ["uri"] = settings.Uri?.ToString(),
-                    ["responseStatus"] = responseStatus,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                }, ex);
+                this.LogError(
+                    _blipMonitoringLogger,
+                    context,
+                    new JObject
+                    {
+                        ["uri"] = settings.Uri?.ToString(),
+                        ["responseStatus"] = responseStatus,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    },
+                    ex
+                );
                 throw;
             }
         }

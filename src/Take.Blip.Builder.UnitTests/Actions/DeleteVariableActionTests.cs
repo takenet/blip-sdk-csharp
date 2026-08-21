@@ -11,9 +11,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             Settings = new DeleteVariableSettings();
         }
-        
+
         public DeleteVariableSettings Settings { get; }
-        
+
         private DeleteVariableAction GetTarget()
         {
             return new DeleteVariableAction();
@@ -25,10 +25,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
             // Arrange
             Settings.Variable = "myVariable";
             var target = GetTarget();
-            
+
             // Act
             await target.ExecuteAsync(Context, Settings, CancellationToken);
-            
+
             // Assert
             Context.Received(1).DeleteVariableAsync(Settings.Variable, CancellationToken);
         }

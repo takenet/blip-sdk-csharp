@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Lime.Protocol.Serialization;
-using System.Net;
+using Microsoft.AspNetCore.Http;
 
 namespace Take.Blip.Client.Web
 {
@@ -14,9 +14,10 @@ namespace Take.Blip.Client.Web
         private readonly IEnvelopeSerializer _envelopeSerializer;
 
         public BlipMiddleware(
-            RequestDelegate next, 
-            IEnvelopeBuffer envelopeBuffer, 
-            IEnvelopeSerializer envelopeSerializer)
+            RequestDelegate next,
+            IEnvelopeBuffer envelopeBuffer,
+            IEnvelopeSerializer envelopeSerializer
+        )
         {
             _next = next;
             _envelopeBuffer = envelopeBuffer;
@@ -25,10 +26,14 @@ namespace Take.Blip.Client.Web
 
         public async Task Invoke(HttpContext context)
         {
-            if (context.Request.ContentType != null
-                && context.Request.ContentType.Equals("application/json") &&
-                (context.Request.Path.StartsWithSegments("/messages")
-                 || context.Request.Path.StartsWithSegments("/notifications")))
+            if (
+                context.Request.ContentType != null
+                && context.Request.ContentType.Equals("application/json")
+                && (
+                    context.Request.Path.StartsWithSegments("/messages")
+                    || context.Request.Path.StartsWithSegments("/notifications")
+                )
+            )
             {
                 try
                 {

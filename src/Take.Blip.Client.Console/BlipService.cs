@@ -30,7 +30,9 @@ namespace Take.Blip.Client.Console
             options.RunAsService = false;
             options.ServiceName = ServiceName;
             var applicationJsonPath = ConsoleRunner.GetApplicationJsonPath(options);
-            using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(options.StartTimeout)))
+            using (
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(options.StartTimeout))
+            )
             {
                 _stoppable = ConsoleRunner.StartAsync(applicationJsonPath, cts.Token).Result;
             }

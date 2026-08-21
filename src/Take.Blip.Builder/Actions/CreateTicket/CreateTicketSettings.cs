@@ -1,5 +1,5 @@
-using Lime.Protocol;
 using System.ComponentModel.DataAnnotations;
+using Lime.Protocol;
 using Take.Blip.Builder.Models;
 using Takenet.Iris.Messaging.Resources;
 
@@ -19,8 +19,6 @@ namespace Take.Blip.Builder.Actions.CreateTicket
 
         public DocumentContainer CustomerInput { get; set; }
 
-        public void Validate()
-        {
-        }
+        public void Validate() { }
     }
 }

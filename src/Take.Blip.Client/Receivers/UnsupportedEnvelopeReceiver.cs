@@ -6,7 +6,6 @@ using Lime.Protocol.Network;
 
 namespace Take.Blip.Client.Receivers
 {
-
     public abstract class UnsupportedEnvelopeReceiver<TEnvelope> : IEnvelopeReceiver<TEnvelope>
         where TEnvelope : Envelope
     {
@@ -17,12 +16,14 @@ namespace Take.Blip.Client.Receivers
             _reason = reason;
         }
 
-        public virtual Task ReceiveAsync(TEnvelope enevelope, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual Task ReceiveAsync(
+            TEnvelope enevelope,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             if (!string.IsNullOrWhiteSpace(enevelope.Id) || enevelope.Id == Guid.Empty.ToString())
             {
-                throw new LimeException(
-                    _reason);
+                throw new LimeException(_reason);
             }
 
             return Task.CompletedTask;

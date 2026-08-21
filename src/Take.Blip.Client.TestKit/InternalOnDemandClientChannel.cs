@@ -29,7 +29,10 @@ namespace Take.Blip.Client.TestKit
 
         internal BufferBlock<Notification> OutgoingNotifications { get; }
 
-        public InternalOnDemandClientChannel(IEnvelopeSerializer serializer, Application applicationSettings)
+        public InternalOnDemandClientChannel(
+            IEnvelopeSerializer serializer,
+            Application applicationSettings
+        )
         {
             _applicationSettings = applicationSettings;
             _serializer = serializer;
@@ -43,13 +46,19 @@ namespace Take.Blip.Client.TestKit
             OutgoingNotifications = new BufferBlock<Notification>();
         }
 
-        public ICollection<Func<ChannelInformation, Task>> ChannelCreatedHandlers => throw new NotImplementedException();
+        public ICollection<Func<ChannelInformation, Task>> ChannelCreatedHandlers =>
+            throw new NotImplementedException();
 
-        public ICollection<Func<FailedChannelInformation, Task<bool>>> ChannelCreationFailedHandlers => throw new NotImplementedException();
+        public ICollection<
+            Func<FailedChannelInformation, Task<bool>>
+        > ChannelCreationFailedHandlers => throw new NotImplementedException();
 
-        public ICollection<Func<ChannelInformation, Task>> ChannelDiscardedHandlers => throw new NotImplementedException();
+        public ICollection<Func<ChannelInformation, Task>> ChannelDiscardedHandlers =>
+            throw new NotImplementedException();
 
-        public ICollection<Func<FailedChannelInformation, Task<bool>>> ChannelOperationFailedHandlers => throw new NotImplementedException();
+        public ICollection<
+            Func<FailedChannelInformation, Task<bool>>
+        > ChannelOperationFailedHandlers => throw new NotImplementedException();
 
         public bool IsEstablished { get; private set; }
 
@@ -80,24 +89,29 @@ namespace Take.Blip.Client.TestKit
             return IncomingNotifications.ReceiveAsync(cancellationToken);
         }
 
-        public Task<Command> ProcessCommandAsync(Command command, CancellationToken cancellationToken)
+        public Task<Command> ProcessCommandAsync(
+            Command command,
+            CancellationToken cancellationToken
+        )
         {
             var successResult = new Command
             {
                 Id = command.Id,
                 Method = command.Method,
-                Status = CommandStatus.Success
+                Status = CommandStatus.Success,
             };
             return Task.FromResult(successResult);
         }
 
-        public Task SendCommandAsync(Command command, CancellationToken cancellationToken)
-            => OutgoingCommands.SendAsync(command);
+        public Task SendCommandAsync(Command command, CancellationToken cancellationToken) =>
+            OutgoingCommands.SendAsync(command);
 
-        public Task SendMessageAsync(Message message, CancellationToken cancellationToken)
-            => OutgoingMessages.SendAsync(message);
+        public Task SendMessageAsync(Message message, CancellationToken cancellationToken) =>
+            OutgoingMessages.SendAsync(message);
 
-        public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken)
-            => OutgoingNotifications.SendAsync(notification);
+        public Task SendNotificationAsync(
+            Notification notification,
+            CancellationToken cancellationToken
+        ) => OutgoingNotifications.SendAsync(notification);
     }
 }

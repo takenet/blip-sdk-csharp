@@ -9,7 +9,7 @@ using Take.Blip.Client.Extensions.Context;
 namespace Take.Blip.Builder
 {
     /// <summary>
-    /// Defines a context 
+    /// Defines a context
     /// </summary>
     public class ContextProvider : IContextProvider
     {
@@ -20,13 +20,29 @@ namespace Take.Blip.Builder
         public ContextProvider(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _contextExtension = new Lazy<IContextExtension>(() => _serviceProvider.GetService<IContextExtension>());
-            _variableProviders = new Lazy<IEnumerable<IVariableProvider>>(() => _serviceProvider.GetService<IEnumerable<IVariableProvider>>());
+            _contextExtension = new Lazy<IContextExtension>(() =>
+                _serviceProvider.GetService<IContextExtension>()
+            );
+            _variableProviders = new Lazy<IEnumerable<IVariableProvider>>(() =>
+                _serviceProvider.GetService<IEnumerable<IVariableProvider>>()
+            );
         }
 
-        public IContext CreateContext(Identity userIdentity, Identity ownerIdentity, LazyInput input, Flow flow)
+        public IContext CreateContext(
+            Identity userIdentity,
+            Identity ownerIdentity,
+            LazyInput input,
+            Flow flow
+        )
         {
-            return new ExtensionContext(userIdentity, ownerIdentity, input, flow, _variableProviders.Value, _contextExtension.Value);
+            return new ExtensionContext(
+                userIdentity,
+                ownerIdentity,
+                input,
+                flow,
+                _variableProviders.Value,
+                _contextExtension.Value
+            );
         }
     }
 

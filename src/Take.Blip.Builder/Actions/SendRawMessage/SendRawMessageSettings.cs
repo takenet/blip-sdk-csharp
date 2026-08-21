@@ -22,19 +22,22 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
             if (RawContent == null)
             {
                 throw new ArgumentException(
-                    $"The '{nameof(RawContent)}' settings value is required for '{nameof(SendRawMessageSettings)}' action");
+                    $"The '{nameof(RawContent)}' settings value is required for '{nameof(SendRawMessageSettings)}' action"
+                );
             }
 
             if (Type == null)
             {
                 throw new ArgumentException(
-                    $"The '{nameof(Type)}' settings value is required for '{nameof(SendRawMessageSettings)}' action");
+                    $"The '{nameof(Type)}' settings value is required for '{nameof(SendRawMessageSettings)}' action"
+                );
             }
 
             if (!MediaType.TryParse(Type, out MediaType))
             {
                 throw new ArgumentException(
-                    $"The '{nameof(Type)}' settings value must be a valid MIME type for '{nameof(SendRawMessageSettings)}' action");
+                    $"The '{nameof(Type)}' settings value must be a valid MIME type for '{nameof(SendRawMessageSettings)}' action"
+                );
             }
         }
     }

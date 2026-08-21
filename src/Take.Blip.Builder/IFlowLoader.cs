@@ -10,13 +10,18 @@ namespace Take.Blip.Builder
     public interface IFlowLoader
     {
         /// <summary>
-        /// Load a flow instance referring to an application 
+        /// Load a flow instance referring to an application
         /// </summary>
         /// <param name="flowType">Flow type</param>
         /// <param name="parentFlow">Parent flow</param>
         /// <param name="identifier">Application identifier</param>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <returns></returns>
-        Task<Flow> LoadFlowAsync(FlowType flowType, Flow parentFlow, string identifier, CancellationToken cancellationToken);
+        Task<Flow> LoadFlowAsync(
+            FlowType flowType,
+            Flow parentFlow,
+            string identifier,
+            CancellationToken cancellationToken
+        );
     }
 }

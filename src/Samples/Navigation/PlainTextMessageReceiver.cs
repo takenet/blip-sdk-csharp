@@ -1,7 +1,7 @@
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Lime.Protocol;
-using System.Diagnostics;
 using Take.Blip.Client;
 
 namespace Navigation

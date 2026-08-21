@@ -15,7 +15,10 @@ namespace Take.Blip.Client.Extensions
             Sender = sender;
         }
 
-        protected async Task ProcessCommandAsync(Command requestCommand, CancellationToken cancellationToken)
+        protected async Task ProcessCommandAsync(
+            Command requestCommand,
+            CancellationToken cancellationToken
+        )
         {
             var responseCommand = await Sender
                 .ProcessCommandAsync(requestCommand, cancellationToken)
@@ -24,7 +27,11 @@ namespace Take.Blip.Client.Extensions
             EnsureSuccess(responseCommand);
         }
 
-        protected async Task<T> ProcessCommandAsync<T>(Command requestCommand, CancellationToken cancellationToken) where T : Document
+        protected async Task<T> ProcessCommandAsync<T>(
+            Command requestCommand,
+            CancellationToken cancellationToken
+        )
+            where T : Document
         {
             var responseCommand = await Sender
                 .ProcessCommandAsync(requestCommand, cancellationToken)
@@ -40,14 +47,16 @@ namespace Take.Blip.Client.Extensions
             string uriPath,
             Node to = null,
             string id = null,
-            Node from = null) where T : Document =>
+            Node from = null
+        )
+            where T : Document =>
             new Command(id ?? EnvelopeId.NewId())
             {
                 From = from,
                 To = to,
                 Method = CommandMethod.Set,
                 Uri = new LimeUri(uriPath),
-                Resource = resource
+                Resource = resource,
             };
 
         protected Command CreateMergeCommandRequest<T>(
@@ -55,36 +64,44 @@ namespace Take.Blip.Client.Extensions
             string uriPath,
             Node to = null,
             string id = null,
-            Node from = null) where T : Document =>
+            Node from = null
+        )
+            where T : Document =>
             new Command(id ?? EnvelopeId.NewId())
             {
                 From = from,
                 To = to,
                 Method = CommandMethod.Merge,
                 Uri = new LimeUri(uriPath),
-                Resource = resource
+                Resource = resource,
             };
 
-        protected Command CreateGetCommandRequest(string uriPath, Node to = null, string id = null, Node from = null) =>
+        protected Command CreateGetCommandRequest(
+            string uriPath,
+            Node to = null,
+            string id = null,
+            Node from = null
+        ) =>
             new Command(id ?? EnvelopeId.NewId())
             {
                 From = from,
                 To = to,
                 Method = CommandMethod.Get,
-                Uri = new LimeUri(uriPath)
+                Uri = new LimeUri(uriPath),
             };
 
         protected Command CreateDeleteCommandRequest(
-            string uriPath, 
-            Node to = null, 
-            string id = null, 
-            Node from = null) =>
+            string uriPath,
+            Node to = null,
+            string id = null,
+            Node from = null
+        ) =>
             new Command(id ?? EnvelopeId.NewId())
             {
                 From = from,
                 To = to,
                 Method = CommandMethod.Delete,
-                Uri = new LimeUri(uriPath)
+                Uri = new LimeUri(uriPath),
             };
 
         protected Command CreateObserveCommandRequest<T>(
@@ -92,14 +109,16 @@ namespace Take.Blip.Client.Extensions
             T resource = default,
             Node to = null,
             string id = null,
-            Node from = null) where T : Document =>
+            Node from = null
+        )
+            where T : Document =>
             new Command(id)
             {
                 From = from,
                 To = to,
                 Method = CommandMethod.Observe,
                 Uri = new LimeUri(uriPath),
-                Resource = resource
+                Resource = resource,
             };
 
         protected virtual void EnsureSuccess(Command responseCommand)
@@ -107,8 +126,13 @@ namespace Take.Blip.Client.Extensions
             if (responseCommand.Status != CommandStatus.Success)
             {
                 throw new LimeException(
-                    responseCommand.Reason ??
-                    new Reason() { Code = ReasonCodes.COMMAND_PROCESSING_ERROR, Description = "An error occurred" });
+                    responseCommand.Reason
+                        ?? new Reason()
+                        {
+                            Code = ReasonCodes.COMMAND_PROCESSING_ERROR,
+                            Description = "An error occurred",
+                        }
+                );
             }
         }
     }

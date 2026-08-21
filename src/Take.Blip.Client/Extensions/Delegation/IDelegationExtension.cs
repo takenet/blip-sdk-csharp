@@ -9,8 +9,16 @@ namespace Take.Blip.Client.Extensions.Delegation
 {
     public interface IDelegationExtension
     {
-        Task DelegateAsync(Identity target, EnvelopeType[] envelopeTypes = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task DelegateAsync(
+            Identity target,
+            EnvelopeType[] envelopeTypes = null,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
 
-        Task UndelegateAsync(Identity target, EnvelopeType[] envelopeTypes = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task UndelegateAsync(
+            Identity target,
+            EnvelopeType[] envelopeTypes = null,
+            CancellationToken cancellationToken = default(CancellationToken)
+        );
     }
 }

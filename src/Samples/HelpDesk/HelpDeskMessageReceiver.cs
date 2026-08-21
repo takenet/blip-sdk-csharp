@@ -13,14 +13,18 @@ namespace HelpDesk
     public class HelpDeskMessageReceiver : HelpDeskReplyMessageReceiverBase
     {
         public HelpDeskMessageReceiver(ISender sender, IHelpDeskExtension helpDeskExtension)
-            : base (sender, helpDeskExtension)
-        {
-        }
+            : base(sender, helpDeskExtension) { }
 
-        protected async override Task ReceiveAsync(Message message, Node customerIdentiy, CancellationToken cancellationToken = default(CancellationToken))
+        protected override async Task ReceiveAsync(
+            Message message,
+            Node customerIdentiy,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             // Send messages from agent to customer
-            Console.WriteLine($"< Received message from agent [CUSTOMER: {customerIdentiy}]: {message.Content}");
+            Console.WriteLine(
+                $"< Received message from agent [CUSTOMER: {customerIdentiy}]: {message.Content}"
+            );
             await _sender.SendMessageAsync(message.Content, customerIdentiy, cancellationToken);
         }
     }

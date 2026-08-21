@@ -18,7 +18,7 @@ namespace Navigation
         {
             _sender = sender;
             if (settings.ContainsKey("culture"))
-            {            
+            {
                 _cultureInfo = new CultureInfo((string)settings["culture"]);
             }
             else
@@ -29,9 +29,16 @@ namespace Navigation
             _messageTemplate = (string)settings["message"];
         }
 
-        public Task ReceiveAsync(Message envelope, CancellationToken cancellationToken = new CancellationToken())
+        public Task ReceiveAsync(
+            Message envelope,
+            CancellationToken cancellationToken = new CancellationToken()
+        )
         {
-            return _sender.SendMessageAsync(string.Format(_messageTemplate, DateTime.Now.ToString("g", _cultureInfo)), envelope.From, cancellationToken);
+            return _sender.SendMessageAsync(
+                string.Format(_messageTemplate, DateTime.Now.ToString("g", _cultureInfo)),
+                envelope.From,
+                cancellationToken
+            );
         }
     }
 }

@@ -55,13 +55,14 @@ namespace Take.Blip.Builder.UnitTests.Actions
             var target = GetTarget();
             var contact = new JObject();
             contact.Add("NotExistKey", "contact");
-            
+
             // Act
             try
             {
                 await target.ExecuteAsync(Context, null, CancellationToken);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Context.DidNotReceive();
             }
         }

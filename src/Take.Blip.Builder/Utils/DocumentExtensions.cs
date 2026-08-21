@@ -26,9 +26,7 @@ namespace Take.Blip.Builder.Utils
             if (document.GetMediaType().IsJson)
             {
                 var serializer = jsonSerializer ?? JsonSerializer.CreateDefault();
-                return JObject
-                    .FromObject(document, serializer)
-                    .ToObject<T>(serializer);
+                return JObject.FromObject(document, serializer).ToObject<T>(serializer);
             }
 
             var parseFunc = TypeUtilEx.GetParseFunc<T>();

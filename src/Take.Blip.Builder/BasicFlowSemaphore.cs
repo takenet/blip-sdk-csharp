@@ -1,7 +1,7 @@
-﻿using Lime.Protocol;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Lime.Protocol;
 using Take.Blip.Builder.Models;
 using Take.Blip.Builder.Storage;
 
@@ -11,21 +11,39 @@ namespace Take.Blip.Builder
     {
         private readonly INamedSemaphore _namedSemaphore;
 
-        public BasicFlowSemaphore(
-            INamedSemaphore namedSemaphore
-            )
+        public BasicFlowSemaphore(INamedSemaphore namedSemaphore)
         {
             _namedSemaphore = namedSemaphore;
         }
 
-        public Task<IAsyncDisposable> WaitAsync(Flow flow, Message message, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken)
+        public Task<IAsyncDisposable> WaitAsync(
+            Flow flow,
+            Message message,
+            Identity userIdentity,
+            TimeSpan timeout,
+            CancellationToken cancellationToken
+        )
         {
-            return _namedSemaphore.WaitAsync($"{flow.Id}:{userIdentity}", timeout, cancellationToken);
+            return _namedSemaphore.WaitAsync(
+                $"{flow.Id}:{userIdentity}",
+                timeout,
+                cancellationToken
+            );
         }
 
-        public Task<IAsyncDisposable> WaitAsync(Flow flow, string actionId, Identity userIdentity, TimeSpan timeout, CancellationToken cancellationToken)
+        public Task<IAsyncDisposable> WaitAsync(
+            Flow flow,
+            string actionId,
+            Identity userIdentity,
+            TimeSpan timeout,
+            CancellationToken cancellationToken
+        )
         {
-            return _namedSemaphore.WaitAsync($"{flow.Id}:{actionId}:{userIdentity}", timeout, cancellationToken);
+            return _namedSemaphore.WaitAsync(
+                $"{flow.Id}:{actionId}:{userIdentity}",
+                timeout,
+                cancellationToken
+            );
         }
     }
 }

@@ -18,13 +18,13 @@ namespace bot_flash_cards_blip_sdk_csharp
         public List<Person> People { get; set; }
 
         public List<Answer> Answers { get; set; }
-        
+
         private Person _lastPerson;
 
         public MediaLink Run()
         {
             Random random = new Random();
-            var person = random.Next(0, People.Count-1);
+            var person = random.Next(0, People.Count - 1);
 
             var document = new MediaLink
             {
@@ -33,7 +33,7 @@ namespace bot_flash_cards_blip_sdk_csharp
                 AspectRatio = People[person].AspectRatio,
                 Size = People[person].Size,
                 Uri = new Uri(People[person].Uri, UriKind.Absolute),
-                PreviewUri = new Uri(People[person].PreviewUri, UriKind.Absolute)
+                PreviewUri = new Uri(People[person].PreviewUri, UriKind.Absolute),
             };
 
             _lastPerson = People[person];
@@ -58,10 +58,7 @@ namespace bot_flash_cards_blip_sdk_csharp
 
         public IEnumerable<Answer> ProcessErrors()
         {
-            var result = 
-                from answer in Answers
-                where !answer.IsCorrect
-                select answer;
+            var result = from answer in Answers where !answer.IsCorrect select answer;
 
             return result;
         }
@@ -74,35 +71,37 @@ namespace bot_flash_cards_blip_sdk_csharp
 
             foreach (var error in ProcessErrors())
             {
-               documents[position] = 
-                    new DocumentSelect
+                documents[position] = new DocumentSelect
+                {
+                    Header = new DocumentContainer
                     {
-                        Header = new DocumentContainer
+                        Value = new MediaLink
                         {
-                            Value = new MediaLink
-                            {
-                                Title = error.Person.Name,
-                                Text = $"You said {error.AnswerName}.",
-                                Type = "image/jpeg",
-                                Uri = new Uri(error.Person.Uri),
-                            }
+                            Title = error.Person.Name,
+                            Text = $"You said {error.AnswerName}.",
+                            Type = "image/jpeg",
+                            Uri = new Uri(error.Person.Uri),
                         },
-                        Options = new DocumentSelectOption[]
+                    },
+                    Options = new DocumentSelectOption[]
+                    {
+                        new DocumentSelectOption
                         {
-                            new DocumentSelectOption
+                            Label = new DocumentContainer
                             {
-                                Label = new DocumentContainer
+                                Value = new WebLink
                                 {
-                                    Value = new WebLink
-                                    {
-                                        Title = "Search on Workplace",
-                                        Uri = new Uri("https://take.facebook.com/search/top/?q=" + error.Person.Name)
-                                    }
-                                }
-                            }
-                        }
-                    };
-                
+                                    Title = "Search on Workplace",
+                                    Uri = new Uri(
+                                        "https://take.facebook.com/search/top/?q="
+                                            + error.Person.Name
+                                    ),
+                                },
+                            },
+                        },
+                    },
+                };
+
                 position++;
             }
             var document = new DocumentCollection
@@ -111,7 +110,7 @@ namespace bot_flash_cards_blip_sdk_csharp
                 Items = documents,
             };
 
-            return document; 
+            return document;
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using Lime.Messaging.Contents;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Lime.Messaging.Contents;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder
@@ -14,9 +14,17 @@ namespace Take.Blip.Builder
             _sender = sender;
         }
 
-        public Task RedirectUserAsync(IContext context, Redirect redirect, CancellationToken cancellationToken)
+        public Task RedirectUserAsync(
+            IContext context,
+            Redirect redirect,
+            CancellationToken cancellationToken
+        )
         {
-            return _sender.SendMessageAsync(redirect, context.Input.Message.From, cancellationToken);
+            return _sender.SendMessageAsync(
+                redirect,
+                context.Input.Message.From,
+                cancellationToken
+            );
         }
     }
 }

@@ -42,11 +42,7 @@ namespace Take.Blip.Builder.Models
 
         public OutputTrace ToTrace()
         {
-            return new OutputTrace
-            {
-                StateId = StateId,
-                ConditionsCount = Conditions?.Length ?? 0
-            };
+            return new OutputTrace { StateId = StateId, ConditionsCount = Conditions?.Length ?? 0 };
         }
     }
 }

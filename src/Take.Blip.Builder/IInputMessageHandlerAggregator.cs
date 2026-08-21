@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Take.Blip.Builder
 {
-    public interface IInputMessageHandlerAggregator: IInputMessageHandler
+    public interface IInputMessageHandlerAggregator : IInputMessageHandler
     {
         IEnumerable<IInputMessageHandler> GetHandlers();
     }

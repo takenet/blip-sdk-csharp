@@ -3,6 +3,6 @@
     public enum FlowType
     {
         Flow,
-        Subflow
+        Subflow,
     }
 }

@@ -17,7 +17,7 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         /// Output Variable
         /// </summary>
         public string OutputVariable { get; set; }
-        
+
         /// <summary>
         /// Template that will be transformed
         /// </summary>
@@ -27,7 +27,9 @@ namespace Take.Blip.Builder.Actions.ExecuteTemplate
         {
             if (string.IsNullOrEmpty(OutputVariable))
             {
-                throw new ValidationException($"The '{nameof(OutputVariable)}' settings value is required for '{nameof(ExecuteTemplateSettings)}' action");
+                throw new ValidationException(
+                    $"The '{nameof(OutputVariable)}' settings value is required for '{nameof(ExecuteTemplateSettings)}' action"
+                );
             }
         }
     }

@@ -7,16 +7,27 @@ namespace Take.Blip.Builder.Storage.Memory
 {
     public sealed class MemoryNamedSemaphore : INamedSemaphore
     {
-        private readonly ConcurrentDictionary<string, AsyncDisposableSemaphore> _handleSemaphoreDictionary;
+        private readonly ConcurrentDictionary<
+            string,
+            AsyncDisposableSemaphore
+        > _handleSemaphoreDictionary;
 
         public MemoryNamedSemaphore()
         {
-            _handleSemaphoreDictionary = new ConcurrentDictionary<string, AsyncDisposableSemaphore>();
+            _handleSemaphoreDictionary =
+                new ConcurrentDictionary<string, AsyncDisposableSemaphore>();
         }
 
-        public async Task<IAsyncDisposable> WaitAsync(string handle, TimeSpan timeout, CancellationToken cancellationToken)
+        public async Task<IAsyncDisposable> WaitAsync(
+            string handle,
+            TimeSpan timeout,
+            CancellationToken cancellationToken
+        )
         {
-            var semaphore = _handleSemaphoreDictionary.GetOrAdd(handle.ToLowerInvariant(), k => new AsyncDisposableSemaphore());
+            var semaphore = _handleSemaphoreDictionary.GetOrAdd(
+                handle.ToLowerInvariant(),
+                k => new AsyncDisposableSemaphore()
+            );
             await semaphore.SemaphoreSlim.WaitAsync(timeout, cancellationToken);
             return semaphore;
         }

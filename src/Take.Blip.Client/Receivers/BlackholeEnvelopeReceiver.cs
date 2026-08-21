@@ -9,6 +9,9 @@ namespace Take.Blip.Client.Receivers
     /// </summary>
     public class BlackholeEnvelopeReceiver : IEnvelopeReceiver<Envelope>
     {
-        public Task ReceiveAsync(Envelope envelope, CancellationToken cancellationToken = default(CancellationToken)) => Task.CompletedTask;
+        public Task ReceiveAsync(
+            Envelope envelope,
+            CancellationToken cancellationToken = default(CancellationToken)
+        ) => Task.CompletedTask;
     }
 }

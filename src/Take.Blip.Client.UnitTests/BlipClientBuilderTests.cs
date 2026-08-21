@@ -19,7 +19,8 @@ namespace Take.Blip.Client.UnitTests
             ChannelListener = new ChannelListener(
                 m => TaskUtil.TrueCompletedTask,
                 n => TaskUtil.TrueCompletedTask,
-                c => TaskUtil.TrueCompletedTask);
+                c => TaskUtil.TrueCompletedTask
+            );
             Server = new DummyServer();
         }
 
@@ -27,8 +28,8 @@ namespace Take.Blip.Client.UnitTests
 
         public DummyServer Server { get; }
 
-        public BlipClientBuilder GetTarget()
-            => new BlipClientBuilder()
+        public BlipClientBuilder GetTarget() =>
+            new BlipClientBuilder()
                 .UsingHostName(Server.ListenerUri.Host)
                 .UsingPort(Server.ListenerUri.Port);
 
@@ -42,9 +43,7 @@ namespace Take.Blip.Client.UnitTests
             var target = GetTarget();
 
             // Act
-            var actual = target
-                .UsingAccessKey(identifier, accessKey)
-                .Build();
+            var actual = target.UsingAccessKey(identifier, accessKey).Build();
 
             await actual.StartAsync(ChannelListener, CancellationToken);
 
@@ -80,9 +79,7 @@ namespace Take.Blip.Client.UnitTests
             var target = GetTarget();
 
             // Act
-            var actual = target
-                .UsingPassword(identifier, password)
-                .Build();
+            var actual = target.UsingPassword(identifier, password).Build();
 
             await actual.StartAsync(ChannelListener, CancellationToken);
 
@@ -106,9 +103,7 @@ namespace Take.Blip.Client.UnitTests
             var target = GetTarget();
 
             // Act
-            var actual = target
-                .UsingExternal(identifier, token, issuer)
-                .Build();
+            var actual = target.UsingExternal(identifier, token, issuer).Build();
 
             await actual.StartAsync(ChannelListener, CancellationToken);
 
@@ -121,7 +116,6 @@ namespace Take.Blip.Client.UnitTests
             externalAuthentication.Token.ShouldBe(token);
             externalAuthentication.Issuer.ShouldBe(issuer);
         }
-
 
         [Fact]
         public async Task BuildUsingDomainAndInstanceShouldSucceed()

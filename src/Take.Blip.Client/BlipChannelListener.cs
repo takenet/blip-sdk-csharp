@@ -15,7 +15,12 @@ using Take.Blip.Client.Receivers;
 
 namespace Take.Blip.Client
 {
-    public class BlipChannelListener : IBlipChannelListener, IDisposable, IMessageReceiver, INotificationReceiver, ICommandReceiver
+    public class BlipChannelListener
+        : IBlipChannelListener,
+            IDisposable,
+            IMessageReceiver,
+            INotificationReceiver,
+            ICommandReceiver
     {
         private readonly ISender _sender;
         private readonly bool _autoNotify;
@@ -36,8 +41,8 @@ namespace Take.Blip.Client
         private const string DEFAULT_ERROR_MESSAGE = "Error processing the received envelope:";
 
         public BlipChannelListener(
-            ISender sender, 
-            bool autoNotify, 
+            ISender sender,
+            bool autoNotify,
             ILogger logger = null,
             int maxThreadCountAllowed = 0
         )
@@ -46,61 +51,104 @@ namespace Take.Blip.Client
             _autoNotify = autoNotify;
             _logger = logger ?? LoggerProvider.Logger;
             _maxThreadCountAllowed = maxThreadCountAllowed;
-            _messageReceivers = new List<ReceiverFactoryPredicate<Message>>(new[]
-            {
-                new ReceiverFactoryPredicate<Message>(() => new UnsupportedMessageReceiver(), m => Task.FromResult(true), int.MaxValue)
-            });
-            _notificationReceivers = new List<ReceiverFactoryPredicate<Notification>>(new[]
-            {
-                new ReceiverFactoryPredicate<Notification>(() => new BlackholeEnvelopeReceiver(), n => Task.FromResult(true), int.MaxValue)
-            });
-            _commandReceivers = new List<ReceiverFactoryPredicate<Command>>(new[]
-            {
-                new ReceiverFactoryPredicate<Command>(() => new UnsupportedCommandReceiver(), c => Task.FromResult(true), int.MaxValue)
-            });
+            _messageReceivers = new List<ReceiverFactoryPredicate<Message>>(
+                new[]
+                {
+                    new ReceiverFactoryPredicate<Message>(
+                        () => new UnsupportedMessageReceiver(),
+                        m => Task.FromResult(true),
+                        int.MaxValue
+                    ),
+                }
+            );
+            _notificationReceivers = new List<ReceiverFactoryPredicate<Notification>>(
+                new[]
+                {
+                    new ReceiverFactoryPredicate<Notification>(
+                        () => new BlackholeEnvelopeReceiver(),
+                        n => Task.FromResult(true),
+                        int.MaxValue
+                    ),
+                }
+            );
+            _commandReceivers = new List<ReceiverFactoryPredicate<Command>>(
+                new[]
+                {
+                    new ReceiverFactoryPredicate<Command>(
+                        () => new UnsupportedCommandReceiver(),
+                        c => Task.FromResult(true),
+                        int.MaxValue
+                    ),
+                }
+            );
 
             var dataflowBlockOptions = new ExecutionDataflowBlockOptions
             {
                 MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
-                BoundedCapacity = DataflowBlockOptions.Unbounded
+                BoundedCapacity = DataflowBlockOptions.Unbounded,
             };
 
             _messageActionBlock = new ActionBlock<Message>(
                 m => ReceiveAsync(m, _cts.Token),
-                dataflowBlockOptions);
+                dataflowBlockOptions
+            );
             _notificationActionBlock = new ActionBlock<Notification>(
                 n => ReceiveAsync(n, _cts.Token),
-                dataflowBlockOptions);
+                dataflowBlockOptions
+            );
             _commandActionBlock = new ActionBlock<Command>(
                 c => ReceiveAsync(c, _cts.Token),
-                dataflowBlockOptions);
+                dataflowBlockOptions
+            );
             _channelListener = new DataflowChannelListener(
                 _messageActionBlock,
                 _notificationActionBlock,
-                _commandActionBlock);
+                _commandActionBlock
+            );
         }
 
         public Task<Message> MessageListenerTask => _channelListener.MessageListenerTask;
 
-        public Task<Notification> NotificationListenerTask => _channelListener.NotificationListenerTask;
+        public Task<Notification> NotificationListenerTask =>
+            _channelListener.NotificationListenerTask;
 
         public Task<Command> CommandListenerTask => _channelListener.CommandListenerTask;
 
-        public void AddMessageReceiver(IMessageReceiver messageReceiver, Func<Message, Task<bool>> messageFilter = null, int priority = 0)
+        public void AddMessageReceiver(
+            IMessageReceiver messageReceiver,
+            Func<Message, Task<bool>> messageFilter = null,
+            int priority = 0
+        )
         {
-            if (messageReceiver == null) throw new ArgumentNullException(nameof(messageReceiver));
+            if (messageReceiver == null)
+                throw new ArgumentNullException(nameof(messageReceiver));
             AddEnvelopeReceiver(_messageReceivers, () => messageReceiver, messageFilter, priority);
         }
 
-        public void AddNotificationReceiver(INotificationReceiver notificationReceiver, Func<Notification, Task<bool>> notificationFilter = null, int priority = 0)
+        public void AddNotificationReceiver(
+            INotificationReceiver notificationReceiver,
+            Func<Notification, Task<bool>> notificationFilter = null,
+            int priority = 0
+        )
         {
-            if (notificationReceiver == null) throw new ArgumentNullException(nameof(notificationReceiver));
-            AddEnvelopeReceiver(_notificationReceivers, () => notificationReceiver, notificationFilter, priority);
+            if (notificationReceiver == null)
+                throw new ArgumentNullException(nameof(notificationReceiver));
+            AddEnvelopeReceiver(
+                _notificationReceivers,
+                () => notificationReceiver,
+                notificationFilter,
+                priority
+            );
         }
 
-        public void AddCommandReceiver(ICommandReceiver commandReceiver, Func<Command, Task<bool>> commandFilter = null, int priority = 0)
+        public void AddCommandReceiver(
+            ICommandReceiver commandReceiver,
+            Func<Command, Task<bool>> commandFilter = null,
+            int priority = 0
+        )
         {
-            if (commandReceiver == null) throw new ArgumentNullException(nameof(commandReceiver));
+            if (commandReceiver == null)
+                throw new ArgumentNullException(nameof(commandReceiver));
             AddEnvelopeReceiver(_commandReceivers, () => commandReceiver, commandFilter, priority);
         }
 
@@ -147,7 +195,9 @@ namespace Take.Blip.Client
             IList<ReceiverFactoryPredicate<T>> envelopeReceivers,
             Func<IEnvelopeReceiver<T>> receiverFactory,
             Func<T, Task<bool>> predicate,
-            int priority) where T : Envelope, new()
+            int priority
+        )
+            where T : Envelope, new()
         {
             if (receiverFactory == null)
             {
@@ -159,11 +209,17 @@ namespace Take.Blip.Client
                 predicate = envelope => TaskUtil.TrueCompletedTask;
             }
 
-            var predicateReceiverFactory = new ReceiverFactoryPredicate<T>(receiverFactory, predicate, priority);
+            var predicateReceiverFactory = new ReceiverFactoryPredicate<T>(
+                receiverFactory,
+                predicate,
+                priority
+            );
             envelopeReceivers.Add(predicateReceiverFactory);
         }
 
-        private async Task<IEnumerable<ReceiverFactoryPredicate<TEnvelope>>> GetReceiversAsync<TEnvelope>(TEnvelope envelope)
+        private async Task<
+            IEnumerable<ReceiverFactoryPredicate<TEnvelope>>
+        > GetReceiversAsync<TEnvelope>(TEnvelope envelope)
             where TEnvelope : Envelope, new()
         {
             if (envelope == null)
@@ -192,9 +248,12 @@ namespace Take.Blip.Client
             return Enumerable.Empty<ReceiverFactoryPredicate<TEnvelope>>();
         }
 
-        private static async Task<IEnumerable<ReceiverFactoryPredicate<TEnvelope>>> FilterReceivers<TEnvelope>(
+        private static async Task<
+            IEnumerable<ReceiverFactoryPredicate<TEnvelope>>
+        > FilterReceivers<TEnvelope>(
             IEnumerable<ReceiverFactoryPredicate<TEnvelope>> envelopeReceivers,
-            TEnvelope envelope)
+            TEnvelope envelope
+        )
             where TEnvelope : Envelope, new()
         {
             var result = new List<ReceiverFactoryPredicate<TEnvelope>>();
@@ -217,7 +276,10 @@ namespace Take.Blip.Client
             {
                 if (shouldNotify)
                 {
-                    await _sender.SendNotificationAsync(message.ToReceivedNotification(), cancellationToken);
+                    await _sender.SendNotificationAsync(
+                        message.ToReceivedNotification(),
+                        cancellationToken
+                    );
                 }
 
                 using (EnvelopeReceiverContext<Message>.Create(message))
@@ -227,7 +289,10 @@ namespace Take.Blip.Client
 
                 if (shouldNotify)
                 {
-                    await _sender.SendNotificationAsync(message.ToConsumedNotification(), cancellationToken);
+                    await _sender.SendNotificationAsync(
+                        message.ToConsumedNotification(),
+                        cancellationToken
+                    );
                 }
             }
             catch (Exception ex)
@@ -250,16 +315,22 @@ namespace Take.Blip.Client
                         reason = new Reason
                         {
                             Code = ReasonCodes.APPLICATION_ERROR,
-                            Description = ex.Message
+                            Description = ex.Message,
                         };
                     }
 
-                    await _sender.SendNotificationAsync(message.ToFailedNotification(reason), CancellationToken.None);
+                    await _sender.SendNotificationAsync(
+                        message.ToFailedNotification(reason),
+                        CancellationToken.None
+                    );
                 }
             }
         }
 
-        public async Task ReceiveAsync(Notification notification, CancellationToken cancellationToken)
+        public async Task ReceiveAsync(
+            Notification notification,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -292,19 +363,24 @@ namespace Take.Blip.Client
             {
                 LogException(command, ex);
 
-                await _sender.SendCommandAsync(new Command
-                {
-                    Id = command.Id,
-                    To = command.From,
-                    Method = command.Method,
-                    Status = CommandStatus.Failure,
-                    Reason = ex.ToReason(),
-                },
-                cancellationToken);
+                await _sender.SendCommandAsync(
+                    new Command
+                    {
+                        Id = command.Id,
+                        To = command.From,
+                        Method = command.Method,
+                        Status = CommandStatus.Failure,
+                        Reason = ex.ToReason(),
+                    },
+                    cancellationToken
+                );
             }
         }
 
-        private async Task CallReceiversAsync<TEnvelope>(TEnvelope envelope, CancellationToken cancellationToken)
+        private async Task CallReceiversAsync<TEnvelope>(
+            TEnvelope envelope,
+            CancellationToken cancellationToken
+        )
             where TEnvelope : Envelope, new()
         {
             var receivers = await GetReceiversAsync(envelope);
@@ -323,25 +399,31 @@ namespace Take.Blip.Client
                     var receiver = r.ReceiverFactory();
                     if (receiver == null)
                     {
-                        throw new ApplicationException("A receiver factory produced a null instance"); 
+                        throw new ApplicationException(
+                            "A receiver factory produced a null instance"
+                        );
                     }
-                
+
                     return receiver.ReceiveAsync(envelope, cancellationToken);
-                }));
+                })
+            );
         }
 
         private void AssertMaxThreadCountAllowed()
         {
             if (
-                _maxThreadCountAllowed > 0 &&
-                Process.GetCurrentProcess().Threads.Count > _maxThreadCountAllowed
-                )
+                _maxThreadCountAllowed > 0
+                && Process.GetCurrentProcess().Threads.Count > _maxThreadCountAllowed
+            )
             {
-                throw new InvalidOperationException($"Exceeded max thread count of Template Hosting ({_maxThreadCountAllowed})");
+                throw new InvalidOperationException(
+                    $"Exceeded max thread count of Template Hosting ({_maxThreadCountAllowed})"
+                );
             }
         }
 
-        private void LogException<T>(T envelope, Exception ex) where T : Envelope
+        private void LogException<T>(T envelope, Exception ex)
+            where T : Envelope
         {
             using (LogContext.PushProperty(nameof(Envelope), typeof(T).Name))
             using (LogContext.PushProperty(nameof(Envelope.Id), envelope.Id))
@@ -360,11 +442,17 @@ namespace Take.Blip.Client
             }
         }
 
-        private class ReceiverFactoryPredicate<T> where T : Envelope, new()
+        private class ReceiverFactoryPredicate<T>
+            where T : Envelope, new()
         {
-            public ReceiverFactoryPredicate(Func<IEnvelopeReceiver<T>> receiverFactory, Func<T, Task<bool>> predicate, int priority)
+            public ReceiverFactoryPredicate(
+                Func<IEnvelopeReceiver<T>> receiverFactory,
+                Func<T, Task<bool>> predicate,
+                int priority
+            )
             {
-                ReceiverFactory = receiverFactory ?? throw new ArgumentNullException(nameof(receiverFactory));
+                ReceiverFactory =
+                    receiverFactory ?? throw new ArgumentNullException(nameof(receiverFactory));
                 Predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
                 Priority = priority;
             }

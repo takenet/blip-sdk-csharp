@@ -10,8 +10,7 @@ namespace Take.Blip.Builder.Actions
 
         public ActionProvider(IEnumerable<IAction> actions)
         {
-            _actionDictionary = actions
-                .ToDictionary(a => a.Type, a => a);
+            _actionDictionary = actions.ToDictionary(a => a.Type, a => a);
         }
 
         public IAction Get(string name)

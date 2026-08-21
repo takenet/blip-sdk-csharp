@@ -17,7 +17,7 @@ namespace Take.Blip.Client
     public class BlipClient : IBlipClient
     {
         private static readonly TimeSpan ChannelDiscardedDelay = TimeSpan.FromSeconds(5);
-        
+
         private readonly IOnDemandClientChannel _onDemandClientChannel;
         private readonly ILogger _logger;
         private readonly SemaphoreSlim _semaphore;
@@ -27,7 +27,9 @@ namespace Take.Blip.Client
 
         public BlipClient(IOnDemandClientChannel onDemandClientChannel, ILogger logger = null)
         {
-            _onDemandClientChannel = onDemandClientChannel ?? throw new ArgumentNullException(nameof(onDemandClientChannel));
+            _onDemandClientChannel =
+                onDemandClientChannel
+                ?? throw new ArgumentNullException(nameof(onDemandClientChannel));
             _logger = logger ?? LoggerProvider.Logger;
             _semaphore = new SemaphoreSlim(1, 1);
             _onDemandClientChannel.ChannelCreatedHandlers.Add(ChannelCreatedAsync);
@@ -36,32 +38,47 @@ namespace Take.Blip.Client
             _onDemandClientChannel.ChannelOperationFailedHandlers.Add(ChannelOperationFailedAsync);
         }
 
-        public Task<Command> ProcessCommandAsync(Command command, CancellationToken cancellationToken)
-            => _onDemandClientChannel.ProcessCommandAsync(command, cancellationToken);
+        public Task<Command> ProcessCommandAsync(
+            Command command,
+            CancellationToken cancellationToken
+        ) => _onDemandClientChannel.ProcessCommandAsync(command, cancellationToken);
 
-        public Task SendCommandAsync(Command command, CancellationToken cancellationToken)
-            => _onDemandClientChannel.SendCommandAsync(command, cancellationToken);
+        public Task SendCommandAsync(Command command, CancellationToken cancellationToken) =>
+            _onDemandClientChannel.SendCommandAsync(command, cancellationToken);
 
-        public Task SendMessageAsync(Message message, CancellationToken cancellationToken)
-            => _onDemandClientChannel.SendMessageAsync(message, cancellationToken);
+        public Task SendMessageAsync(Message message, CancellationToken cancellationToken) =>
+            _onDemandClientChannel.SendMessageAsync(message, cancellationToken);
 
-        public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken)
-            => _onDemandClientChannel.SendNotificationAsync(notification, cancellationToken);
+        public Task SendNotificationAsync(
+            Notification notification,
+            CancellationToken cancellationToken
+        ) => _onDemandClientChannel.SendNotificationAsync(notification, cancellationToken);
 
-        public async Task StartAsync(IChannelListener channelListener, CancellationToken cancellationToken)
+        public async Task StartAsync(
+            IChannelListener channelListener,
+            CancellationToken cancellationToken
+        )
         {
-            if (_channelListener != null) throw new InvalidOperationException("The client is already started");
+            if (_channelListener != null)
+                throw new InvalidOperationException("The client is already started");
 
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                _channelListener = channelListener ?? throw new ArgumentNullException(nameof(channelListener));
+                _channelListener =
+                    channelListener ?? throw new ArgumentNullException(nameof(channelListener));
                 _channelListener.Start(_onDemandClientChannel);
-                await _onDemandClientChannel.EstablishAsync(cancellationToken).ConfigureAwait(false);
+                await _onDemandClientChannel
+                    .EstablishAsync(cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "An error ocurred while starting the client: {Message}", ex.Message);
+                _logger.Error(
+                    ex,
+                    "An error ocurred while starting the client: {Message}",
+                    ex.Message
+                );
                 throw;
             }
             finally
@@ -72,7 +89,8 @@ namespace Take.Blip.Client
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            if (_channelListener == null) throw new InvalidOperationException("The client is not started");
+            if (_channelListener == null)
+                throw new InvalidOperationException("The client is not started");
 
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -84,7 +102,11 @@ namespace Take.Blip.Client
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "An error ocurred while stopping the client: {Message}", ex.Message);
+                _logger.Error(
+                    ex,
+                    "An error ocurred while stopping the client: {Message}",
+                    ex.Message
+                );
                 throw;
             }
             finally
@@ -94,46 +116,66 @@ namespace Take.Blip.Client
         }
 
         private Task ChannelCreatedAsync(ChannelInformation channelInformation)
-        {   
-            _logger.Information("Channel '{SessionId}' created - Local node {LocalNode} - Remote node: {RemoteNode}", 
+        {
+            _logger.Information(
+                "Channel '{SessionId}' created - Local node {LocalNode} - Remote node: {RemoteNode}",
                 channelInformation.SessionId,
                 channelInformation.LocalNode,
-                channelInformation.RemoteNode);
+                channelInformation.RemoteNode
+            );
             return Task.CompletedTask;
         }
 
-        private async Task<bool> ChannelCreationFailedAsync(FailedChannelInformation failedChannelInformation)
+        private async Task<bool> ChannelCreationFailedAsync(
+            FailedChannelInformation failedChannelInformation
+        )
         {
-            _logger.Error(failedChannelInformation.Exception, "Channel '{SessionId}' creation failed - Local node: {LocalNode} - Remote node: {RemoteNode}", 
+            _logger.Error(
+                failedChannelInformation.Exception,
+                "Channel '{SessionId}' creation failed - Local node: {LocalNode} - Remote node: {RemoteNode}",
                 failedChannelInformation.SessionId,
                 failedChannelInformation.LocalNode,
-                failedChannelInformation.RemoteNode);
+                failedChannelInformation.RemoteNode
+            );
 
-            if (failedChannelInformation.Exception is LimeException ex && ex.Reason.Code == ReasonCodes.SESSION_AUTHENTICATION_FAILED) return false;
+            if (
+                failedChannelInformation.Exception is LimeException ex
+                && ex.Reason.Code == ReasonCodes.SESSION_AUTHENTICATION_FAILED
+            )
+                return false;
             await Task.Delay(ChannelDiscardedDelay).ConfigureAwait(false);
             return !_isStopping;
         }
 
         private Task ChannelDiscardedAsync(ChannelInformation channelInformation)
         {
-            _logger.Information("Channel '{SessionId}' discarded - Local node: {LocalNode} - Remote node: {RemoteNode}",
+            _logger.Information(
+                "Channel '{SessionId}' discarded - Local node: {LocalNode} - Remote node: {RemoteNode}",
                 channelInformation.SessionId,
                 channelInformation.LocalNode,
-                channelInformation.RemoteNode);
+                channelInformation.RemoteNode
+            );
 
-            if (_isStopping) return Task.CompletedTask;
+            if (_isStopping)
+                return Task.CompletedTask;
             return Task.Delay(ChannelDiscardedDelay);
         }
 
-        private Task<bool> ChannelOperationFailedAsync(FailedChannelInformation failedChannelInformation)
+        private Task<bool> ChannelOperationFailedAsync(
+            FailedChannelInformation failedChannelInformation
+        )
         {
-            _logger.Error(failedChannelInformation.Exception, "Channel '{SessionId}' operation '{OperationName}' failed - Local node: {LocalNode} - Remote node: {RemoteNode}",
+            _logger.Error(
+                failedChannelInformation.Exception,
+                "Channel '{SessionId}' operation '{OperationName}' failed - Local node: {LocalNode} - Remote node: {RemoteNode}",
                 failedChannelInformation.SessionId,
                 failedChannelInformation.OperationName,
                 failedChannelInformation.LocalNode,
-                failedChannelInformation.RemoteNode);
+                failedChannelInformation.RemoteNode
+            );
 
-            if (_isStopping) return TaskUtil.FalseCompletedTask;
+            if (_isStopping)
+                return TaskUtil.FalseCompletedTask;
             return TaskUtil.TrueCompletedTask;
         }
     }

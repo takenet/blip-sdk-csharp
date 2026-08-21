@@ -39,13 +39,25 @@ namespace Take.Blip.Client.Session
         /// <param name="identity">The node.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException"></exception>
-        public async Task<string> GetStateAsync(Identity identity, CancellationToken cancellationToken)
+        public async Task<string> GetStateAsync(
+            Identity identity,
+            CancellationToken cancellationToken
+        )
         {
-            if (identity == null) throw new ArgumentNullException(nameof(identity));
+            if (identity == null)
+                throw new ArgumentNullException(nameof(identity));
             using (var cts = new CancellationTokenSource(CommandTimeout))
-            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+            using (
+                var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                    cts.Token,
+                    cancellationToken
+                )
+            )
             {
-                return (await _bucket.GetAsync<StateDocument>(GetKey(identity), linkedCts.Token))?.State ?? Constants.DEFAULT_STATE;
+                return (
+                        await _bucket.GetAsync<StateDocument>(GetKey(identity), linkedCts.Token)
+                    )?.State
+                    ?? Constants.DEFAULT_STATE;
             }
         }
 
@@ -54,7 +66,11 @@ namespace Take.Blip.Client.Session
         /// </summary>
         /// <param name="identity">The identity.</param>
         /// <param name="state">The state.</param>
-        public Task SetStateAsync(Identity identity, string state, CancellationToken cancellationToken)
+        public Task SetStateAsync(
+            Identity identity,
+            string state,
+            CancellationToken cancellationToken
+        )
         {
             return SetStateAsync(identity, state, true, cancellationToken);
         }
@@ -74,14 +90,26 @@ namespace Take.Blip.Client.Session
         /// </summary>
         public event EventHandler<StateEventArgs> StateChanged;
 
-        internal async Task SetStateAsync(Identity identity, string state, bool raiseEvent, CancellationToken cancellationToken)
+        internal async Task SetStateAsync(
+            Identity identity,
+            string state,
+            bool raiseEvent,
+            CancellationToken cancellationToken
+        )
         {
-            if (identity == null) throw new ArgumentNullException(nameof(identity));
-            if (state == null) throw new ArgumentNullException(nameof(state));
+            if (identity == null)
+                throw new ArgumentNullException(nameof(identity));
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
             if (state.Equals(Constants.DEFAULT_STATE, StringComparison.OrdinalIgnoreCase))
             {
                 using (var cts = new CancellationTokenSource(CommandTimeout))
-                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+                using (
+                    var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                        cts.Token,
+                        cancellationToken
+                    )
+                )
                 {
                     await _bucket.DeleteAsync(GetKey(identity), linkedCts.Token);
                 }
@@ -89,9 +117,19 @@ namespace Take.Blip.Client.Session
             else
             {
                 using (var cts = new CancellationTokenSource(CommandTimeout))
-                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+                using (
+                    var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                        cts.Token,
+                        cancellationToken
+                    )
+                )
                 {
-                    await _bucket.SetAsync(GetKey(identity), new StateDocument { State = state }, StateTimeout, linkedCts.Token);
+                    await _bucket.SetAsync(
+                        GetKey(identity),
+                        new StateDocument { State = state },
+                        StateTimeout,
+                        linkedCts.Token
+                    );
                 }
             }
 

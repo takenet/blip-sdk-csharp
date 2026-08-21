@@ -20,10 +20,9 @@ namespace MessageTypes
 
         public async Task ReceiveAsync(Message message, CancellationToken cancellationToken)
         {
-
             Document document;
-            var openWith = new Dictionary<string, string>();//using System.Collections.Generic
-            openWith.Add("name", message.From.Name);//checar mais tarde <<
+            var openWith = new Dictionary<string, string>(); //using System.Collections.Generic
+            openWith.Add("name", message.From.Name); //checar mais tarde <<
 
             if (message.Content.ToString().Equals("res1"))
                 document = getResource();
@@ -37,19 +36,15 @@ namespace MessageTypes
         {
             var document = new Resource
             {
-                Key = "welcome-message" //recurso previamente adicionado com extensão 'recursos' ou através do portal
+                Key = "welcome-message", //recurso previamente adicionado com extensão 'recursos' ou através do portal
             };
 
             return document;
         }
 
-         public Resource getResourceMessageReplace(Dictionary<string,string> openWith)
+        public Resource getResourceMessageReplace(Dictionary<string, string> openWith)
         {
-            var document = new Resource
-            {
-                Key = "welcome-message",
-                Variables = openWith
-            };
+            var document = new Resource { Key = "welcome-message", Variables = openWith };
 
             return document;
         }

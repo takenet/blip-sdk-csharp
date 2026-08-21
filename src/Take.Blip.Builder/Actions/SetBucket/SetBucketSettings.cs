@@ -34,11 +34,15 @@ namespace Take.Blip.Builder.Actions.SetBucket
         {
             if (Id == null)
             {
-                throw new ValidationException($"The '{nameof(Id)}' settings value is required for '{nameof(SetBucket)}' action");
+                throw new ValidationException(
+                    $"The '{nameof(Id)}' settings value is required for '{nameof(SetBucket)}' action"
+                );
             }
             if (Type == null)
             {
-                throw new ValidationException($"The '{nameof(Type)}' settings value is required for '{nameof(SetBucket)}' action");
+                throw new ValidationException(
+                    $"The '{nameof(Type)}' settings value is required for '{nameof(SetBucket)}' action"
+                );
             }
         }
     }

@@ -11,7 +11,9 @@ namespace Take.Blip.Builder.Actions.DeleteVariable
         {
             if (Variable == null)
             {
-                throw new ValidationException($"The '{nameof(Variable)}' setting value is required for '{nameof(DeleteVariable)}' action");
+                throw new ValidationException(
+                    $"The '{nameof(Variable)}' setting value is required for '{nameof(DeleteVariable)}' action"
+                );
             }
         }
     }

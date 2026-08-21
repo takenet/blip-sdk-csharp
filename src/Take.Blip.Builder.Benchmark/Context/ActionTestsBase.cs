@@ -18,7 +18,9 @@ public class ActionTestsBase : ContextTestsBase
         To = OwnerIdentity.ToNode();
         Message = new Message()
         {
-            From = From, To = To, Content = new PlainText { Text = "Hello BLiP" }
+            From = From,
+            To = To,
+            Content = new PlainText { Text = "Hello BLiP" },
         };
         Input = new LazyInput(
             Message,
@@ -27,7 +29,8 @@ public class ActionTestsBase : ContextTestsBase
             new DocumentSerializer(new DocumentTypeResolver()),
             new EnvelopeSerializer(new DocumentTypeResolver()),
             null,
-            CancellationToken);
+            CancellationToken
+        );
         Context.Input.Returns(Input);
         Context.OwnerIdentity.Returns(OwnerIdentity);
         Context.UserIdentity.Returns(UserIdentity);

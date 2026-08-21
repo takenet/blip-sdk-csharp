@@ -44,20 +44,26 @@ namespace Take.Blip.Client.Activation
         {
             if (!string.IsNullOrWhiteSpace(ResourceKey))
             {
-                return new Resource()
-                {
-                    Key = ResourceKey
-                };
+                return new Resource() { Key = ResourceKey };
             }
 
-            if (MediaType == null) throw new InvalidOperationException($"The '{nameof(MediaType)}' property is not defined");
+            if (MediaType == null)
+                throw new InvalidOperationException(
+                    $"The '{nameof(MediaType)}' property is not defined"
+                );
             var mediaType = Lime.Protocol.MediaType.Parse(MediaType);
             if (mediaType.IsJson)
             {
-                if (JsonContent == null) throw new InvalidOperationException($"The '{nameof(JsonContent)}' property is not defined");
+                if (JsonContent == null)
+                    throw new InvalidOperationException(
+                        $"The '{nameof(JsonContent)}' property is not defined"
+                    );
                 return new JsonDocument(JsonContent, mediaType);
             }
-            if (PlainContent == null) throw new InvalidOperationException($"The '{nameof(PlainContent)}' property is not defined");
+            if (PlainContent == null)
+                throw new InvalidOperationException(
+                    $"The '{nameof(PlainContent)}' property is not defined"
+                );
             return new PlainDocument(PlainContent, mediaType);
         }
     }

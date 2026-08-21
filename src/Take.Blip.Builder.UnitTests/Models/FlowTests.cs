@@ -23,12 +23,9 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "root",
                         Root = true,
-                        Input = new Input
-                        {
-                            Variable = "Any"
-                        }
-                    }
-                }
+                        Input = new Input { Variable = "Any" },
+                    },
+                },
             };
 
             // Act
@@ -57,17 +54,7 @@ namespace Take.Blip.Builder.UnitTests.Models
         public void ValidateWithoutRootStateShouldFail()
         {
             // Arrange
-            var flow = new Flow
-            {
-                Id = "0",
-                States = new[]
-                {
-                    new State
-                    {
-                        Id = "0"
-                    }
-                }
-            };
+            var flow = new Flow { Id = "0", States = new[] { new State { Id = "0" } } };
 
             // Act
             try
@@ -90,13 +77,8 @@ namespace Take.Blip.Builder.UnitTests.Models
                 Id = "0",
                 States = new[]
                 {
-                    new State
-                    {
-                        Id = "0",
-                        Root = true
-                    }
-
-                }
+                    new State { Id = "0", Root = true },
+                },
             };
 
             // Act
@@ -124,15 +106,15 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "0",
                         Root = true,
-                        Input = new Input()
+                        Input = new Input(),
                     },
                     new State
                     {
                         Id = "1",
                         Root = true,
-                        Input = new Input()
-                    }
-                }
+                        Input = new Input(),
+                    },
+                },
             };
 
             // Act
@@ -160,19 +142,11 @@ namespace Take.Blip.Builder.UnitTests.Models
                     {
                         Id = "0",
                         Root = true,
-                        Input = new Input()
+                        Input = new Input(),
                     },
-                    new State
-                    {
-                        Id = "1",
-                        Input = new Input()
-                    },
-                    new State
-                    {
-                        Id = "1",
-                        Input = new Input()
-                    }
-                }
+                    new State { Id = "1", Input = new Input() },
+                    new State { Id = "1", Input = new Input() },
+                },
             };
 
             // Act
@@ -201,26 +175,10 @@ namespace Take.Blip.Builder.UnitTests.Models
                         Id = "0",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "1"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "1" } },
                     },
-                    new State
-                    {
-                        Id = "1",
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "1"
-                            }
-                        }
-                    }
-                }
+                    new State { Id = "1", Outputs = new[] { new Output { StateId = "1" } } },
+                },
             };
 
             // Act
@@ -231,7 +189,9 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("There is a loop in the flow starting in the state 1 that does not requires user input");
+                ex.Message.ShouldBe(
+                    "There is a loop in the flow starting in the state 1 that does not requires user input"
+                );
             }
         }
 
@@ -249,37 +209,11 @@ namespace Take.Blip.Builder.UnitTests.Models
                         Id = "0",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "1"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "1" } },
                     },
-                    new State
-                    {
-                        Id = "1",
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "2"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "2",
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "1"
-                            }
-                        }
-                    }
-                }
+                    new State { Id = "1", Outputs = new[] { new Output { StateId = "2" } } },
+                    new State { Id = "2", Outputs = new[] { new Output { StateId = "1" } } },
+                },
             };
 
             // Act
@@ -290,7 +224,9 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("There is a loop in the flow starting in the state 1 that does not requires user input");
+                ex.Message.ShouldBe(
+                    "There is a loop in the flow starting in the state 1 that does not requires user input"
+                );
             }
         }
 
@@ -308,59 +244,13 @@ namespace Take.Blip.Builder.UnitTests.Models
                         Id = "0",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "1"
-                            }
-                        }
+                        Outputs = new[] { new Output { StateId = "1" } },
                     },
-                    new State
-                    {
-                        Id = "1",
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "2"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "2",
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "3"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "3",
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "4"
-                            }
-                        }
-                    },
-                    new State
-                    {
-                        Id = "4",
-                        Outputs = new []
-                        {
-                            new Output
-                            {
-                                StateId = "2"
-                            }
-                        }
-                    }
-                }
+                    new State { Id = "1", Outputs = new[] { new Output { StateId = "2" } } },
+                    new State { Id = "2", Outputs = new[] { new Output { StateId = "3" } } },
+                    new State { Id = "3", Outputs = new[] { new Output { StateId = "4" } } },
+                    new State { Id = "4", Outputs = new[] { new Output { StateId = "2" } } },
+                },
             };
 
             // Act
@@ -371,7 +261,9 @@ namespace Take.Blip.Builder.UnitTests.Models
             }
             catch (ValidationException ex)
             {
-                ex.Message.ShouldBe("There is a loop in the flow starting in the state 2 that does not requires user input");
+                ex.Message.ShouldBe(
+                    "There is a loop in the flow starting in the state 2 that does not requires user input"
+                );
             }
         }
 
@@ -389,74 +281,70 @@ namespace Take.Blip.Builder.UnitTests.Models
                         Id = "onboarding",
                         Root = true,
                         Input = new Input(),
-                        Outputs = new []
+                        Outputs = new[]
                         {
                             new Output { StateId = "1" },
-                            new Output { StateId = "fallback" }
-                        }
+                            new Output { StateId = "fallback" },
+                        },
                     },
                     new State
                     {
                         Id = "fallback",
-                        Outputs = new []
-                        {
-                            new Output { StateId = "onboarding" }
-                        }
+                        Outputs = new[] { new Output { StateId = "onboarding" } },
                     },
                     new State
                     {
                         Id = "1",
-                        Outputs = new []
+                        Outputs = new[]
                         {
                             new Output { StateId = "2" },
-                            new Output { StateId = "fallback" }
-                        }
+                            new Output { StateId = "fallback" },
+                        },
                     },
                     new State
                     {
                         Id = "2",
-                        Outputs = new []
+                        Outputs = new[]
                         {
                             new Output { StateId = "3" },
-                            new Output { StateId = "fallback" }
-                        }
+                            new Output { StateId = "fallback" },
+                        },
                     },
-                    new State
-                    {
-                        Id = "3",
-                        Outputs = new []
-                        {
-                            new Output { StateId = "fallback" }
-                        }
-                    }
-                }
+                    new State { Id = "3", Outputs = new[] { new Output { StateId = "fallback" } } },
+                },
             };
 
             // Act
-            flow.Validate(); 
+            flow.Validate();
         }
 
         [Fact]
         public void GetBuilderConfigurationWhenExistsBuilderKeysShouldReturnValidInstance()
         {
             // Arrange
-            var minimumIntentScoreValue = 0.512;            
+            var minimumIntentScoreValue = 0.512;
             var stateExpiration = TimeSpan.Parse("00:30:00");
             var actionExecutionTimeout = 30.121412;
             var flow = new Flow()
             {
                 Configuration = new Dictionary<string, string>()
                 {
-                    {"builder:minimumIntentScore", minimumIntentScoreValue.ToString(CultureInfo.InvariantCulture)},
-                    {"builder:stateExpiration", stateExpiration.ToString()},
-                    {"builder:actionExecutionTimeout", actionExecutionTimeout.ToString(CultureInfo.InvariantCulture)},
-                    {"myConfigurationKey", "anyValue"}
-                }
+                    {
+                        "builder:minimumIntentScore",
+                        minimumIntentScoreValue.ToString(CultureInfo.InvariantCulture)
+                    },
+                    { "builder:stateExpiration", stateExpiration.ToString() },
+                    {
+                        "builder:actionExecutionTimeout",
+                        actionExecutionTimeout.ToString(CultureInfo.InvariantCulture)
+                    },
+                    { "myConfigurationKey", "anyValue" },
+                },
             };
-            
+
             // Act
             var builderConfiguration = flow.BuilderConfiguration;
-            
+
             // Assert
             builderConfiguration.ShouldNotBeNull();
             builderConfiguration.MinimumIntentScore.ShouldBe(minimumIntentScoreValue);

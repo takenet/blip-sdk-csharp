@@ -48,7 +48,6 @@ namespace Take.Blip.Client.Session
         event EventHandler<StateEventArgs> StateChanged;
     }
 
-
     /// <summary>
     /// Represents an event for the user state.
     /// </summary>

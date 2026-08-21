@@ -35,34 +35,28 @@ namespace Take.Blip.Builder.UnitTests
             Logger = Substitute.For<ILogger>();
             Configuration = Substitute.For<IConfiguration>();
             Sender = Substitute.For<ISender>();
-            Flow = new Flow()
-            {
-                Id = "0",
-                Configuration = new Dictionary<string, string>()
-            };
+            Flow = new Flow() { Id = "0", Configuration = new Dictionary<string, string>() };
             User = "user@msging.net";
             Application = new Application()
             {
                 Identifier = "application",
                 Domain = "msging.net",
-                Instance = "default"
+                Instance = "default",
             };
             Input = new LazyInput(
                 new Message()
-                { 
+                {
                     From = User.ToNode(),
                     To = ApplicationIdentity.ToNode(),
-                    Content = new PlainText()
-                    {
-                        Text = "Hello world!"
-                    }
+                    Content = new PlainText() { Text = "Hello world!" },
                 },
                 User,
                 Flow.BuilderConfiguration,
                 new DocumentSerializer(documentTypeResolver),
                 new EnvelopeSerializer(documentTypeResolver),
                 ArtificialIntelligenceExtension,
-                CancellationToken);
+                CancellationToken
+            );
         }
 
         public IArtificialIntelligenceExtension ArtificialIntelligenceExtension { get; }
@@ -70,9 +64,9 @@ namespace Take.Blip.Builder.UnitTests
         public IContactExtension ContactExtension { get; }
 
         public IHelpDeskExtension HelpDeskExtension { get; }
-        
+
         public ITunnelExtension TunnelExtension { get; }
-        
+
         public ISender Sender { get; set; }
 
         public ILogger Logger { get; }
@@ -80,7 +74,7 @@ namespace Take.Blip.Builder.UnitTests
         public IConfiguration Configuration { get; }
 
         public Identity User { get; set; }
-        
+
         public Application Application { get; }
 
         public Identity ApplicationIdentity => Application.Identity;
@@ -119,7 +113,10 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync($"context.{variableName}", CancellationToken);
+            var actual = await target.GetVariableAsync(
+                $"context.{variableName}",
+                CancellationToken
+            );
 
             // Assert
             actual.ShouldBe(variableValue);
@@ -135,7 +132,9 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.GetVariableAsync($".{variableName}", CancellationToken).ShouldThrowAsync<ArgumentException>();
+            await target
+                .GetVariableAsync($".{variableName}", CancellationToken)
+                .ShouldThrowAsync<ArgumentException>();
         }
 
         [Fact]
@@ -148,7 +147,9 @@ namespace Take.Blip.Builder.UnitTests
             var target = GetTarget();
 
             // Act
-            await target.GetVariableAsync($"{variableName}.", CancellationToken).ShouldThrowAsync<ArgumentException>();
+            await target
+                .GetVariableAsync($"{variableName}.", CancellationToken)
+                .ShouldThrowAsync<ArgumentException>();
         }
 
         [Fact]
@@ -172,7 +173,10 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var variableName = "variableName1";
-            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}");
+            AddVariableValue(
+                variableName,
+                "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}"
+            );
             var target = GetTarget();
 
             // Act
@@ -187,7 +191,10 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var variableName = "variableName1";
-            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}");
+            AddVariableValue(
+                variableName,
+                "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}"
+            );
             var target = GetTarget();
 
             // Act
@@ -202,11 +209,17 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var variableName = "variableName1";
-            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}");
+            AddVariableValue(
+                variableName,
+                "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}"
+            );
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("variableName1@details.address", CancellationToken);
+            var actual = await target.GetVariableAsync(
+                "variableName1@details.address",
+                CancellationToken
+            );
 
             // Assert
             actual.ShouldBe("Rua X");
@@ -217,11 +230,17 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             var variableName = "variableName1";
-            AddVariableValue(variableName, "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}");
+            AddVariableValue(
+                variableName,
+                "{\"plan\": \"Premium\",\"details\": {\"address\": \"Rua X\"}}"
+            );
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("variableName1@details.none", CancellationToken);
+            var actual = await target.GetVariableAsync(
+                "variableName1@details.none",
+                CancellationToken
+            );
 
             // Assert
             actual.ShouldBeNull();
@@ -231,10 +250,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task GetContactVariableShouldSucceed()
         {
             // Arrange
-            var contact = new Contact
-            {
-                Name = "John da Silva"
-            };
+            var contact = new Contact { Name = "John da Silva" };
 
             ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
             var target = GetTarget();
@@ -253,17 +269,17 @@ namespace Take.Blip.Builder.UnitTests
             var contact = new Contact
             {
                 Name = "John da Silva",
-                Extras = new Dictionary<string, string>()
-                {
-                    { "property1", "value 1" }
-                }
+                Extras = new Dictionary<string, string>() { { "property1", "value 1" } },
             };
 
             ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
             var target = GetTarget();
 
             // Act
-            var actual = await target.GetVariableAsync("contact.extras.property1", CancellationToken);
+            var actual = await target.GetVariableAsync(
+                "contact.extras.property1",
+                CancellationToken
+            );
 
             // Assert
             actual.ShouldBe(contact.Extras["property1"]);
@@ -273,10 +289,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task GetInvalidContactVariableShouldReturnNull()
         {
             // Arrange
-            var contact = new Contact
-            {
-                Name = "John da Silva"
-            };
+            var contact = new Contact { Name = "John da Silva" };
 
             ContactExtension.GetAsync(User, CancellationToken).Returns(contact);
             var target = GetTarget();
@@ -364,10 +377,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task GetBucketTextVariableShouldSucceed()
         {
             // Arrange
-            var document = new PlainText()
-            {
-                Text = "my value"
-            };
+            var document = new PlainText() { Text = "my value" };
 
             SetupGetCommandResult("/buckets/id1", document);
 
@@ -384,11 +394,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task GetBucketJsonVariablePropertyShouldSucceed()
         {
             // Arrange
-            var document = new JsonDocument()
-            {
-                {"key1", "value1"},
-                {"key2", "value2"}
-            };
+            var document = new JsonDocument() { { "key1", "value1" }, { "key2", "value2" } };
 
             SetupGetCommandResult("/buckets/id1", document);
 
@@ -400,17 +406,15 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             actual.ShouldBe("value2");
         }
+
         [Fact]
         public async Task GetResourceTextVariableShouldSucceed()
         {
             // Arrange
-            var document = new PlainText()
-            {
-                Text = "my value"
-            };
-            
+            var document = new PlainText() { Text = "my value" };
+
             SetupGetCommandResult("/resources/id1", document);
-            
+
             var target = GetTarget();
 
             // Act
@@ -424,11 +428,7 @@ namespace Take.Blip.Builder.UnitTests
         public async Task GetResourceJsonVariablePropertyShouldSucceed()
         {
             // Arrange
-            var document = new JsonDocument()
-            {
-                {"key1", "value1"},
-                {"key2", "value2"}
-            };
+            var document = new JsonDocument() { { "key1", "value1" }, { "key2", "value2" } };
 
             SetupGetCommandResult("/resources/id1", document);
 
@@ -445,12 +445,12 @@ namespace Take.Blip.Builder.UnitTests
         {
             Sender
                 .ProcessCommandAsync(
-                    Arg.Is<Command>(c => c.Method == CommandMethod.Get && c.Uri.ToString().Equals(uri)), CancellationToken)
-                .Returns(new Command()
-                {
-                    Status = CommandStatus.Success,
-                    Resource = resource
-                });
+                    Arg.Is<Command>(c =>
+                        c.Method == CommandMethod.Get && c.Uri.ToString().Equals(uri)
+                    ),
+                    CancellationToken
+                )
+                .Returns(new Command() { Status = CommandStatus.Success, Resource = resource });
         }
     }
 }

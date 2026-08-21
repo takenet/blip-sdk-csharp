@@ -21,6 +21,7 @@ namespace Take.Blip.Builder.Storage
             var other = (FromToIdentityInputExpirationPair)obj;
             return FromIdentity.Equals(other.FromIdentity) && ToIdentity.Equals(other.ToIdentity);
         }
+
         public override int GetHashCode()
         {
             return HashCode.Combine(FromIdentity, ToIdentity);

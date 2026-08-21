@@ -9,24 +9,19 @@ namespace Take.Blip.Builder
     public class ActionProcessingException : BuilderException
     {
         /// <inheritdoc />
-        public ActionProcessingException()
-        {
-        }
+        public ActionProcessingException() { }
 
         /// <inheritdoc />
-        public ActionProcessingException(string message) : base(message)
-        {
-        }
+        public ActionProcessingException(string message)
+            : base(message) { }
 
         /// <inheritdoc />
-        public ActionProcessingException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+        public ActionProcessingException(string message, Exception innerException)
+            : base(message, innerException) { }
 
         /// <inheritdoc />
-        protected ActionProcessingException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        protected ActionProcessingException(SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
 
         public string ActionType { get; set; }
 

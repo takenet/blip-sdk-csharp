@@ -7,8 +7,18 @@ namespace Take.Blip.Builder.Diagnostics
 {
     public interface ITraceManager
     {
-        (StateTrace, Stopwatch) CreateStateTrace(InputTrace inputTrace, State state, StateTrace stateTrace = null, Stopwatch stateStopwatch = null);
+        (StateTrace, Stopwatch) CreateStateTrace(
+            InputTrace inputTrace,
+            State state,
+            StateTrace stateTrace = null,
+            Stopwatch stateStopwatch = null
+        );
 
-        Task ProcessTraceAsync(InputTrace inputTrace, TraceSettings traceSettings, Stopwatch inputStopwatch, CancellationToken cancellationToken);
+        Task ProcessTraceAsync(
+            InputTrace inputTrace,
+            TraceSettings traceSettings,
+            Stopwatch inputStopwatch,
+            CancellationToken cancellationToken
+        );
     }
 }

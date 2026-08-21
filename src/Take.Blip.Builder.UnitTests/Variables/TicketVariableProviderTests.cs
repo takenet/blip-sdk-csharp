@@ -20,7 +20,7 @@ namespace Take.Blip.Builder.UnitTests.Variables
             HelpDeskExtension = Substitute.For<IHelpDeskExtension>();
             Logger = Substitute.For<ILogger>();
         }
-        
+
         public IHelpDeskExtension HelpDeskExtension { get; }
 
         public ILogger Logger { get; }
@@ -36,73 +36,83 @@ namespace Take.Blip.Builder.UnitTests.Variables
             // Arrange
             var ticket = new Ticket()
             {
-                Id = Guid.NewGuid()
-                    .ToString(),
+                Id = Guid.NewGuid().ToString(),
                 OwnerIdentity = "owner@msging.net",
-                CustomerIdentity = "customer@msging.net"
+                CustomerIdentity = "customer@msging.net",
             };
-            HelpDeskExtension.GetCustomerActiveTicketAsync(UserIdentity, CancellationToken).Returns(ticket);
+            HelpDeskExtension
+                .GetCustomerActiveTicketAsync(UserIdentity, CancellationToken)
+                .Returns(ticket);
             var target = GetTarget();
-            
+
             // Act
             var actualTicketId = await target.GetVariableAsync("id", Context, CancellationToken);
-            var actualOwnerIdentity = await target.GetVariableAsync("ownerIdentity", Context, CancellationToken);
-            var actualCustomerIdentity = await target.GetVariableAsync("customerIdentity", Context, CancellationToken);
-            
+            var actualOwnerIdentity = await target.GetVariableAsync(
+                "ownerIdentity",
+                Context,
+                CancellationToken
+            );
+            var actualCustomerIdentity = await target.GetVariableAsync(
+                "customerIdentity",
+                Context,
+                CancellationToken
+            );
+
             // Assert
             actualTicketId.ShouldBe(ticket.Id);
             actualOwnerIdentity.ShouldBe(ticket.OwnerIdentity);
             actualCustomerIdentity.ShouldBe(ticket.CustomerIdentity);
         }
-        
+
         [Fact]
         public async Task GetWithNoTicketShouldReturnNull()
         {
             // Arrange
             Ticket ticket = null;
-            HelpDeskExtension.GetCustomerActiveTicketAsync(UserIdentity, CancellationToken)
+            HelpDeskExtension
+                .GetCustomerActiveTicketAsync(UserIdentity, CancellationToken)
                 .Throws(new LimeException(ReasonCodes.COMMAND_RESOURCE_NOT_FOUND, "Not found"));
             var target = GetTarget();
-            
+
             // Act
             var actual = await target.GetVariableAsync("id", Context, CancellationToken);
 
             // Assert
             actual.ShouldBeNull();
         }
-        
+
         [Fact]
         public async Task GetNullPropertyShouldReturnNull()
         {
             // Arrange
-            var ticket = new Ticket()
-            {
-                Id = null
-            };
-            HelpDeskExtension.GetCustomerActiveTicketAsync(UserIdentity, CancellationToken).Returns(ticket);
+            var ticket = new Ticket() { Id = null };
+            HelpDeskExtension
+                .GetCustomerActiveTicketAsync(UserIdentity, CancellationToken)
+                .Returns(ticket);
             var target = GetTarget();
-            
+
             // Act
             var actual = await target.GetVariableAsync("id", Context, CancellationToken);
 
             // Assert
             actual.ShouldBeNull();
         }
-        
+
         [Fact]
         public async Task GetNonExistingPropertyShouldReturnNull()
         {
             // Arrange
             var ticket = new Ticket()
             {
-                Id = Guid.NewGuid()
-                    .ToString(),
+                Id = Guid.NewGuid().ToString(),
                 OwnerIdentity = "owner@msging.net",
-                CustomerIdentity = "customer@msging.net"
+                CustomerIdentity = "customer@msging.net",
             };
-            HelpDeskExtension.GetCustomerActiveTicketAsync(UserIdentity, CancellationToken).Returns(ticket);
+            HelpDeskExtension
+                .GetCustomerActiveTicketAsync(UserIdentity, CancellationToken)
+                .Returns(ticket);
             var target = GetTarget();
-            
+
             // Act
             var actual = await target.GetVariableAsync("doesNotExists", Context, CancellationToken);
 

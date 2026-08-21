@@ -18,13 +18,15 @@ namespace Take.Blip.Builder
             // TODO: Create a stack to support multiple levels of contexts
             if (_owner.Value != null)
             {
-                throw new InvalidOperationException("The owner is already defined for the current context");
+                throw new InvalidOperationException(
+                    "The owner is already defined for the current context"
+                );
             }
 
             _owner.Value = owner;
-            return new ClearOwnerContext();        
+            return new ClearOwnerContext();
         }
-        
+
         private sealed class ClearOwnerContext : IDisposable
         {
             public void Dispose()

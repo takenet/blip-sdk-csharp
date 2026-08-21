@@ -13,8 +13,11 @@ namespace Take.Blip.Builder.Actions.ExecuteScriptV2.Functions
     public static class RequestExtensions
     {
         /// <inheritdoc cref="Context.SetVariableAsync(string, object, TimeSpan)"/>
-        public static Task<Request.HttpResponse> FetchAsync(this Request request, string uri,
-            Undefined _)
+        public static Task<Request.HttpResponse> FetchAsync(
+            this Request request,
+            string uri,
+            Undefined _
+        )
         {
             return request.FetchAsync(uri);
         }
