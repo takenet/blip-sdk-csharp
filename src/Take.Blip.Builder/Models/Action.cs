@@ -15,7 +15,6 @@ namespace Take.Blip.Builder.Models
         /// <summary>
         /// The action identifier. It is used to identify the action in the conversation context and in the action trace. Required.
         /// </summary>
-        [JsonProperty("$id")]
         public string Id { get; set; }
 
         /// <summary>

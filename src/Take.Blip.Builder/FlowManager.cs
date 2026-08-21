@@ -1878,8 +1878,8 @@ namespace Take.Blip.Builder
 
             // Getting the properly action based on the actionId informed on the execution
             var actionToExecute = state.LocalCustomActions.FirstOrDefault(action =>
-                action.Id.Equals(actionId, StringComparison.InvariantCultureIgnoreCase)
-            );
+                    action.Id?.Equals(actionId, StringComparison.InvariantCultureIgnoreCase) == true
+                );
 
             if (actionToExecute == null)
                 return null;
