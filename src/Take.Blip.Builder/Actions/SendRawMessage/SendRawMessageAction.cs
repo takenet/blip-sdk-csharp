@@ -61,12 +61,6 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
                 }
 
                 await _sender.SendMessageAsync(message, cancellationToken);
-
-                this.LogDelivery(_blipMonitoringLogger, context, new JObject
-                {
-                    ["mediaType"] = settings.MediaType?.ToString(),
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
             }
             catch (Exception ex)
             {

@@ -90,17 +90,6 @@ namespace Take.Blip.Builder.Actions.SendMessage
                         await Task.Delay(chatState.Interval.Value, cancellationToken);
                     }
                 }
-
-                this.LogDelivery(_blipMonitoringLogger, context, new JObject
-                {
-                    ["messageId"] = message.Id,
-                    ["contentType"] = (string)settings[Message.TYPE_KEY],
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                    ["metadata"] = message.Metadata != null ? JObject.FromObject(message.Metadata) : null
-                }, new JObject
-                {
-                    ["content"] = rawContent
-                });
             }
             catch (Exception ex)
             {
