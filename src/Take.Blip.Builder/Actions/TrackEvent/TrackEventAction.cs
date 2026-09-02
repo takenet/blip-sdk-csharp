@@ -40,14 +40,6 @@ namespace Take.Blip.Builder.Actions.TrackEvent
                     fireAndForget: settings.FireAndForget ?? true,
                     cancellationToken: cancellationToken
                     );
-
-                this.LogExecution(_blipMonitoringLogger, context, new JObject
-                {
-                    ["category"] = settings.Category,
-                    ["action"] = settings.Action,
-                    ["label"] = settings.Label,
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
             }
             catch (Exception ex)
             {

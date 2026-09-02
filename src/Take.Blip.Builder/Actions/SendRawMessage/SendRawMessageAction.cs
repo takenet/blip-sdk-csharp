@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Lime.Protocol.Serialization;
 using Newtonsoft.Json.Linq;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.SendRawMessage
@@ -61,12 +60,6 @@ namespace Take.Blip.Builder.Actions.SendRawMessage
                 }
 
                 await _sender.SendMessageAsync(message, cancellationToken);
-
-                this.LogDelivery(_blipMonitoringLogger, context, new JObject
-                {
-                    ["mediaType"] = settings.MediaType?.ToString(),
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                });
             }
             catch (Exception ex)
             {

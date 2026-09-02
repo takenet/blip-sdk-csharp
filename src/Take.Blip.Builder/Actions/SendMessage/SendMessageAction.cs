@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using Blip.Ai.Bot.Monitoring.Logging.Interface;
+using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
-using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Services;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Take.Blip.Client;
 
 namespace Take.Blip.Builder.Actions.SendMessage
@@ -90,17 +89,6 @@ namespace Take.Blip.Builder.Actions.SendMessage
                         await Task.Delay(chatState.Interval.Value, cancellationToken);
                     }
                 }
-
-                this.LogDelivery(_blipMonitoringLogger, context, new JObject
-                {
-                    ["messageId"] = message.Id,
-                    ["contentType"] = (string)settings[Message.TYPE_KEY],
-                    ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
-                    ["metadata"] = message.Metadata != null ? JObject.FromObject(message.Metadata) : null
-                }, new JObject
-                {
-                    ["content"] = rawContent
-                });
             }
             catch (Exception ex)
             {
