@@ -18,9 +18,9 @@ namespace Take.Blip.Builder.UnitTests
             _flow = new Flow
             {
                 Id = Guid.NewGuid().ToString(),
-                BuilderConfiguration = new BuilderConfiguration
+                Configuration = new System.Collections.Generic.Dictionary<string, string>
                 {
-                    StateExpiration = TimeSpan.FromHours(24)
+                    ["builder:stateExpiration"] = TimeSpan.FromHours(24).ToString()
                 }
             };
 
