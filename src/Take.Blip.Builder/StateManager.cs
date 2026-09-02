@@ -40,6 +40,18 @@ namespace Take.Blip.Builder
             return context.SetVariableAsync(GetStateKey(context.Flow.Id), stateId, cancellationToken, expiration);
         }
 
+        public async Task RenewStateExpirationAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var stateId = await GetStateIdAsync(context, cancellationToken);
+
+            if (string.IsNullOrEmpty(stateId))
+            {
+                return;
+            }
+
+            await SetStateIdAsync(context, stateId, cancellationToken);
+        }
+
         public Task SetPreviousStateIdAsync(IContext context, string previousStateId, CancellationToken cancellationToken)
         {
             return context.SetVariableAsync(GetPreviousStateKey(context.Flow.Id), previousStateId, cancellationToken);

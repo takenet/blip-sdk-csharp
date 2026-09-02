@@ -31,6 +31,12 @@ namespace Take.Blip.Builder
         Task SetStateIdAsync(IContext context, string stateId, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Renews the expiration of the current state for the user in the flow, without changing its value.
+        /// Does nothing if there's no state currently stored.
+        /// </summary>
+        Task RenewStateExpirationAsync(IContext context, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Sets the previous state id for the user in the flow.
         /// This action is only informative and do not affect the user navigation.
         /// </summary>
