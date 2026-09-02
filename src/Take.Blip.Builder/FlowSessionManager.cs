@@ -31,6 +31,21 @@ namespace Take.Blip.Builder
             return context.SetVariableAsync(flowSessionId, flowSession, cancellationToken, expiration);
         }
 
+        /// <summary>
+        /// Renews the expiration of the current flow session for the user in the flow, without changing its value.
+        /// </summary>
+        public async Task RenewFlowSessionExpirationAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var flowSession = await GetFlowSessionAsync(context, cancellationToken);
+
+            if (string.IsNullOrEmpty(flowSession))
+            {
+                return;
+            }
+
+            await SetFlowSessionAsync(context, flowSession, cancellationToken);
+        }
+
         private static string GetFlowId(IContext context) => context.Flow.Type == Models.FlowType.Flow ? context.Flow.Id : context.Flow.Parent?.Id;
 
         private static string GetStateKey(string flowId) => $"{CURRENT_FLOW_SESSION_KEY}@{flowId}";
