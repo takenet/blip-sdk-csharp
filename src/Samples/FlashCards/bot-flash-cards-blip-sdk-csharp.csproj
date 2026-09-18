@@ -7,8 +7,11 @@
   
   <ItemGroup>    
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
-    <PackageReference Include="Take.Blip.Client" Version="0.7.544" />
-    <PackageReference Include="Take.Blip.Client.Console" Version="0.7.544" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Take.Blip.Client.Console\Take.Blip.Client.Console.csproj" />
+    <ProjectReference Include="..\..\Take.Blip.Client\Take.Blip.Client.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
