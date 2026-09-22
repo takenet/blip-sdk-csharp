@@ -29,6 +29,7 @@ namespace Take.Blip.Builder.Benchmark.Actions
         public int MaximumInputExpirationLoop { get; set; }
         public long ExecuteScriptV2MaxRuntimeHeapSize { get; set; }
         public long ExecuteScriptV2MaxRuntimeStackUsage { get; set; }
+        public bool IsMonitoringDetailedEnabled { get; set; }
         public Dictionary<string, string> ProcessCommandMetadatasToInsert { get; set; }
     }
 }

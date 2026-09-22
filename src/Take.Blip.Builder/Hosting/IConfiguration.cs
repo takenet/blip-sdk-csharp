@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Take.Blip.Builder.Hosting
 {
@@ -44,6 +43,8 @@ namespace Take.Blip.Builder.Hosting
         long ExecuteScriptV2MaxRuntimeHeapSize { get; }
 
         long ExecuteScriptV2MaxRuntimeStackUsage { get; }
+
+        bool IsMonitoringDetailedEnabled { get; }
 
         Dictionary<string, string> ProcessCommandMetadatasToInsert { get; }
     }
