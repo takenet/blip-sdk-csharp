@@ -44,6 +44,8 @@ namespace Take.Blip.Builder.Hosting
 
         public int MaximumInputExpirationLoop => 50;
 
+        public bool IsMonitoringDetailedEnabled => true;
+
         public Dictionary<string, string> ProcessCommandMetadatasToInsert => new Dictionary<string, string>() { { "#envelope.sendToServerRequired", "true" } };
     }
 }
