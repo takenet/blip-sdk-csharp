@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Blip.Ai.Bot.Monitoring.Logging.Models;
-using Take.Blip.Builder.Hosting;
 
 namespace Take.Blip.Builder.Monitoring
 {
@@ -42,22 +41,21 @@ namespace Take.Blip.Builder.Monitoring
         );
 
         private readonly IBlipLogger _innerLogger;
-        private readonly IConfiguration _configuration;
+        private readonly Func<bool> _isMonitoringDetailedEnabled;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MonitoringDetailedFilterBlipLoggerDecorator"/> class.
         /// </summary>
         /// <param name="innerLogger">The inner <see cref="IBlipLogger"/> to decorate.</param>
-        /// <param name="configuration">The configuration instance.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerLogger"/> or <paramref name="configuration"/> is null.</exception>
+        /// <param name="isMonitoringDetailedEnabled">A function that indicates whether detailed monitoring is enabled.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerLogger"/> is null.</exception>
         public MonitoringDetailedFilterBlipLoggerDecorator(
             IBlipLogger innerLogger,
-            IConfiguration configuration
+            Func<bool> isMonitoringDetailedEnabled
         )
         {
             _innerLogger = innerLogger ?? throw new ArgumentNullException(nameof(innerLogger));
-            _configuration =
-                configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _isMonitoringDetailedEnabled = isMonitoringDetailedEnabled;
         }
 
         /// <summary>
@@ -155,7 +153,7 @@ namespace Take.Blip.Builder.Monitoring
         }
 
         private bool ShouldSuppress(LogInput stateLog) =>
-            !_configuration.IsMonitoringDetailedEnabled
+            !_isMonitoringDetailedEnabled()
             && !string.IsNullOrWhiteSpace(stateLog?.Title)
             && _filteredTitles.Contains(stateLog.Title);
     }

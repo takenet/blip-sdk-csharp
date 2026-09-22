@@ -2,7 +2,6 @@ using System;
 using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Blip.Ai.Bot.Monitoring.Logging.Models;
 using NSubstitute;
-using Take.Blip.Builder.Hosting;
 using Take.Blip.Builder.Monitoring;
 using Xunit;
 
@@ -14,10 +13,9 @@ namespace Take.Blip.Builder.UnitTests.Monitoring
         public void ErrorEvents_ShouldAlwaysForward_WhenTitleIsFiltered_AndDetailedDisabled()
         {
             var innerLogger = Substitute.For<IBlipLogger>();
-            var configuration = Substitute.For<IConfiguration>();
-            configuration.IsMonitoringDetailedEnabled.Returns(false);
+            var isMonitoringDetailedEnabled = new Func<bool>(() => false);
 
-            var sut = new MonitoringDetailedFilterBlipLoggerDecorator(innerLogger, configuration);
+            var sut = new MonitoringDetailedFilterBlipLoggerDecorator(innerLogger, isMonitoringDetailedEnabled);
             var logInput = CreateLogInput("TrackEvent");
             var exception = new Exception("test");
 
@@ -30,10 +28,9 @@ namespace Take.Blip.Builder.UnitTests.Monitoring
         public void ConversationalFlow_ShouldForward_WhenDetailedEnabled_AndTitleIsFiltered()
         {
             var innerLogger = Substitute.For<IBlipLogger>();
-            var configuration = Substitute.For<IConfiguration>();
-            configuration.IsMonitoringDetailedEnabled.Returns(true);
+            var isMonitoringDetailedEnabled = new Func<bool>(() => true);
 
-            var sut = new MonitoringDetailedFilterBlipLoggerDecorator(innerLogger, configuration);
+            var sut = new MonitoringDetailedFilterBlipLoggerDecorator(innerLogger, isMonitoringDetailedEnabled);
             var logInput = CreateLogInput("TrackEvent");
 
             sut.ConversationalFlow(logInput);
@@ -45,10 +42,9 @@ namespace Take.Blip.Builder.UnitTests.Monitoring
         public void ConversationalFlow_ShouldSuppress_WhenDetailedDisabled_AndTitleIsFiltered()
         {
             var innerLogger = Substitute.For<IBlipLogger>();
-            var configuration = Substitute.For<IConfiguration>();
-            configuration.IsMonitoringDetailedEnabled.Returns(false);
+            var isMonitoringDetailedEnabled = new Func<bool>(() => false);
 
-            var sut = new MonitoringDetailedFilterBlipLoggerDecorator(innerLogger, configuration);
+            var sut = new MonitoringDetailedFilterBlipLoggerDecorator(innerLogger, isMonitoringDetailedEnabled);
             var logInput = CreateLogInput("TrackEvent");
 
             sut.ConversationalFlow(logInput);
@@ -60,10 +56,9 @@ namespace Take.Blip.Builder.UnitTests.Monitoring
         public void ConversationalFlow_ShouldForward_WhenDetailedDisabled_AndTitleIsNotFiltered()
         {
             var innerLogger = Substitute.For<IBlipLogger>();
-            var configuration = Substitute.For<IConfiguration>();
-            configuration.IsMonitoringDetailedEnabled.Returns(false);
+            var isMonitoringDetailedEnabled = new Func<bool>(() => false);
 
-            var sut = new MonitoringDetailedFilterBlipLoggerDecorator(innerLogger, configuration);
+            var sut = new MonitoringDetailedFilterBlipLoggerDecorator(innerLogger, isMonitoringDetailedEnabled);
             var logInput = CreateLogInput("AgentHandoff");
 
             sut.ConversationalFlow(logInput);
