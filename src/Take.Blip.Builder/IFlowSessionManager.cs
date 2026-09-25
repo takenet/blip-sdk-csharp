@@ -17,5 +17,11 @@ namespace Take.Blip.Builder
         /// Sets the current flow session for the user in the flow.
         /// </summary>
         Task SetFlowSessionAsync(IContext context, string flowSession, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Renews the expiration of the current flow session for the user in the flow, without changing its value.
+        /// Does nothing if there's no flow session currently stored.
+        /// </summary>
+        Task RenewFlowSessionExpirationAsync(IContext context, CancellationToken cancellationToken);
     }
 }
