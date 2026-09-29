@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Serilog;
 using Blip.Ai.Bot.Monitoring.Logging.Interface;
 using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Blip.Ai.Bot.Monitoring.Logging.Models;
@@ -21,16 +22,18 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
         private readonly ISender _sender;
         private readonly IEnvelopeSerializer _envelopeSerializer;
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
         private readonly IBlipLogger _blipMonitoringLogger;
 
         private const string SERIALIZABLE_PATTERN = @".+[/|\+]json$";
         private const string OUTPUT_VARIABLE_PROPERTY = "variable";
 
-        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer, IConfiguration configuration, IBlipLogger? blipMonitoringLogger = null)
+        public ProcessCommandAction(ISender sender, IEnvelopeSerializer envelopeSerializer, IConfiguration configuration, ILogger logger, IBlipLogger? blipMonitoringLogger = null)
         {
             _sender = sender;
             _envelopeSerializer = envelopeSerializer;
             _configuration = configuration;
+            _logger = logger;
             _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
@@ -59,7 +62,20 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
                 var command = ConvertToCommand(settings);
                 command.Id = EnvelopeId.NewId();
 
+                var commandJson = _envelopeSerializer.Serialize(command);
+
+                _logger.Information(
+                    "ProcessCommand action - Sending command: {Command}",
+                    commandJson);
+
                 var resultCommand = await _sender.ProcessCommandAsync(command, cancellationToken);
+
+                var resultCommandJsonForLog = _envelopeSerializer.Serialize(resultCommand);
+
+                _logger.Information(
+                    "ProcessCommand action - Command processed. ElapsedMilliseconds: {ElapsedMilliseconds}. Result: {ResultCommand}",
+                    sw.ElapsedMilliseconds,
+                    resultCommandJsonForLog);
 
                 if (!string.IsNullOrWhiteSpace(variable))
                 {
@@ -83,6 +99,8 @@ namespace Take.Blip.Builder.Actions.ProcessCommand
             }
             catch (Exception ex)
             {
+                _logger.Warning(ex, "ProcessCommand action - An exception occurred while processing command. ElapsedMilliseconds: {ElapsedMilliseconds}", sw.ElapsedMilliseconds);
+
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,

@@ -24,6 +24,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         {
             BlipClient = Substitute.For<ISender>();
             Configuration = Substitute.For<IConfiguration>();
+            Logger = Substitute.For<Serilog.ILogger>();
 
             Context.Flow.Returns(new Builder.Models.Flow { Configuration = new Dictionary<string, string>() });
         }
@@ -32,9 +33,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
         public IConfiguration Configuration { get; set; }
 
+        public Serilog.ILogger Logger { get; set; }
+
         private ProcessCommandAction GetTarget()
         {
-            return new ProcessCommandAction(BlipClient, LimeSerializerContainer.EnvelopeSerializer, Configuration);
+            return new ProcessCommandAction(BlipClient, LimeSerializerContainer.EnvelopeSerializer, Configuration, Logger);
         }
 
         [Fact]
