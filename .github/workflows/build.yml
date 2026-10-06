@@ -1,4 +1,6 @@
 name: .NET Core
+permissions:
+  contents: read
 
 on:
   push:
@@ -8,14 +10,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
 
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 6.0.200
+        dotnet-version: 8
 
     - name: Install dependencies
       run: dotnet restore src/Take.Blip.Client.sln
@@ -24,4 +26,4 @@ jobs:
       run: dotnet build src/Take.Blip.Client.sln --configuration Release --no-restore
 
     - name: Test
-      run: sudo dotnet test src/Take.Blip.Client.sln --no-restore --verbosity normal
+      run: dotnet test src/Take.Blip.Client.sln --no-restore --verbosity normal
