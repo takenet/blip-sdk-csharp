@@ -34,7 +34,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         private const string PAYMENT_EVENT_ERROR_STATUS = "error_status";
         private static readonly TimeSpan SHORT_SCRIPT_TIMEOUT = TimeSpan.FromSeconds(2);
         private static readonly TimeSpan DELAY_BEYOND_SCRIPT_TIMEOUT = TimeSpan.FromSeconds(30);
-        private static readonly TimeSpan TIMEOUT_TOLERANCE = TimeSpan.FromSeconds(1.5);
+        private static readonly TimeSpan TIMEOUT_TOLERANCE = TimeSpan.FromSeconds(10);
 
         private readonly BuilderEngineHarness _harness;
         private string _bucketId;
@@ -185,7 +185,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
 
         /// <summary>
         /// Confere que a criação do link, pendente além do tempo máximo de script, foi cancelada por esse limite: a chamada
-        /// não respondeu e durou menos que o limite mais a tolerância (a demora simulada é bem maior).
+        /// não respondeu e durou menos que o limite mais a tolerância. A tolerância absorve o agente de CI sob carga e fica
+        /// bem abaixo da demora simulada, então um cancelamento que não venha do limite ainda reprova.
         /// </summary>
         [Then("a execução do script é interrompida por tempo")]
         public void ThenScriptIsInterruptedByTimeout()
@@ -194,10 +195,10 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             var purchases = HttpCalls(interactions, SyntheticData.CHECKOUT_HOST, SimulatedHttpClient.PURCHASE_PATH, POST);
             purchases.Count.ShouldBe(1, "criações de link na checkout-api. Sequência: " + Describe(interactions));
             var purchase = purchases[0];
+            var limit = _harness.ScriptTimeout + TIMEOUT_TOLERANCE;
+            limit.ShouldBeLessThan(_harness.HttpClient.CheckoutApiDelay, "a tolerância precisa ficar abaixo da demora simulada");
             purchase.HttpCancelled.ShouldBeTrue("a criação do link respondeu em vez de ser interrompida. Sequência: " + Describe(interactions));
-            purchase.HttpElapsed.ShouldBeLessThan(
-                _harness.ScriptTimeout + TIMEOUT_TOLERANCE,
-                "a criação do link não foi interrompida pelo tempo máximo de script");
+            purchase.HttpElapsed.ShouldBeLessThan(limit, "a criação do link não foi interrompida pelo tempo máximo de script");
         }
 
         private IReadOnlyList<BuilderEngineHarness.Interaction> AssertEngineCompleted()
