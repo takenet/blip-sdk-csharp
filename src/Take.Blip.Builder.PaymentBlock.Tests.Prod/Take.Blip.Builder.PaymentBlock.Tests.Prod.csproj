@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Same scenarios as Take.Blip.Builder.PaymentBlock.Tests, compiled by link against the engine version in production. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>Take.Blip.Builder.PaymentBlock.Tests</RootNamespace>
+    <DefineConstants>$(DefineConstants);ENGINE_PACKAGE</DefineConstants>
+    <ReqnrollUseIntermediateOutputPathForCodeBehind>true</ReqnrollUseIntermediateOutputPathForCodeBehind>
+    <MainTestProjectDir>..\Take.Blip.Builder.PaymentBlock.Tests\</MainTestProjectDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="NSubstitute" Version="5.1.0" />
+    <PackageReference Include="Reqnroll.xUnit" Version="3.3.4" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+    <PackageReference Include="Take.Blip.Builder" Version="0.7.653" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MainTestProjectDir)**\*.cs" Exclude="$(MainTestProjectDir)obj\**;$(MainTestProjectDir)bin\**" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <ReqnrollFeatureFile Include="$(MainTestProjectDir)Features\*.feature" Link="Features\%(Filename)%(Extension)" />
+    <None Include="$(MainTestProjectDir)reqnroll.json" Link="reqnroll.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(MainTestProjectDir)Fixtures\**" Link="Fixtures\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(MainTestProjectDir)Referencias\*.json" Link="Referencias\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
