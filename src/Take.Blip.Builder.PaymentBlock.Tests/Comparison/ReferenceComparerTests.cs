@@ -78,6 +78,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             DATE_TIME_PATTERN.IsMatch(firstText).ShouldBeFalse();
             firstText.ShouldContain(ZERO_GUID);
             firstText.ShouldContain("REF<epoch-ms>");
+            firstText.ShouldContain("\"timestamp\": \"<epoch-s>\"");
             firstText.ShouldContain("\"amount\": 1999");
             firstText.ShouldNotContain(first.Token);
             firstText.ShouldNotContain(first.Secret);
@@ -237,6 +238,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
                                 ["scheduledAt"] = new JValue(now.AddMinutes(10)),
                                 ["paymentKey"] = ZERO_GUID,
                                 ["amount"] = 1999,
+                                ["timestamp"] = now.ToUnixTimeSeconds(),
                                 ["botToken"] = token,
                             },
                         },

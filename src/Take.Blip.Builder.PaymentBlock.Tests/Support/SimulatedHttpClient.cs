@@ -14,8 +14,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 {
     /// <summary>
     /// <see cref="IHttpClient"/> simulado do <c>request.fetchAsync</c>: responde em memória pela checkout-auth-api
-    /// (<c>POST /bot</c>) e pela checkout-api (<c>POST /v0.1/checkout/purchase</c> e
-    /// <c>GET /v0.1/checkout/customer/last-card</c>) e grava cada chamada na sequência do
+    /// (<c>POST /bot</c>) e pela checkout-api (<c>POST /v0.1/checkout/purchase</c>,
+    /// <c>GET /v0.1/checkout/customer/last-card</c> e <c>GET /v0.1/payment</c>) e grava cada chamada na sequência do
     /// <see cref="BuilderEngineHarness.InteractionLog"/>. Nenhuma chamada sai para a rede.
     /// </summary>
     public sealed class SimulatedHttpClient : IHttpClient
@@ -29,10 +29,21 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         /// <summary>Caminho da consulta do último cartão salvo na checkout-api.</summary>
         public const string LAST_CARD_PATH = "/v0.1/checkout/customer/last-card";
 
+        /// <summary>Caminho da consulta do pagamento na checkout-api (o script do feedback chama <c>/V0.1/payment?id=</c>).</summary>
+        public const string PAYMENT_PATH = "/v0.1/payment";
+
         private const string AUTHORIZATION_HEADER = "Authorization";
         private const string BEARER_PREFIX = "Bearer ";
         private const string JSON_MEDIA_TYPE = "application/json";
         private const string PIX_PAYMENT_METHOD = "Pix";
+        private const string PAYMENT_QUERY = "?id=" + SyntheticData.PURCHASE_ID;
+
+        private static readonly string[] PAYMENT_METHODS = { "None", "CreditCard", PIX_PAYMENT_METHOD, "BolePix" };
+
+        private static readonly string[] PAYMENT_STATUSES =
+        {
+            "None", "Created", "Processing", "Pending", "Denied", "Cancelled", "Completed", "Expired", "Failed", "Succeeded", "GenericError",
+        };
 
         private readonly BuilderEngineHarness.InteractionLog _log;
 
@@ -70,6 +81,23 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 
         /// <summary>Se a consulta do último cartão devolve um cartão salvo (200) ou nenhum (404).</summary>
         public bool HasSavedCard { get; set; }
+
+        /// <summary>Meio informado pela consulta do pagamento, ou <c>null</c> se ela responde 404.</summary>
+        public string ReportedPaymentMethod { get; private set; }
+
+        /// <summary>Status informado pela consulta do pagamento, ou <c>null</c> se ela responde 404.</summary>
+        public string ReportedPaymentStatus { get; private set; }
+
+        /// <summary>
+        /// Faz a consulta do pagamento da compra simulada informar <paramref name="paymentMethod"/> e <paramref name="status"/>
+        /// com os nomes que a checkout-api devolve (<c>PaymentMethodsType</c> e <c>PurchaseStatus</c> como texto). Aceita
+        /// qualquer caixa, porque os cenários escrevem o meio como o negócio (<c>PIX</c>) e a API responde <c>Pix</c>.
+        /// </summary>
+        public void ReportPayment(string paymentMethod, string status)
+        {
+            ReportedPaymentMethod = ApiName(PAYMENT_METHODS, paymentMethod, nameof(paymentMethod));
+            ReportedPaymentStatus = ApiName(PAYMENT_STATUSES, status, nameof(status));
+        }
 
         /// <inheritdoc />
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -134,6 +162,11 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
                 return CreatePurchase(request, body);
             }
 
+            if (IsRoute(request, HttpMethod.Get, PAYMENT_PATH))
+            {
+                return GetPayment(request);
+            }
+
             return IsRoute(request, HttpMethod.Get, LAST_CARD_PATH) ? GetLastCard(request) : NotFound();
         }
 
@@ -196,6 +229,40 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
                 ["id"] = SyntheticData.SAVED_CARD_ID,
                 ["lastFourDigits"] = SyntheticData.SAVED_CARD_LAST_FOUR,
             }));
+        }
+
+        private (int Status, string Body) GetPayment(HttpRequestMessage request)
+        {
+            if (!IsAuthorized(request))
+            {
+                return Unauthorized();
+            }
+
+            if (ReportedPaymentStatus == null
+                || !string.Equals(request.RequestUri.Query, PAYMENT_QUERY, StringComparison.Ordinal))
+            {
+                return NotFound();
+            }
+
+            return (200, Json(new JObject
+            {
+                ["id"] = SyntheticData.PURCHASE_ID,
+                ["status"] = ReportedPaymentStatus,
+                ["paymentMethod"] = ReportedPaymentMethod,
+            }));
+        }
+
+        private static string ApiName(string[] names, string value, string parameterName)
+        {
+            foreach (var name in names)
+            {
+                if (string.Equals(name, value, StringComparison.OrdinalIgnoreCase))
+                {
+                    return name;
+                }
+            }
+
+            throw new ArgumentException("Valor desconhecido pela checkout-api: " + value, parameterName);
         }
 
         private bool IsAuthorized(HttpRequestMessage request)

@@ -46,6 +46,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         private Container _container;
         private Flow _flow;
         private string _bucketSecret;
+        private int _deliveredSchedules;
 
         /// <summary>Cria o harness com a checkout-api simulada no modo normal e o tempo de script padrão do motor.</summary>
         public BuilderEngineHarness()
@@ -138,7 +139,58 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             => _bucketSecret != null && string.Equals(value, _bucketSecret, StringComparison.Ordinal);
 
         /// <summary>Envia ao motor a mensagem do cliente que leva o fluxo ao bloco e guarda a falha, se houver.</summary>
-        public async Task SendClientMessageAsync()
+        public Task SendClientMessageAsync()
+        {
+            var message = new Message
+            {
+                Id = Guid.NewGuid().ToString(),
+                From = Node.Parse(SyntheticData.USER_IDENTITY),
+                To = ApplicationNode(),
+                Content = new PlainText { Text = SyntheticData.CLIENT_MESSAGE_TEXT },
+                Metadata = new Dictionary<string, string>(),
+            };
+
+            return ProcessAsync(message);
+        }
+
+        /// <summary>
+        /// Entrega ao motor, sem espera real, a expiração de input que ele agendou no <see cref="SchedulerExtension"/> depois
+        /// da última entrega, como o agendador faria ao fim do tempo, e guarda a falha, se houver.
+        /// </summary>
+        public Task DeliverScheduledInputExpirationAsync()
+        {
+            Message scheduled = null;
+            Node scheduledFrom = null;
+            var schedules = 0;
+            foreach (var call in SchedulerExtension.ReceivedCalls())
+            {
+                var arguments = call.GetArguments();
+                if (string.Equals(call.GetMethodInfo().Name, nameof(ISchedulerExtension.ScheduleMessageAsync), StringComparison.Ordinal)
+                    && arguments.Length > 0
+                    && arguments[0] is Message message)
+                {
+                    schedules++;
+                    scheduled = message;
+                    scheduledFrom = arguments.Length > 2 ? arguments[2] as Node : null;
+                }
+            }
+
+            if (scheduled == null || schedules <= _deliveredSchedules)
+            {
+                throw new InvalidOperationException("O motor não agendou uma nova expiração de input desde a última entrega.");
+            }
+
+            _deliveredSchedules = schedules;
+            return ProcessAsync(new Message(scheduled.Id)
+            {
+                From = scheduledFrom ?? ApplicationNode(),
+                To = scheduled.To,
+                Content = scheduled.Content,
+                Metadata = scheduled.Metadata,
+            });
+        }
+
+        private async Task ProcessAsync(Message message)
         {
             if (_flow == null)
             {
@@ -146,15 +198,6 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             }
 
             _container ??= CreateContainer();
-            var message = new Message
-            {
-                Id = Guid.NewGuid().ToString(),
-                From = Node.Parse(SyntheticData.USER_IDENTITY),
-                To = new Node(SyntheticData.APPLICATION_IDENTIFIER, SyntheticData.APPLICATION_DOMAIN, null),
-                Content = new PlainText { Text = SyntheticData.CLIENT_MESSAGE_TEXT },
-                Metadata = new Dictionary<string, string>(),
-            };
-
             EngineFailure = null;
             using (var deadline = new CancellationTokenSource(INPUT_DEADLINE))
             {
@@ -192,6 +235,9 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             _container?.Dispose();
         }
+
+        private static Node ApplicationNode()
+            => new Node(SyntheticData.APPLICATION_IDENTIFIER, SyntheticData.APPLICATION_DOMAIN, null);
 
         private Container CreateContainer()
         {
