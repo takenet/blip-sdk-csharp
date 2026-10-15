@@ -10,17 +10,17 @@ using Xunit.Sdk;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
 {
     /// <summary>
-    /// Compara a saída de uma execução do motor, normalizada por <see cref="JsonNormalizer"/>, com a referência aprovada
-    /// <c>Referencias/&lt;nome&gt;.json</c>. Diferença em campo não volátil ou referência ausente reprovam o teste.
-    /// Com <c>REFERENCIAS_GRAVAR=1</c>, o projeto principal grava a versão normalizada na pasta-fonte em vez de comparar;
-    /// compilado com <c>ENGINE_PACKAGE</c>, nunca grava.
+    /// Compares the output of an engine run, normalized by <see cref="JsonNormalizer"/>, with the approved reference
+    /// <c>Referencias/&lt;name&gt;.json</c>. A difference in a non-volatile field or a missing reference fails the test.
+    /// With <c>REFERENCIAS_GRAVAR=1</c>, the main project writes the normalized version to the source folder instead of comparing;
+    /// compiled with <c>ENGINE_PACKAGE</c>, it never writes.
     /// </summary>
     public sealed class ReferenceComparer
     {
-        /// <summary>Variável de ambiente que, com o valor <c>1</c>, grava as referências em vez de comparar.</summary>
+        /// <summary>Environment variable that, set to <c>1</c>, writes the references instead of comparing.</summary>
         public const string RECORD_VARIABLE = "REFERENCIAS_GRAVAR";
 
-        /// <summary>Pasta das referências, na saída do build e no projeto principal.</summary>
+        /// <summary>References folder, in the build output and in the main project.</summary>
         public const string REFERENCES_FOLDER = "Referencias";
 
         private const string JSON_EXTENSION = ".json";
@@ -37,11 +37,11 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
 #endif
 
         /// <summary>
-        /// Cria o comparador.
+        /// Creates the comparer.
         /// </summary>
-        /// <param name="referenceDirectory">Pasta de onde as referências são lidas.</param>
-        /// <param name="recordDirectory">Pasta onde as referências são gravadas quando <paramref name="record"/> é verdadeiro.</param>
-        /// <param name="record">Grava a versão normalizada em vez de comparar. Ignorado quando compilado com <c>ENGINE_PACKAGE</c>.</param>
+        /// <param name="referenceDirectory">Folder the references are read from.</param>
+        /// <param name="recordDirectory">Folder the references are written to when <paramref name="record"/> is true.</param>
+        /// <param name="record">Writes the normalized version instead of comparing. Ignored when compiled with <c>ENGINE_PACKAGE</c>.</param>
         public ReferenceComparer(string referenceDirectory, string recordDirectory = null, bool record = false)
         {
             if (string.IsNullOrWhiteSpace(referenceDirectory))
@@ -63,12 +63,12 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
 #endif
         }
 
-        /// <summary>Verdadeiro quando o comparador grava as referências em vez de comparar.</summary>
+        /// <summary>True when the comparer writes the references instead of comparing.</summary>
         public bool IsRecording { get; }
 
         /// <summary>
-        /// Comparador padrão: lê <c>Referencias/</c> da saída do build e, com <c>REFERENCIAS_GRAVAR=1</c> no projeto principal,
-        /// grava em <c>src/Take.Blip.Builder.PaymentBlock.Tests/Referencias/</c>.
+        /// Default comparer: reads <c>Referencias/</c> from the build output and, with <c>REFERENCIAS_GRAVAR=1</c> in the main project,
+        /// writes to <c>src/Take.Blip.Builder.PaymentBlock.Tests/Referencias/</c>.
         /// </summary>
         public static ReferenceComparer FromBuildOutput()
         {
@@ -82,12 +82,12 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         }
 
         /// <summary>
-        /// Normaliza <paramref name="actual"/> e compara com a referência <paramref name="name"/>. Lança <see cref="XunitException"/>
-        /// com os caminhos JSON divergentes (sem valores) ou, se a referência não existir, com a instrução de gravação.
+        /// Normalizes <paramref name="actual"/> and compares it with the reference <paramref name="name"/>. Throws <see cref="XunitException"/>
+        /// with the diverging JSON paths (without values) or, if the reference does not exist, with the recording instruction.
         /// </summary>
-        /// <param name="name">Nome da referência, em minúsculas e hífens (ex.: <c>v1-checkout-pix</c>).</param>
-        /// <param name="actual">JSON capturado da execução.</param>
-        /// <param name="runSecrets">Segredos e tokens gerados nesta execução.</param>
+        /// <param name="name">Reference name, in lowercase and hyphens (e.g. <c>v1-checkout-pix</c>).</param>
+        /// <param name="actual">JSON captured from the run.</param>
+        /// <param name="runSecrets">Secrets and tokens generated in this run.</param>
         public void AssertMatches(string name, JToken actual, IEnumerable<string> runSecrets = null)
         {
             if (name == null || !NAME_PATTERN.IsMatch(name))

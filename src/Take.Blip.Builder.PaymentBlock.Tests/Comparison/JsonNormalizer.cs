@@ -10,9 +10,9 @@ using Newtonsoft.Json.Linq;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
 {
     /// <summary>
-    /// Normaliza o JSON capturado de uma execução do motor para compará-lo com as referências aprovadas.
-    /// A normalização é determinística: ordena as propriedades de cada objeto (ordinal), mantém a ordem dos arrays
-    /// e troca por marcadores fixos só o que está em <see cref="VOLATILE_RULES"/>. Todo o resto é comparado como veio.
+    /// Normalizes the JSON captured from an engine run so it can be compared with the approved references.
+    /// Normalization is deterministic: it sorts the properties of each object (ordinal), keeps the array order
+    /// and replaces with fixed markers only what is in <see cref="VOLATILE_RULES"/>. Everything else is compared as is.
     /// </summary>
     public static class JsonNormalizer
     {
@@ -28,17 +28,17 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         };
 
         /// <summary>
-        /// Lista fechada do que é volátil, na ordem em que é aplicada. É a fonte única: nada fora dela é ignorado na comparação.
+        /// Closed list of what is volatile, in the order it is applied. It is the single source: nothing outside it is ignored in the comparison.
         /// <list type="number">
-        /// <item><description><c>&lt;segredo&gt;</c>: valor inteiro das propriedades <c>authorization</c>, <c>accessKey</c>, <c>accessToken</c>, <c>apiKey</c>, <c>botToken</c>, <c>password</c>, <c>secret</c> e <c>token</c> (sem diferenciar maiúsculas) e, dentro de qualquer texto, os segredos e tokens gerados na execução que o chamador informa em <c>runSecrets</c>.</description></item>
-        /// <item><description><c>&lt;envelope-id&gt;</c>: <c>id</c> de envelope (objeto com <c>to</c>, <c>from</c> ou <c>method</c> e <c>uri</c>), que o motor gera a cada envio.</description></item>
-        /// <item><description><c>&lt;id-motor&gt;</c>: metadados de id do motor <c>#inReplyToId</c>, <c>#uniqueId</c> e <c>#message.uniqueId</c>.</description></item>
-        /// <item><description><c>&lt;guid&gt;</c>: GUID dentro de texto, exceto o zero (<c>00000000-0000-0000-0000-000000000000</c>).</description></item>
-        /// <item><description><c>&lt;data-hora&gt;</c>: data/hora ISO 8601 dentro de texto (<c>AAAA-MM-DDTHH:MM</c>, com segundos, fração e fuso opcionais) e valor do tipo data.</description></item>
-        /// <item><description><c>&lt;epoch-ms&gt;</c>: instante Unix em milissegundos (13 dígitos, de 2017 a 2042) logo depois do prefixo <c>REF</c>, o id de referência que o script do bloco gera com <c>"REF" + Date.now()</c> quando a configuração não traz um. O prefixo continua no texto (<c>REF&lt;epoch-ms&gt;</c>); número de 13 dígitos sem esse prefixo é comparado como veio.</description></item>
-        /// <item><description><c>&lt;epoch-s&gt;</c>: valor inteiro da propriedade <c>timestamp</c>, o instante Unix em segundos (<c>Math.floor(Date.now() / 1000)</c>) que o script de feedback grava em <c>payment.timestamp</c> da mensagem de status.</description></item>
+        /// <item><description><c>&lt;segredo&gt;</c>: whole value of the properties <c>authorization</c>, <c>accessKey</c>, <c>accessToken</c>, <c>apiKey</c>, <c>botToken</c>, <c>password</c>, <c>secret</c> and <c>token</c> (case-insensitive) and, inside any text, the secrets and tokens generated in the run that the caller passes in <c>runSecrets</c>.</description></item>
+        /// <item><description><c>&lt;envelope-id&gt;</c>: envelope <c>id</c> (object with <c>to</c>, <c>from</c> or <c>method</c> and <c>uri</c>), which the engine generates on every send.</description></item>
+        /// <item><description><c>&lt;id-motor&gt;</c>: engine id metadata <c>#inReplyToId</c>, <c>#uniqueId</c> and <c>#message.uniqueId</c>.</description></item>
+        /// <item><description><c>&lt;guid&gt;</c>: GUID inside text, except the zero one (<c>00000000-0000-0000-0000-000000000000</c>).</description></item>
+        /// <item><description><c>&lt;data-hora&gt;</c>: ISO 8601 date/time inside text (<c>YYYY-MM-DDTHH:MM</c>, with optional seconds, fraction and offset) and date-typed value.</description></item>
+        /// <item><description><c>&lt;epoch-ms&gt;</c>: Unix time in milliseconds (13 digits, from 2017 to 2042) right after the <c>REF</c> prefix, the reference id the block script generates with <c>"REF" + Date.now()</c> when the configuration has none. The prefix stays in the text (<c>REF&lt;epoch-ms&gt;</c>); a 13-digit number without that prefix is compared as is.</description></item>
+        /// <item><description><c>&lt;epoch-s&gt;</c>: whole value of the <c>timestamp</c> property, the Unix time in seconds (<c>Math.floor(Date.now() / 1000)</c>) that the feedback script writes to <c>payment.timestamp</c> of the status message.</description></item>
         /// </list>
-        /// Nomes de propriedade passam pelas mesmas regras de texto; se dois nomes viram o mesmo marcador, recebem o sufixo <c>#2</c>, <c>#3</c>... na ordem do valor normalizado.
+        /// Property names go through the same text rules; if two names turn into the same marker, they get the suffix <c>#2</c>, <c>#3</c>... in the order of the normalized value.
         /// </summary>
         public static readonly IReadOnlyList<VolatileRule> VOLATILE_RULES = new[]
         {
@@ -54,10 +54,10 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         private static readonly string DATE_TIME_MARKER = VOLATILE_RULES[4].Marker;
 
         /// <summary>
-        /// Devolve uma cópia normalizada de <paramref name="value"/>, sem alterar o original.
+        /// Returns a normalized copy of <paramref name="value"/>, without changing the original.
         /// </summary>
-        /// <param name="value">JSON capturado da execução.</param>
-        /// <param name="runSecrets">Segredos e tokens gerados nesta execução (mínimo de 8 caracteres cada), trocados por <c>&lt;segredo&gt;</c> onde aparecerem.</param>
+        /// <param name="value">JSON captured from the run.</param>
+        /// <param name="runSecrets">Secrets and tokens generated in this run (at least 8 characters each), replaced with <c>&lt;segredo&gt;</c> wherever they appear.</param>
         public static JToken Normalize(JToken value, IEnumerable<string> runSecrets = null)
         {
             if (value == null)
@@ -69,7 +69,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         }
 
         /// <summary>
-        /// Lê JSON sem converter datas nem perder casas decimais, rejeitando propriedade duplicada e conteúdo além do fim.
+        /// Reads JSON without converting dates or losing decimal places, rejecting duplicate properties and content past the end.
         /// </summary>
         public static JToken Parse(string json)
         {
@@ -94,7 +94,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         }
 
         /// <summary>
-        /// Texto canônico do JSON normalizado: indentado com 2 espaços, quebra de linha <c>\n</c> e <c>\n</c> no fim.
+        /// Canonical text of the normalized JSON: indented with 2 spaces, <c>\n</c> line breaks and a trailing <c>\n</c>.
         /// </summary>
         public static string ToCanonicalText(JToken normalized)
         {
@@ -267,8 +267,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         }
 
         /// <summary>
-        /// Regra de volatilidade: troca por <see cref="Marker"/> o valor inteiro das propriedades em <see cref="PropertyNames"/>
-        /// ou cada trecho de texto que casa com <see cref="TextPattern"/>.
+        /// Volatility rule: replaces with <see cref="Marker"/> the whole value of the properties in <see cref="PropertyNames"/>
+        /// or each piece of text that matches <see cref="TextPattern"/>.
         /// </summary>
         public sealed class VolatileRule
         {
@@ -282,16 +282,16 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
                 TextPattern = textPattern;
             }
 
-            /// <summary>Marcador fixo que entra no lugar do valor volátil.</summary>
+            /// <summary>Fixed marker that takes the place of the volatile value.</summary>
             public string Marker { get; }
 
-            /// <summary>Nomes de propriedade cujo valor inteiro é volátil; vazio quando a regra é por padrão de texto.</summary>
+            /// <summary>Property names whose whole value is volatile; empty when the rule is a text pattern.</summary>
             public IReadOnlyCollection<string> PropertyNames => _propertyNames;
 
-            /// <summary>Quando verdadeiro, a regra só vale para propriedades de um objeto de envelope.</summary>
+            /// <summary>When true, the rule only applies to properties of an envelope object.</summary>
             public bool EnvelopeOnly { get; }
 
-            /// <summary>Padrão procurado dentro de textos; nulo quando a regra é por nome de propriedade.</summary>
+            /// <summary>Pattern searched inside texts; null when the rule is by property name.</summary>
             public Regex TextPattern { get; }
 
             internal static VolatileRule ForProperties(string marker, StringComparer comparer, bool envelopeOnly, params string[] names)

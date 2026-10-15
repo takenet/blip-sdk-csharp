@@ -9,9 +9,9 @@ using Take.Blip.Client;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 {
     /// <summary>
-    /// <see cref="ISender"/> simulado: grava na sequência do <see cref="BuilderEngineHarness.InteractionLog"/> cada comando,
-    /// mensagem e notificação que o motor envia e responde em memória aos comandos de leitura de bucket
-    /// (<c>get /buckets/&lt;id&gt;</c>). Nada sai para a rede.
+    /// Simulated <see cref="ISender"/>: records in the sequence of the <see cref="BuilderEngineHarness.InteractionLog"/> each command,
+    /// message and notification the engine sends, and answers in memory the bucket read commands
+    /// (<c>get /buckets/&lt;id&gt;</c>). Nothing goes out to the network.
     /// </summary>
     public sealed class SimulatedSender : ISender
     {
@@ -21,13 +21,13 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         private readonly ConcurrentDictionary<string, string> _buckets =
             new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>Cria o sender simulado gravando na sequência informada.</summary>
+        /// <summary>Creates the simulated sender recording to the given sequence.</summary>
         public SimulatedSender(BuilderEngineHarness.InteractionLog log)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
-        /// <summary>Guarda um texto no bucket <paramref name="bucketId"/>, devolvido em <c>get /buckets/&lt;id&gt;</c>.</summary>
+        /// <summary>Stores a text in the bucket <paramref name="bucketId"/>, returned on <c>get /buckets/&lt;id&gt;</c>.</summary>
         public void SetBucketText(string bucketId, string value)
         {
             if (string.IsNullOrWhiteSpace(bucketId))

@@ -8,20 +8,20 @@ using Take.Blip.Builder.Models;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 {
     /// <summary>
-    /// Monta, em memória, o fluxo executado pelo motor a partir de <c>Fixtures/</c>, conforme a montagem do estado descrita
-    /// no <c>ORIGEM.md</c>: o <c>model</c> de <c>&lt;fluxo&gt;-estado.json</c> com as referências <c>$fixture</c>/<c>$path</c>
-    /// resolvidas, os SetVariable de configuração preenchidos com uma linha de <c>configuracoes-v1.json</c>, um estado
-    /// inicial que leva ao bloco e um estado de saída para cada saída do bloco sem destino. Os arquivos não mudam.
+    /// Assembles in memory the flow the engine runs from <c>Fixtures/</c>, following the state assembly described
+    /// in <c>ORIGEM.md</c>: the <c>model</c> of <c>&lt;flow&gt;-estado.json</c> with the <c>$fixture</c>/<c>$path</c> references
+    /// resolved, the configuration SetVariable actions filled with a row of <c>configuracoes-v1.json</c>, an initial state
+    /// that leads to the block and an exit state for each block output without a destination. The files do not change.
     /// </summary>
     public static class FlowAssembler
     {
-        /// <summary>Pasta das fixtures, na saída do build.</summary>
+        /// <summary>Fixtures folder, in the build output.</summary>
         public const string FIXTURES_FOLDER = "Fixtures";
 
-        /// <summary>Matriz de configurações do bloco.</summary>
+        /// <summary>Block configuration matrix.</summary>
         public const string CONFIGURATIONS_FILE = "configuracoes-v1.json";
 
-        /// <summary>Estado raiz do fluxo montado: espera a mensagem do cliente e segue para o bloco.</summary>
+        /// <summary>Root state of the assembled flow: waits for the customer message and moves on to the block.</summary>
         public const string ENTRY_STATE_ID = "inicio";
 
         private const string STATE_FILE_SUFFIX = "-estado.json";
@@ -34,7 +34,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 
         private static readonly string[] CONFIGURATION_VARIABLES = { "configurationData", "paymentMethodData", "customizeData" };
 
-        /// <summary>Id do estado de saída ligado à saída do bloco cuja primeira condição vale <paramref name="outputValue"/>.</summary>
+        /// <summary>Id of the exit state linked to the block output whose first condition equals <paramref name="outputValue"/>.</summary>
         public static string ExitStateId(string outputValue)
         {
             if (string.IsNullOrWhiteSpace(outputValue))
@@ -46,8 +46,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         }
 
         /// <summary>
-        /// Linha de <c>configuracoes-v1.json</c> com a <paramref name="configuration"/> (coluna <c>configuracao</c>) e o
-        /// <paramref name="feedback"/> informados.
+        /// Row of <c>configuracoes-v1.json</c> with the given <paramref name="configuration"/> (<c>configuracao</c> column) and
+        /// <paramref name="feedback"/>.
         /// </summary>
         public static JObject LoadConfiguration(string configuration, bool feedback)
         {
@@ -70,7 +70,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
                 nameof(configuration));
         }
 
-        /// <summary>Monta o fluxo de <paramref name="referenceFlow"/> com a linha de configuração informada.</summary>
+        /// <summary>Assembles the <paramref name="referenceFlow"/> flow with the given configuration row.</summary>
         public static Flow Assemble(string referenceFlow, JObject configuration)
         {
             if (string.IsNullOrWhiteSpace(referenceFlow))

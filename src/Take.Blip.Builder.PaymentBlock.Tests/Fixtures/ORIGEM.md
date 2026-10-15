@@ -1,65 +1,65 @@
-# Origem das fixtures do bloco de Pagamentos v1
+# Origin of the Payments block v1 fixtures
 
-- Repositório de origem: `portal-submodule-builder`, PR `portal-submodule-builder#164` (ainda NÃO mergeado).
-  Se o #164 mudar na revisão, re-sincronize estes arquivos a partir do novo SHA, com o mesmo método.
+- Source repository: `portal-submodule-builder`, PR `portal-submodule-builder#164` (NOT merged yet).
+  If #164 changes during review, re-sync these files from the new SHA, with the same method.
 - SHA: `843c51c6aedf3916973154ad67dbfa80dd515510` (branch `test/ipay-14-caracterizacao-bloco-builder`).
-- Leitura só com `git show`/`git archive` desse SHA, extraindo para uma pasta vazia fora dos checkouts.
-- Nada aqui roda Node em tempo de teste: os arquivos são JSON estáticos.
+- Read only with `git show`/`git archive` of that SHA, extracting to an empty folder outside the checkouts.
+- Nothing here runs Node at test time: the files are static JSON.
 
-## Arquivos
+## Files
 
-| Arquivo | Origem no SHA | Método |
+| File | Origin in the SHA | Method |
 | --- | --- | --- |
-| `checkout-v1.json` | `templates/builder/payment/features/referencias/checkout-v1.json` | cópia byte a byte (`git show <SHA>:<caminho>`, 34677 bytes) |
-| `checkout-v1-acoes-saida.json` | `templates/builder/payment/state/Actions.ts`, `leavingPaymentActions(urlCheckout, urlAuth)` | gerado |
-| `checkout-v1-conteudo.json` | `templates/builder/payment/state/Actions.ts`, `contentActionsPayment(textContent)` | gerado |
-| `checkout-v1-outputs.json` | `templates/builder/payment/state/Outputs.ts`, `conditionOutputPayment` | gerado |
-| `checkout-v1-estado.json` | `templates/builder/payment/state/State.ts`, `getPaymentState(...)` (`viewModel`), e `templates/builder/models/viewModels/StateViewModel.ts`, `StateViewModel.createModel` (`model`) | gerado |
-| `configuracoes-v1.json` | formato de `templates/builder/payment/components/tabs/configuration/configuration.component.ts` (`updateSetVariableAction`) e `templates/builder/payment/components/tabs/paymentMethod/paymentMethod.component.ts` (`buildPaymentMethodData`) | criado nesta fase (formato transcrito, dados sintéticos) |
-| `ORIGEM.md` | (este arquivo) | criado nesta fase |
+| `checkout-v1.json` | `templates/builder/payment/features/referencias/checkout-v1.json` | byte-for-byte copy (`git show <SHA>:<path>`, 34677 bytes) |
+| `checkout-v1-acoes-saida.json` | `templates/builder/payment/state/Actions.ts`, `leavingPaymentActions(urlCheckout, urlAuth)` | generated |
+| `checkout-v1-conteudo.json` | `templates/builder/payment/state/Actions.ts`, `contentActionsPayment(textContent)` | generated |
+| `checkout-v1-outputs.json` | `templates/builder/payment/state/Outputs.ts`, `conditionOutputPayment` | generated |
+| `checkout-v1-estado.json` | `templates/builder/payment/state/State.ts`, `getPaymentState(...)` (`viewModel`), and `templates/builder/models/viewModels/StateViewModel.ts`, `StateViewModel.createModel` (`model`) | generated |
+| `configuracoes-v1.json` | format from `templates/builder/payment/components/tabs/configuration/configuration.component.ts` (`updateSetVariableAction`) and `templates/builder/payment/components/tabs/paymentMethod/paymentMethod.component.ts` (`buildPaymentMethodData`) | created in this phase (transcribed format, synthetic data) |
+| `ORIGEM.md` | (this file) | created in this phase |
 
-## Como os arquivos gerados foram produzidos
+## How the generated files were produced
 
-1. `git -C portal-submodule-builder archive <SHA> templates/builder/models templates/builder/payment templates/builder/aiAgent templates/builder/services/BuilderStateService.ts templates/builder/services/BuilderAiAgentService.ts __mocks__ tsconfig.json package.json | tar -x` numa pasta vazia.
-2. Bundle (esbuild) das funções puras, com os mesmos aliases do `jest.config.js` do SHA: `modules/application/detail/portal-submodule-builder/*` e `@detailssubmodule/*` apontam para a raiz; `types/CommandMethods`, `app.constants`, `fast-json-patch` e `find-duplicated-property-keys` apontam para `__mocks__/`. Os campos de classe usam `useDefineForClassFields`, que dá a mesma ordem de chaves do Babel do jest.
-3. Substituições no bundle:
-   - `uuid.v4()` devolve `"<id>"`;
-   - `angular.copy` vira cópia JSON;
-   - `BuilderStateService` vira só `PAYMENT_ID_PREFIX = 'payment:'` (linha 35 do arquivo no SHA);
-   - `BuilderAiAgentService.isAiAgentState` devolve `false` (o `createModel` não o chama).
-4. Parâmetros:
-   - URLs `https://checkout.hmg.example.test` e `https://auth.hmg.example.test`, as mesmas da referência;
-   - título `PaymentConstants.DEFAULT_BLOCK_TITLE` (`Payment`);
-   - `textContent` = a chave `builder-tabs-content.media.userInput`. O portal passa a tradução dessa chave, que mora no blip-portal, fora do SHA.
-5. Normalização igual à de `templates/builder/payment/features/__tests__/regressao.steps.test.ts`: `JSON.parse(JSON.stringify(x))` e todo `$id` trocado por `"<id>"`. Gravação com `JSON.stringify(x, null, 2)` mais `\n`.
-6. Prova de fidelidade: o mesmo gerador reproduz `checkout-v1.json` byte a byte (`cmp` com o blob do SHA).
+1. `git -C portal-submodule-builder archive <SHA> templates/builder/models templates/builder/payment templates/builder/aiAgent templates/builder/services/BuilderStateService.ts templates/builder/services/BuilderAiAgentService.ts __mocks__ tsconfig.json package.json | tar -x` into an empty folder.
+2. Bundle (esbuild) of the pure functions, with the same aliases as the `jest.config.js` in the SHA: `modules/application/detail/portal-submodule-builder/*` and `@detailssubmodule/*` point to the root; `types/CommandMethods`, `app.constants`, `fast-json-patch` and `find-duplicated-property-keys` point to `__mocks__/`. Class fields use `useDefineForClassFields`, which gives the same key order as the jest Babel setup.
+3. Replacements in the bundle:
+   - `uuid.v4()` returns `"<id>"`;
+   - `angular.copy` becomes a JSON copy;
+   - `BuilderStateService` becomes only `PAYMENT_ID_PREFIX = 'payment:'` (line 35 of the file in the SHA);
+   - `BuilderAiAgentService.isAiAgentState` returns `false` (`createModel` does not call it).
+4. Parameters:
+   - URLs `https://checkout.hmg.example.test` and `https://auth.hmg.example.test`, the same as in the reference;
+   - title `PaymentConstants.DEFAULT_BLOCK_TITLE` (`Payment`);
+   - `textContent` = the key `builder-tabs-content.media.userInput`. The portal passes the translation of that key, which lives in blip-portal, outside the SHA.
+5. Normalization equal to the one in `templates/builder/payment/features/__tests__/regressao.steps.test.ts`: `JSON.parse(JSON.stringify(x))` and every `$id` replaced with `"<id>"`. Written with `JSON.stringify(x, null, 2)` plus `\n`.
+6. Fidelity proof: the same generator reproduces `checkout-v1.json` byte for byte (`cmp` against the blob in the SHA).
 
-## Montagem do estado (`checkout-v1-estado.json`)
+## State assembly (`checkout-v1-estado.json`)
 
-- `viewModel`: o `StateViewModel` de `getPaymentState`, como o editor guarda o bloco.
-- `model`: o `State` publicado por `StateViewModel.createModel`, que é o formato executado pelo motor:
-  - `inputActions` = ações de entrada (`checkout-v1.json`);
-  - `input` = `input` do primeiro item de `checkout-v1-conteudo.json`;
-  - `outputActions` = ações de saída (`checkout-v1-acoes-saida.json`);
-  - `outputs` = `$conditionOutputs` com `stateId` `"self"` trocado pelo id do estado, mais o `$defaultOutput`, sem as saídas internas de pagamento sem destino.
-- Referência a outro arquivo: `{"$fixture": "<arquivo>"}` é o conteúdo inteiro do arquivo desta pasta; `"$path"` é o caminho dentro dele, na sintaxe do `SelectToken` do Newtonsoft. O gerador confere que cada referência é igual ao valor que ela substituiu.
-- O id do estado é `payment:<id>` e todo uuid vira `<id>`. Ids únicos são atribuídos em memória, se o motor exigir.
-- `checkout-v1-outputs.json` é a lista crua de `Outputs.ts`, ainda com `stateId` `"self"`.
+- `viewModel`: the `StateViewModel` from `getPaymentState`, as the editor stores the block.
+- `model`: the `State` published by `StateViewModel.createModel`, which is the format the engine runs:
+  - `inputActions` = entering actions (`checkout-v1.json`);
+  - `input` = `input` of the first item of `checkout-v1-conteudo.json`;
+  - `outputActions` = leaving actions (`checkout-v1-acoes-saida.json`);
+  - `outputs` = `$conditionOutputs` with `stateId` `"self"` replaced by the state id, plus `$defaultOutput`, without the internal payment outputs that have no destination.
+- Reference to another file: `{"$fixture": "<file>"}` is the whole content of the file in this folder; `"$path"` is the path inside it, in Newtonsoft `SelectToken` syntax. The generator checks that each reference equals the value it replaced.
+- The state id is `payment:<id>` and every uuid becomes `<id>`. Unique ids are assigned in memory, if the engine requires them.
+- `checkout-v1-outputs.json` is the raw list from `Outputs.ts`, still with `stateId` `"self"`.
 
-## Matriz de configurações (`configuracoes-v1.json`)
+## Configuration matrix (`configuracoes-v1.json`)
 
-- Uma linha para cada valor da coluna `configuracao` de `Features/mensagens_do_bloco_v1.feature` (9), mais `checkout-link-e-pix` com `feedback: true`, usada pelo esquema de status.
-- `configurationData`, `paymentMethodData` e `customizeData` são os objetos que o portal grava, com `JSON.stringify`, nos SetVariable `[SETUP][INIT] Configuration Data`, `[SETUP][INIT] Payment Method Data` e `[SETUP][INIT] Customize Data` (`PaymentDataService.updateVariableValue`). No fluxo de referência esses valores são `"{}"`; a montagem do fluxo troca cada um pelo objeto da linha, serializado.
-- `State.ts` só declara `PaymentConfiguration` como `{ [key: string]: any }`: o formato real vem dos dois componentes citados na tabela.
-- `configuracao`, `feedback` e `cartaoSalvo` são metadados do teste e não entram no fluxo. Em `checkout-link-com-cartao-salvo`, a configuração é igual à de `checkout-link`; o cartão salvo vem da resposta simulada (`hasSavedCard`) de `[CHECKOUT][EXEC] Get Customer Cards`.
-- Só dados sintéticos:
-  - chave PIX CPF `000.000.000-00` e chave aleatória `00000000-0000-0000-0000-000000000000`;
-  - link em `pagamento.example.test`;
-  - boleto com 47 zeros;
-  - nenhum telefone, CNPJ, cartão ou e-mail real.
-- No PIX do provedor checkout, o portal preencheria `keyType` `cnpj` e `pixKey` com o CNPJ do merchant (`fillPixFieldsFromMerchant`). Aqui esses campos ficam vazios, porque o script do provedor checkout usa a chave devolvida pela checkout-api.
+- One row for each value of the `configuracao` column of `Features/mensagens_do_bloco_v1.feature` (9), plus `checkout-link-e-pix` with `feedback: true`, used by the status scenario outline.
+- `configurationData`, `paymentMethodData` and `customizeData` are the objects the portal writes, with `JSON.stringify`, to the SetVariable actions `[SETUP][INIT] Configuration Data`, `[SETUP][INIT] Payment Method Data` and `[SETUP][INIT] Customize Data` (`PaymentDataService.updateVariableValue`). In the reference flow these values are `"{}"`; the flow assembly replaces each one with the serialized object of the row.
+- `State.ts` only declares `PaymentConfiguration` as `{ [key: string]: any }`: the real format comes from the two components cited in the table.
+- `configuracao`, `feedback` and `cartaoSalvo` are test metadata and do not go into the flow. In `checkout-link-com-cartao-salvo`, the configuration is the same as `checkout-link`; the saved card comes from the simulated response (`hasSavedCard`) of `[CHECKOUT][EXEC] Get Customer Cards`.
+- Synthetic data only:
+  - CPF PIX key `000.000.000-00` and random key `00000000-0000-0000-0000-000000000000`;
+  - link at `pagamento.example.test`;
+  - bank slip with 47 zeros;
+  - no real phone number, CNPJ, card or e-mail.
+- For the checkout provider PIX, the portal would fill `keyType` `cnpj` and `pixKey` with the merchant CNPJ (`fillPixFieldsFromMerchant`). Here those fields stay empty, because the checkout provider script uses the key returned by the checkout-api.
 
-## Itens de conferência da dona do repo
+## Review items for the repository owner
 
-1. `configuracoes-v1.json`: o formato foi transcrito dos componentes, porque não há função pura que o gere. Confira campos e valores de cada linha.
-2. Substituições do gerador: `PAYMENT_ID_PREFIX` transcrito e `textContent` igual à chave de tradução.
+1. `configuracoes-v1.json`: the format was transcribed from the components, because there is no pure function that generates it. Check the fields and values of each row.
+2. Generator replacements: `PAYMENT_ID_PREFIX` transcribed and `textContent` equal to the translation key.

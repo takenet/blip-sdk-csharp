@@ -5,16 +5,16 @@ using Take.Blip.Builder.Hosting;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 {
     /// <summary>
-    /// <see cref="IConfiguration"/> do motor para os testes: devolve os valores de <see cref="ConventionsConfiguration"/>
-    /// (inclusive o <c>ProcessCommandMetadatasToInsert</c>) e só troca o <c>ExecuteScriptV2Timeout</c>, que lá não é
-    /// virtual e por isso é reimplementado aqui em vez de sobrescrito.
+    /// Engine <see cref="IConfiguration"/> for the tests: returns the values of <see cref="ConventionsConfiguration"/>
+    /// (including <c>ProcessCommandMetadatasToInsert</c>) and only replaces <c>ExecuteScriptV2Timeout</c>, which is not
+    /// virtual there and is therefore reimplemented here instead of overridden.
     /// </summary>
     public sealed class TestBuilderConfiguration : IConfiguration
     {
         private readonly ConventionsConfiguration _conventions = new ConventionsConfiguration();
 
-        /// <summary>Cria a configuração com o tempo máximo de script informado.</summary>
-        /// <param name="executeScriptV2Timeout">Tempo máximo de execução de um <c>ExecuteScriptV2</c>.</param>
+        /// <summary>Creates the configuration with the given maximum script time.</summary>
+        /// <param name="executeScriptV2Timeout">Maximum execution time of an <c>ExecuteScriptV2</c>.</param>
         public TestBuilderConfiguration(TimeSpan executeScriptV2Timeout)
         {
             if (executeScriptV2Timeout <= TimeSpan.Zero)
@@ -25,7 +25,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             ExecuteScriptV2Timeout = executeScriptV2Timeout;
         }
 
-        /// <summary>Tempo máximo de script padrão do motor (o de <see cref="ConventionsConfiguration"/>).</summary>
+        /// <summary>Engine default maximum script time (the one from <see cref="ConventionsConfiguration"/>).</summary>
         public static TimeSpan DefaultExecuteScriptV2Timeout => new ConventionsConfiguration().ExecuteScriptV2Timeout;
 
         /// <inheritdoc />

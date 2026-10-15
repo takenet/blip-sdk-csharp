@@ -31,10 +31,10 @@ using Take.Blip.Client.Extensions.Tunnel;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 {
     /// <summary>
-    /// Executa um fluxo de referência no motor do Builder, no padrão de <c>FlowManagerTestsBase.CreateContainer</c>: um
-    /// container por cenário com <c>RegisterBuilder()</c>, <see cref="ISender"/> e <see cref="IHttpClient"/> simulados,
-    /// extensões substituídas e contexto do usuário em memória (sem Redis nem rede). Criado pela injeção de contexto do
-    /// Reqnroll, uma instância por cenário, compartilhada pelos passos das features.
+    /// Runs a reference flow on the Builder engine, following <c>FlowManagerTestsBase.CreateContainer</c>: one
+    /// container per scenario with <c>RegisterBuilder()</c>, simulated <see cref="ISender"/> and <see cref="IHttpClient"/>,
+    /// substituted extensions and in-memory user context (no Redis and no network). Created by Reqnroll context injection,
+    /// one instance per scenario, shared by the feature steps.
     /// </summary>
     public sealed class BuilderEngineHarness : IDisposable
     {
@@ -48,7 +48,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         private string _bucketSecret;
         private int _deliveredSchedules;
 
-        /// <summary>Cria o harness com a checkout-api simulada no modo normal e o tempo de script padrão do motor.</summary>
+        /// <summary>Creates the harness with the simulated checkout-api in normal mode and the engine default script time.</summary>
         public BuilderEngineHarness()
         {
             Sender = new SimulatedSender(_log);
@@ -63,60 +63,60 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             ScriptTimeout = TestBuilderConfiguration.DefaultExecuteScriptV2Timeout;
         }
 
-        /// <summary>Tipo de cada item gravado na sequência.</summary>
+        /// <summary>Kind of each item recorded in the sequence.</summary>
         public enum InteractionKind
         {
-            /// <summary>Comando enviado ou processado pelo motor (<see cref="Interaction.Envelope"/> é um <see cref="Command"/>).</summary>
+            /// <summary>Command sent or processed by the engine (<see cref="Interaction.Envelope"/> is a <see cref="Command"/>).</summary>
             Command,
 
-            /// <summary>Mensagem enviada pelo motor (<see cref="Interaction.Envelope"/> é uma <see cref="Message"/>).</summary>
+            /// <summary>Message sent by the engine (<see cref="Interaction.Envelope"/> is a <see cref="Message"/>).</summary>
             Message,
 
-            /// <summary>Notificação enviada pelo motor.</summary>
+            /// <summary>Notification sent by the engine.</summary>
             Notification,
 
-            /// <summary>Chamada HTTP feita por <c>request.fetchAsync</c>.</summary>
+            /// <summary>HTTP call made by <c>request.fetchAsync</c>.</summary>
             Http,
         }
 
-        /// <summary><see cref="ISender"/> simulado registrado no container.</summary>
+        /// <summary>Simulated <see cref="ISender"/> registered in the container.</summary>
         public SimulatedSender Sender { get; }
 
-        /// <summary><see cref="IHttpClient"/> simulado registrado no container.</summary>
+        /// <summary>Simulated <see cref="IHttpClient"/> registered in the container.</summary>
         public SimulatedHttpClient HttpClient { get; }
 
-        /// <summary>Extensão de agendamento substituída (expiração de input).</summary>
+        /// <summary>Substituted scheduler extension (input expiration).</summary>
         public ISchedulerExtension SchedulerExtension { get; }
 
-        /// <summary>Extensão de eventos substituída (ação TrackEvent).</summary>
+        /// <summary>Substituted event extension (TrackEvent action).</summary>
         public IEventTrackExtension EventTrackExtension { get; }
 
-        /// <summary>Extensão de contatos substituída, que devolve o contato sintético.</summary>
+        /// <summary>Substituted contact extension, which returns the synthetic contact.</summary>
         public IContactExtension ContactExtension { get; }
 
-        /// <summary>Logger de monitoramento do motor, substituído.</summary>
+        /// <summary>Substituted engine monitoring logger.</summary>
         public IBlipLogger MonitoringLogger { get; }
 
-        /// <summary>Tempo máximo de <c>ExecuteScriptV2</c>; vale para o container criado no próximo envio.</summary>
+        /// <summary>Maximum <c>ExecuteScriptV2</c> time; applies to the container created on the next send.</summary>
         public TimeSpan ScriptTimeout { get; set; }
 
-        /// <summary>Fluxo de referência em uso (nome da fixture).</summary>
+        /// <summary>Reference flow in use (fixture name).</summary>
         public string ReferenceFlow { get; private set; }
 
-        /// <summary>Configuração do bloco em uso (coluna <c>configuracao</c> de <c>configuracoes-v1.json</c>).</summary>
+        /// <summary>Block configuration in use (<c>configuracao</c> column of <c>configuracoes-v1.json</c>).</summary>
         public string ConfigurationName { get; private set; }
 
-        /// <summary>Exceção devolvida pelo motor no último envio, ou <c>null</c> se ele terminou sem erro.</summary>
+        /// <summary>Exception returned by the engine on the last send, or <c>null</c> if it finished without error.</summary>
         public Exception EngineFailure { get; private set; }
 
-        /// <summary>Sequência ordenada de comandos, mensagens, notificações e chamadas HTTP gravados até agora.</summary>
+        /// <summary>Ordered sequence of commands, messages, notifications and HTTP calls recorded so far.</summary>
         public IReadOnlyList<Interaction> Interactions => _log.Snapshot();
 
-        /// <summary>Segredo do bucket e token da auth-api gerados nesta execução, para o normalizador mascarar.</summary>
+        /// <summary>Bucket secret and auth-api token generated in this run, for the normalizer to mask.</summary>
         public IReadOnlyList<string> RunSecrets
             => _bucketSecret == null ? new[] { HttpClient.BotToken } : new[] { _bucketSecret, HttpClient.BotToken };
 
-        /// <summary>Escolhe o fluxo de referência e a linha de configuração usados no próximo envio.</summary>
+        /// <summary>Chooses the reference flow and the configuration row used on the next send.</summary>
         public void UseReferenceFlow(string referenceFlow, string configuration, bool feedback)
         {
             var row = FlowAssembler.LoadConfiguration(configuration, feedback);
@@ -126,7 +126,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             ConfigurationName = configuration;
         }
 
-        /// <summary>Gera o segredo desta execução, guarda no bucket <paramref name="bucketId"/> e o faz aceito pela auth-api.</summary>
+        /// <summary>Generates this run's secret, stores it in the bucket <paramref name="bucketId"/> and makes the auth-api accept it.</summary>
         public void StoreBucketSecret(string bucketId)
         {
             _bucketSecret = SyntheticData.NewRunSecret();
@@ -134,11 +134,11 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             HttpClient.AcceptedSecret = _bucketSecret;
         }
 
-        /// <summary>Indica se <paramref name="value"/> é o segredo do bucket desta execução, sem expor o valor.</summary>
+        /// <summary>Tells whether <paramref name="value"/> is this run's bucket secret, without exposing the value.</summary>
         public bool IsBucketSecret(string value)
             => _bucketSecret != null && string.Equals(value, _bucketSecret, StringComparison.Ordinal);
 
-        /// <summary>Envia ao motor a mensagem do cliente que leva o fluxo ao bloco e guarda a falha, se houver.</summary>
+        /// <summary>Sends to the engine the customer message that takes the flow to the block and keeps the failure, if any.</summary>
         public Task SendClientMessageAsync()
         {
             var message = new Message
@@ -154,8 +154,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         }
 
         /// <summary>
-        /// Entrega ao motor, sem espera real, a expiração de input que ele agendou no <see cref="SchedulerExtension"/> depois
-        /// da última entrega, como o agendador faria ao fim do tempo, e guarda a falha, se houver.
+        /// Delivers to the engine, without real waiting, the input expiration it scheduled in the <see cref="SchedulerExtension"/> after
+        /// the last delivery, as the scheduler would at the end of the time, and keeps the failure, if any.
         /// </summary>
         public Task DeliverScheduledInputExpirationAsync()
         {
@@ -212,14 +212,14 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             }
         }
 
-        /// <summary>Estado do cliente no fluxo gravado pelo motor, ou <c>null</c> se não há estado gravado.</summary>
+        /// <summary>Customer state in the flow recorded by the engine, or <c>null</c> if no state is recorded.</summary>
         public string UserStateId => GetContextVariable(USER_STATE_VARIABLE_PREFIX + SyntheticData.FLOW_ID);
 
-        /// <summary>Valor atual da variável de contexto do cliente, ou <c>null</c> se ela não existe.</summary>
+        /// <summary>Current value of the customer context variable, or <c>null</c> if it does not exist.</summary>
         public string GetContextVariable(string name)
             => _contextExtension.GetText(Identity.Parse(SyntheticData.USER_IDENTITY), name);
 
-        /// <summary>Serializa o envelope com o serializador do motor, como ele iria para o servidor.</summary>
+        /// <summary>Serializes the envelope with the engine serializer, as it would go to the server.</summary>
         public JObject ToJson(Envelope envelope)
         {
             if (_container == null)
@@ -274,7 +274,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             return container;
         }
 
-        /// <summary>Item da sequência gravada pelos simuladores.</summary>
+        /// <summary>Item of the sequence recorded by the simulators.</summary>
         public sealed class Interaction
         {
             internal Interaction(int sequence, InteractionKind kind)
@@ -283,47 +283,47 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
                 Kind = kind;
             }
 
-            /// <summary>Posição na sequência, a partir de 1.</summary>
+            /// <summary>Position in the sequence, starting at 1.</summary>
             public int Sequence { get; }
 
-            /// <summary>Tipo do item.</summary>
+            /// <summary>Item kind.</summary>
             public InteractionKind Kind { get; }
 
-            /// <summary>Envelope enviado pelo motor (comando, mensagem ou notificação).</summary>
+            /// <summary>Envelope sent by the engine (command, message or notification).</summary>
             public Envelope Envelope { get; internal set; }
 
-            /// <summary>Método HTTP.</summary>
+            /// <summary>HTTP method.</summary>
             public string HttpMethod { get; internal set; }
 
-            /// <summary>URL chamada.</summary>
+            /// <summary>Called URL.</summary>
             public Uri HttpUri { get; internal set; }
 
-            /// <summary>Cabeçalhos da requisição.</summary>
+            /// <summary>Request headers.</summary>
             public IReadOnlyDictionary<string, string> HttpRequestHeaders { get; internal set; }
 
-            /// <summary>Corpo da requisição.</summary>
+            /// <summary>Request body.</summary>
             public string HttpRequestBody { get; internal set; }
 
-            /// <summary>Status devolvido, ou <c>null</c> se a chamada foi cancelada.</summary>
+            /// <summary>Returned status, or <c>null</c> if the call was cancelled.</summary>
             public int? HttpStatus { get; internal set; }
 
-            /// <summary>Corpo da resposta.</summary>
+            /// <summary>Response body.</summary>
             public string HttpResponseBody { get; internal set; }
 
-            /// <summary>Se a chamada foi cancelada antes de responder.</summary>
+            /// <summary>Whether the call was cancelled before responding.</summary>
             public bool HttpCancelled { get; internal set; }
 
-            /// <summary>Duração da chamada no simulador.</summary>
+            /// <summary>Call duration in the simulator.</summary>
             public TimeSpan HttpElapsed { get; internal set; }
         }
 
-        /// <summary>Sequência única e ordenada, compartilhada pelo sender e pelo cliente HTTP simulados.</summary>
+        /// <summary>Single ordered sequence, shared by the simulated sender and HTTP client.</summary>
         public sealed class InteractionLog
         {
             private readonly object _gate = new object();
             private readonly List<Interaction> _items = new List<Interaction>();
 
-            /// <summary>Acrescenta um item ao fim da sequência e o devolve para ser preenchido.</summary>
+            /// <summary>Appends an item to the end of the sequence and returns it to be filled.</summary>
             public Interaction Add(InteractionKind kind)
             {
                 lock (_gate)
@@ -334,7 +334,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
                 }
             }
 
-            /// <summary>Cópia da sequência atual.</summary>
+            /// <summary>Copy of the current sequence.</summary>
             public IReadOnlyList<Interaction> Snapshot()
             {
                 lock (_gate)

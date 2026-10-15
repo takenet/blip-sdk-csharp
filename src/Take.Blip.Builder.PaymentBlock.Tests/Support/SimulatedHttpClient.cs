@@ -13,23 +13,23 @@ using Take.Blip.Builder.Utils;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 {
     /// <summary>
-    /// <see cref="IHttpClient"/> simulado do <c>request.fetchAsync</c>: responde em memória pela checkout-auth-api
-    /// (<c>POST /bot</c>) e pela checkout-api (<c>POST /v0.1/checkout/purchase</c>,
-    /// <c>GET /v0.1/checkout/customer/last-card</c> e <c>GET /v0.1/payment</c>) e grava cada chamada na sequência do
-    /// <see cref="BuilderEngineHarness.InteractionLog"/>. Nenhuma chamada sai para a rede.
+    /// Simulated <see cref="IHttpClient"/> for <c>request.fetchAsync</c>: answers in memory for the checkout-auth-api
+    /// (<c>POST /bot</c>) and the checkout-api (<c>POST /v0.1/checkout/purchase</c>,
+    /// <c>GET /v0.1/checkout/customer/last-card</c> and <c>GET /v0.1/payment</c>) and records each call in the sequence of the
+    /// <see cref="BuilderEngineHarness.InteractionLog"/>. No call goes out to the network.
     /// </summary>
     public sealed class SimulatedHttpClient : IHttpClient
     {
-        /// <summary>Caminho da emissão de token na checkout-auth-api.</summary>
+        /// <summary>Path of the token issuing in the checkout-auth-api.</summary>
         public const string AUTH_TOKEN_PATH = "/bot";
 
-        /// <summary>Caminho da criação do link de pagamento na checkout-api.</summary>
+        /// <summary>Path of the payment link creation in the checkout-api.</summary>
         public const string PURCHASE_PATH = "/v0.1/checkout/purchase";
 
-        /// <summary>Caminho da consulta do último cartão salvo na checkout-api.</summary>
+        /// <summary>Path of the last saved card query in the checkout-api.</summary>
         public const string LAST_CARD_PATH = "/v0.1/checkout/customer/last-card";
 
-        /// <summary>Caminho da consulta do pagamento na checkout-api (o script do feedback chama <c>/V0.1/payment?id=</c>).</summary>
+        /// <summary>Path of the payment query in the checkout-api (the feedback script calls <c>/V0.1/payment?id=</c>).</summary>
         public const string PAYMENT_PATH = "/v0.1/payment";
 
         private const string AUTHORIZATION_HEADER = "Authorization";
@@ -47,51 +47,51 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 
         private readonly BuilderEngineHarness.InteractionLog _log;
 
-        /// <summary>Cria o cliente simulado gravando na sequência informada.</summary>
+        /// <summary>Creates the simulated client recording to the given sequence.</summary>
         public SimulatedHttpClient(BuilderEngineHarness.InteractionLog log)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             BotToken = SyntheticData.NewRunSecret();
         }
 
-        /// <summary>Comportamento da checkout-api simulada.</summary>
+        /// <summary>Behavior of the simulated checkout-api.</summary>
         public enum CheckoutApiMode
         {
-            /// <summary>Responde na hora, com sucesso.</summary>
+            /// <summary>Responds immediately, with success.</summary>
             Normal,
 
-            /// <summary>Responde 500 na criação do link; as outras rotas seguem normais.</summary>
+            /// <summary>Responds 500 on link creation; the other routes stay normal.</summary>
             Error,
 
-            /// <summary>Toda rota da checkout-api espera <see cref="CheckoutApiDelay"/> (cancelável) antes de responder.</summary>
+            /// <summary>Every checkout-api route waits <see cref="CheckoutApiDelay"/> (cancellable) before responding.</summary>
             Delay,
         }
 
-        /// <summary>Token devolvido pela checkout-auth-api simulada, gerado nesta execução.</summary>
+        /// <summary>Token returned by the simulated checkout-auth-api, generated in this run.</summary>
         public string BotToken { get; }
 
-        /// <summary>Segredo que a checkout-auth-api aceita; outro valor recebe 401.</summary>
+        /// <summary>Secret the checkout-auth-api accepts; any other value gets 401.</summary>
         public string AcceptedSecret { get; set; }
 
-        /// <summary>Comportamento atual da checkout-api simulada.</summary>
+        /// <summary>Current behavior of the simulated checkout-api.</summary>
         public CheckoutApiMode CheckoutApi { get; set; } = CheckoutApiMode.Normal;
 
-        /// <summary>Espera da checkout-api no modo <see cref="CheckoutApiMode.Delay"/>.</summary>
+        /// <summary>checkout-api wait in <see cref="CheckoutApiMode.Delay"/> mode.</summary>
         public TimeSpan CheckoutApiDelay { get; set; } = TimeSpan.FromMinutes(1);
 
-        /// <summary>Se a consulta do último cartão devolve um cartão salvo (200) ou nenhum (404).</summary>
+        /// <summary>Whether the last saved card query returns a saved card (200) or none (404).</summary>
         public bool HasSavedCard { get; set; }
 
-        /// <summary>Meio informado pela consulta do pagamento, ou <c>null</c> se ela responde 404.</summary>
+        /// <summary>Payment method reported by the payment query, or <c>null</c> if it responds 404.</summary>
         public string ReportedPaymentMethod { get; private set; }
 
-        /// <summary>Status informado pela consulta do pagamento, ou <c>null</c> se ela responde 404.</summary>
+        /// <summary>Status reported by the payment query, or <c>null</c> if it responds 404.</summary>
         public string ReportedPaymentStatus { get; private set; }
 
         /// <summary>
-        /// Faz a consulta do pagamento da compra simulada informar <paramref name="paymentMethod"/> e <paramref name="status"/>
-        /// com os nomes que a checkout-api devolve (<c>PaymentMethodsType</c> e <c>PurchaseStatus</c> como texto). Aceita
-        /// qualquer caixa, porque os cenários escrevem o meio como o negócio (<c>PIX</c>) e a API responde <c>Pix</c>.
+        /// Makes the payment query of the simulated purchase report <paramref name="paymentMethod"/> and <paramref name="status"/>
+        /// with the names the checkout-api returns (<c>PaymentMethodsType</c> and <c>PurchaseStatus</c> as text). Accepts
+        /// any casing, because the scenarios write the method as the business does (<c>PIX</c>) and the API responds <c>Pix</c>.
         /// </summary>
         public void ReportPayment(string paymentMethod, string status)
         {

@@ -4,61 +4,61 @@ using System.Security.Cryptography;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 {
     /// <summary>
-    /// Dados sintéticos fixos da execução do bloco no motor. Nenhum valor real: hosts em <c>*.example.test</c>,
-    /// identidades sem telefone e chave PIX CNPJ de 14 zeros. Segredo do bucket e token da auth-api são gerados a cada
-    /// execução por <see cref="NewRunSecret"/>.
+    /// Fixed synthetic data for the block run on the engine. No real value: hosts in <c>*.example.test</c>,
+    /// identities without a phone number and a CNPJ PIX key of 14 zeros. The bucket secret and the auth-api token are
+    /// generated on every run by <see cref="NewRunSecret"/>.
     /// </summary>
     public static class SyntheticData
     {
-        /// <summary>Identidade do cliente que conversa com o bot.</summary>
+        /// <summary>Identity of the customer talking to the bot.</summary>
         public const string USER_IDENTITY = "cliente-de-teste@wa.gw.msging.net";
 
-        /// <summary>Identificador do bot (aplicação) dono do fluxo.</summary>
+        /// <summary>Identifier of the bot (application) that owns the flow.</summary>
         public const string APPLICATION_IDENTIFIER = "bot-de-teste";
 
-        /// <summary>Domínio da identidade do bot.</summary>
+        /// <summary>Domain of the bot identity.</summary>
         public const string APPLICATION_DOMAIN = "msging.net";
 
-        /// <summary>Nome do contato devolvido pela extensão de contatos simulada.</summary>
+        /// <summary>Contact name returned by the simulated contact extension.</summary>
         public const string CONTACT_NAME = "Cliente de Teste";
 
-        /// <summary>Texto da mensagem do cliente que leva o fluxo ao bloco de Pagamentos.</summary>
+        /// <summary>Text of the customer message that takes the flow to the Payments block.</summary>
         public const string CLIENT_MESSAGE_TEXT = "Quero pagar o meu pedido";
 
-        /// <summary>Identificador do fluxo montado pelo <see cref="FlowAssembler"/>.</summary>
+        /// <summary>Identifier of the flow assembled by <see cref="FlowAssembler"/>.</summary>
         public const string FLOW_ID = "fluxo-de-teste-checkout-v1";
 
-        /// <summary>Host da checkout-api, o mesmo das ações do bloco na fixture.</summary>
+        /// <summary>checkout-api host, the same one used by the block actions in the fixture.</summary>
         public const string CHECKOUT_HOST = "checkout.hmg.example.test";
 
-        /// <summary>Host da checkout-auth-api, o mesmo das ações do bloco na fixture.</summary>
+        /// <summary>checkout-auth-api host, the same one used by the block actions in the fixture.</summary>
         public const string AUTH_HOST = "auth.hmg.example.test";
 
-        /// <summary>Id fixo da compra criada pela checkout-api simulada.</summary>
+        /// <summary>Fixed id of the purchase created by the simulated checkout-api.</summary>
         public const string PURCHASE_ID = "compra-de-teste-0001";
 
-        /// <summary>Link de pagamento determinístico devolvido pela checkout-api simulada.</summary>
+        /// <summary>Deterministic payment link returned by the simulated checkout-api.</summary>
         public const string PAYMENT_LINK = "https://checkout.hmg.example.test/pagamento?id=compra-de-teste-0001";
 
-        /// <summary>Código PIX copia e cola devolvido pela checkout-api simulada.</summary>
+        /// <summary>PIX copy-and-paste code returned by the simulated checkout-api.</summary>
         public const string PIX_COPY_CODE = "pix-copia-e-cola-de-teste";
 
-        /// <summary>Chave PIX CNPJ do merchant: 14 dígitos sem formatação, todos zero.</summary>
+        /// <summary>Merchant CNPJ PIX key: 14 unformatted digits, all zero.</summary>
         public const string PIX_KEY_CNPJ = "00000000000000";
 
-        /// <summary>Nome do merchant devolvido junto com o PIX.</summary>
+        /// <summary>Merchant name returned along with the PIX.</summary>
         public const string PIX_MERCHANT_NAME = "Loja de Teste";
 
-        /// <summary>Id do cartão salvo devolvido pela checkout-api simulada.</summary>
+        /// <summary>Id of the saved card returned by the simulated checkout-api.</summary>
         public const string SAVED_CARD_ID = "cartao-de-teste-0001";
 
-        /// <summary>Final do cartão salvo devolvido pela checkout-api simulada.</summary>
+        /// <summary>Last digits of the saved card returned by the simulated checkout-api.</summary>
         public const string SAVED_CARD_LAST_FOUR = "0000";
 
         private const int RUN_SECRET_BYTES = 32;
 
         /// <summary>
-        /// Gera um valor aleatório (base64 url-safe, 43 caracteres) para segredo ou token desta execução.
+        /// Generates a random value (url-safe base64, 43 characters) for a secret or token of this run.
         /// </summary>
         public static string NewRunSecret()
         {

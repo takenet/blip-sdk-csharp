@@ -12,15 +12,15 @@ using Take.Blip.Builder.PaymentBlock.Tests.Support;
 namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
 {
     /// <summary>
-    /// Passos de <c>execucao_do_bloco.feature</c>. O passo de envio da mensagem do cliente é compartilhado com
-    /// <c>mensagens_do_bloco_v1.feature</c> pelo <see cref="BuilderEngineHarness"/> do cenário.
+    /// Steps of <c>execucao_do_bloco.feature</c>. The step that sends the customer message is shared with
+    /// <c>mensagens_do_bloco_v1.feature</c> through the scenario <see cref="BuilderEngineHarness"/>.
     /// </summary>
     [Binding]
     public sealed class BlockExecutionSteps
     {
         /// <summary>
-        /// Configuração do bloco usada por <c>execucao_do_bloco.feature</c>: link de pagamento e PIX pelo Checkout Blip,
-        /// os dois meios que a contratação do Checkout habilita.
+        /// Block configuration used by <c>execucao_do_bloco.feature</c>: payment link and PIX through Checkout Blip,
+        /// the two payment methods that the Checkout contract enables.
         /// </summary>
         public const string BLOCK_CONFIGURATION = "checkout-link-e-pix";
 
@@ -39,20 +39,20 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         private readonly BuilderEngineHarness _harness;
         private string _bucketId;
 
-        /// <summary>Recebe o harness do cenário pela injeção de contexto do Reqnroll.</summary>
+        /// <summary>Receives the scenario harness through Reqnroll context injection.</summary>
         public BlockExecutionSteps(BuilderEngineHarness harness)
         {
             _harness = harness ?? throw new ArgumentNullException(nameof(harness));
         }
 
-        /// <summary>Carrega o fluxo de referência com a configuração <see cref="BLOCK_CONFIGURATION"/>.</summary>
+        /// <summary>Loads the reference flow with the <see cref="BLOCK_CONFIGURATION"/> configuration.</summary>
         [Given("o fluxo de referência {string} carregado no motor do Builder")]
         public void GivenReferenceFlowLoaded(string referenceFlow)
         {
             _harness.UseReferenceFlow(referenceFlow, BLOCK_CONFIGURATION, false);
         }
 
-        /// <summary>Guarda no bucket um segredo gerado nesta execução.</summary>
+        /// <summary>Stores in the bucket a secret generated in this run.</summary>
         [Given("o bucket {string} do bot com um segredo de teste")]
         public void GivenBucketWithTestSecret(string bucketId)
         {
@@ -60,21 +60,21 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             _harness.StoreBucketSecret(bucketId);
         }
 
-        /// <summary>Deixa a checkout-auth-api e a checkout-api simuladas no modo normal.</summary>
+        /// <summary>Puts the simulated checkout-auth-api and checkout-api in normal mode.</summary>
         [Given("a checkout-auth-api e a checkout-api simuladas respondendo normalmente")]
         public void GivenApisRespondingNormally()
         {
             _harness.HttpClient.CheckoutApi = SimulatedHttpClient.CheckoutApiMode.Normal;
         }
 
-        /// <summary>Faz a checkout-api simulada responder erro na criação do link.</summary>
+        /// <summary>Makes the simulated checkout-api respond with an error when creating the link.</summary>
         [Given("que a checkout-api simulada responde erro na criação do link")]
         public void GivenCheckoutApiFailsCreatingLink()
         {
             _harness.HttpClient.CheckoutApi = SimulatedHttpClient.CheckoutApiMode.Error;
         }
 
-        /// <summary>Encurta o tempo máximo de script e faz a checkout-api demorar além dele.</summary>
+        /// <summary>Shortens the maximum script time and makes the checkout-api take longer than it.</summary>
         [Given("que a checkout-api simulada demora mais que o tempo máximo de script configurado")]
         public void GivenCheckoutApiSlowerThanScriptTimeout()
         {
@@ -83,14 +83,14 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             _harness.HttpClient.CheckoutApi = SimulatedHttpClient.CheckoutApiMode.Delay;
         }
 
-        /// <summary>Envia ao motor a mensagem do cliente que leva ao bloco (compartilhado entre as features).</summary>
+        /// <summary>Sends to the engine the customer message that leads to the block (shared between the features).</summary>
         [When("o cliente envia a mensagem que leva ao bloco de Pagamentos")]
         public Task WhenClientSendsMessageToPaymentBlock()
         {
             return _harness.SendClientMessageAsync();
         }
 
-        /// <summary>Confere a leitura do bucket por um comando com <c>#envelope.sendToServerRequired=true</c>, antes de qualquer HTTP.</summary>
+        /// <summary>Checks the bucket read through a command with <c>#envelope.sendToServerRequired=true</c>, before any HTTP call.</summary>
         [Then("o motor lê o bucket {string} por um comando marcado para passar pelo Iris Server")]
         public void ThenEngineReadsBucketThroughIrisServer(string bucketId)
         {
@@ -114,7 +114,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             FirstHttp(interactions).ShouldBeGreaterThan(reads[0].Sequence, "o bucket deveria ser lido antes de qualquer chamada HTTP");
         }
 
-        /// <summary>Confere a chamada à checkout-auth-api com o segredo do bucket, depois da leitura do bucket.</summary>
+        /// <summary>Checks the call to the checkout-auth-api with the bucket secret, after the bucket read.</summary>
         [Then("chama a checkout-auth-api para obter o token do bot")]
         public void ThenCallsAuthApiForBotToken()
         {
@@ -128,7 +128,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             first.HttpStatus.ShouldBe(200, "a checkout-auth-api simulada não emitiu o token");
         }
 
-        /// <summary>Confere a criação do link na checkout-api com o token emitido, depois da checkout-auth-api.</summary>
+        /// <summary>Checks the link creation in the checkout-api with the issued token, after the checkout-auth-api.</summary>
         [Then("chama a checkout-api para criar o link de pagamento")]
         public void ThenCallsCheckoutApiToCreateLink()
         {
@@ -143,7 +143,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             purchase.HttpStatus.ShouldBe(200);
         }
 
-        /// <summary>Confere um único cartão de pedido, enviado ao cliente depois da criação do link e com o link criado.</summary>
+        /// <summary>Checks a single order card, sent to the customer after the link creation and with the created link.</summary>
         [Then("envia ao cliente o cartão de pedido com o link")]
         public void ThenSendsOrderCardWithLink()
         {
@@ -156,7 +156,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             PaymentLinks(content).ShouldBe(new[] { SyntheticData.PAYMENT_LINK });
         }
 
-        /// <summary>Confere que nenhum cartão de pedido foi enviado.</summary>
+        /// <summary>Checks that no order card was sent.</summary>
         [Then("nenhum cartão de pedido é enviado ao cliente")]
         public void ThenNoOrderCardIsSent()
         {
@@ -165,8 +165,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         }
 
         /// <summary>
-        /// Confere o registro da falha da criação do link: o motor leva o cliente à saída de erro do bloco e grava, pela
-        /// ação TrackEvent, o evento de pagamento com <c>error_status</c> igual a <c>Error</c>.
+        /// Checks that the link creation failure is recorded: the engine takes the customer to the block error output and records,
+        /// through the TrackEvent action, the payment event with <c>error_status</c> equal to <c>Error</c>.
         /// </summary>
         [Then("a falha fica registrada pelo motor")]
         public void ThenFailureIsRecordedByEngine()
@@ -184,9 +184,9 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         }
 
         /// <summary>
-        /// Confere que a criação do link, pendente além do tempo máximo de script, foi cancelada por esse limite: a chamada
-        /// não respondeu e durou menos que o limite mais a tolerância. A tolerância absorve o agente de CI sob carga e fica
-        /// bem abaixo da demora simulada, então um cancelamento que não venha do limite ainda reprova.
+        /// Checks that the link creation, pending beyond the maximum script time, was cancelled by that limit: the call
+        /// did not respond and lasted less than the limit plus the tolerance. The tolerance absorbs a loaded CI agent and stays
+        /// well below the simulated delay, so a cancellation that does not come from the limit still fails.
         /// </summary>
         [Then("a execução do script é interrompida por tempo")]
         public void ThenScriptIsInterruptedByTimeout()
