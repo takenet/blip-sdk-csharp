@@ -248,7 +248,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
                         new JObject
                         {
                             ["method"] = "POST",
-                            ["uri"] = "https://checkout.example.invalid/api/v1/token",
+                            ["uri"] = "https://checkout.hmg.example.test/api/v1/token",
                             ["headers"] = new JObject { ["Authorization"] = "Bearer " + token },
                             ["body"] = "{\"botShortName\":\"loja\",\"secret\":\"" + secret + "\"}",
                         },
