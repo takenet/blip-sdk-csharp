@@ -177,7 +177,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 
             if (scheduled == null || schedules <= _deliveredSchedules)
             {
-                throw new InvalidOperationException("O motor não agendou uma nova expiração de input desde a última entrega.");
+                throw new InvalidOperationException("The engine did not schedule a new input expiration since the last delivery.");
             }
 
             _deliveredSchedules = schedules;
@@ -194,7 +194,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             if (_flow == null)
             {
-                throw new InvalidOperationException("Escolha o fluxo de referência antes de enviar a mensagem.");
+                throw new InvalidOperationException("Choose the reference flow before sending the message.");
             }
 
             _container ??= CreateContainer();
@@ -224,7 +224,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             if (_container == null)
             {
-                throw new InvalidOperationException("O motor ainda não foi executado neste cenário.");
+                throw new InvalidOperationException("The engine has not run in this scenario yet.");
             }
 
             return JObject.Parse(_container.GetInstance<IEnvelopeSerializer>().Serialize(envelope));

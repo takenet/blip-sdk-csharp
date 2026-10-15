@@ -262,7 +262,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
                 }
             }
 
-            throw new ArgumentException("Valor desconhecido pela checkout-api: " + value, parameterName);
+            throw new ArgumentException("Value unknown to checkout-api: " + value, parameterName);
         }
 
         private bool IsAuthorized(HttpRequestMessage request)

@@ -102,8 +102,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             var exception = Should.Throw<XunitException>(() => comparer.AssertMatches(REFERENCE_NAME, current.Json, current.Secrets));
 
             // Assert
-            exception.Message.ShouldContain("$.commands[0].uri: valor diferente");
-            exception.Message.ShouldContain(" 1 ponto(s)");
+            exception.Message.ShouldContain("$.commands[0].uri: different value");
+            exception.Message.ShouldContain(" 1 point(s)");
             exception.Message.ShouldNotContain("/payments/status");
             AssertNoSecret(exception.Message, recorded, current);
         }
@@ -129,11 +129,11 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             var exception = Should.Throw<XunitException>(() => comparer.AssertMatches(REFERENCE_NAME, current.Json, current.Secrets));
 
             // Assert
-            exception.Message.ShouldContain("$.commands[0].resource.amount: campo ausente na saída");
-            exception.Message.ShouldContain("$.commands[0].resource.installments: campo a mais na saída");
-            exception.Message.ShouldContain("$.commands[0].resource.paymentKey: tipo diferente (referência string, saída integer)");
-            exception.Message.ShouldContain("$.commands[0].metadata['#tunnel.owner']: campo a mais na saída");
-            exception.Message.ShouldContain("$.http: tamanho diferente (referência 1, saída 2)");
+            exception.Message.ShouldContain("$.commands[0].resource.amount: field missing from output");
+            exception.Message.ShouldContain("$.commands[0].resource.installments: extra field in output");
+            exception.Message.ShouldContain("$.commands[0].resource.paymentKey: different type (reference string, output integer)");
+            exception.Message.ShouldContain("$.commands[0].metadata['#tunnel.owner']: extra field in output");
+            exception.Message.ShouldContain("$.http: different size (reference 1, output 2)");
             AssertNoSecret(exception.Message, recorded, current);
         }
 
@@ -154,9 +154,9 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             var exception = Should.Throw<XunitException>(() => comparer.AssertMatches(REFERENCE_NAME, current.Json, current.Secrets));
 
             // Assert
-            exception.Message.ShouldContain("$.commands[0].resource.orderNumber: valor diferente");
-            exception.Message.ShouldContain("$.commands[0].resource.orderLabel: valor diferente");
-            exception.Message.ShouldContain(" 2 ponto(s)");
+            exception.Message.ShouldContain("$.commands[0].resource.orderNumber: different value");
+            exception.Message.ShouldContain("$.commands[0].resource.orderLabel: different value");
+            exception.Message.ShouldContain(" 2 point(s)");
             Canonical(recorded).ShouldContain("\"orderNumber\": 1712345678901");
             Canonical(recorded).ShouldContain("\"orderLabel\": \"pedido-1712345678901\"");
             AssertNoSecret(exception.Message, recorded, current);
@@ -175,7 +175,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             var exception = Should.Throw<XunitException>(() => comparer.AssertMatches(REFERENCE_NAME, current.Json, current.Secrets));
 
             // Assert
-            exception.Message.ShouldContain("'" + REFERENCE_NAME + "' ausente");
+            exception.Message.ShouldContain("'" + REFERENCE_NAME + "' missing");
             exception.Message.ShouldContain(ReferenceComparer.RECORD_VARIABLE + "=1");
             _referenceDirectory.GetFileSystemInfos().ShouldBeEmpty();
             AssertNoSecret(exception.Message, current, current);

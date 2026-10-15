@@ -32,7 +32,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             if (string.IsNullOrWhiteSpace(bucketId))
             {
-                throw new ArgumentException("O id do bucket é obrigatório.", nameof(bucketId));
+                throw new ArgumentException("The bucket id is required.", nameof(bucketId));
             }
 
             _buckets[bucketId] = value ?? throw new ArgumentNullException(nameof(value));

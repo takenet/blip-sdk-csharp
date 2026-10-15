@@ -46,12 +46,12 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         {
             if (string.IsNullOrWhiteSpace(referenceDirectory))
             {
-                throw new ArgumentException("A pasta de referências é obrigatória.", nameof(referenceDirectory));
+                throw new ArgumentException("The reference folder is required.", nameof(referenceDirectory));
             }
 
             if (record && string.IsNullOrWhiteSpace(recordDirectory))
             {
-                throw new ArgumentException("A pasta de gravação é obrigatória quando a gravação está ligada.", nameof(recordDirectory));
+                throw new ArgumentException("The record folder is required when recording is enabled.", nameof(recordDirectory));
             }
 
             _referenceDirectory = referenceDirectory;
@@ -92,7 +92,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         {
             if (name == null || !NAME_PATTERN.IsMatch(name))
             {
-                throw new ArgumentException("Nome de referência inválido: use minúsculas, dígitos e hífens.", nameof(name));
+                throw new ArgumentException("Invalid reference name: use lowercase letters, digits and hyphens.", nameof(name));
             }
 
             if (actual == null)
@@ -113,8 +113,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             if (!File.Exists(referencePath))
             {
                 throw new XunitException(
-                    "Referência '" + name + "' ausente em " + referencePath + ". Grave-a rodando o projeto principal com "
-                    + RECORD_VARIABLE + "=1, revise o conteúdo e versione em src/Take.Blip.Builder.PaymentBlock.Tests/"
+                    "Reference '" + name + "' missing at " + referencePath + ". Record it by running the main project with "
+                    + RECORD_VARIABLE + "=1, review the content and commit it under src/Take.Blip.Builder.PaymentBlock.Tests/"
                     + REFERENCES_FOLDER + "/.");
             }
 
@@ -139,7 +139,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             }
 
             throw new InvalidOperationException(
-                RECORD_VARIABLE + "=1 exige rodar o projeto principal dentro do repositório: " + PROJECT_FILE + " não foi encontrado acima de "
+                RECORD_VARIABLE + "=1 requires running the main project inside the repository: " + PROJECT_FILE + " was not found above "
                 + AppContext.BaseDirectory + ".");
         }
 #endif
@@ -148,7 +148,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         {
             if (expected.Type != actual.Type)
             {
-                differences.Add(path, "tipo diferente (referência " + TypeName(expected) + ", saída " + TypeName(actual) + ")");
+                differences.Add(path, "different type (reference " + TypeName(expected) + ", output " + TypeName(actual) + ")");
                 return;
             }
 
@@ -163,7 +163,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
                 default:
                     if (!JToken.DeepEquals(expected, actual))
                     {
-                        differences.Add(path, "valor diferente");
+                        differences.Add(path, "different value");
                     }
 
                     return;
@@ -181,7 +181,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
                 }
                 else
                 {
-                    differences.Add(propertyPath, "campo ausente na saída");
+                    differences.Add(propertyPath, "field missing from output");
                 }
             }
 
@@ -189,7 +189,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             {
                 if (!expected.ContainsKey(property.Name))
                 {
-                    differences.Add(ChildPath(path, property.Name), "campo a mais na saída");
+                    differences.Add(ChildPath(path, property.Name), "extra field in output");
                 }
             }
         }
@@ -198,8 +198,8 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         {
             if (expected.Count != actual.Count)
             {
-                differences.Add(path, "tamanho diferente (referência " + expected.Count.ToString(CultureInfo.InvariantCulture)
-                    + ", saída " + actual.Count.ToString(CultureInfo.InvariantCulture) + ")");
+                differences.Add(path, "different size (reference " + expected.Count.ToString(CultureInfo.InvariantCulture)
+                    + ", output " + actual.Count.ToString(CultureInfo.InvariantCulture) + ")");
             }
 
             var common = Math.Min(expected.Count, actual.Count);
@@ -239,9 +239,9 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             public string ToMessage(string name)
             {
                 var builder = new StringBuilder();
-                builder.Append("A saída do motor diverge da referência '").Append(name).Append("' em ")
+                builder.Append("The engine output differs from reference '").Append(name).Append("' at ")
                     .Append(Total.ToString(CultureInfo.InvariantCulture))
-                    .Append(" ponto(s); os valores não são impressos para não expor dado sensível:\n");
+                    .Append(" point(s); values are not printed to avoid exposing sensitive data:\n");
                 foreach (var line in _lines)
                 {
                     builder.Append("  - ").Append(line).Append('\n');
@@ -249,11 +249,11 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
 
                 if (Total > _lines.Count)
                 {
-                    builder.Append("  - ... e mais ").Append((Total - _lines.Count).ToString(CultureInfo.InvariantCulture)).Append('\n');
+                    builder.Append("  - ... and ").Append((Total - _lines.Count).ToString(CultureInfo.InvariantCulture)).Append(" more\n");
                 }
 
-                builder.Append("Se a mudança for esperada, regrave no projeto principal com ").Append(RECORD_VARIABLE)
-                    .Append("=1 e revise o diff antes de versionar.");
+                builder.Append("If the change is expected, re-record it in the main project with ").Append(RECORD_VARIABLE)
+                    .Append("=1 and review the diff before committing.");
                 return builder.ToString();
             }
         }

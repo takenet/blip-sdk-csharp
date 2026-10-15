@@ -39,7 +39,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             if (string.IsNullOrWhiteSpace(outputValue))
             {
-                throw new ArgumentException("O valor da saída é obrigatório.", nameof(outputValue));
+                throw new ArgumentException("The output value is required.", nameof(outputValue));
             }
 
             return EXIT_STATE_PREFIX + outputValue.ToLowerInvariant();
@@ -53,7 +53,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             if (!(ReadFixture(CONFIGURATIONS_FILE) is JArray rows))
             {
-                throw new InvalidDataException(CONFIGURATIONS_FILE + " deveria ser uma lista.");
+                throw new InvalidDataException(CONFIGURATIONS_FILE + " should be a list.");
             }
 
             foreach (var row in rows.Children<JObject>())
@@ -66,7 +66,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             }
 
             throw new ArgumentException(
-                "Configuração ausente em " + CONFIGURATIONS_FILE + ": " + configuration + " (feedback " + feedback + ").",
+                "Configuration missing from " + CONFIGURATIONS_FILE + ": " + configuration + " (feedback " + feedback + ").",
                 nameof(configuration));
         }
 
@@ -75,7 +75,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             if (string.IsNullOrWhiteSpace(referenceFlow))
             {
-                throw new ArgumentException("O fluxo de referência é obrigatório.", nameof(referenceFlow));
+                throw new ArgumentException("The reference flow is required.", nameof(referenceFlow));
             }
 
             if (configuration == null)
@@ -84,9 +84,9 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             }
 
             var model = ReadFixture(referenceFlow + STATE_FILE_SUFFIX)["model"]
-                        ?? throw new InvalidDataException(referenceFlow + STATE_FILE_SUFFIX + " sem a propriedade model.");
+                        ?? throw new InvalidDataException(referenceFlow + STATE_FILE_SUFFIX + " has no model property.");
             var state = ResolveFixtureReferences(model.DeepClone()) as JObject
-                        ?? throw new InvalidDataException("O model do estado deveria ser um objeto.");
+                        ?? throw new InvalidDataException("The state model should be an object.");
 
             ApplyConfiguration(state["inputActions"] as JArray, configuration);
 
@@ -109,13 +109,13 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             if (inputActions == null)
             {
-                throw new InvalidDataException("O estado do bloco não tem inputActions.");
+                throw new InvalidDataException("The block state has no inputActions.");
             }
 
             foreach (var variable in CONFIGURATION_VARIABLES)
             {
                 var value = configuration[variable]
-                            ?? throw new InvalidDataException("A linha de configuração não tem " + variable + ".");
+                            ?? throw new InvalidDataException("The configuration row has no " + variable + ".");
                 FindSetVariableSettings(inputActions, variable)["value"] = value.ToString(Formatting.None);
             }
         }
@@ -132,7 +132,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
                 }
             }
 
-            throw new InvalidDataException("O bloco não tem o SetVariable de " + variable + ".");
+            throw new InvalidDataException("The block has no SetVariable for " + variable + ".");
         }
 
         private static JObject CreateEntryState(string blockStateId) => new JObject
@@ -216,7 +216,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
             var path = Path.Combine(AppContext.BaseDirectory, FIXTURES_FOLDER, fileName);
             if (!File.Exists(path))
             {
-                throw new FileNotFoundException("Fixture ausente na saída do build: " + fileName, path);
+                throw new FileNotFoundException("Fixture missing from the build output: " + fileName, path);
             }
 
             using (var reader = new JsonTextReader(File.OpenText(path)) { DateParseHandling = DateParseHandling.None })

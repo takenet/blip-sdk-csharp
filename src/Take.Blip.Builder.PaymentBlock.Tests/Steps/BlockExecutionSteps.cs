@@ -106,12 +106,12 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
                 }
             }
 
-            reads.Count.ShouldBe(1, "leituras do bucket " + bucketId + ". Sequência: " + Describe(interactions));
+            reads.Count.ShouldBe(1, "reads of bucket " + bucketId + ". Sequence: " + Describe(interactions));
             var metadata = ((Command)reads[0].Envelope).Metadata;
-            metadata.ShouldNotBeNull("o comando do bucket saiu sem metadados");
-            metadata.TryGetValue(SEND_TO_SERVER_METADATA, out var sendToServer).ShouldBeTrue("o comando do bucket saiu sem " + SEND_TO_SERVER_METADATA);
+            metadata.ShouldNotBeNull("the bucket command was sent without metadata");
+            metadata.TryGetValue(SEND_TO_SERVER_METADATA, out var sendToServer).ShouldBeTrue("the bucket command was sent without " + SEND_TO_SERVER_METADATA);
             sendToServer.ShouldBe("true");
-            FirstHttp(interactions).ShouldBeGreaterThan(reads[0].Sequence, "o bucket deveria ser lido antes de qualquer chamada HTTP");
+            FirstHttp(interactions).ShouldBeGreaterThan(reads[0].Sequence, "the bucket should be read before any HTTP call");
         }
 
         /// <summary>Checks the call to the checkout-auth-api with the bucket secret, after the bucket read.</summary>
@@ -120,12 +120,12 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         {
             var interactions = AssertEngineCompleted();
             var calls = HttpCalls(interactions, SyntheticData.AUTH_HOST, SimulatedHttpClient.AUTH_TOKEN_PATH, POST);
-            calls.Count.ShouldBeGreaterThan(0, "nenhuma chamada à checkout-auth-api. Sequência: " + Describe(interactions));
+            calls.Count.ShouldBeGreaterThan(0, "no call to checkout-auth-api. Sequence: " + Describe(interactions));
             var first = calls[0];
-            first.Sequence.ShouldBeGreaterThan(BucketReadSequence(interactions), "a checkout-auth-api foi chamada antes da leitura do bucket");
+            first.Sequence.ShouldBeGreaterThan(BucketReadSequence(interactions), "checkout-auth-api was called before the bucket was read");
             _harness.IsBucketSecret((string)JObject.Parse(first.HttpRequestBody)["secret"])
-                .ShouldBeTrue("a checkout-auth-api não recebeu o segredo lido do bucket");
-            first.HttpStatus.ShouldBe(200, "a checkout-auth-api simulada não emitiu o token");
+                .ShouldBeTrue("checkout-auth-api did not receive the secret read from the bucket");
+            first.HttpStatus.ShouldBe(200, "the simulated checkout-auth-api did not issue the token");
         }
 
         /// <summary>Checks the link creation in the checkout-api with the issued token, after the checkout-auth-api.</summary>
@@ -134,12 +134,12 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         {
             var interactions = AssertEngineCompleted();
             var purchases = HttpCalls(interactions, SyntheticData.CHECKOUT_HOST, SimulatedHttpClient.PURCHASE_PATH, POST);
-            purchases.Count.ShouldBe(1, "criações de link na checkout-api. Sequência: " + Describe(interactions));
+            purchases.Count.ShouldBe(1, "link creations on checkout-api. Sequence: " + Describe(interactions));
             var purchase = purchases[0];
-            purchase.Sequence.ShouldBeGreaterThan(FirstAuthSequence(interactions), "a checkout-api foi chamada antes da checkout-auth-api");
-            purchase.HttpRequestHeaders.TryGetValue("Authorization", out var authorization).ShouldBeTrue("a checkout-api foi chamada sem Authorization");
+            purchase.Sequence.ShouldBeGreaterThan(FirstAuthSequence(interactions), "checkout-api was called before checkout-auth-api");
+            purchase.HttpRequestHeaders.TryGetValue("Authorization", out var authorization).ShouldBeTrue("checkout-api was called without Authorization");
             string.Equals(authorization, BEARER_PREFIX + _harness.HttpClient.BotToken, StringComparison.Ordinal)
-                .ShouldBeTrue("a checkout-api não recebeu o token emitido pela checkout-auth-api");
+                .ShouldBeTrue("checkout-api did not receive the token issued by checkout-auth-api");
             purchase.HttpStatus.ShouldBe(200);
         }
 
@@ -149,9 +149,9 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         {
             var interactions = AssertEngineCompleted();
             var cards = OrderCards(interactions);
-            cards.Count.ShouldBe(1, "cartões de pedido enviados. Sequência: " + Describe(interactions));
+            cards.Count.ShouldBe(1, "order cards sent. Sequence: " + Describe(interactions));
             var (interaction, content) = cards[0];
-            interaction.Sequence.ShouldBeGreaterThan(PurchaseSequence(interactions), "o cartão saiu antes da criação do link");
+            interaction.Sequence.ShouldBeGreaterThan(PurchaseSequence(interactions), "the card was sent before the link was created");
             interaction.Envelope.To.ToIdentity().ShouldBe(Identity.Parse(SyntheticData.USER_IDENTITY));
             PaymentLinks(content).ShouldBe(new[] { SyntheticData.PAYMENT_LINK });
         }
@@ -161,7 +161,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         public void ThenNoOrderCardIsSent()
         {
             var interactions = _harness.Interactions;
-            OrderCards(interactions).Count.ShouldBe(0, "cartões de pedido enviados. Sequência: " + Describe(interactions));
+            OrderCards(interactions).Count.ShouldBe(0, "order cards sent. Sequence: " + Describe(interactions));
         }
 
         /// <summary>
@@ -173,14 +173,14 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         {
             var interactions = AssertEngineCompleted();
             var purchases = HttpCalls(interactions, SyntheticData.CHECKOUT_HOST, SimulatedHttpClient.PURCHASE_PATH, POST);
-            purchases.Count.ShouldBeGreaterThan(0, "nenhuma criação de link na checkout-api. Sequência: " + Describe(interactions));
+            purchases.Count.ShouldBeGreaterThan(0, "no link creation on checkout-api. Sequence: " + Describe(interactions));
             foreach (var purchase in purchases)
             {
-                purchase.HttpStatus.ShouldBe(500, "a checkout-api simulada deveria falhar na criação do link");
+                purchase.HttpStatus.ShouldBe(500, "the simulated checkout-api should fail to create the link");
             }
 
-            _harness.UserStateId.ShouldBe(FlowAssembler.ExitStateId(ERROR_OUTPUT), "o motor não levou o cliente à saída de erro do bloco");
-            PaymentEventErrorStatus().ShouldBe(ERROR_OUTPUT, "o motor não registrou o evento de pagamento com a falha");
+            _harness.UserStateId.ShouldBe(FlowAssembler.ExitStateId(ERROR_OUTPUT), "the engine did not take the client to the block error output");
+            PaymentEventErrorStatus().ShouldBe(ERROR_OUTPUT, "the engine did not track the payment event with the failure");
         }
 
         /// <summary>
@@ -193,17 +193,17 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         {
             var interactions = _harness.Interactions;
             var purchases = HttpCalls(interactions, SyntheticData.CHECKOUT_HOST, SimulatedHttpClient.PURCHASE_PATH, POST);
-            purchases.Count.ShouldBe(1, "criações de link na checkout-api. Sequência: " + Describe(interactions));
+            purchases.Count.ShouldBe(1, "link creations on checkout-api. Sequence: " + Describe(interactions));
             var purchase = purchases[0];
             var limit = _harness.ScriptTimeout + TIMEOUT_TOLERANCE;
-            limit.ShouldBeLessThan(_harness.HttpClient.CheckoutApiDelay, "a tolerância precisa ficar abaixo da demora simulada");
-            purchase.HttpCancelled.ShouldBeTrue("a criação do link respondeu em vez de ser interrompida. Sequência: " + Describe(interactions));
-            purchase.HttpElapsed.ShouldBeLessThan(limit, "a criação do link não foi interrompida pelo tempo máximo de script");
+            limit.ShouldBeLessThan(_harness.HttpClient.CheckoutApiDelay, "the tolerance must stay below the simulated delay");
+            purchase.HttpCancelled.ShouldBeTrue("the link creation responded instead of being interrupted. Sequence: " + Describe(interactions));
+            purchase.HttpElapsed.ShouldBeLessThan(limit, "the link creation was not interrupted by the script timeout");
         }
 
         private IReadOnlyList<BuilderEngineHarness.Interaction> AssertEngineCompleted()
         {
-            _harness.EngineFailure.ShouldBeNull("o motor terminou com " + _harness.EngineFailure?.GetType().Name);
+            _harness.EngineFailure.ShouldBeNull("the engine finished with " + _harness.EngineFailure?.GetType().Name);
             return _harness.Interactions;
         }
 
@@ -218,20 +218,20 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
                 }
             }
 
-            throw new ShouldAssertException("o bucket " + _bucketId + " não foi lido");
+            throw new ShouldAssertException("bucket " + _bucketId + " was not read");
         }
 
         private static int FirstAuthSequence(IReadOnlyList<BuilderEngineHarness.Interaction> interactions)
         {
             var calls = HttpCalls(interactions, SyntheticData.AUTH_HOST, SimulatedHttpClient.AUTH_TOKEN_PATH, POST);
-            calls.Count.ShouldBeGreaterThan(0, "nenhuma chamada à checkout-auth-api");
+            calls.Count.ShouldBeGreaterThan(0, "no call to checkout-auth-api");
             return calls[0].Sequence;
         }
 
         private static int PurchaseSequence(IReadOnlyList<BuilderEngineHarness.Interaction> interactions)
         {
             var calls = HttpCalls(interactions, SyntheticData.CHECKOUT_HOST, SimulatedHttpClient.PURCHASE_PATH, POST);
-            calls.Count.ShouldBeGreaterThan(0, "nenhuma criação de link na checkout-api");
+            calls.Count.ShouldBeGreaterThan(0, "no link creation on checkout-api");
             return calls[0].Sequence;
         }
 
@@ -333,7 +333,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
                 {
                     text.Append(' ').Append(interaction.HttpMethod)
                         .Append(' ').Append(interaction.HttpUri.Host).Append(interaction.HttpUri.AbsolutePath)
-                        .Append(" -> ").Append(interaction.HttpCancelled ? "cancelada" : interaction.HttpStatus?.ToString());
+                        .Append(" -> ").Append(interaction.HttpCancelled ? "cancelled" : interaction.HttpStatus?.ToString());
                 }
                 else if (interaction.Envelope is Command command)
                 {

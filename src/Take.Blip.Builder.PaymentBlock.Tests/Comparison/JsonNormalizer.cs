@@ -85,7 +85,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
                 {
                     if (reader.TokenType != JsonToken.Comment)
                     {
-                        throw new JsonReaderException("Conteúdo além do fim do JSON.");
+                        throw new JsonReaderException("Content after the end of the JSON.");
                     }
                 }
 
@@ -126,7 +126,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             {
                 if (secret == null || secret.Length < MIN_RUN_SECRET_LENGTH)
                 {
-                    throw new ArgumentException("Todo segredo de execução precisa ter ao menos 8 caracteres.", nameof(runSecrets));
+                    throw new ArgumentException("Every run secret must have at least 8 characters.", nameof(runSecrets));
                 }
 
                 if (!secrets.Contains(secret))

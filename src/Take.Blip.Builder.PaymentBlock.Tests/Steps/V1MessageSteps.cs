@@ -93,7 +93,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
 
         private void AssertSingleMessageMatches(string reference, List<JObject> messages)
         {
-            messages.Count.ShouldBe(1, "mensagens enviadas ao cliente pelo bloco");
+            messages.Count.ShouldBe(1, "messages sent to the client by the block");
             ReferenceComparer.FromBuildOutput().AssertMatches(reference, messages[0], _harness.RunSecrets);
         }
 
@@ -113,7 +113,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
 
         private void AssertEngineCompleted()
         {
-            _harness.EngineFailure.ShouldBeNull("o motor terminou com " + _harness.EngineFailure?.GetType().Name);
+            _harness.EngineFailure.ShouldBeNull("the engine finished with " + _harness.EngineFailure?.GetType().Name);
         }
     }
 }
