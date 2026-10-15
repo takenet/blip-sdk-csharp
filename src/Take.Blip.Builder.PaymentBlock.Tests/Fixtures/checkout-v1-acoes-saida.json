@@ -1,0 +1,701 @@
+[
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [],
+    "settings": {
+      "function": "run",
+      "source": "function run(paymentStatusFeedbackTime, inputCheckout, customerCardsResponse, checkoutRequest) {\n\n            const regexOutraForma = /outra\\s+forma/i;\n            const regexCartaoFinal = /cart[a\\u00e3]o\\s+final/i;\n\n    paymentStatusFeedbackTime = Number(paymentStatusFeedbackTime);\n    const customerCards =  typeof customerCardsResponse === 'string' ? JSON.parse(customerCardsResponse) : null;        \n    checkoutRequest = JSON.parse(checkoutRequest);\n        \n\tif(checkoutRequest.step === 'link') {\n\t\treturn paymentStatusFeedbackTime;\n\t}\t\t\n\n\tif (paymentStatusFeedbackTime <= 0 || (checkoutRequest.step === 'wait' && inputCheckout && !regexOutraForma.test(inputCheckout) || inputCheckout && regexCartaoFinal.test(inputCheckout))) {\n\t\treturn 0;\n\t}\n\n\treturn paymentStatusFeedbackTime - 1;\n}",
+      "inputVariables": [
+        "paymentStatusFeedbackTime",
+        "inputCheckout",
+        "customerCardsResponse",
+        "checkoutRequest"
+      ],
+      "outputVariable": "paymentStatusFeedbackTime"
+    },
+    "$title": "[FEEDBACK][UPDATE] Decrement Timer",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link",
+          "noCheckout"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "function run(configurationData, customizeData, paymentMethodData, checkoutResponse, customerCardsResponse, inputCheckout, checkoutRequest) {\n    \n    // Função auxiliar para parse robusto de JSON (com ou sem JSON.stringify)\n    const safeJsonParse = (data) => {\n        if (!data) return null;\n        \n        // Se já é objeto, retorna diretamente\n        if (typeof data === 'object') return data;\n        \n        try {\n            // Primeiro parse (JSON normal)\n            let parsed = JSON.parse(data);\n            \n            // Se ainda for string, tenta segundo parse (caso JSON.stringify duplo)\n            if (typeof parsed === 'string') {\n                parsed = JSON.parse(parsed);\n            }\n            \n            return parsed;\n        } catch (e) {\n            // Tratamento específico para formato Blip\n            try {\n                // Verifica se tem o padrão típico do erro do Blip\n                if (data.includes('\"items\":\"[{') && data.includes('}]\"')) {\n                    // Extrai os componentes manualmente usando regex\n                    const refMatch = data.match(/\"referenceId\":\"([^\"]+)\"/);\n                    const typeMatch = data.match(/\"productType\":\"([^\"]+)\"/);\n                    const valueMatch = data.match(/\"value\":\"([^\"]*)\"/);\n                    \n                    // Extrai e corrige o campo items\n                    const itemsMatch = data.match(/\"items\":\"(\\[.*?\\])\"/);\n                    \n                    if (refMatch && typeMatch && itemsMatch) {\n                        return {\n                            referenceId: refMatch[1],\n                            productType: typeMatch[1],\n                            items: itemsMatch[1],\n                            value: valueMatch ? valueMatch[1] : \"\"\n                        };\n                    }\n                }\n                \n                // Se não conseguiu aplicar o fix específico, tenta outras abordagens\n                const unescaped = data.replace(/\\\"/g, '\"');\n                return JSON.parse(unescaped);\n                \n            } catch (e2) {\n                return null;\n            }\n        }\n    };\n\n    // Verificar se deve mostrar order details:\n    // 1. Usuário não tem cartão salvo, OU\n    // 2. Usuário escolheu Outra forma (ACCESS_PAYMENT_LINK)\n    \n    let shouldShowOrderDetails = false;\n    \n    // Verificar se não tem cartão salvo\n    let hasCard = false;\n    try {\n        const cardData = safeJsonParse(customerCardsResponse);\n        hasCard = cardData && cardData.hasSavedCard === true;\n    } catch (e) {\n        hasCard = false;\n    }\n    \n    if (!hasCard) {\n        shouldShowOrderDetails = true;\n    }\n    \n    // Processar order details normalmente\n    let productType = \"digital\";\n    let referenceId = \"\";\n    let items = [];\n\n    checkoutResponse = safeJsonParse(checkoutResponse);\n\n    try {\n        const configData = safeJsonParse(configurationData);\n        \n        if (configData && configData.items) {\n            let itemsArray = [];\n            \n            // Se items já for um array, usa diretamente\n            if (Array.isArray(configData.items)) {\n                itemsArray = configData.items;\n            }\n            // Se items for uma string JSON, faz o parse\n            else if (typeof configData.items === \"string\") {\n                try {\n                    itemsArray = JSON.parse(configData.items);\n                } catch (e) {\n                    itemsArray = [];\n                }\n            }\n            \n            if (Array.isArray(itemsArray) && itemsArray.length > 0) {\n                itemsArray.forEach(item => {\n                    items.push({\n                        retailer_id: item.retailer_product_id || item.retailer_id || \"\",\n                        name: item.name || \"\",\n                        amount: {\n                            value: Math.round((item.amount.value || 0) * 100),\n                            offset: 100\n                        },\n                        quantity: item.quantity || 1\n                    });\n                });\n\n                referenceId = configData.referenceId || \"\";\n                productType = configData.productType || \"digital\";\n            }\n        } else {\n            // Fallback para processamento por regex (formato legacy)\n            const refMatch = configurationData && configurationData.match(/\"referenceId\"\\s*:\\s*\"([^\"]+)\"/);\n            const typeMatch = configurationData && configurationData.match(/\"productType\"\\s*:\\s*\"([^\"]+)\"/);\n\n            referenceId = refMatch ? refMatch[1] : \"\";\n            productType = typeMatch ? typeMatch[1] : \"digital\";\n\n            const itemsMatch = configurationData && configurationData.match(/\"items\"\\s*:\\s*\"(.+?)\"/s);\n\n            if (itemsMatch) {\n                let itemsStr = itemsMatch[1];\n                \n                try {\n                    // Tentar parse direto da string JSON\n                    const itemsArray = JSON.parse(itemsStr);\n                    if (Array.isArray(itemsArray)) {\n                        itemsArray.forEach(item => {\n                            items.push({\n                                retailer_id: item.retailer_product_id || item.retailer_id || \"\",\n                                name: item.name || \"\",\n                                amount: {\n                                    value: Math.round((item.amount.value || 0) * 100),\n                                    offset: 100\n                                },\n                                quantity: item.quantity || 1\n                            });\n                        });\n                    }\n                } catch (e) {\n                    // Se falhar, usar a lógica de regex original\n                    itemsStr = itemsStr.replace(/\\\"/g, '\"').replace(/\"/g, '\"');\n\n                    const objectRegex = /{[^{}]*{[^{}]*}[^{}]*}/g;\n                    const matches = itemsStr.match(objectRegex);\n\n                    if (matches) {\n                        for (let i = 0; i < matches.length; i++) {\n                            const part = matches[i].trim();\n\n                            const retailerMatch = part.match(/\"retailer_product_id\"\\s*:\\s*\"([^\"]+)\"/) || part.match(/\"retailer_id\"\\s*:\\s*\"([^\"]+)\"/);\n                            const nameMatch = part.match(/\"name\"\\\\s*:\\\\s*\"([^\"]+)\"/);\n                            const valueMatch = part.match(/\"value\"\\s*:\\s*(\\d+)/);\n                            const quantityMatch = part.match(/\"quantity\"\\\\s*:\\\\s*(\\\\d+)/);\n\n                            if (retailerMatch && nameMatch && valueMatch && quantityMatch) {\n                                items.push({\n                                    retailer_id: retailerMatch[1],\n                                    name: nameMatch[1],\n                                    amount: {\n                                        value: parseInt(valueMatch[1]),\n                                        offset: 100\n                                    },\n                                    quantity: parseInt(quantityMatch[1])\n                                });\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    } catch (e) {\n        items = [];\n    }\n\n    let totalValue = 0;\n    for (let i = 0; i < items.length; i++) {\n        totalValue += items[i].amount.value * items[i].quantity;\n    }\n\n    let textBody = \"\";\n    let textFooter = \"\";\n    try {\n        const customData = safeJsonParse(customizeData);\n        if (customData) {\n            textBody = customData.textBody || \"\";\n            textFooter = customData.textFooter || \"\";\n        }\n    } catch (e) {}\n\n    const mapKeyType = (keyType) => {\n        const map = {\n            'cpf': 'CPF',\n            'cnpj': 'CNPJ',\n            'email': 'EMAIL',\n            'telefone': 'PHONE',\n            'random': 'RANDOM_KEY'\n        };\n        return map[(keyType || '').toLowerCase()] || (keyType || 'EMAIL').toUpperCase();\n    };\n\n    let paymentSettings = [];\n\n    var paymentProcessError = null;\n\n    try {\n        const paymentData = safeJsonParse(paymentMethodData);\n        \n        if (paymentData) {\n            const processMethod = (method) => {\n                if (!method || !method.type) return;\n\n                if (method.type === \"pixcopycode\" && method.config && method.config.provider === \"own\") {\n                    paymentSettings.push({\n                        type: \"pix_dynamic_code\",\n                        pix_dynamic_code: {\n                            code: method.config.pixCode || \"\",\n                            merchant_name: method.config.business || \"\",\n                            key: method.config.pixKey || method.config.business || \"\",\n                            key_type: mapKeyType(method.config.keyType || \"email\")\n                        }\n                    });\n                }\n                else if (method.type === \"pixcopycode\" && method.config && method.config.provider === \"checkout\") {\n                    // Tentar extrair o código PIX de diferentes campos possíveis na resposta do checkout\n                    var pixCode = \"\";\n                    if (checkoutResponse && checkoutResponse.status === \"created\") {\n                        pixCode = checkoutResponse.pixQrCodeText\n                            || (checkoutResponse.rawApiResponse && (\n                                checkoutResponse.rawApiResponse.pixQrCodeText\n                                || (checkoutResponse.rawApiResponse.pix && checkoutResponse.rawApiResponse.pix.qrCodeText)\n                                || checkoutResponse.rawApiResponse.pixCode\n                                || (checkoutResponse.rawApiResponse.pix && checkoutResponse.rawApiResponse.pix.copyAndPaste)\n                            ))\n                            || \"\";\n                    }\n                    if (!pixCode) {\n                        paymentProcessError = 'PIX_CODE_EMPTY: Checkout API did not return a PIX code. checkoutStatus=' + (checkoutResponse ? checkoutResponse.status : 'null');\n                        return;\n                    }\n                    paymentSettings.push({\n                        type: \"pix_dynamic_code\",\n                        pix_dynamic_code: {\n                            code: pixCode,\n                            merchant_name: checkoutResponse.pixName || \"\",\n                            key: checkoutResponse.pixKey || \"\",\n                            key_type: \"CNPJ\"\n                        }\n                    });\n                }\n                else if (method.type === \"paymentlink\" && method.config) {\n                    if (method.config.provider === \"own\") {\n                        paymentSettings.push({\n                            type: \"payment_link\",\n                            payment_link: {\n                                uri: method.config.httpsLink || method.config.paymentUrl || \"\"\n                            }\n                        });\n                    }\n                    else if (method.config.provider === \"checkout\") {\n                        let checkoutLink = \"\";\n                        if (checkoutResponse && checkoutResponse.link && checkoutResponse.status === \"created\") {\n                            checkoutLink = checkoutResponse.link;\n                        }\n                        \n                        const checkoutSettings = {\n                            type: \"payment_link\",\n                            payment_link: {\n                                uri: checkoutLink || \"#\"\n                            }\n                        };                        \n\n                        paymentSettings.push(checkoutSettings);\n                    }\n                }\n                else if (method.type === \"boleto\" && method.config && method.config.provider === \"own\") {\n                    paymentSettings.push({\n                        type: \"boleto\",\n                        boleto: {\n                            digitable_line: method.config.boletoCode || \"\"\n                        }\n                    });\n                }\n            };\n\n            processMethod(paymentData.method1);\n            if (paymentProcessError) {\n                return JSON.stringify({ status: 'Error', result: paymentProcessError });\n            }\n\n            if (paymentData.showMethod2) {\n                processMethod(paymentData.method2);\n                if (paymentProcessError) {\n                    return JSON.stringify({ status: 'Error', result: paymentProcessError });\n                }\n            }\n        }\n    } catch (e) {\n        paymentSettings = [];\n    }\n        \n    const parsedJSON = {\n        type: \"interactive\",\n        interactive: {\n            type: \"order_details\",\n            body: {\n                text: textBody || \"Detalhes do seu pedido:\"\n            },\n            action: {\n                name: \"review_and_pay\",\n                parameters: {\n                    reference_id: referenceId || \"REF\" + Date.now(),\n                    type: productType === \"fisico\" ? \"physical-goods\" : \"digital-goods\",\n                    payment_type: \"br\",\n                    currency: \"BRL\",\n                    total_amount: {\n                        value: totalValue,\n                        offset: 100\n                    },\n                    order: {\n                        status: \"pending\",\n                        items: items,\n                        subtotal: {\n                            value: totalValue,\n                            offset: 100\n                        }\n                    },\n                    payment_settings: paymentSettings\n                }\n            }\n        }\n    };\n\n    if (textFooter) {\n        parsedJSON.interactive.footer = { text: textFooter };\n    }\n\n    const isValidCPF = function(cpf) {\n        const cleaned = cpf.replace(/\\D/g, '');\n        return (\n            /^\\d{11}$/.test(cleaned) &&\n            !new RegExp('(\\d)\\1{10}').test(cleaned)\n        );\n    };\n    const isValidCNPJ = function(cnpj) {\n        const cleaned = cnpj.replace(/\\D/g, '');\n        return (\n            /^\\d{14}$/.test(cleaned) &&\n            !new RegExp('(\\d)\\1{13}').test(cleaned)\n        );\n    };\n    const isValidEmail = (email) => {\n        return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n    };\n    const isValidLink = (url) => {\n        const cleaned = (url || '').trim();\n        // Permitir links vazios, \"#\" ou links válidos\n        if (cleaned === \"\" || cleaned === \"#\") return true;\n        const regex = /^(https?:\\/\\/)(?!javascript:|data:)(?:[A-Za-z0-9-._~%]+@)?(?:(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z]{2,}|localhost|\\d{1,3}(?:\\.\\d{1,3}){3})(?::\\d{2,5})?(?:[\\/\\?#][^\\s]*)?$/i;\n        return regex.test(cleaned);\n    };\n    const isValidBoleto = (boleto) => {\n        const cleaned = boleto.replace(/\\D/g, '');\n        return /^\\d{47,48}$/.test(cleaned);\n    };\n\n    // Validar estrutura básica\n    if (!parsedJSON.interactive || !parsedJSON.interactive.action || !parsedJSON.interactive.action.parameters) {\n        return JSON.stringify({ status: 'Error', result: 'ORDER DETAILS JSON STRUCTURE ERROR' });\n    }                            \n\n    // Garantir corpo de texto não-vazio (obrigatório para WhatsApp)\n    if (!parsedJSON.interactive.body || !parsedJSON.interactive.body.text) {\n        parsedJSON.interactive.body = { text: \"Detalhes do seu pedido:\" };\n    }\n\n    const params = parsedJSON.interactive.action.parameters;\n\n    // Validar referência\n    if (!params.reference_id || params.reference_id.trim() === \"\") {\n        return JSON.stringify({ status: 'Error', result: 'ORDER REFERENCE ERROR' });\n    }\n\n    // Validar itens do pedido\n    if (!params.order || !Array.isArray(params.order.items) || params.order.items.length === 0) {\n        return JSON.stringify({ status: 'Error', result: 'ORDER ITEMS ERROR' });\n    }\n\n    // Validar métodos de pagamento\n    if (!Array.isArray(params.payment_settings) || params.payment_settings.length === 0) {\n        return JSON.stringify({ status: 'Error', result: 'PAYMENT SETTINGS ERROR' });\n    }\n\n    // Validar payment_settings\n    if (parsedJSON.interactive && parsedJSON.interactive.action && parsedJSON.interactive.action.parameters) {\n        const params = parsedJSON.interactive.action.parameters;\n        if (Array.isArray(params.payment_settings)) {\n            for (let i = 0; i < params.payment_settings.length; i++) {\n                const setting = params.payment_settings[i];\n                if (setting.type === 'payment_link' && setting.payment_link) {\n                    // Só validar link se não for vazio ou \"#\"\n                    const uri = setting.payment_link.uri || '';\n                    if (uri !== '' && uri !== '#' && !isValidLink(uri)) {\n                        return JSON.stringify({ status: 'Error', result: 'PAYMENT LINK ERROR: ' + uri });\n                    }\n                } else if (setting.type === 'pix_dynamic_code' && setting.pix_dynamic_code) {\n                    const keyType = (setting.pix_dynamic_code.key_type || '').toUpperCase();\n                    const key = setting.pix_dynamic_code.key || '';\n                    // Só validar se a chave não estiver vazia\n                    if (key) {\n                        if (keyType === 'CPF' && !isValidCPF(key)) {\n                            return JSON.stringify({ status: 'Error', result: 'CPF ERROR: ' + key });\n                        } else if (keyType === 'CNPJ' && !isValidCNPJ(key)) {\n                            return JSON.stringify({ status: 'Error', result: 'CNPJ ERROR: ' + key });\n                        } else if (keyType === 'EMAIL' && !isValidEmail(key)) {\n                            return JSON.stringify({ status: 'Error', result: 'EMAIL ERROR: ' + key });\n                        }\n                    }\n                } else if (setting.type === 'boleto' && setting.boleto) {\n                    const boletoCode = setting.boleto.digitable_line || '';\n                    // Só validar se o código não estiver vazio\n                    if (boletoCode && !isValidBoleto(boletoCode)) {\n                        return JSON.stringify({ status: 'Error', result: 'BOLETO ERROR: ' + boletoCode });\n                    }\n                }\n            }\n        }\n    }\n\n    return JSON.stringify(parsedJSON, null, 2);\n}",
+      "inputVariables": [
+        "configurationData",
+        "customizeData",
+        "paymentMethodData",
+        "checkoutResponse",
+        "customerCardsResponse",
+        "inputCheckout",
+        "checkoutRequest"
+      ],
+      "outputVariable": "orderDetailsJSON"
+    },
+    "$title": "[WHATSAPP][GENERATE] Order Details",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "settings": {
+      "function": "run",
+      "source": "function run(orderDetailsJSON, inputCheckout, paymentMethodData, paymentStatusFeedbackTime, customerCardsResponse) {\n                      try {\n                            const regexUnexpectedInput = /^(?!.*(?:cart[a\\u00e3]o\\s+final|outra\\s+forma)).*$/i;\n                            const regexOutraForma = /outra\\s+forma/i;\n                            const regexCartaoFinal = /cart[a\\u00e3]o\\s+final/i;\n                            paymentMethodData = JSON.parse(paymentMethodData);                           \n\n                            const customerCards =  typeof customerCardsResponse === 'string' ? JSON.parse(customerCardsResponse) : null;            \n\n                            if((((paymentMethodData.method1 && (paymentMethodData.method1.type === \"paymentlink\" || paymentMethodData.method1.type === \"pixcopycode\") && paymentMethodData.method1.config.provider === \"checkout\")) || \n                               (paymentMethodData.method2 && (paymentMethodData.method2.type === \"paymentlink\" || paymentMethodData.method2.type === \"pixcopycode\") && paymentMethodData.method2.config.provider === \"checkout\")) &&                                 \n                                (inputCheckout && regexUnexpectedInput.test(inputCheckout) ) && customerCards && customerCards.hasSavedCard === true) {\n                                    return 'UnexpectedInput';\n                            }\n\n                             if (!orderDetailsJSON) {\n                                return '';\n                            }\n\n                            // Verificar se o generate script retornou um erro (ex: PIX_CODE_EMPTY)\n                            // Isso deve ser checado ANTES do Loopback para não enviar JSON inválido ao WhatsApp\n                            try {\n                                var quickCheck = JSON.parse(orderDetailsJSON);\n                                if (quickCheck && quickCheck.status === 'Error') {\n                                    return 'Error';\n                                }\n                            } catch (qe) { /* ignorar parse error aqui, será tratado abaixo */ }\n\n                            if(inputCheckout && regexCartaoFinal.test(inputCheckout)) {\n                                return 'WithoutComponent';\n                            } \n\n                            if(inputCheckout && regexOutraForma.test(inputCheckout) || paymentStatusFeedbackTime > 0) {\n                                return 'Loopback';\n                            }                                                       \n\n                            const parsedJSON = JSON.parse(orderDetailsJSON);                          \n\n                            if (\n                                parsedJSON.type === \"interactive\" &&\n                                parsedJSON.interactive &&\n                                parsedJSON.interactive.type === \"order_details\"\n                            ) {\n                                return 'Success';\n                            }\n\n                            return 'Error';\n                        } catch (e) {\n                            return 'Error';\n                        }\n                    }",
+      "inputVariables": [
+        "orderDetailsJSON",
+        "inputCheckout",
+        "paymentMethodData",
+        "paymentStatusFeedbackTime",
+        "customerCardsResponse"
+      ],
+      "outputVariable": "paymentGenerateComponent"
+    },
+    "$title": "[WHATSAPP][VALIDATE] Order Details",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SendRawMessage",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "paymentGenerateComponent",
+        "comparison": "equals",
+        "values": [
+          "Success",
+          "Loopback"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "inputCheckout",
+        "comparison": "matches",
+        "values": [
+          "^(?!.*(?:[cC]art[aA\\u00e3\\u00c3]o\\s+[fF]inal)).*$"
+        ]
+      }
+    ],
+    "settings": {
+      "type": "application/json",
+      "rawContent": "{{orderDetailsJSON}}",
+      "metadata": {}
+    },
+    "$title": "[WHATSAPP][SEND] Order Details",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SendRawMessage",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "paymentGenerateComponent",
+        "comparison": "equals",
+        "values": [
+          "Success",
+          "Loopback"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "noCheckout"
+        ]
+      }
+    ],
+    "settings": {
+      "type": "application/json",
+      "rawContent": "{{orderDetailsJSON}}",
+      "metadata": {}
+    },
+    "$title": "[WHATSAPP][SEND] Order Details - No Checkout",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "function run(checkoutRequest) {\n\t\n\t\n\tcheckoutRequest = JSON.parse(checkoutRequest);\n\tcheckoutRequest.step = \"wait\";\n\treturn JSON.stringify(checkoutRequest);\n}",
+      "inputVariables": [
+        "checkoutRequest"
+      ],
+      "outputVariable": "checkoutRequest"
+    },
+    "$title": "[CHECKOUT][SET] Step Wait",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SendRawMessage",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "input.content",
+        "comparison": "matches",
+        "values": [
+          ".*(?:[cC]art[aA\\u00e3\\u00c3]o\\s+[fF]inal).*"
+        ]
+      }
+    ],
+    "settings": {
+      "type": "text/plain",
+      "rawContent": "⏳ Seu pagamento está sendo processado. Por favor, aguarde um instante.",
+      "metadata": {}
+    },
+    "$title": "[CHECKOUT][SEND] Send Processing Message",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "input.content",
+        "comparison": "matches",
+        "values": [
+          ".*(?:[cC]art[aA\\u00e3\\u00c3]o\\s+[fF]inal).*"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "\nfunction isCheckoutMethod(method) {\n    return !!(method &&\n        (method.type === 'paymentlink' || method.type === 'pixcopycode') &&\n        method.config &&\n        method.config.provider === 'checkout');\n}\n\nfunction hasAnyCheckoutMethod(paymentData) {\n    return !!(isCheckoutMethod(paymentData && paymentData.method1) ||\n        (paymentData && paymentData.showMethod2 && isCheckoutMethod(paymentData.method2)));\n}\n\nfunction getHeaders(token) {\n    return {\n        Authorization: `Bearer ${token}`\n    };\n}\n\nasync function execFetch(url, options) {\n    try {\n        const response = await request.fetchAsync(url, options);\n\n        let parsedBody;\n        try {\n            parsedBody = await response.jsonAsync();\n        } catch (e) {\n            parsedBody = await response; \n        }\n\n        return {\n             status: response.status,\n             body: parsedBody\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\nasync function getToken(checkoutRequest, urlBase, secret) {\n    const bodyRequest = {\n        botShortName: checkoutRequest.botShortName,\n        secret: secret\n    };\n    \n    let response = await execFetch(`${urlBase}/bot`, {\n            method: 'POST',\n            body: bodyRequest\n        });\n\n    return {\n        status: response.status,\n        body: response.body && response.body.token ? response.body.token : response.body\n    }\n}\n\nasync function getPaymentResponse(checkoutId, token, urlBase) {    \n    try {\n        var response = await execFetch(`${urlBase}/V0.1/payment?id=${checkoutId}`, { \n            method: 'GET', \n            headers: getHeaders(token)       \n        });  \n\n        return {\n            status: response.status,\n            body: response.body\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\n\nasync function ProcessPaymentWithSavedCard(purchaseId, cardId, token, urlBase) {    \n    try {\n        const bodyRequest = {\n            id: cardId,\n            installments: 1\n        };\n\n        var response = await execFetch(`${urlBase}/V0.1/payment/saved-card?id=${purchaseId}`, { \n            method: 'POST', \n            body: bodyRequest,\n            headers: getHeaders(token)       \n        });  \n\n        return {\n            status: response.status,\n            body: response.body\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\nasync function run(checkoutResponse, checkoutRequest, customerCardsResponse, checkoutConfig, checkoutSecretCommandResponse) {\n   \n     try {        \n        const config = typeof checkoutConfig === 'string' ? JSON.parse(checkoutConfig) : checkoutConfig;\n        const URL_BASE = config.baseUrl;\n        const URL_BASE_AUTH = config.authUrl;\n        const secretResponse = typeof checkoutSecretCommandResponse === 'string' ? JSON.parse(checkoutSecretCommandResponse) : checkoutSecretCommandResponse;\n        const SECRET = secretResponse && secretResponse.resource ? secretResponse.resource : null;\n        if (!SECRET) throw new Error('Falha ao ler bucket checkout-secret: Bucket \"checkout-secret\" não encontrado ou vazio');\n   \n        const checkoutData = typeof checkoutResponse === 'string' ? JSON.parse(checkoutResponse) : checkoutResponse;\n        const requestData = typeof checkoutRequest === 'string' ? JSON.parse(checkoutRequest) : checkoutRequest;\n        const cardData = typeof customerCardsResponse === 'string' ? JSON.parse(customerCardsResponse) : customerCardsResponse;\n        const card = cardData.card;\n   \n        let urlBase = URL_BASE;\n        let urlAuthBase = URL_BASE_AUTH;\n        let response = { status: 'error' };        \n        \n        try {\n            let responsePayment = await ProcessPaymentWithSavedCard(checkoutData.checkoutId, card.id, checkoutData.botToken, urlBase);\n            \n            if (Number(responsePayment.status) === 401) {\n                const responseToken = await getToken(requestData, urlAuthBase, SECRET);\n                if (Number(responseToken.status) === 200) {\n                    responsePayment = await ProcessPaymentWithSavedCard(checkoutData.checkoutId, card.id, responseToken.body, urlBase);\n                }\n            }\n            \n            if (Number(responsePayment.status) === 200 && responsePayment.body) {\n                response = {\n                    status: 'success', \n                    body: responsePayment.body            \n                };\n            } else {\n                response = {\n                    status: 'error',\n                    message: 'Erro ao processar pagamento',\n                    httpStatus: responsePayment.status,\n                    details: responsePayment.body\n                };\n            }\n\n        } catch (apiError) {\n            response = {\n                status: 'error', \n                message: 'Erro no request da API: ' + apiError.message                    \n            };\n        }    \n        \n    return JSON.stringify(response);\n        \n    } catch (error) {\n        return JSON.stringify({ status: 'error', message: 'Erro ao processar pagamento: ' + error.message });\n    }\n}",
+      "inputVariables": [
+        "checkoutResponse",
+        "checkoutRequest",
+        "customerCardsResponse",
+        "checkoutConfig",
+        "checkoutSecretCommandResponse"
+      ],
+      "outputVariable": "oneClickPaymentResult"
+    },
+    "$title": "[CHECKOUT][EXEC] Process One-Click Payment",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SendRawMessage",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "input.content",
+        "comparison": "matches",
+        "values": [
+          ".*(?:[cC]art[aA\\u00e3\\u00c3]o\\s+[fF]inal).*"
+        ]
+      }
+    ],
+    "settings": {
+      "type": "application/vnd.lime.chatstate+json",
+      "rawContent": "{\"state\":\"composing\",\"interval\":5000}",
+      "metadata": {}
+    },
+    "$title": "[CHECKOUT][TYPING] Native Typing Indicator",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "input.content",
+        "comparison": "matches",
+        "values": [
+          ".*(?:[cC]art[aA\\u00e3\\u00c3]o\\s+[fF]inal).*"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "function run(checkoutRequest) {\n    try {\n        checkoutRequest = typeof checkoutRequest === 'string' ? JSON.parse(checkoutRequest) : checkoutRequest;\n        checkoutRequest.step = 'status';\n        return JSON.stringify(checkoutRequest);\n    } catch (e) {\n        return checkoutRequest;\n    }\n}",
+      "inputVariables": [
+        "checkoutRequest"
+      ],
+      "outputVariable": "checkoutRequest"
+    },
+    "$title": "[CHECKOUT][SET] Force Status Step (Saved Card)",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SetVariable",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "input.content",
+        "comparison": "matches",
+        "values": [
+          ".*(?:[cC]art[aA\\u00e3\\u00c3]o\\s+[fF]inal).*"
+        ]
+      }
+    ],
+    "settings": {
+      "variable": "paymentStatusFeedbackTime",
+      "value": "0"
+    },
+    "$title": "[CHECKOUT][SET] Force Timer Zero (Saved Card)",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "paymentStatusFeedbackTime",
+        "comparison": "equals",
+        "values": [
+          "0"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "paymentMethodData",
+        "comparison": "contains",
+        "values": [
+          "\"provider\":\"checkout\""
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "inputCheckout",
+        "comparison": "matches",
+        "values": [
+          "^(?!.*(?:[oO]utra\\s+[fF]orma)).*$"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "function run(checkoutRequest) {\n\tcheckoutRequest = JSON.parse(checkoutRequest);\n\tcheckoutRequest.step = \"status\";\n\treturn checkoutRequest;\n}",
+      "inputVariables": [
+        "checkoutRequest"
+      ],
+      "outputVariable": "checkoutRequest"
+    },
+    "$title": "[CHECKOUT][SET] Step Status",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SetVariable",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "status"
+        ]
+      }
+    ],
+    "settings": {
+      "variable": "checkoutConfig",
+      "value": "{\"baseUrl\":\"https://checkout.hmg.example.test\",\"authUrl\":\"https://auth.hmg.example.test\"}"
+    },
+    "$title": "[CHECKOUT][SETUP] Feedback Config Variables",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "status"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "\nfunction isCheckoutMethod(method) {\n    return !!(method &&\n        (method.type === 'paymentlink' || method.type === 'pixcopycode') &&\n        method.config &&\n        method.config.provider === 'checkout');\n}\n\nfunction hasAnyCheckoutMethod(paymentData) {\n    return !!(isCheckoutMethod(paymentData && paymentData.method1) ||\n        (paymentData && paymentData.showMethod2 && isCheckoutMethod(paymentData.method2)));\n}\n\nfunction getHeaders(token) {\n    return {\n        Authorization: `Bearer ${token}`\n    };\n}\n\nasync function execFetch(url, options) {\n    try {\n        const response = await request.fetchAsync(url, options);\n\n        let parsedBody;\n        try {\n            parsedBody = await response.jsonAsync();\n        } catch (e) {\n            parsedBody = await response; \n        }\n\n        return {\n             status: response.status,\n             body: parsedBody\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\nasync function getToken(checkoutRequest, urlBase, secret) {\n    const bodyRequest = {\n        botShortName: checkoutRequest.botShortName,\n        secret: secret\n    };\n    \n    let response = await execFetch(`${urlBase}/bot`, {\n            method: 'POST',\n            body: bodyRequest\n        });\n\n    return {\n        status: response.status,\n        body: response.body && response.body.token ? response.body.token : response.body\n    }\n}\n\nasync function getPaymentResponse(checkoutId, token, urlBase) {    \n    try {\n        var response = await execFetch(`${urlBase}/V0.1/payment?id=${checkoutId}`, { \n            method: 'GET', \n            headers: getHeaders(token)       \n        });  \n\n        return {\n            status: response.status,\n            body: response.body\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\n\nasync function run(paymentMethodData, checkoutResponse, checkoutRequest, checkoutConfig, checkoutSecretCommandResponse, inputCheckout, oneClickPaymentResult) {\n    try {\n        const config = typeof checkoutConfig === 'string' ? JSON.parse(checkoutConfig) : checkoutConfig;\n        const URL_BASE = config.baseUrl;\n        const URL_BASE_AUTH = config.authUrl;\n        const secretResponse = typeof checkoutSecretCommandResponse === 'string' ? JSON.parse(checkoutSecretCommandResponse) : checkoutSecretCommandResponse;\n        const SECRET = secretResponse && secretResponse.resource ? secretResponse.resource : null;\n        if (!SECRET) throw new Error('Falha ao ler bucket checkout-secret: Bucket \"checkout-secret\" não encontrado ou vazio');\n\n        const paymentData = typeof paymentMethodData === 'string' ? JSON.parse(paymentMethodData) : paymentMethodData;\n        const checkoutData = typeof checkoutResponse === 'string' ? JSON.parse(checkoutResponse) : checkoutResponse;\n        const requestData = typeof checkoutRequest === 'string' ? JSON.parse(checkoutRequest) : checkoutRequest;\n\n        // Verificar se algum método tem feedback habilitado\n        const method1HasFeedback = paymentData.method1 && paymentData.method1.config &&\n            paymentData.method1.config.paymentReturn &&\n            paymentData.method1.config.paymentReturn.feedbackReturnPayment;\n        const method2HasFeedback = paymentData.showMethod2 && paymentData.method2 &&\n            paymentData.method2.config &&\n            paymentData.method2.config.paymentReturn &&\n            paymentData.method2.config.paymentReturn.feedbackReturnPayment;\n\n        if (!method1HasFeedback && !method2HasFeedback) {\n            return { status: 'disabled', message: 'Feedback de pagamento desabilitado' };\n        }\n\n        if (!checkoutData || !requestData) {\n            return { status: 'error', message: 'Dados do checkout não encontrados' };\n        }\n\n        const paymentId = checkoutData.checkoutId;\n        if (!paymentId) {\n            return { status: 'error', message: 'ID do pagamento não encontrado no resultado do checkout' };\n        }\n\n        // Verificar status do pagamento via API\n        let urlBase = URL_BASE;\n        let urlAuthBase = URL_BASE_AUTH;\n        let paymentStatus = 'unknown';\n        let paymentMethodFromApi = 'None';\n\n        const parseJsonSafe = (value) => {\n            if (!value) {\n                return null;\n            }\n            if (typeof value === 'object') {\n                return value;\n            }\n            try {\n                return JSON.parse(value);\n            } catch (e) {\n                return null;\n            }\n        };\n\n        const wait = async (ms) => {\n            if (typeof setTimeout !== 'function') {\n                return;\n            }\n            await new Promise(resolve => setTimeout(resolve, ms));\n        };\n\n        const isFinalPaymentStatus = (status) => status === 'Succeeded' || status === 'Denied' || status === 'Failed';\n        const hasUserInput = typeof inputCheckout === 'string' && inputCheckout.trim().length > 0;\n\n        let isSavedCardFlow = false;\n        const oneClickResult = parseJsonSafe(oneClickPaymentResult);\n        if (oneClickResult && oneClickResult.status === 'success') {\n            isSavedCardFlow = true;\n        }\n\n        if (!isSavedCardFlow && typeof inputCheckout === 'string') {\n            const regexCartaoFinal = /cart[aã]o +final/i;\n            isSavedCardFlow = regexCartaoFinal.test(inputCheckout);\n        }\n\n        if (isSavedCardFlow) {\n            const hasPaymentLink =\n                (paymentData.method1 && paymentData.method1.type === 'paymentlink') ||\n                (paymentData.showMethod2 && paymentData.method2 && paymentData.method2.type === 'paymentlink');\n            if (!hasPaymentLink) isSavedCardFlow = false;\n        }\n\n        const fetchPaymentStatus = async () => {\n            let responsePayment = await getPaymentResponse(checkoutData.checkoutId, checkoutData.botToken, urlBase);\n\n            if (Number(responsePayment.status) === 401) {\n                const responseToken = await getToken(requestData, urlAuthBase, SECRET);\n                if (Number(responseToken.status) === 200) {\n                    responsePayment = await getPaymentResponse(checkoutData.checkoutId, responseToken.body, urlBase);\n                }\n            }\n\n            if (Number(responsePayment.status) === 200 && responsePayment.body) {\n                if (responsePayment.body.status) {\n                    paymentStatus = responsePayment.body.status;\n                }\n                if (responsePayment.body.paymentMethod) {\n                    paymentMethodFromApi = responsePayment.body.paymentMethod;\n                }\n            }\n        };\n\n        try {\n            if (isSavedCardFlow) {\n                // Saved-card flow with user input: check immediately once, then continue retries.\n                if (hasUserInput) {\n                    await fetchPaymentStatus();\n                }\n\n                // Saved-card flow: wait 15s, query; wait 15s, query; wait 15s, query.\n                // Exit early only when status is final.\n                for (let attempt = 0; attempt < 3; attempt++) {\n                    if (isFinalPaymentStatus(paymentStatus)) {\n                        break;\n                    }\n\n                    await wait(15000);\n                    await fetchPaymentStatus();\n                    if (isFinalPaymentStatus(paymentStatus)) {\n                        break;\n                    }\n                }\n            } else {\n                await fetchPaymentStatus();\n            }\n        } catch (apiError) {\n            // Se falhar na API, continuar com status unknown\n            paymentStatus = 'unknown';\n        }\n\n        // Identificar qual método é Pix vs CreditCard\n        const method1Type = paymentData.method1 && paymentData.method1.type;\n        const method2Type = paymentData.showMethod2 && paymentData.method2 && paymentData.method2.type;\n        const method1IsPix = method1Type === 'pixcopycode';\n        const method2IsPix = method2Type === 'pixcopycode';\n        const method1IsCard = method1Type === 'paymentlink';\n        const method2IsCard = method2Type === 'paymentlink';\n\n        // Selecionar configuração de feedback baseada no paymentMethod retornado pela API:\n        // - \"Pix\"        → usar configuração do método pixcopycode\n        // - \"CreditCard\" → usar configuração do método paymentlink\n        // - \"None\" ou não encontrado → usar método 1 como fallback\n        let selectedFeedback = null;\n\n        if (paymentMethodFromApi === 'Pix') {\n            if (method1IsPix && method1HasFeedback) {\n                selectedFeedback = paymentData.method1.config.paymentReturn;\n            } else if (method2IsPix && method2HasFeedback) {\n                selectedFeedback = paymentData.method2.config.paymentReturn;\n            }\n        } else if (paymentMethodFromApi === 'CreditCard') {\n            if (method1IsCard && method1HasFeedback) {\n                selectedFeedback = paymentData.method1.config.paymentReturn;\n            } else if (method2IsCard && method2HasFeedback) {\n                selectedFeedback = paymentData.method2.config.paymentReturn;\n            }\n        }\n\n        // Fallback: paymentMethod === \"None\" ou correspondência não encontrada → usar método 1\n        if (!selectedFeedback) {\n            if (method1HasFeedback) {\n                selectedFeedback = paymentData.method1.config.paymentReturn;\n            } else if (method2HasFeedback) {\n                selectedFeedback = paymentData.method2.config.paymentReturn;\n            }\n        }\n\n        if (!selectedFeedback) {\n            return { status: 'disabled', message: 'Feedback de pagamento desabilitado' };\n        }\n\n        const feedbackTimeMinutes = selectedFeedback.paymentStatusFeedbackTime || 1;\n        const feedbackTimeSeconds = feedbackTimeMinutes * 60;\n\n        // Verificar se checkout é o único método configurado\n        const hasMethod1 = paymentData.method1 && paymentData.method1.type && paymentData.method1.type.trim() !== '';\n        const hasMethod2 = paymentData.showMethod2 && paymentData.method2 && paymentData.method2.type && paymentData.method2.type.trim() !== '';\n        const method1IsCheckout = hasMethod1 && isCheckoutMethod(paymentData.method1);\n        const method2IsCheckout = hasMethod2 && isCheckoutMethod(paymentData.method2);\n\n        // Checkout é único se:\n        // - Apenas method1 é checkout e method2 não está ativo/vazio, OU\n        // - Apenas method2 é checkout e method1 não existe/está vazio\n        const checkoutIsOnlyMethod = (method1IsCheckout && !hasMethod2) || (method2IsCheckout && !hasMethod1) || (method1IsCheckout && method2IsCheckout);\n\n        // Se checkout não é o único método, não incluir mensagem \"created\"\n        const createdMessage = checkoutIsOnlyMethod\n            ? (selectedFeedback.paymentCreatedMessage || 'Seu pagamento foi criado e está aguardando processamento.')\n            : '';\n\n        return {\n            status: 'configured',\n            paymentId: paymentId,\n            paymentStatus: paymentStatus,\n            feedbackTimeSeconds: feedbackTimeSeconds,\n            successMessage: selectedFeedback.paymentSuccessMessage || 'Seu pagamento foi processado com sucesso!',\n            deniedMessage: selectedFeedback.paymentDeniedMessage || 'Seu pagamento foi negado.',\n            processingMessage: selectedFeedback.paymentProcessingMessage || 'Seu pagamento está sendo processado.',\n            createdMessage: createdMessage\n        };\n\n    } catch (error) {\n        return { status: 'error', message: 'Erro ao configurar feedback: ' + error.message };\n    }\n}",
+      "inputVariables": [
+        "paymentMethodData",
+        "checkoutResponse",
+        "checkoutRequest",
+        "checkoutConfig",
+        "checkoutSecretCommandResponse",
+        "inputCheckout",
+        "oneClickPaymentResult"
+      ],
+      "outputVariable": "feedbackConfig"
+    },
+    "$title": "[CHECKOUT][FEEDBACK][SETUP] Configure Feedback",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "status"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "feedbackConfig@status",
+        "comparison": "equals",
+        "values": [
+          "disabled"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "function run(checkoutRequest) {\n                checkoutRequest = JSON.parse(checkoutRequest);\n                checkoutRequest.step = \"end\";\n                return JSON.stringify(checkoutRequest);\n            }",
+      "inputVariables": [
+        "checkoutRequest"
+      ],
+      "outputVariable": "checkoutRequest"
+    },
+    "$title": "[CHECKOUT][SET] End Step (Feedback Disabled)",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "status"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "async function run(feedbackConfig, checkoutRequest, checkoutResponse, orderDetailsJSON) {\n    try {\n        if (!feedbackConfig) {\n            return JSON.stringify({ status: 'skipped', message: 'Sem config' });\n        }\n        \n        var config = {};\n        try {\n            config = JSON.parse(feedbackConfig);\n        } catch (e) {\n            return JSON.stringify({ status: 'error', message: 'Config inválido' });\n        }\n        \n        if (config.status !== 'configured') {\n            return JSON.stringify({ status: 'skipped', message: 'Config não configurado' });\n        }\n        \n        const paymentStatus = config.paymentStatus || 'unknown';\n        const timestamp = Math.floor(Date.now() / 1000);\n\n        // Extrair reference_id do orderDetailsJSON (deve corresponder ao enviado no order_details)\n        let referenceId = config.paymentId || '';\n        try {\n            const orderDetails = typeof orderDetailsJSON === 'string' ? JSON.parse(orderDetailsJSON) : orderDetailsJSON;\n            if (orderDetails &&\n                orderDetails.interactive &&\n                orderDetails.interactive.action &&\n                orderDetails.interactive.action.parameters &&\n                orderDetails.interactive.action.parameters.reference_id) {\n                referenceId = orderDetails.interactive.action.parameters.reference_id;\n            }\n        } catch (e) { /* usa fallback config.paymentId */ }\n     \n        if (!referenceId) {\n            return JSON.stringify({ status: 'skipped', message: 'reference_id ausente — order_status não enviado' });\n        }\n\n        // Mapear status do Checkout para valores suportados pela Meta API\n        // Order status: pending | processing | partially_shipped | shipped | completed | canceled\n        // Payment status: pending | captured | failed\n        let orderStatus = 'processing';\n        let paymentStatusMeta = 'pending';\n        let bodyText = config.processingMessage || 'Processando pagamento...';\n\n        switch (paymentStatus) {\n            case 'Succeeded':\n                orderStatus = 'completed';\n                paymentStatusMeta = 'captured';\n                bodyText = config.successMessage || 'Seu pagamento foi processado com sucesso!';\n                break;\n            case 'Denied':\n            case 'Failed':\n                orderStatus = 'canceled';\n                paymentStatusMeta = 'failed';\n                bodyText = config.deniedMessage || 'Seu pagamento foi negado.';\n                break;\n            case 'Processing':\n            case 'Pending':\n                orderStatus = 'processing';\n                paymentStatusMeta = 'pending';\n                bodyText = config.processingMessage || 'Seu pagamento está sendo processado.';\n                break;\n            case 'Created':\n                orderStatus = 'pending';\n                paymentStatusMeta = 'pending';\n                // Só usa mensagem \"created\" se configurada e não vazia\n                // (será vazia quando checkout não for o único método)\n                bodyText = config.createdMessage || '';\n                break;\n            default:\n                orderStatus = 'processing';\n                paymentStatusMeta = 'pending';\n                bodyText = config.processingMessage || 'Processando pagamento...';\n                break;\n        }\n\n        // Não enviar se bodyText estiver vazio (ex: Created sem mensagem configurada)\n        if (!bodyText) {\n            return JSON.stringify({ status: 'skipped', message: 'Sem mensagem para este status' });\n        }\n\n        const orderStatusJSON = {\n            recipient_type: 'individual',\n            type: 'interactive',\n            interactive: {\n                type: 'order_status',\n                body: {\n                    text: bodyText\n                },\n                action: {\n                    name: 'review_order',\n                    parameters: {\n                        reference_id: referenceId,\n                        order: {\n                            status: orderStatus\n                        },\n                        payment: {\n                            status: paymentStatusMeta,\n                            timestamp: timestamp\n                        }\n                    }\n                }\n            }\n        };\n        \n        return JSON.stringify({\n            status: 'completed',\n            orderStatusJSON: orderStatusJSON,\n            paymentId: config.paymentId,\n            paymentStatus: paymentStatus,\n            checkoutResponse: checkoutResponse\n        });\n        \n    } catch (error) {\n        return JSON.stringify({\n            status: 'error',\n            message: error.message || error.toString()\n        });\n    }\n}",
+      "inputVariables": [
+        "feedbackConfig",
+        "checkoutRequest",
+        "checkoutResponse",
+        "orderDetailsJSON"
+      ],
+      "outputVariable": "paymentCheckResult"
+    },
+    "$title": "[CHECKOUT][FEEDBACK][EXEC] Verify Status",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SendRawMessage",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "status"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "status"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "paymentGenerateComponent",
+        "comparison": "notEquals",
+        "values": [
+          "UnexpectedInput",
+          "Loopback"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "paymentCheckResult@status",
+        "comparison": "equals",
+        "values": [
+          "completed"
+        ]
+      }
+    ],
+    "settings": {
+      "type": "application/json",
+      "rawContent": "{{paymentCheckResult@orderStatusJSON}}",
+      "metadata": {}
+    },
+    "$title": "[FEEDBACK][SEND] Status Message (success)",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "status"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "function run(checkoutRequest) {\n                checkoutRequest = JSON.parse(checkoutRequest);\n                checkoutRequest.step = \"end\";\n                return JSON.stringify(checkoutRequest);\n            }",
+      "inputVariables": [
+        "checkoutRequest"
+      ],
+      "outputVariable": "checkoutRequest"
+    },
+    "$title": "[CHECKOUT][SET] End Step",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "TrackEvent",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "notEquals",
+        "values": [
+          "status",
+          "link"
+        ]
+      }
+    ],
+    "settings": {
+      "category": "payment_request",
+      "action": "studio_payment_request",
+      "extras": {
+        "reference_id": "{{orderDetailsJSON@interactive.action.parameters.reference_id}}",
+        "type": "{{orderDetailsJSON@interactive.action.parameters.type}}",
+        "total_amount": "{{orderDetailsJSON@interactive.action.parameters.total_amount.value}}",
+        "items": "{{orderDetailsJSON@interactive.action.parameters.order.items}}",
+        "subtotal": "{{orderDetailsJSON@interactive.action.parameters.order.subtotal.value}}",
+        "payment_settings": "{{orderDetailsJSON@interactive.action.parameters.payment_settings}}",
+        "contact_name": "{{contact.name}}",
+        "error_status": "{{orderDetailsJSON@status}}",
+        "error_result": "{{orderDetailsJSON@result}}",
+        "checkout_result": "{{paymentCheckResult}}"
+      }
+    },
+    "$invalid": false,
+    "$title": "[TRACKING] Payment Event",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "end"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "function run(checkoutResponse, inputCheckout) {\n    try {\n        checkoutResponse = JSON.parse(checkoutResponse);\n        return JSON.stringify({\n            status: checkoutResponse.status,\n            input: inputCheckout,\n            checkoutId: checkoutResponse.checkoutId\n        });\n    } catch(ex) {\n        return JSON.stringify({\n            status: \"error\",\n            input: \"\",\n            error: ex.message\n        });\n    }\n}",
+      "inputVariables": [
+        "checkoutResponse",
+        "inputCheckout"
+      ],
+      "outputVariable": "checkoutResponse"
+    },
+    "$title": "[CHECKOUT][UPDATE] Response",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "end"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "async function run() {\n                    // Reset all checkout-related variables using context.setVariableAsync\n                    // This handles the complete cleanup of all checkout variables in a single operation\n                    try {\n                        // Reset all checkout variables to empty/default values\n                        await context.setVariableAsync('checkoutRequest', '');                        \n                        await context.setVariableAsync('checkoutConfig', '');\n                        await context.setVariableAsync('inputCheckout', '');\n                        await context.setVariableAsync('paymentStatusFeedbackTime', 0);                        \n                        await context.setVariableAsync('shouldWaitForInput', false);                                                \n                        await context.setVariableAsync('customerCardsResponse', '');\n                        await context.setVariableAsync('oneClickPaymentCTA', '');\n                        await context.setVariableAsync('oneClickPaymentResult', '');\n                        await context.setVariableAsync('checkoutSecretCommandResponse', '');\n                        \n                        // Optional: Clear additional checkout-related variables that might exist\n                        await context.setVariableAsync('checkoutId', '');\n                        await context.setVariableAsync('botToken', '');\n                        await context.setVariableAsync('checkoutLink', '');\n                        \n                        // Return success status with metadata\n                        const resetStatus = {\n                            resetComplete: true,\n                            timestamp: new Date().toISOString(),\n                            variablesCleared: [\n                                'checkoutRequest',                                \n                                'checkoutConfig',\n                                'inputCheckout',\n                                'paymentStatusFeedbackTime',\n                                'shouldWaitForInput',                                \n                                'orderDetailsJSON',\n                                'customerCardsResponse',\n                                'oneClickPaymentCTA',\n                                'oneClickPaymentResult',\n                                'checkoutSecretCommandResponse',\n                                'checkoutId',\n                                'botToken',\n                                'checkoutLink'\n                            ],\n                            message: 'All checkout variables successfully reset using context.setVariableAsync'\n                        };\n                        \n                        return JSON.stringify(resetStatus);\n                        \n                    } catch (error) {\n                        // Return error status if something fails\n                        const errorStatus = {\n                            resetComplete: false,\n                            error: error.message,\n                            timestamp: new Date().toISOString(),\n                            message: 'Failed to reset checkout variables'\n                        };\n                        \n                        return JSON.stringify(errorStatus);\n                    }\n                }",
+      "inputVariables": [],
+      "outputVariable": "checkoutResetStatus"
+    },
+    "$title": "[CHECKOUT][CLEANUP] Reset All Variables",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+]

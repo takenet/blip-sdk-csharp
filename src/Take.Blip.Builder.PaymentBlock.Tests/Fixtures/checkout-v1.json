@@ -1,0 +1,340 @@
+[
+  {
+    "type": "SetVariable",
+    "conditions": [],
+    "settings": {
+      "variable": "configurationData",
+      "value": "{}"
+    },
+    "$title": "[SETUP][INIT] Configuration Data",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SetVariable",
+    "conditions": [],
+    "settings": {
+      "variable": "paymentMethodData",
+      "value": "{}"
+    },
+    "$title": "[SETUP][INIT] Payment Method Data",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SetVariable",
+    "conditions": [],
+    "settings": {
+      "variable": "customizeData",
+      "value": "{}"
+    },
+    "$title": "[SETUP][INIT] Customize Data",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ProcessCommand",
+    "settings": {
+      "to": "postmaster@msging.net",
+      "method": "get",
+      "uri": "/buckets/checkout-secret",
+      "variable": "checkoutSecretCommandResponse"
+    },
+    "$invalid": false,
+    "$title": "[CHECKOUT][GET] Bucket Secret",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "notExists",
+        "values": []
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "\nfunction isCheckoutMethod(method) {\n    return !!(method &&\n        (method.type === 'paymentlink' || method.type === 'pixcopycode') &&\n        method.config &&\n        method.config.provider === 'checkout');\n}\n\nfunction hasAnyCheckoutMethod(paymentData) {\n    return !!(isCheckoutMethod(paymentData && paymentData.method1) ||\n        (paymentData && paymentData.showMethod2 && isCheckoutMethod(paymentData.method2)));\n}\n\nfunction run (paymentMethodData, configurationData) {\n                    try {\n                        let paymentData;\n                        try {\n                            paymentData = JSON.parse(paymentMethodData);\n                        } catch (e) {\n                            return JSON.stringify({ status: \"error\", error: \"Invalid paymentMethodData JSON\" });\n                        }\n\n                        let configData;\n                        try {\n                            configData = JSON.parse(configurationData);\n                        } catch (e) {\n                            configData = { rawData: configurationData };\n                        }\n\n                        let checkoutConfig = null;\n                        let checkoutPaymentType = null;\n                        if (isCheckoutMethod(paymentData.method1)) {\n                            checkoutConfig = paymentData.method1.config;\n                            checkoutPaymentType = paymentData.method1.type;\n                        } else if (paymentData.showMethod2 && isCheckoutMethod(paymentData.method2)) {\n                            checkoutConfig = paymentData.method2.config;\n                            checkoutPaymentType = paymentData.method2.type;\n                        }\n\n                        if (!checkoutConfig) {\n                            return {step: 'noCheckout'};\n                        }\n\n                        // Verificar TODOS os métodos checkout para determinar quais tipos de pagamento gerar.\n                        // Quando method1=paymentlink+checkout e method2=pixcopycode+checkout, o checkoutPaymentType\n                        // seria 'paymentlink' (null no paymentMethodsToGenerate), fazendo a API não gerar PIX.\n                        var needsPix = checkoutPaymentType === 'pixcopycode';\n                        if (!needsPix && paymentData.showMethod2 && paymentData.method2 && paymentData.method2.type === 'pixcopycode' && paymentData.method2.config && paymentData.method2.config.provider === 'checkout') {\n                            needsPix = true;\n                        }\n                        var paymentMethodsToGenerate = needsPix ? ['Pix'] : null;\n\n                        let products = [];\n                        \n                        if (configData.items && Array.isArray(configData.items)) {\n                            products = configData.items.map(item => ({\n                                description: item.name || item.retailer_id || \"Produto\",\n                                price: String((item.amount.value || 0)),\n                                quantity: item.quantity || 1\n                            }));\n                        } else {\n                            const itemsMatch = configurationData && configurationData.match(/\"items\"\\s*:\\s*\"\\[(.+?)\\]\"/s);\n                            \n                            if (itemsMatch) {\n                                let itemsStr = itemsMatch[1];\n                                itemsStr = itemsStr.replace(/\\\\\"/g, '\"').replace(/\\\"/g, '\"');\n                                const objectRegex = /\\{[^{}]*\\{[^{}]*\\}[^{}]*\\}/g;\n                                const matches = itemsStr.match(objectRegex);\n\n                                if (matches) {\n                                    for (let i = 0; i < matches.length; i++) {\n                                        const part = matches[i].trim();\n                                        const nameMatch = part.match(/\"name\"\\s*:\\s*\"([^\"]+)\"/);\n                                        const valueMatch = part.match(/\"value\"\\s*:\\s*(\\d+(?:\\.\\d+)?)/);\n                                        const quantityMatch = part.match(/\"quantity\"\\s*:\\s*(\\d+)/);\n\n                                        if (nameMatch && valueMatch && quantityMatch) {\n                                            products.push({\n                                                description: nameMatch[1],\n                                                price: String(parseFloat(valueMatch[1])),\n                                                quantity: parseInt(quantityMatch[1])\n                                            });\n                                        }\n                                    }\n                                }\n                            }\n                        }\n\n                        const checkoutRequest = {\n                            step: \"link\",\n                            merchantId: checkoutConfig.merchantId,\n                            botShortName: \"{{application.shortName}}\" || checkoutConfig.source,\n                            customer: {\n                                ...checkoutConfig.customer,\n                                identity: \"{{contact.identity}}\"\n                            },\n                            products: products,\n                            currency: checkoutConfig.currency || 'BRL',\n                            channel: checkoutConfig.channel || 'WhatsApp',\n                            source: checkoutConfig.source || 'bot',\n                            paymentMethodsToGenerate: paymentMethodsToGenerate,\n                            paymentReturn: checkoutConfig.paymentReturn\n                        };\n\n                        return JSON.stringify(checkoutRequest);\n                        \n                    } catch (error) {\n                        return JSON.stringify({ status: \"error\", error: error.message });\n                    }\n                }",
+      "inputVariables": [
+        "paymentMethodData",
+        "configurationData"
+      ],
+      "outputVariable": "checkoutRequest"
+    },
+    "$title": "[CHECKOUT][SETUP] Prepare Request",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "\nfunction isCheckoutMethod(method) {\n    return !!(method &&\n        (method.type === 'paymentlink' || method.type === 'pixcopycode') &&\n        method.config &&\n        method.config.provider === 'checkout');\n}\n\nfunction hasAnyCheckoutMethod(paymentData) {\n    return !!(isCheckoutMethod(paymentData && paymentData.method1) ||\n        (paymentData && paymentData.showMethod2 && isCheckoutMethod(paymentData.method2)));\n}\n\nfunction run(checkoutRequest, paymentMethodData, paymentStatusFeedbackTime) {\n                if (!checkoutRequest) {\n                    return 0;\n                }\n\n                try {\n                    checkoutRequest = JSON.parse(checkoutRequest);\n                    paymentMethodData = JSON.parse(paymentMethodData);\n                } catch (e) {\n                    return 0;\n                }\n\n                if (!hasAnyCheckoutMethod(paymentMethodData)) {\n                    return 0;\n                }\n                \n                const method1HasFeedback = isCheckoutMethod(paymentMethodData.method1) &&\n                    paymentMethodData.method1.config &&\n                    paymentMethodData.method1.config.paymentReturn &&\n                    paymentMethodData.method1.config.paymentReturn.feedbackReturnPayment === true;\n                const method2HasFeedback = paymentMethodData.showMethod2 &&\n                    isCheckoutMethod(paymentMethodData.method2) &&\n                    paymentMethodData.method2.config &&\n                    paymentMethodData.method2.config.paymentReturn &&\n                    paymentMethodData.method2.config.paymentReturn.feedbackReturnPayment === true;\n\n                if (!method1HasFeedback && !method2HasFeedback) {\n                    return 0;\n                }\n\n                // Preservar timer existente (cenário de loopback enquanto aguarda pagamento)\n                paymentStatusFeedbackTime = Number(paymentStatusFeedbackTime);\n                if (paymentStatusFeedbackTime && paymentStatusFeedbackTime > 0) {\n                    return paymentStatusFeedbackTime;\n                }\n\n                if (\n                    checkoutRequest.paymentReturn &&\n                    checkoutRequest.paymentReturn.paymentStatusFeedbackTime != null\n                ) {\n                    return Number(checkoutRequest.paymentReturn.paymentStatusFeedbackTime);\n                }\n\n                return 1;\n            }",
+      "inputVariables": [
+        "checkoutRequest",
+        "paymentMethodData",
+        "paymentStatusFeedbackTime"
+      ],
+      "outputVariable": "paymentStatusFeedbackTime"
+    },
+    "$title": "[FEEDBACK][INIT] Timer",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SetVariable",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link"
+        ]
+      }
+    ],
+    "settings": {
+      "variable": "checkoutConfig",
+      "value": "{\"baseUrl\":\"https://checkout.hmg.example.test\",\"authUrl\":\"https://auth.hmg.example.test\"}"
+    },
+    "$title": "[CHECKOUT][SETUP] Config Variables",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SetVariable",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link"
+        ]
+      }
+    ],
+    "settings": {
+      "variable": "inputCheckout",
+      "value": ""
+    },
+    "$title": "[SETUP][RESET] Input Checkout",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "\nfunction isCheckoutMethod(method) {\n    return !!(method &&\n        (method.type === 'paymentlink' || method.type === 'pixcopycode') &&\n        method.config &&\n        method.config.provider === 'checkout');\n}\n\nfunction hasAnyCheckoutMethod(paymentData) {\n    return !!(isCheckoutMethod(paymentData && paymentData.method1) ||\n        (paymentData && paymentData.showMethod2 && isCheckoutMethod(paymentData.method2)));\n}\n\nfunction getHeaders(token) {\n    return {\n        Authorization: `Bearer ${token}`\n    };\n}\n\nasync function execFetch(url, options) {\n    try {\n        const response = await request.fetchAsync(url, options);\n\n        let parsedBody;\n        try {\n            parsedBody = await response.jsonAsync();\n        } catch (e) {\n            parsedBody = await response; \n        }\n\n        return {\n             status: response.status,\n             body: parsedBody\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\nasync function getToken(checkoutRequest, urlBase, secret) {\n    const bodyRequest = {\n        botShortName: checkoutRequest.botShortName,\n        secret: secret\n    };\n    \n    let response = await execFetch(`${urlBase}/bot`, {\n            method: 'POST',\n            body: bodyRequest\n        });\n\n    return {\n        status: response.status,\n        body: response.body && response.body.token ? response.body.token : response.body\n    }\n}\n\nasync function getPaymentResponse(checkoutId, token, urlBase) {    \n    try {\n        var response = await execFetch(`${urlBase}/V0.1/payment?id=${checkoutId}`, { \n            method: 'GET', \n            headers: getHeaders(token)       \n        });  \n\n        return {\n            status: response.status,\n            body: response.body\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\n\n            async function getCheckoutLink(token, checkoutRequest, urlBase) {\n                const bodyRequest = {\n                    customer: checkoutRequest.customer,\n                    products: checkoutRequest.products,\n                    currency: checkoutRequest.currency,\n                    channel: checkoutRequest.channel,\n                    source: checkoutRequest.source,\n                    paymentMethodsToGenerate: checkoutRequest.paymentMethodsToGenerate || null\n                };\n\n            let response = await execFetch(\n                urlBase + \"/v0.1/checkout/purchase?merchant-id=\" + checkoutRequest.merchantId,\n                {\n                    method: 'POST',\n                    headers: getHeaders(token),\n                    body: bodyRequest\n                }\n            );\n\n            // 🔴 Erro\n            if (Number(response.status) !== 200) {\n                return {\n                    success: false,\n                    status: response.status,\n                    bodyRequest,\n                    error: response || \"Unknown error from checkout API\"\n                };\n            }\n\n            // ✅ Sucesso\n            // Tentar extrair o código PIX de diferentes possíveis caminhos na resposta da API\n            var pixQrCode = (response.body.pix && response.body.pix.qrCodeText)\n                || response.body.pixQrCodeText\n                || response.body.pixCode\n                || (response.body.pix && response.body.pix.copyAndPaste)\n                || null;\n\n            return {\n                success: true,\n                status: response.status,\n                bodyRequest,\n                link: response.body.link,\n                purchaseId: response.body.purchaseId,\n                pixQrCodeText: pixQrCode,\n                pixKey: (response.body.pix && response.body.pix.pixKey) || null,\n                pixName: (response.body.pix && response.body.pix.merchantName) || null,\n                rawBody: response.body\n            };\n}\n\nasync function run(checkoutRequest, checkoutConfig, checkoutSecretCommandResponse) {\n    try {\n        const config = typeof checkoutConfig === 'string' ? JSON.parse(checkoutConfig) : checkoutConfig;\n        const URL_BASE = config.baseUrl;\n        const URL_BASE_AUTH = config.authUrl;\n        const secretResponse = typeof checkoutSecretCommandResponse === 'string' ? JSON.parse(checkoutSecretCommandResponse) : checkoutSecretCommandResponse;\n        const SECRET = secretResponse && secretResponse.resource ? secretResponse.resource : null;\n        if (!SECRET) throw new Error('Falha ao ler bucket checkout-secret: Bucket \"checkout-secret\" não encontrado ou vazio');\n        \n        checkoutRequest = JSON.parse(checkoutRequest);\n        let urlBase = URL_BASE;\n        let urlAuthBase = URL_BASE_AUTH;\n\n        let responseToken = await getToken(checkoutRequest, urlAuthBase, SECRET);              \n        if(Number(responseToken.status) !== 200) {\n            responseToken = await getToken(checkoutRequest, urlAuthBase, SECRET);\n        }    \n        \n        if (Number(responseToken.status) !== 200) {\n            return JSON.stringify({\n                status: \"error\",\n                api: \"getToken\",\n                httpStatus: responseToken.status,\n                message: \"Erro ao gerar token do checkout\",\n                details: responseToken.body\n            });\n        }     \n        \n        let  checkoutLink = await getCheckoutLink(responseToken.body,  checkoutRequest, urlBase);         \n        if(Number(checkoutLink.status) !== 200) {\n            checkoutLink = await getCheckoutLink(responseToken.body,  checkoutRequest, urlBase);   \n        }\n      if (!checkoutLink.success) {\n        return JSON.stringify({\n            status: \"error\",\n            api: \"getCheckoutLink\",\n            httpStatus: checkoutLink.status,\n            message: \"Erro ao gerar link do checkout\",\n            bodyRequest: checkoutLink.bodyRequest,\n            details: checkoutLink.error,\n            responseToken\n        });\n    }\n\n        return JSON.stringify({\n            apiTokenStatus:  responseToken ? responseToken.status : 500,\n            apiTokenResponse: responseToken ? responseToken : {},\n            apiLinkStatus:  checkoutLink ? checkoutLink.status : 500,\n            apiLinkResponse: checkoutLink ? checkoutLink : {},\n            apiLinkRequest: checkoutLink ? checkoutLink.bodyRequest : {},            \n            link: checkoutLink.link,\n            purchaseId: checkoutLink.purchaseId,\n            checkoutId: checkoutLink.purchaseId || getIdCheckoutId(checkoutLink.link),\n            pixQrCodeText: checkoutLink.pixQrCodeText || null,\n            pixKey: checkoutLink.pixKey || null,\n            pixName: checkoutLink.pixName || null,\n            rawApiResponse: checkoutLink.rawBody || null,\n            botToken: responseToken ? responseToken.body : null,\n            status: \"created\",            \n        });\n        \n    } catch (error) {\n        return JSON.stringify({           \n            status: \"error\",\n            error: error.message\n        });\n    }\n}\n\nfunction getIdCheckoutId(url) {\n    if (!url || typeof url !== \"string\") return null;\n    const idParam = url.split(\"id=\")[1];\n    if (!idParam) return null;\n\n    const id = idParam.split(\"&\")[0];\n    return id;\n}\n\nfunction getFrontEndToken(url) {\n  const tokenParam = url.split(\"token=\")[1];\n  if (!tokenParam) return null;\n\n  return tokenParam.split(\"&\")[0];\n}",
+      "inputVariables": [
+        "checkoutRequest",
+        "checkoutConfig",
+        "checkoutSecretCommandResponse"
+      ],
+      "outputVariable": "checkoutResponse"
+    },
+    "$title": "[CHECKOUT][EXEC] API Link",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [],
+    "settings": {
+      "function": "run",
+      "source": "\nfunction isCheckoutMethod(method) {\n    return !!(method &&\n        (method.type === 'paymentlink' || method.type === 'pixcopycode') &&\n        method.config &&\n        method.config.provider === 'checkout');\n}\n\nfunction hasAnyCheckoutMethod(paymentData) {\n    return !!(isCheckoutMethod(paymentData && paymentData.method1) ||\n        (paymentData && paymentData.showMethod2 && isCheckoutMethod(paymentData.method2)));\n}\n\nfunction getHeaders(token) {\n    return {\n        Authorization: `Bearer ${token}`\n    };\n}\n\nasync function execFetch(url, options) {\n    try {\n        const response = await request.fetchAsync(url, options);\n\n        let parsedBody;\n        try {\n            parsedBody = await response.jsonAsync();\n        } catch (e) {\n            parsedBody = await response; \n        }\n\n        return {\n             status: response.status,\n             body: parsedBody\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\nasync function getToken(checkoutRequest, urlBase, secret) {\n    const bodyRequest = {\n        botShortName: checkoutRequest.botShortName,\n        secret: secret\n    };\n    \n    let response = await execFetch(`${urlBase}/bot`, {\n            method: 'POST',\n            body: bodyRequest\n        });\n\n    return {\n        status: response.status,\n        body: response.body && response.body.token ? response.body.token : response.body\n    }\n}\n\nasync function getPaymentResponse(checkoutId, token, urlBase) {    \n    try {\n        var response = await execFetch(`${urlBase}/V0.1/payment?id=${checkoutId}`, { \n            method: 'GET', \n            headers: getHeaders(token)       \n        });  \n\n        return {\n            status: response.status,\n            body: response.body\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\n\nasync function getCustomerCards(purchaseId, token, urlBase) {    \n    try {\n        var response = await execFetch(`${urlBase}/V0.1/checkout/customer/last-card?purchase-id=${purchaseId}`, { \n            method: 'GET', \n            headers: getHeaders(token)       \n        });  \n\n        return {\n            status: response.status,\n            body: response.body\n        }\n    } catch (error) {\n        throw error;\n    }\n}\n\nasync function run(checkoutResponse, checkoutRequest, inputCheckout, checkoutConfig, checkoutSecretCommandResponse, paymentMethodData) {\n   \n    let response =  { hasSavedCard: false };\n    const regexOutraForma = /outra\\s+forma/i;\n    if (typeof inputCheckout === \"string\" && regexOutraForma.test(inputCheckout)) {\n        return JSON.stringify(response);\n    }\n\n    try {\n        const paymentData = typeof paymentMethodData === 'string' ? JSON.parse(paymentMethodData) : paymentMethodData;\n        const hasPaymentLink =\n            (paymentData && paymentData.method1 && paymentData.method1.type === 'paymentlink') ||\n            (paymentData && paymentData.showMethod2 && paymentData.method2 && paymentData.method2.type === 'paymentlink');\n        if (!hasPaymentLink) return JSON.stringify(response);\n    } catch (e) { return JSON.stringify(response); }\n\n     try {        \n        const config = typeof checkoutConfig === 'string' ? JSON.parse(checkoutConfig) : checkoutConfig;\n        const URL_BASE = config.baseUrl;\n        const URL_BASE_AUTH = config.authUrl;\n        const secretResponse = typeof checkoutSecretCommandResponse === 'string' ? JSON.parse(checkoutSecretCommandResponse) : checkoutSecretCommandResponse;\n        const SECRET = secretResponse && secretResponse.resource ? secretResponse.resource : null;\n        if (!SECRET) throw new Error('Falha ao ler bucket checkout-secret: Bucket \"checkout-secret\" não encontrado ou vazio');\n \n        const checkoutData = typeof checkoutResponse === 'string' ? JSON.parse(checkoutResponse) : checkoutResponse;\n        const requestData = typeof checkoutRequest === 'string' ? JSON.parse(checkoutRequest) : checkoutRequest;        \n    \n        let urlBase = URL_BASE;\n        let urlAuthBase = URL_BASE_AUTH;\n        \n        try {\n            if(requestData && requestData.step !== 'link')  {\n                return response;\n            }\n\n            let responseCards = await getCustomerCards(checkoutData.checkoutId, checkoutData.botToken, urlBase);\n            \n            if (Number(responseCards.status) === 401) {\n                const responseToken = await getToken(requestData, urlAuthBase, SECRET);\n                if (Number(responseToken.status) === 200) {\n                    responseCards = await getCustomerCards(checkoutData.checkoutId, responseToken.body, urlBase);\n                }\n            }\n            \n            if (Number(responseCards.status) === 200 && responseCards.body) {\n                const savedCard = responseCards.body;\n\n                response = {\n                    hasSavedCard: true,\n                    card: {\n                        id: savedCard.id,\n                        lastFourDigits: savedCard.lastFourDigits\n\n                    }\n                };\n            }\n\n        } catch (apiError) {      \n            response = {\n                    hasSavedCard: false,\n                    status: 'error', \n                    message: 'Erro no request da API: ' + apiError.message                    \n                };\n        } \n    return JSON.stringify(response);\n        \n    } catch (error) {\n        return JSON.stringify({ hasSavedCard: false, status: 'error', message: 'Erro ao configurar feedback: ' + error.message });\n    }\n}",
+      "inputVariables": [
+        "checkoutResponse",
+        "checkoutRequest",
+        "inputCheckout",
+        "checkoutConfig",
+        "checkoutSecretCommandResponse",
+        "paymentMethodData"
+      ],
+      "outputVariable": "customerCardsResponse"
+    },
+    "$title": "[CHECKOUT][EXEC] Get Customer Cards",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [],
+    "settings": {
+      "function": "run",
+      "source": "\nfunction isCheckoutMethod(method) {\n    return !!(method &&\n        (method.type === 'paymentlink' || method.type === 'pixcopycode') &&\n        method.config &&\n        method.config.provider === 'checkout');\n}\n\nfunction hasAnyCheckoutMethod(paymentData) {\n    return !!(isCheckoutMethod(paymentData && paymentData.method1) ||\n        (paymentData && paymentData.showMethod2 && isCheckoutMethod(paymentData.method2)));\n}\n\nfunction run(paymentMethodData, customerCardsResponse, checkoutRequest) {\n    try {\n        // Se não há dados do método de pagamento, não aguarda input\n        if (!paymentMethodData) {\n            return \"false\";\n        }       \n       \n        const customerCards =  typeof customerCardsResponse === 'string' ? JSON.parse(customerCardsResponse) : null;\n        const paymentData = typeof paymentMethodData === 'string' ? JSON.parse(paymentMethodData) : paymentMethodData;\n        checkoutRequest = JSON.parse(checkoutRequest);        \n\n        if(customerCards && !customerCards.hasSavedCard && checkoutRequest.step === 'link' && !hasTwoCheckoutMethods) {\n            return false;\n        }\n\n        // Verificar se existe checkout e feedback habilitado\n        const hasCheckout = hasAnyCheckoutMethod(paymentData);\n        let feedbackEnabled = false;\n        \n        if (isCheckoutMethod(paymentData.method1) &&\n            paymentData.method1.config &&\n            paymentData.method1.config.paymentReturn &&\n            paymentData.method1.config.paymentReturn.feedbackReturnPayment === true) {\n            feedbackEnabled = true;\n        }\n        \n        if (!feedbackEnabled && paymentData.showMethod2 &&\n            isCheckoutMethod(paymentData.method2) &&\n            paymentData.method2.config &&\n            paymentData.method2.config.paymentReturn &&\n            paymentData.method2.config.paymentReturn.feedbackReturnPayment === true) {\n            feedbackEnabled = true;\n        }\n        \n        // Aguarda input quando tem checkout configurado (independente do feedback)\n        // Isso é necessário para capturar cliques de botões de pagamento com 1 clique\n        const shouldWaitForInput = hasCheckout;\n        return shouldWaitForInput ? \"true\" : \"false\";\n        \n    } catch (error) {\n        // Em caso de erro, não aguarda input para não travar o fluxo\n        return \"false\";\n    }\n}",
+      "inputVariables": [
+        "paymentMethodData",
+        "customerCardsResponse",
+        "checkoutRequest"
+      ],
+      "outputVariable": "shouldWaitForInput"
+    },
+    "$title": "[SETUP][SET] Should Wait For User Input",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "ExecuteScriptV2",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "customerCardsResponse@hasSavedCard",
+        "comparison": "equals",
+        "values": [
+          "true"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link"
+        ]
+      }
+    ],
+    "settings": {
+      "function": "run",
+      "source": "function run(checkoutRequest, customerCardsResponse) {\n    try {\n        const card = typeof customerCardsResponse === \"string\"\n            ? JSON.parse(customerCardsResponse).card\n            : customerCardsResponse.card;\n\n        const order = typeof checkoutRequest === \"string\"\n            ? JSON.parse(checkoutRequest)\n            : checkoutRequest;        \n\n        // =========================\n        // CARTÃO\n        // =========================        \n        const last4 = card.lastFourDigits;\n        const id = card.id;\n\n        // =========================\n        // RESUMO DO PEDIDO\n        // =========================\n        let resumo = `🛒 Resumo do seu pedido\\n\\n`;\n        let totalGeral = 0;\n\n        order.products.forEach((product, index) => {\n            const nome = product.description || \"Produto\";\n            const quantidade = Number(product.quantity) || 1;\n            const precoUnitario = parseFloat(product.price || 0);\n            const subtotal = quantidade * precoUnitario;\n\n            totalGeral += subtotal;\n\n            const precoFormatado = precoUnitario.toFixed(2).replace('.', ',');\n            const subtotalFormatado = subtotal.toFixed(2).replace('.', ',');\n\n            resumo += `*${nome}*\n`;\n            resumo += `${quantidade} x R$ ${precoFormatado} = R$ ${subtotalFormatado}\\n`;           \n\n            if (index < order.products.length - 1) {\n                resumo += `------------------------\\n`;\n            }\n\n            resumo += `\\n`;\n        });\n\n        const totalFormatado = totalGeral.toFixed(2).replace('.', ',');\n       \n\n        resumo += `-------------------------------\\n`;\n        resumo += `*Valor total: R$ ${totalFormatado}*\\n`;\n        resumo += `-------------------------------\\n\\n`;\n        resumo += `Como deseja pagar?\\n\\n`;      \n\n        // =========================\n        // CTA WHATSAPP\n        // =========================\n        return JSON.stringify({\n            type: \"interactive\",\n            interactive: {\n                type: \"button\",\n                body: {\n                    text: `${resumo}`\n                },                \n                action: {\n                    buttons: [\n                        {\n                            type: \"reply\",\n                            reply: {\n                                id: `PAY_ONE_CLICK_${id}`,\n                                title: `Cartão final ${last4}`\n                            }\n                        },\n                        {\n                            type: \"reply\",\n                            reply: {\n                                id: \"ACCESS_PAYMENT_LINK\",\n                                title: \"Outra forma\"\n                            }\n                        }\n                    ]\n                }\n            }\n        });\n\n    } catch (error) {\n        return JSON.stringify({\n            type: \"text\",\n            text: \"❌ Ocorreu um erro ao processar o pagamento.\"\n        });\n    }\n}",
+      "inputVariables": [
+        "checkoutRequest",
+        "customerCardsResponse"
+      ],
+      "outputVariable": "oneClickPaymentCTA"
+    },
+    "$title": "[CHECKOUT][EXEC] Generate One-Click Payment CTA",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "type": "SendRawMessage",
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "customerCardsResponse@hasSavedCard",
+        "comparison": "equals",
+        "values": [
+          "true"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "checkoutRequest@step",
+        "comparison": "equals",
+        "values": [
+          "link"
+        ]
+      }
+    ],
+    "settings": {
+      "type": "application/json",
+      "rawContent": "{{oneClickPaymentCTA}}",
+      "metadata": {}
+    },
+    "$title": "[CHECKOUT][SEND] Send One-Click Payment CTA",
+    "$id": "<id>",
+    "$typeOfContent": "",
+    "$description": "",
+    "$inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+]
