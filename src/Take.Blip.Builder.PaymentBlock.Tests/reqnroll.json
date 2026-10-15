@@ -4,6 +4,6 @@
     "feature": "pt-BR"
   },
   "runtime": {
-    "missingOrPendingStepsOutcome": "Ignore"
+    "missingOrPendingStepsOutcome": "Error"
   }
 }
