@@ -12,6 +12,7 @@ using Take.Blip.Builder.Actions.ExecuteScriptV2;
 using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.MergeContact;
+using Take.Blip.Builder.Actions.PassThreadControl;
 using Take.Blip.Builder.Actions.ProcessCommand;
 using Take.Blip.Builder.Actions.ProcessContentAssistant;
 using Take.Blip.Builder.Actions.ProcessHttp;
@@ -24,6 +25,7 @@ using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetVariable;
 using Take.Blip.Builder.Actions.TrackEvent;
 using Take.Blip.Builder.Actions.TrackContactsJourney;
+using Take.Blip.Builder.Actions.TakeThreadControl;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
@@ -98,10 +100,12 @@ namespace Take.Blip.Builder.Hosting
                     typeof(RedirectAction),
                     typeof(CreateTicketAction),
                     typeof(DeleteVariableAction),
-                    typeof(ProcessContentAssistantAction),
-                    typeof(TrackContactsJourneyAction),
-                    typeof(ExecuteTemplateAction)
-                });
+                     typeof(ProcessContentAssistantAction),
+                     typeof(TrackContactsJourneyAction),
+                     typeof(ExecuteTemplateAction),
+                     typeof(PassThreadControlAction),
+                     typeof(TakeThreadControlAction)
+                 });
 
             return container;
         }
