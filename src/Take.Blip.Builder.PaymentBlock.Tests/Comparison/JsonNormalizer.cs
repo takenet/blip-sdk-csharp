@@ -35,7 +35,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         /// <item><description><c>&lt;id-motor&gt;</c>: metadados de id do motor <c>#inReplyToId</c>, <c>#uniqueId</c> e <c>#message.uniqueId</c>.</description></item>
         /// <item><description><c>&lt;guid&gt;</c>: GUID dentro de texto, exceto o zero (<c>00000000-0000-0000-0000-000000000000</c>).</description></item>
         /// <item><description><c>&lt;data-hora&gt;</c>: data/hora ISO 8601 dentro de texto (<c>AAAA-MM-DDTHH:MM</c>, com segundos, fração e fuso opcionais) e valor do tipo data.</description></item>
-        /// <item><description><c>&lt;epoch-ms&gt;</c>: instante Unix em milissegundos (13 dígitos, de 2017 a 2042), como o <c>Date.now()</c> dos scripts do bloco.</description></item>
+        /// <item><description><c>&lt;epoch-ms&gt;</c>: instante Unix em milissegundos (13 dígitos, de 2017 a 2042) logo depois do prefixo <c>REF</c>, o id de referência que o script do bloco gera com <c>"REF" + Date.now()</c> quando a configuração não traz um. O prefixo continua no texto (<c>REF&lt;epoch-ms&gt;</c>); número de 13 dígitos sem esse prefixo é comparado como veio.</description></item>
         /// <item><description><c>&lt;epoch-s&gt;</c>: valor inteiro da propriedade <c>timestamp</c>, o instante Unix em segundos (<c>Math.floor(Date.now() / 1000)</c>) que o script de feedback grava em <c>payment.timestamp</c> da mensagem de status.</description></item>
         /// </list>
         /// Nomes de propriedade passam pelas mesmas regras de texto; se dois nomes viram o mesmo marcador, recebem o sufixo <c>#2</c>, <c>#3</c>... na ordem do valor normalizado.
@@ -47,7 +47,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             VolatileRule.ForProperties("<id-motor>", StringComparer.Ordinal, false, "#inReplyToId", "#uniqueId", "#message.uniqueId"),
             VolatileRule.ForText("<guid>", new Regex("(?!0{8}-0{4}-0{4}-0{4}-0{12})[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", RegexOptions.CultureInvariant, REGEX_TIMEOUT)),
             VolatileRule.ForText("<data-hora>", new Regex("(?<![0-9])[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}(?::[0-9]{2}(?:[.,][0-9]+)?)?(?:Z|[+-][0-9]{2}(?::?[0-9]{2})?)?", RegexOptions.CultureInvariant, REGEX_TIMEOUT)),
-            VolatileRule.ForText("<epoch-ms>", new Regex("(?<![0-9])(?:1[5-9]|2[0-2])[0-9]{11}(?![0-9])", RegexOptions.CultureInvariant, REGEX_TIMEOUT)),
+            VolatileRule.ForText("<epoch-ms>", new Regex("(?<=\\bREF)(?:1[5-9]|2[0-2])[0-9]{11}(?![0-9])", RegexOptions.CultureInvariant, REGEX_TIMEOUT)),
             VolatileRule.ForProperties("<epoch-s>", StringComparer.Ordinal, false, "timestamp"),
         };
 

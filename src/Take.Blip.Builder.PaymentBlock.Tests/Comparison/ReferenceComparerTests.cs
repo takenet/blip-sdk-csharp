@@ -139,6 +139,31 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
 
         [Fact]
         [Trait(CATEGORY, COMPARER)]
+        [Trait(CATEGORY, DIFFERENCE_FAILS)]
+        public void ThirteenDigitNumberOutsideGeneratedReferenceIdShouldNotBeMasked()
+        {
+            // Arrange
+            var recorded = SyntheticRun.Create(TimeSpan.Zero, CHECKOUT_URI);
+            var current = SyntheticRun.Create(TimeSpan.FromMinutes(3), CHECKOUT_URI);
+            SetOrderNumber(recorded, 1712345678901L);
+            SetOrderNumber(current, 1798765432109L);
+            WriteReference(recorded);
+            var comparer = new ReferenceComparer(_referenceDirectory.FullName);
+
+            // Act
+            var exception = Should.Throw<XunitException>(() => comparer.AssertMatches(REFERENCE_NAME, current.Json, current.Secrets));
+
+            // Assert
+            exception.Message.ShouldContain("$.commands[0].resource.orderNumber: valor diferente");
+            exception.Message.ShouldContain("$.commands[0].resource.orderLabel: valor diferente");
+            exception.Message.ShouldContain(" 2 ponto(s)");
+            Canonical(recorded).ShouldContain("\"orderNumber\": 1712345678901");
+            Canonical(recorded).ShouldContain("\"orderLabel\": \"pedido-1712345678901\"");
+            AssertNoSecret(exception.Message, recorded, current);
+        }
+
+        [Fact]
+        [Trait(CATEGORY, COMPARER)]
         [Trait(CATEGORY, MISSING_FAILS)]
         public void MissingReferenceShouldFailPointingToRecordVariable()
         {
@@ -177,6 +202,13 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         private void WriteReference(SyntheticRun run)
         {
             File.WriteAllText(Path.Combine(_referenceDirectory.FullName, REFERENCE_NAME + ".json"), Canonical(run), new UTF8Encoding(false));
+        }
+
+        private static void SetOrderNumber(SyntheticRun run, long orderNumber)
+        {
+            var resource = (JObject)run.Json["commands"][0]["resource"];
+            resource["orderNumber"] = orderNumber;
+            resource["orderLabel"] = "pedido-" + orderNumber.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private static string Canonical(SyntheticRun run)
