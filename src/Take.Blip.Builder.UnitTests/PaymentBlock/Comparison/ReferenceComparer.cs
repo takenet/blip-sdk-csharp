@@ -7,20 +7,23 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Xunit.Sdk;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
 {
     /// <summary>
     /// Compares the output of an engine run, normalized by <see cref="JsonNormalizer"/>, with the approved reference
-    /// <c>Referencias/&lt;name&gt;.json</c>. A difference in a non-volatile field or a missing reference fails the test.
-    /// With <c>REFERENCIAS_GRAVAR=1</c>, the main project writes the normalized version to the source folder instead of comparing;
-    /// compiled with <c>ENGINE_PACKAGE</c>, it never writes.
+    /// <c>PaymentBlock/Referencias/&lt;name&gt;.json</c>. A difference in a non-volatile field or a missing reference fails the test.
+    /// With <c>REFERENCIAS_GRAVAR=1</c>, <c>Take.Blip.Builder.UnitTests</c> writes the normalized version to the source folder instead
+    /// of comparing; compiled with <c>ENGINE_PACKAGE</c>, it never writes.
     /// </summary>
     public sealed class ReferenceComparer
     {
         /// <summary>Environment variable that, set to <c>1</c>, writes the references instead of comparing.</summary>
         public const string RECORD_VARIABLE = "REFERENCIAS_GRAVAR";
 
-        /// <summary>References folder, in the build output and in the main project.</summary>
+        /// <summary>Folder of the Payments block files, in the build output and in the test project.</summary>
+        public const string PAYMENT_BLOCK_FOLDER = "PaymentBlock";
+
+        /// <summary>References folder, inside <see cref="PAYMENT_BLOCK_FOLDER"/>.</summary>
         public const string REFERENCES_FOLDER = "Referencias";
 
         private const string JSON_EXTENSION = ".json";
@@ -31,7 +34,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
 
         private readonly string _referenceDirectory;
 #if !ENGINE_PACKAGE
-        private const string PROJECT_FILE = "Take.Blip.Builder.PaymentBlock.Tests.csproj";
+        private const string PROJECT_FILE = "Take.Blip.Builder.UnitTests.csproj";
         private static readonly Encoding UTF8_WITHOUT_BOM = new UTF8Encoding(false, true);
         private readonly string _recordDirectory;
 #endif
@@ -67,12 +70,12 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
         public bool IsRecording { get; }
 
         /// <summary>
-        /// Default comparer: reads <c>Referencias/</c> from the build output and, with <c>REFERENCIAS_GRAVAR=1</c> in the main project,
-        /// writes to <c>src/Take.Blip.Builder.PaymentBlock.Tests/Referencias/</c>.
+        /// Default comparer: reads <c>PaymentBlock/Referencias/</c> from the build output and, with <c>REFERENCIAS_GRAVAR=1</c> in
+        /// <c>Take.Blip.Builder.UnitTests</c>, writes to <c>src/Take.Blip.Builder.UnitTests/PaymentBlock/Referencias/</c>.
         /// </summary>
         public static ReferenceComparer FromBuildOutput()
         {
-            var referenceDirectory = Path.Combine(AppContext.BaseDirectory, REFERENCES_FOLDER);
+            var referenceDirectory = Path.Combine(AppContext.BaseDirectory, PAYMENT_BLOCK_FOLDER, REFERENCES_FOLDER);
 #if ENGINE_PACKAGE
             return new ReferenceComparer(referenceDirectory);
 #else
@@ -113,9 +116,9 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             if (!File.Exists(referencePath))
             {
                 throw new XunitException(
-                    "Reference '" + name + "' missing at " + referencePath + ". Record it by running the main project with "
-                    + RECORD_VARIABLE + "=1, review the content and commit it under src/Take.Blip.Builder.PaymentBlock.Tests/"
-                    + REFERENCES_FOLDER + "/.");
+                    "Reference '" + name + "' missing at " + referencePath + ". Record it by running Take.Blip.Builder.UnitTests with "
+                    + RECORD_VARIABLE + "=1, review the content and commit it under src/Take.Blip.Builder.UnitTests/"
+                    + PAYMENT_BLOCK_FOLDER + "/" + REFERENCES_FOLDER + "/.");
             }
 
             var expected = JsonNormalizer.Normalize(JsonNormalizer.Parse(File.ReadAllText(referencePath, Encoding.UTF8)));
@@ -134,12 +137,12 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
             {
                 if (File.Exists(Path.Combine(directory.FullName, PROJECT_FILE)))
                 {
-                    return Path.Combine(directory.FullName, REFERENCES_FOLDER);
+                    return Path.Combine(directory.FullName, PAYMENT_BLOCK_FOLDER, REFERENCES_FOLDER);
                 }
             }
 
             throw new InvalidOperationException(
-                RECORD_VARIABLE + "=1 requires running the main project inside the repository: " + PROJECT_FILE + " was not found above "
+                RECORD_VARIABLE + "=1 requires running Take.Blip.Builder.UnitTests inside the repository: " + PROJECT_FILE + " was not found above "
                 + AppContext.BaseDirectory + ".");
         }
 #endif
@@ -252,7 +255,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
                     builder.Append("  - ... and ").Append((Total - _lines.Count).ToString(CultureInfo.InvariantCulture)).Append(" more\n");
                 }
 
-                builder.Append("If the change is expected, re-record it in the main project with ").Append(RECORD_VARIABLE)
+                builder.Append("If the change is expected, re-record it in Take.Blip.Builder.UnitTests with ").Append(RECORD_VARIABLE)
                     .Append("=1 and review the diff before committing.");
                 return builder.ToString();
             }

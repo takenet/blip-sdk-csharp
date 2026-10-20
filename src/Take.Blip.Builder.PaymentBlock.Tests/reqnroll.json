@@ -1,9 +1,0 @@
-{
-  "$schema": "https://schemas.reqnroll.net/reqnroll-config-latest.json",
-  "language": {
-    "feature": "pt-BR"
-  },
-  "runtime": {
-    "missingOrPendingStepsOutcome": "Error"
-  }
-}

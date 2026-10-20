@@ -5,17 +5,20 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Models;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Support
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
 {
     /// <summary>
-    /// Assembles in memory the flow the engine runs from <c>Fixtures/</c>, following the state assembly described
+    /// Assembles in memory the flow the engine runs from <c>PaymentBlock/Fixtures/</c>, following the state assembly described
     /// in <c>ORIGEM.md</c>: the <c>model</c> of <c>&lt;flow&gt;-estado.json</c> with the <c>$fixture</c>/<c>$path</c> references
     /// resolved, the configuration SetVariable actions filled with a row of <c>configuracoes-v1.json</c>, an initial state
     /// that leads to the block and an exit state for each block output without a destination. The files do not change.
     /// </summary>
     public static class FlowAssembler
     {
-        /// <summary>Fixtures folder, in the build output.</summary>
+        /// <summary>Folder of the Payments block files, in the build output and in the test project.</summary>
+        public const string PAYMENT_BLOCK_FOLDER = "PaymentBlock";
+
+        /// <summary>Fixtures folder, inside <see cref="PAYMENT_BLOCK_FOLDER"/>.</summary>
         public const string FIXTURES_FOLDER = "Fixtures";
 
         /// <summary>Block configuration matrix.</summary>
@@ -213,7 +216,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
 
         private static JToken ReadFixture(string fileName)
         {
-            var path = Path.Combine(AppContext.BaseDirectory, FIXTURES_FOLDER, fileName);
+            var path = Path.Combine(AppContext.BaseDirectory, PAYMENT_BLOCK_FOLDER, FIXTURES_FOLDER, fileName);
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException("Fixture missing from the build output: " + fileName, path);

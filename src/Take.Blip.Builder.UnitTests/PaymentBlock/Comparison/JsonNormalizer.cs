@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
 {
     /// <summary>
     /// Normalizes the JSON captured from an engine run so it can be compared with the approved references.

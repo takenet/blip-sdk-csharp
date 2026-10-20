@@ -7,7 +7,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Comparison
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
 {
     public sealed class ReferenceComparerTests : IDisposable
     {

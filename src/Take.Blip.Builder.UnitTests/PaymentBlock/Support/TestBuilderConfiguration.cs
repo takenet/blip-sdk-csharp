@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Take.Blip.Builder.Hosting;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Support
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
 {
     /// <summary>
     /// Engine <see cref="IConfiguration"/> for the tests: returns the values of <see cref="ConventionsConfiguration"/>

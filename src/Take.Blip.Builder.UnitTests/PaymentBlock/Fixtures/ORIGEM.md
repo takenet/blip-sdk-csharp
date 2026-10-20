@@ -48,7 +48,7 @@
 
 ## Configuration matrix (`configuracoes-v1.json`)
 
-- One row for each value of the `configuracao` column of `Features/mensagens_do_bloco_v1.feature` (9), plus `checkout-link-e-pix` with `feedback: true`, used by the status scenario outline.
+- One row for each configuration of `PaymentBlockV1MessageTests.OrderMessageShouldMatchApprovedReference` (9), plus `checkout-link-e-pix` with `feedback: true`, used by `PaymentBlockV1MessageTests.StatusMessageShouldMatchApprovedReference`.
 - `configurationData`, `paymentMethodData` and `customizeData` are the objects the portal writes, with `JSON.stringify`, to the SetVariable actions `[SETUP][INIT] Configuration Data`, `[SETUP][INIT] Payment Method Data` and `[SETUP][INIT] Customize Data` (`PaymentDataService.updateVariableValue`). In the reference flow these values are `"{}"`; the flow assembly replaces each one with the serialized object of the row.
 - `State.ts` only declares `PaymentConfiguration` as `{ [key: string]: any }`: the real format comes from the two components cited in the table.
 - `configuracao`, `feedback` and `cartaoSalvo` are test metadata and do not go into the flow. In `checkout-link-com-cartao-salvo`, the configuration is the same as `checkout-link`; the saved card comes from the simulated response (`hasSavedCard`) of `[CHECKOUT][EXEC] Get Customer Cards`.

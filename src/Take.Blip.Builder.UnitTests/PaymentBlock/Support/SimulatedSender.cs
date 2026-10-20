@@ -6,7 +6,7 @@ using Lime.Messaging.Contents;
 using Lime.Protocol;
 using Take.Blip.Client;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Support
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
 {
     /// <summary>
     /// Simulated <see cref="ISender"/>: records in the sequence of the <see cref="BuilderEngineHarness.InteractionLog"/> each command,

@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Take.Blip.Builder.Utils;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Support
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
 {
     /// <summary>
     /// Simulated <see cref="IHttpClient"/> for <c>request.fetchAsync</c>: answers in memory for the checkout-auth-api
@@ -91,7 +91,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         /// <summary>
         /// Makes the payment query of the simulated purchase report <paramref name="paymentMethod"/> and <paramref name="status"/>
         /// with the names the checkout-api returns (<c>PaymentMethodsType</c> and <c>PurchaseStatus</c> as text). Accepts
-        /// any casing, because the scenarios write the method as the business does (<c>PIX</c>) and the API responds <c>Pix</c>.
+        /// any casing, because the tests write the method as the business does (<c>PIX</c>) and the API responds <c>Pix</c>.
         /// </summary>
         public void ReportPayment(string paymentMethod, string status)
         {

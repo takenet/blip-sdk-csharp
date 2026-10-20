@@ -5,25 +5,29 @@ using System.Threading.Tasks;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
-using Reqnroll;
 using Shouldly;
-using Take.Blip.Builder.PaymentBlock.Tests.Support;
+using Take.Blip.Builder.UnitTests.PaymentBlock.Support;
+using Xunit;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
+namespace Take.Blip.Builder.UnitTests.PaymentBlock
 {
     /// <summary>
-    /// Steps of <c>execucao_do_bloco.feature</c>. The step that sends the customer message is shared with
-    /// <c>mensagens_do_bloco_v1.feature</c> through the scenario <see cref="BuilderEngineHarness"/>.
+    /// Runs the Payments block v1 (approved reference <c>checkout-v1</c>, exported by the portal-submodule-builder suite) on the
+    /// same engine used by Template Hosting, with commands and HTTP calls simulated. Protects v1 while it exists.
+    /// Each test is one scenario: the arrange step loads the flow, stores the bucket secret and puts the simulated APIs in normal mode.
     /// </summary>
-    [Binding]
-    public sealed class BlockExecutionSteps
+    [Trait(CATEGORY, REGRESSION)]
+    [Trait(CATEGORY, PAYMENT_BLOCK)]
+    public sealed class PaymentBlockExecutionTests : IDisposable
     {
-        /// <summary>
-        /// Block configuration used by <c>execucao_do_bloco.feature</c>: payment link and PIX through Checkout Blip,
-        /// the two payment methods that the Checkout contract enables.
-        /// </summary>
-        public const string BLOCK_CONFIGURATION = "checkout-link-e-pix";
+        private const string CATEGORY = "Category";
+        private const string REGRESSION = "regressao";
+        private const string PAYMENT_BLOCK = "bloco-pagamento";
+        private const string REFERENCE_FLOW = "checkout-v1";
 
+        // Payment link and PIX through Checkout Blip, the two payment methods that the Checkout contract enables.
+        private const string BLOCK_CONFIGURATION = "checkout-link-e-pix";
+        private const string BUCKET_ID = "checkout-secret";
         private const string BUCKET_URI_PREFIX = "/buckets/";
         private const string SEND_TO_SERVER_METADATA = "#envelope.sendToServerRequired";
         private const string ORDER_CARD_TYPE = "order_details";
@@ -36,63 +40,73 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         private static readonly TimeSpan DELAY_BEYOND_SCRIPT_TIMEOUT = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan TIMEOUT_TOLERANCE = TimeSpan.FromSeconds(10);
 
-        private readonly BuilderEngineHarness _harness;
-        private string _bucketId;
+        private readonly BuilderEngineHarness _harness = new BuilderEngineHarness();
 
-        /// <summary>Receives the scenario harness through Reqnroll context injection.</summary>
-        public BlockExecutionSteps(BuilderEngineHarness harness)
+        public void Dispose()
         {
-            _harness = harness ?? throw new ArgumentNullException(nameof(harness));
+            _harness.Dispose();
         }
 
-        /// <summary>Loads the reference flow with the <see cref="BLOCK_CONFIGURATION"/> configuration.</summary>
-        [Given("o fluxo de referência {string} carregado no motor do Builder")]
-        public void GivenReferenceFlowLoaded(string referenceFlow)
+        /// <summary>Cliente entra no bloco e recebe o pedido com o link.</summary>
+        [Fact]
+        public async Task ClientEntersBlockAndReceivesOrderWithLink()
         {
-            _harness.UseReferenceFlow(referenceFlow, BLOCK_CONFIGURATION, false);
+            // Arrange
+            GivenReferenceFlowWithBucketSecretAndApisRespondingNormally();
+
+            // Act
+            await _harness.SendClientMessageAsync();
+
+            // Assert
+            ThenEngineReadsBucketThroughIrisServer();
+            ThenCallsAuthApiForBotToken();
+            ThenCallsCheckoutApiToCreateLink();
+            ThenSendsOrderCardWithLink();
         }
 
-        /// <summary>Stores in the bucket a secret generated in this run.</summary>
-        [Given("o bucket {string} do bot com um segredo de teste")]
-        public void GivenBucketWithTestSecret(string bucketId)
+        /// <summary>Falha da checkout-api não envia link.</summary>
+        [Fact]
+        public async Task CheckoutApiFailureShouldNotSendLink()
         {
-            _bucketId = bucketId;
-            _harness.StoreBucketSecret(bucketId);
-        }
-
-        /// <summary>Puts the simulated checkout-auth-api and checkout-api in normal mode.</summary>
-        [Given("a checkout-auth-api e a checkout-api simuladas respondendo normalmente")]
-        public void GivenApisRespondingNormally()
-        {
-            _harness.HttpClient.CheckoutApi = SimulatedHttpClient.CheckoutApiMode.Normal;
-        }
-
-        /// <summary>Makes the simulated checkout-api respond with an error when creating the link.</summary>
-        [Given("que a checkout-api simulada responde erro na criação do link")]
-        public void GivenCheckoutApiFailsCreatingLink()
-        {
+            // Arrange
+            GivenReferenceFlowWithBucketSecretAndApisRespondingNormally();
             _harness.HttpClient.CheckoutApi = SimulatedHttpClient.CheckoutApiMode.Error;
+
+            // Act
+            await _harness.SendClientMessageAsync();
+
+            // Assert
+            ThenNoOrderCardIsSent();
+            ThenFailureIsRecordedByEngine();
         }
 
-        /// <summary>Shortens the maximum script time and makes the checkout-api take longer than it.</summary>
-        [Given("que a checkout-api simulada demora mais que o tempo máximo de script configurado")]
-        public void GivenCheckoutApiSlowerThanScriptTimeout()
+        /// <summary>Script do bloco respeita o tempo máximo de execução.</summary>
+        [Fact]
+        public async Task BlockScriptShouldRespectMaximumExecutionTime()
         {
+            // Arrange
+            GivenReferenceFlowWithBucketSecretAndApisRespondingNormally();
             _harness.ScriptTimeout = SHORT_SCRIPT_TIMEOUT;
             _harness.HttpClient.CheckoutApiDelay = SHORT_SCRIPT_TIMEOUT + DELAY_BEYOND_SCRIPT_TIMEOUT;
             _harness.HttpClient.CheckoutApi = SimulatedHttpClient.CheckoutApiMode.Delay;
+
+            // Act
+            await _harness.SendClientMessageAsync();
+
+            // Assert
+            ThenScriptIsInterruptedByTimeout();
+            ThenNoOrderCardIsSent();
         }
 
-        /// <summary>Sends to the engine the customer message that leads to the block (shared between the features).</summary>
-        [When("o cliente envia a mensagem que leva ao bloco de Pagamentos")]
-        public Task WhenClientSendsMessageToPaymentBlock()
+        private void GivenReferenceFlowWithBucketSecretAndApisRespondingNormally()
         {
-            return _harness.SendClientMessageAsync();
+            _harness.UseReferenceFlow(REFERENCE_FLOW, BLOCK_CONFIGURATION, false);
+            _harness.StoreBucketSecret(BUCKET_ID);
+            _harness.HttpClient.CheckoutApi = SimulatedHttpClient.CheckoutApiMode.Normal;
         }
 
         /// <summary>Checks the bucket read through a command with <c>#envelope.sendToServerRequired=true</c>, before any HTTP call.</summary>
-        [Then("o motor lê o bucket {string} por um comando marcado para passar pelo Iris Server")]
-        public void ThenEngineReadsBucketThroughIrisServer(string bucketId)
+        private void ThenEngineReadsBucketThroughIrisServer()
         {
             var interactions = AssertEngineCompleted();
             var reads = new List<BuilderEngineHarness.Interaction>();
@@ -100,13 +114,13 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             {
                 if (interaction.Envelope is Command command
                     && command.Method == CommandMethod.Get
-                    && string.Equals(command.Uri?.ToString(), BUCKET_URI_PREFIX + bucketId, StringComparison.OrdinalIgnoreCase))
+                    && string.Equals(command.Uri?.ToString(), BUCKET_URI_PREFIX + BUCKET_ID, StringComparison.OrdinalIgnoreCase))
                 {
                     reads.Add(interaction);
                 }
             }
 
-            reads.Count.ShouldBe(1, "reads of bucket " + bucketId + ". Sequence: " + Describe(interactions));
+            reads.Count.ShouldBe(1, "reads of bucket " + BUCKET_ID + ". Sequence: " + Describe(interactions));
             var metadata = ((Command)reads[0].Envelope).Metadata;
             metadata.ShouldNotBeNull("the bucket command was sent without metadata");
             metadata.TryGetValue(SEND_TO_SERVER_METADATA, out var sendToServer).ShouldBeTrue("the bucket command was sent without " + SEND_TO_SERVER_METADATA);
@@ -115,8 +129,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         }
 
         /// <summary>Checks the call to the checkout-auth-api with the bucket secret, after the bucket read.</summary>
-        [Then("chama a checkout-auth-api para obter o token do bot")]
-        public void ThenCallsAuthApiForBotToken()
+        private void ThenCallsAuthApiForBotToken()
         {
             var interactions = AssertEngineCompleted();
             var calls = HttpCalls(interactions, SyntheticData.AUTH_HOST, SimulatedHttpClient.AUTH_TOKEN_PATH, POST);
@@ -129,8 +142,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         }
 
         /// <summary>Checks the link creation in the checkout-api with the issued token, after the checkout-auth-api.</summary>
-        [Then("chama a checkout-api para criar o link de pagamento")]
-        public void ThenCallsCheckoutApiToCreateLink()
+        private void ThenCallsCheckoutApiToCreateLink()
         {
             var interactions = AssertEngineCompleted();
             var purchases = HttpCalls(interactions, SyntheticData.CHECKOUT_HOST, SimulatedHttpClient.PURCHASE_PATH, POST);
@@ -144,8 +156,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         }
 
         /// <summary>Checks a single order card, sent to the customer after the link creation and with the created link.</summary>
-        [Then("envia ao cliente o cartão de pedido com o link")]
-        public void ThenSendsOrderCardWithLink()
+        private void ThenSendsOrderCardWithLink()
         {
             var interactions = AssertEngineCompleted();
             var cards = OrderCards(interactions);
@@ -157,8 +168,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         }
 
         /// <summary>Checks that no order card was sent.</summary>
-        [Then("nenhum cartão de pedido é enviado ao cliente")]
-        public void ThenNoOrderCardIsSent()
+        private void ThenNoOrderCardIsSent()
         {
             var interactions = _harness.Interactions;
             OrderCards(interactions).Count.ShouldBe(0, "order cards sent. Sequence: " + Describe(interactions));
@@ -168,8 +178,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         /// Checks that the link creation failure is recorded: the engine takes the customer to the block error output and records,
         /// through the TrackEvent action, the payment event with <c>error_status</c> equal to <c>Error</c>.
         /// </summary>
-        [Then("a falha fica registrada pelo motor")]
-        public void ThenFailureIsRecordedByEngine()
+        private void ThenFailureIsRecordedByEngine()
         {
             var interactions = AssertEngineCompleted();
             var purchases = HttpCalls(interactions, SyntheticData.CHECKOUT_HOST, SimulatedHttpClient.PURCHASE_PATH, POST);
@@ -188,8 +197,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
         /// did not respond and lasted less than the limit plus the tolerance. The tolerance absorbs a loaded CI agent and stays
         /// well below the simulated delay, so a cancellation that does not come from the limit still fails.
         /// </summary>
-        [Then("a execução do script é interrompida por tempo")]
-        public void ThenScriptIsInterruptedByTimeout()
+        private void ThenScriptIsInterruptedByTimeout()
         {
             var interactions = _harness.Interactions;
             var purchases = HttpCalls(interactions, SyntheticData.CHECKOUT_HOST, SimulatedHttpClient.PURCHASE_PATH, POST);
@@ -207,18 +215,18 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Steps
             return _harness.Interactions;
         }
 
-        private int BucketReadSequence(IReadOnlyList<BuilderEngineHarness.Interaction> interactions)
+        private static int BucketReadSequence(IReadOnlyList<BuilderEngineHarness.Interaction> interactions)
         {
             foreach (var interaction in interactions)
             {
                 if (interaction.Envelope is Command command
-                    && string.Equals(command.Uri?.ToString(), BUCKET_URI_PREFIX + _bucketId, StringComparison.OrdinalIgnoreCase))
+                    && string.Equals(command.Uri?.ToString(), BUCKET_URI_PREFIX + BUCKET_ID, StringComparison.OrdinalIgnoreCase))
                 {
                     return interaction.Sequence;
                 }
             }
 
-            throw new ShouldAssertException("bucket " + _bucketId + " was not read");
+            throw new ShouldAssertException("bucket " + BUCKET_ID + " was not read");
         }
 
         private static int FirstAuthSequence(IReadOnlyList<BuilderEngineHarness.Interaction> interactions)

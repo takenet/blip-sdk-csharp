@@ -28,13 +28,13 @@ using Take.Blip.Client.Extensions.HelpDesk;
 using Take.Blip.Client.Extensions.Scheduler;
 using Take.Blip.Client.Extensions.Tunnel;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Support
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
 {
     /// <summary>
     /// Runs a reference flow on the Builder engine, following <c>FlowManagerTestsBase.CreateContainer</c>: one
-    /// container per scenario with <c>RegisterBuilder()</c>, simulated <see cref="ISender"/> and <see cref="IHttpClient"/>,
-    /// substituted extensions and in-memory user context (no Redis and no network). Created by Reqnroll context injection,
-    /// one instance per scenario, shared by the feature steps.
+    /// container per test with <c>RegisterBuilder()</c>, simulated <see cref="ISender"/> and <see cref="IHttpClient"/>,
+    /// substituted extensions and in-memory user context (no Redis and no network). One instance per test, created by the
+    /// test class and disposed with it.
     /// </summary>
     public sealed class BuilderEngineHarness : IDisposable
     {
@@ -224,7 +224,7 @@ namespace Take.Blip.Builder.PaymentBlock.Tests.Support
         {
             if (_container == null)
             {
-                throw new InvalidOperationException("The engine has not run in this scenario yet.");
+                throw new InvalidOperationException("The engine has not run in this test yet.");
             }
 
             return JObject.Parse(_container.GetInstance<IEnvelopeSerializer>().Serialize(envelope));

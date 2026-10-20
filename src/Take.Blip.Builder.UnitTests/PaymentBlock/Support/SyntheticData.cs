@@ -1,7 +1,7 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Take.Blip.Builder.PaymentBlock.Tests.Support
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
 {
     /// <summary>
     /// Fixed synthetic data for the block run on the engine. No real value: hosts in <c>*.example.test</c>,
