@@ -121,7 +121,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
             resource.Remove("amount");
             resource["installments"] = "1x " + current.Secret;
             resource["paymentKey"] = 0;
-            ((JObject)current.Json["commands"][0]["metadata"])["#tunnel.owner"] = "loja@msging.net";
+            ((JObject)current.Json["commands"][0]["metadata"])["#tunnel.owner"] = "store@msging.net";
             ((JArray)current.Json["http"]).Add(new JObject { ["method"] = "GET" });
             var comparer = new ReferenceComparer(_referenceDirectory.FullName);
 
@@ -158,7 +158,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
             exception.Message.ShouldContain("$.commands[0].resource.orderLabel: different value");
             exception.Message.ShouldContain(" 2 point(s)");
             Canonical(recorded).ShouldContain("\"orderNumber\": 1712345678901");
-            Canonical(recorded).ShouldContain("\"orderLabel\": \"pedido-1712345678901\"");
+            Canonical(recorded).ShouldContain("\"orderLabel\": \"order-1712345678901\"");
             AssertNoSecret(exception.Message, recorded, current);
         }
 
@@ -208,7 +208,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         {
             var resource = (JObject)run.Json["commands"][0]["resource"];
             resource["orderNumber"] = orderNumber;
-            resource["orderLabel"] = "pedido-" + orderNumber.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            resource["orderLabel"] = "order-" + orderNumber.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private static string Canonical(SyntheticRun run)
@@ -282,7 +282,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
                             ["method"] = "POST",
                             ["uri"] = "https://checkout.hmg.example.test/api/v1/token",
                             ["headers"] = new JObject { ["Authorization"] = "Bearer " + token },
-                            ["body"] = "{\"botShortName\":\"loja\",\"secret\":\"" + secret + "\"}",
+                            ["body"] = "{\"botShortName\":\"store\",\"secret\":\"" + secret + "\"}",
                         },
                     },
                 };

@@ -16,7 +16,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
     /// </summary>
     public static class JsonNormalizer
     {
-        private const string SECRET_MARKER = "<segredo>";
+        private const string SECRET_MARKER = "<secret>";
         private const int MIN_RUN_SECRET_LENGTH = 8;
         private static readonly TimeSpan REGEX_TIMEOUT = TimeSpan.FromSeconds(1);
 
@@ -30,11 +30,11 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         /// <summary>
         /// Closed list of what is volatile, in the order it is applied. It is the single source: nothing outside it is ignored in the comparison.
         /// <list type="number">
-        /// <item><description><c>&lt;segredo&gt;</c>: whole value of the properties <c>authorization</c>, <c>accessKey</c>, <c>accessToken</c>, <c>apiKey</c>, <c>botToken</c>, <c>password</c>, <c>secret</c> and <c>token</c> (case-insensitive) and, inside any text, the secrets and tokens generated in the run that the caller passes in <c>runSecrets</c>.</description></item>
+        /// <item><description><c>&lt;secret&gt;</c>: whole value of the properties <c>authorization</c>, <c>accessKey</c>, <c>accessToken</c>, <c>apiKey</c>, <c>botToken</c>, <c>password</c>, <c>secret</c> and <c>token</c> (case-insensitive) and, inside any text, the secrets and tokens generated in the run that the caller passes in <c>runSecrets</c>.</description></item>
         /// <item><description><c>&lt;envelope-id&gt;</c>: envelope <c>id</c> (object with <c>to</c>, <c>from</c> or <c>method</c> and <c>uri</c>), which the engine generates on every send.</description></item>
-        /// <item><description><c>&lt;id-motor&gt;</c>: engine id metadata <c>#inReplyToId</c>, <c>#uniqueId</c> and <c>#message.uniqueId</c>.</description></item>
+        /// <item><description><c>&lt;engine-id&gt;</c>: engine id metadata <c>#inReplyToId</c>, <c>#uniqueId</c> and <c>#message.uniqueId</c>.</description></item>
         /// <item><description><c>&lt;guid&gt;</c>: GUID inside text, except the zero one (<c>00000000-0000-0000-0000-000000000000</c>).</description></item>
-        /// <item><description><c>&lt;data-hora&gt;</c>: ISO 8601 date/time inside text (<c>YYYY-MM-DDTHH:MM</c>, with optional seconds, fraction and offset) and date-typed value.</description></item>
+        /// <item><description><c>&lt;date-time&gt;</c>: ISO 8601 date/time inside text (<c>YYYY-MM-DDTHH:MM</c>, with optional seconds, fraction and offset) and date-typed value.</description></item>
         /// <item><description><c>&lt;epoch-ms&gt;</c>: Unix time in milliseconds (13 digits, from 2017 to 2042) right after the <c>REF</c> prefix, the reference id the block script generates with <c>"REF" + Date.now()</c> when the configuration has none. The prefix stays in the text (<c>REF&lt;epoch-ms&gt;</c>); a 13-digit number without that prefix is compared as is.</description></item>
         /// <item><description><c>&lt;epoch-s&gt;</c>: whole value of the <c>timestamp</c> property, the Unix time in seconds (<c>Math.floor(Date.now() / 1000)</c>) that the feedback script writes to <c>payment.timestamp</c> of the status message.</description></item>
         /// </list>
@@ -44,9 +44,9 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         {
             VolatileRule.ForProperties(SECRET_MARKER, StringComparer.OrdinalIgnoreCase, false, "authorization", "accessKey", "accessToken", "apiKey", "botToken", "password", "secret", "token"),
             VolatileRule.ForProperties("<envelope-id>", StringComparer.Ordinal, true, "id"),
-            VolatileRule.ForProperties("<id-motor>", StringComparer.Ordinal, false, "#inReplyToId", "#uniqueId", "#message.uniqueId"),
+            VolatileRule.ForProperties("<engine-id>", StringComparer.Ordinal, false, "#inReplyToId", "#uniqueId", "#message.uniqueId"),
             VolatileRule.ForText("<guid>", new Regex("(?!0{8}-0{4}-0{4}-0{4}-0{12})[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", RegexOptions.CultureInvariant, REGEX_TIMEOUT)),
-            VolatileRule.ForText("<data-hora>", new Regex("(?<![0-9])[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}(?::[0-9]{2}(?:[.,][0-9]+)?)?(?:Z|[+-][0-9]{2}(?::?[0-9]{2})?)?", RegexOptions.CultureInvariant, REGEX_TIMEOUT)),
+            VolatileRule.ForText("<date-time>", new Regex("(?<![0-9])[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}(?::[0-9]{2}(?:[.,][0-9]+)?)?(?:Z|[+-][0-9]{2}(?::?[0-9]{2})?)?", RegexOptions.CultureInvariant, REGEX_TIMEOUT)),
             VolatileRule.ForText("<epoch-ms>", new Regex("(?<=\\bREF)(?:1[5-9]|2[0-2])[0-9]{11}(?![0-9])", RegexOptions.CultureInvariant, REGEX_TIMEOUT)),
             VolatileRule.ForProperties("<epoch-s>", StringComparer.Ordinal, false, "timestamp"),
         };
@@ -57,7 +57,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         /// Returns a normalized copy of <paramref name="value"/>, without changing the original.
         /// </summary>
         /// <param name="value">JSON captured from the run.</param>
-        /// <param name="runSecrets">Secrets and tokens generated in this run (at least 8 characters each), replaced with <c>&lt;segredo&gt;</c> wherever they appear.</param>
+        /// <param name="runSecrets">Secrets and tokens generated in this run (at least 8 characters each), replaced with <c>&lt;secret&gt;</c> wherever they appear.</param>
         public static JToken Normalize(JToken value, IEnumerable<string> runSecrets = null)
         {
             if (value == null)
