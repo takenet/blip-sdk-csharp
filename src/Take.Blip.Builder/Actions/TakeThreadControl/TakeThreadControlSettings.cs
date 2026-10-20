@@ -26,7 +26,7 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
         public string Message { get; set; }
 
         /// <summary>
-        /// Validates the settings instance ensuring prohibited fields are absent and mutual dependencies are met.
+        /// Validates that a nonblank target service is configured for the redirect.
         /// </summary>
         /// <exception cref="ValidationException">Thrown when validation rules are violated.</exception>
         public void Validate()

@@ -16,8 +16,8 @@ namespace Take.Blip.Builder.Actions.PassThreadControl
         public ThreadControlType ControlType { get; set; }
 
         /// <summary>
-        /// Gets or sets the optional custom contact identity (e.g., phone number or GUID).
-        /// When omitted, the current contact identity from context is used by default.
+        /// Gets or sets a legacy identity setting. Thread control commands always use
+        /// the current contact identity from context; this setting does not override it.
         /// </summary>
         public string Identity { get; set; }
 
