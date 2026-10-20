@@ -1,24 +1,21 @@
-using System.Collections.Generic;
-using Lime.Messaging.Contents;
 using Lime.Protocol;
-using Newtonsoft.Json.Linq;
 
 namespace Take.Blip.Builder.Actions.ThreadControl
 {
     internal static class ThreadControlCommandFactory
     {
-        public static Command CreateSetCommand(LimeUri uri, JObject resource)
+        public static readonly Node gatewayAddress = Node.Parse("postmaster@wa.gw.msging.net");
+        public static readonly LimeUri threadControlUri = new LimeUri("/thread-control");
+
+        public static Command CreateSetCommand(ThreadControlCommandResource resource)
         {
             return new Command
             {
                 Id = EnvelopeId.NewId(),
                 Method = CommandMethod.Set,
-                Type = ThreadControlConstants.JsonMediaType,
-                To = ThreadControlConstants.GatewayAddress,
-                Uri = uri,
-                Resource = new JsonDocument(
-                    resource?.ToObject<Dictionary<string, object>>() ?? new Dictionary<string, object>(),
-                    ThreadControlConstants.JsonMediaType)
+                To = gatewayAddress,
+                Uri = threadControlUri,
+                Resource = resource
             };
         }
     }

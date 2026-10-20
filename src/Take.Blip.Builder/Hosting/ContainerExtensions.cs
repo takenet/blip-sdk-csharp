@@ -100,11 +100,11 @@ namespace Take.Blip.Builder.Hosting
                     typeof(RedirectAction),
                     typeof(CreateTicketAction),
                     typeof(DeleteVariableAction),
-                     typeof(ProcessContentAssistantAction),
-                     typeof(TrackContactsJourneyAction),
-                     typeof(ExecuteTemplateAction),
-                     typeof(PassThreadControlAction),
-                     typeof(TakeThreadControlAction)
+                    typeof(ProcessContentAssistantAction),
+                    typeof(TrackContactsJourneyAction),
+                    typeof(ExecuteTemplateAction),
+                    typeof(PassThreadControlAction),
+                    typeof(TakeThreadControlAction)
                  });
 
             return container;
@@ -171,11 +171,12 @@ namespace Take.Blip.Builder.Hosting
 
         private static Container RegisterExternal(this Container container)
         {
-            container.RegisterSingleton<IDocumentTypeResolver>( () => {
+            container.RegisterSingleton<IDocumentTypeResolver>(() =>
+            {
                 var documentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
                 documentTypeResolver.RegisterDocument<InputExpiration>();
                 return documentTypeResolver;
-                });
+            });
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
             container.RegisterSingleton<ILogger>(() => LoggerProvider.Logger);

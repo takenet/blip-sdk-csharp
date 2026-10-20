@@ -1,33 +1,40 @@
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
+using Take.Blip.Builder.Actions.ThreadControl;
 using Take.Blip.Builder.Models;
 
 namespace Take.Blip.Builder.Actions.TakeThreadControl
 {
+    /// <summary>
+    /// Represents the configuration settings for the Take Thread Control action within the Builder flow.
+    /// </summary>
     public class TakeThreadControlSettings : IValidable
     {
-        private string _targetRole;
-        private bool _targetRoleDefined;
-
-        [JsonProperty("targetRole")]
-        public string TargetRole
-        {
-            get => _targetRole;
-            set
-            {
-                _targetRole = value;
-                _targetRoleDefined = true;
-            }
-        }
-
+        /// <summary>
+        /// Gets or sets optional contextual notes or metadata regarding the takeover.
+        /// </summary>
         public string Metadata { get; set; }
 
+        /// <summary>
+        /// Gets or sets the target router service identifier to redirect the conversation to after taking control.
+        /// </summary>
+        public string Service { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optional payload or message sent alongside the service redirect.
+        /// </summary>
+        public string Message { get; set; }
+
+        /// <summary>
+        /// Validates the settings instance ensuring prohibited fields are absent and mutual dependencies are met.
+        /// </summary>
+        /// <exception cref="ValidationException">Thrown when validation rules are violated.</exception>
         public void Validate()
         {
-            if (_targetRoleDefined)
+            if (string.IsNullOrWhiteSpace(Service))
             {
                 throw new ValidationException(
-                    $"The '{nameof(TargetRole)}' setting is not allowed for '{nameof(TakeThreadControl)}' action");
+                    $"The '{nameof(Service)}' setting value is required for '{nameof(TakeThreadControlSettings)}'.");
             }
         }
     }

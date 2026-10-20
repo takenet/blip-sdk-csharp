@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
@@ -15,12 +14,14 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
     public class TakeThreadControlAction : ActionBase<TakeThreadControlSettings>
     {
         private readonly ISender _sender;
+        private readonly IRedirectManager _redirectManager;
         private readonly IBlipLogger _blipMonitoringLogger;
 
-        public TakeThreadControlAction(ISender sender, IBlipLogger? blipMonitoringLogger = null)
+        public TakeThreadControlAction(ISender sender, IRedirectManager redirectManager, IBlipLogger? blipMonitoringLogger = null)
             : base(nameof(TakeThreadControl))
         {
             _sender = sender;
+            _redirectManager = redirectManager;
             _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
@@ -29,20 +30,18 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
             var sw = Stopwatch.StartNew();
             try
             {
-                var resource = new JObject();
+                var resource = BuildThreadControlResource(context, settings);
 
-                if (!string.IsNullOrWhiteSpace(settings.Metadata))
-                {
-                    resource["metadata"] = settings.Metadata;
-                }
-
-                var command = ThreadControlCommandFactory.CreateSetCommand(ThreadControlConstants.TakeUri, resource);
+                var command = ThreadControlCommandFactory.CreateSetCommand(resource);
                 var response = await _sender.ProcessCommandAsync(command, cancellationToken);
                 ThrowIfFailure(response);
 
+                await RedirectAsync(context, settings, cancellationToken);
+
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
-                    ["uri"] = command.Uri.ToString(),
+                    ["controlType"] = ThreadControlType.Take.ToString(),
+                    ["service"] = settings.Service,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
             }
@@ -50,10 +49,51 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
+                    ["controlType"] = ThreadControlType.Take.ToString(),
+                    ["service"] = settings.Service,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);
                 throw;
             }
+        }
+
+        private static ThreadControlCommandResource BuildThreadControlResource(
+            IContext context,
+            TakeThreadControlSettings settings)
+        {
+            var resource = new ThreadControlCommandResource
+            {
+                ControlType = ThreadControlType.Take,
+                Metadata = settings.Metadata,
+                UserIdentity = context?.UserIdentity?.ToString()
+            };
+
+            return resource;
+        }
+
+        private async Task RedirectAsync(IContext context, TakeThreadControlSettings settings, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(settings.Service))
+            {
+                return;
+            }
+
+            var redirectSettings = new JObject
+            {
+                ["address"] = settings.Service
+            };
+
+            if (!string.IsNullOrWhiteSpace(settings.Message))
+            {
+                redirectSettings["context"] = new JObject
+                {
+                    ["type"] = "text/plain",
+                    ["value"] = settings.Message,
+                };
+            }
+
+            var redirect = redirectSettings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
+            await _redirectManager.RedirectUserAsync(context, redirect, cancellationToken);
         }
 
         private static void ThrowIfFailure(Command response)

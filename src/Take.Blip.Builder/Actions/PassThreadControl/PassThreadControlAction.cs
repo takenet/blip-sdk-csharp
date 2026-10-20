@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Blip.Ai.Bot.Monitoring.Logging.Interface;
-using Blip.Ai.Bot.Monitoring.Logging.Models;
 using Blip.Ai.Bot.Monitoring.Logging.Services;
 using Lime.Protocol;
 using Newtonsoft.Json.Linq;
@@ -27,28 +26,19 @@ namespace Take.Blip.Builder.Actions.PassThreadControl
         public override async Task ExecuteAsync(IContext context, PassThreadControlSettings settings, CancellationToken cancellationToken)
         {
             var sw = Stopwatch.StartNew();
+
             try
             {
-                var resource = new JObject();
-
-                if (!string.IsNullOrWhiteSpace(settings.TargetRole))
-                {
-                    resource["targetRole"] = settings.TargetRole;
-                }
-
-                if (!string.IsNullOrWhiteSpace(settings.Metadata))
-                {
-                    resource["metadata"] = settings.Metadata;
-                }
-
-                var command = ThreadControlCommandFactory.CreateSetCommand(ThreadControlConstants.PassUri, resource);
+                var resource = BuildThreadControlResource(context, settings, settings.ControlType);
+                var command = ThreadControlCommandFactory.CreateSetCommand(resource);
                 var response = await _sender.ProcessCommandAsync(command, cancellationToken);
                 ThrowIfFailure(response);
 
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["uri"] = command.Uri.ToString(),
-                    ["targetRole"] = settings.TargetRole,
+                    ["controlType"] = settings.ControlType.ToString(),
+                    ["targetRole"] = settings.TargetRole?.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
             }
@@ -56,11 +46,28 @@ namespace Take.Blip.Builder.Actions.PassThreadControl
             {
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
-                    ["targetRole"] = settings.TargetRole,
+                    ["controlType"] = settings.ControlType.ToString(),
+                    ["targetRole"] = settings.TargetRole?.ToString(),
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);
                 throw;
             }
+        }
+
+        private static ThreadControlCommandResource BuildThreadControlResource(
+            IContext context,
+            PassThreadControlSettings settings,
+            ThreadControlType controlType)
+        {
+            var resource = new ThreadControlCommandResource
+            {
+                ControlType = controlType,
+                TargetRole = settings.TargetRole,
+                Metadata = settings.Metadata,
+                UserIdentity = context?.UserIdentity?.ToString()
+            };
+
+            return resource;
         }
 
         private static void ThrowIfFailure(Command response)
