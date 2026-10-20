@@ -251,6 +251,14 @@ namespace Take.Blip.Builder
                             return;
                         }
 
+                        // Renew the state and flow session expiration while the user is interacting inside a subflow,
+                        // since transitions may not occur on every input (e.g. during a human attendance handled externally).
+                        if (flow.Type == FlowType.Subflow)
+                        {
+                            await _stateManager.RenewStateExpirationAsync(context, linkedCts.Token);
+                            await _flowSessionManager.RenewFlowSessionExpirationAsync(context, linkedCts.Token);
+                        }
+
                         await _inputMessageHandlerAggregator.OnFlowPreProcessingAsync(
                             state,
                             message,
