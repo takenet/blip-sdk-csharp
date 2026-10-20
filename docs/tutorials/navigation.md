@@ -48,10 +48,10 @@ For ease of use, the SDK includes some *receivers* for common actions, such as s
   "messageReceivers": [
     {
       "mediaType": "text/plain",
-      "content": "ajuda",
+      "content": "help",
       "response": {
         "mediaType": "text/plain",
-        "plainContent": "Olá, seja bem-vindo ao serviço de ajuda do Messaging Hub."
+        "plainContent": "Hello, welcome to the Messaging Hub help service."
       }
     }
   ]
@@ -62,10 +62,10 @@ In this way, if the client sends the word `help`, it will receive a message of t
   "messageReceivers": [
     {
       "mediaType": "text/plain",
-      "content": "^(inicio|iniciar|começar|ajuda)$",
+      "content": "^(start|begin|help)$",
       "response": {
         "mediaType": "text/plain",
-        "plainContent": "Olá, seja bem-vindo ao serviço de ajuda do Messaging Hub."
+        "plainContent": "Hello, welcome to the Messaging Hub help service."
       }
     }
   ]
@@ -76,29 +76,29 @@ We can return, instead of a plain text, a complex message type such as a ** Sele
   "messageReceivers": [
     {
       "mediaType": "text/plain",
-      "content": "^(inicio|iniciar|começar|ajuda)$",
+      "content": "^(start|begin|help)$",
       "response": {
         "mediaType": "application/vnd.lime.select+json",
         "jsonContent": {
-          "text": "Olá, seja bem-vindo ao serviço de ajuda do Messaging Hub. Escolha o que você deseja receber:",
+          "text": "Hello, welcome to the Messaging Hub help service. Choose what you want to receive:",
           "options": [
             {
               "order": 1,
-              "text": "Um TEXTO",
+              "text": "A TEXT",
               "type": "text/plain",
-              "value": "texto"
+              "value": "text"
             },
             {
               "order": 2,
-              "text": "Uma IMAGEM",
+              "text": "AN IMAGE",
               "type": "text/plain",
-              "value": "imagem"
+              "value": "image"
             },
             {
               "order": 3,
-              "text": "A DATA atual",
+              "text": "TODAY'S DATE",
               "type": "text/plain",
-              "value": "data"
+              "value": "date"
             }
           ]
         }
@@ -111,10 +111,10 @@ For each of the `Select` options, we must include a *receiver* for the word set 
 ```json
     {
       "mediaType": "text/plain",
-      "content": "^(texto|um texto|1)$",
+      "content": "^(text|a text|1)$",
       "response": {
         "mediaType": "text/plain",
-        "plainContent": "Este é um texto simples, sem nada de especial."
+        "plainContent": "This is a simple text, with nothing special."
       }
     }
 ```    
@@ -123,7 +123,7 @@ In this case, we return a simple message but supporting several different comman
 ```json
     {
       "mediaType": "text/plain",
-      "content": "^(imagem|uma imagem|2)$",
+      "content": "^(image|an image|2)$",
       "response": {
         "mediaType": "application/vnd.lime.media-link+json",
         "jsonContent": {

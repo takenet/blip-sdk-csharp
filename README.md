@@ -37,6 +37,7 @@ There are available the following templates:
 - `blip-web` - Run as a ASP.NET Core application (experimental)
 
 For more details about the BLiP SDK, please refer to our SDK documentation [here](https://docs.blip.ai/#sdk).
+Project-specific guides are available in the [`docs`](./docs) folder, including [WhatsApp Thread Control actions](./docs/thread-control.md).
 
 ## License
 

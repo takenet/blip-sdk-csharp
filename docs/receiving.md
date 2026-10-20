@@ -19,7 +19,7 @@ Some important notes:
 
 - Before the `ReceiveAsync` method be executed, a notification of `Event.Received` type is automatically sent to originator of message.
 - After `ReceiveAsync` method be executed, if no one exception occur, a notification of type `Event.Consumed` is automatically sent to originator of message.
-- If some exception occur on `ReceiveAsync` method, a notificação of type `Event.Failed` is automatically sent to originator of message.
+- If some exception occur on `ReceiveAsync` method, a notification of type `Event.Failed` is automatically sent to originator of message.
 
 A `INotificationReceiver` can be defined as follow:
 
