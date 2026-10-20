@@ -30,7 +30,7 @@
   <ItemGroup>
     <Compile Include="$(PaymentBlockTestsDir)**\*.cs" Link="PaymentBlock\%(RecursiveDir)%(Filename)%(Extension)" />
     <None Include="$(PaymentBlockTestsDir)Fixtures\**" Link="PaymentBlock\Fixtures\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="$(PaymentBlockTestsDir)Referencias\*.json" Link="PaymentBlock\Referencias\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(PaymentBlockTestsDir)References\*.json" Link="PaymentBlock\References\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -12,11 +12,11 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
     public sealed class ReferenceComparerTests : IDisposable
     {
         private const string CATEGORY = "Category";
-        private const string COMPARER = "comparador";
-        private const string VOLATILE_PASSES = "comparador-volatil-passa";
-        private const string DIFFERENCE_FAILS = "comparador-diferenca-reprova";
-        private const string MISSING_FAILS = "comparador-ausente-reprova";
-        private const string REFERENCE_NAME = "v1-comparador";
+        private const string COMPARER = "comparer";
+        private const string VOLATILE_PASSES = "comparer-volatile-passes";
+        private const string DIFFERENCE_FAILS = "comparer-difference-fails";
+        private const string MISSING_FAILS = "comparer-missing-fails";
+        private const string REFERENCE_NAME = "v1-comparer";
         private const string CHECKOUT_URI = "/payments/checkout";
 
         private static readonly TimeSpan REGEX_TIMEOUT = TimeSpan.FromSeconds(1);
@@ -28,7 +28,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
 
         public ReferenceComparerTests()
         {
-            _referenceDirectory = Directory.CreateTempSubdirectory("paymentblock-referencias-");
+            _referenceDirectory = Directory.CreateTempSubdirectory("paymentblock-references-");
         }
 
         public void Dispose()

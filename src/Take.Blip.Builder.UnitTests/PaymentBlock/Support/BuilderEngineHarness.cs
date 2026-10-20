@@ -103,7 +103,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
         /// <summary>Reference flow in use (fixture name).</summary>
         public string ReferenceFlow { get; private set; }
 
-        /// <summary>Block configuration in use (<c>configuracao</c> column of <c>configuracoes-v1.json</c>).</summary>
+        /// <summary>Block configuration in use (<c>configuration</c> column of <c>configurations-v1.json</c>).</summary>
         public string ConfigurationName { get; private set; }
 
         /// <summary>Exception returned by the engine on the last send, or <c>null</c> if it finished without error.</summary>
@@ -121,7 +121,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
         {
             var row = FlowAssembler.LoadConfiguration(configuration, feedback);
             _flow = FlowAssembler.Assemble(referenceFlow, row);
-            HttpClient.HasSavedCard = (bool?)row["cartaoSalvo"] ?? false;
+            HttpClient.HasSavedCard = (bool?)row["savedCard"] ?? false;
             ReferenceFlow = referenceFlow;
             ConfigurationName = configuration;
         }

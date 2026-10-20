@@ -21,12 +21,16 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock
     public sealed class PaymentBlockExecutionTests : IDisposable
     {
         private const string CATEGORY = "Category";
+
+        // These two traits mirror the Gherkin tags of the IPAY-1 decision, shared by every Payments repository
+        // (--filter Category=regressao), so they keep their original names.
         private const string REGRESSION = "regressao";
         private const string PAYMENT_BLOCK = "bloco-pagamento";
+
         private const string REFERENCE_FLOW = "checkout-v1";
 
         // Payment link and PIX through Checkout Blip, the two payment methods that the Checkout contract enables.
-        private const string BLOCK_CONFIGURATION = "checkout-link-e-pix";
+        private const string BLOCK_CONFIGURATION = "checkout-link-and-pix";
         private const string BUCKET_ID = "checkout-secret";
         private const string BUCKET_URI_PREFIX = "/buckets/";
         private const string SEND_TO_SERVER_METADATA = "#envelope.sendToServerRequired";
@@ -47,7 +51,10 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock
             _harness.Dispose();
         }
 
-        /// <summary>Cliente entra no bloco e recebe o pedido com o link.</summary>
+        /// <summary>
+        /// Entering the block sends the order card with the created link. Scenario "Cliente entra no bloco e recebe o pedido com o link"
+        /// of the Payments regression suite.
+        /// </summary>
         [Fact]
         public async Task ClientEntersBlockAndReceivesOrderWithLink()
         {
@@ -64,7 +71,10 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock
             ThenSendsOrderCardWithLink();
         }
 
-        /// <summary>Falha da checkout-api não envia link.</summary>
+        /// <summary>
+        /// A checkout-api failure sends no link and the engine records the failure. Scenario "Falha da checkout-api não envia link"
+        /// of the Payments regression suite.
+        /// </summary>
         [Fact]
         public async Task CheckoutApiFailureShouldNotSendLink()
         {
@@ -80,7 +90,10 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock
             ThenFailureIsRecordedByEngine();
         }
 
-        /// <summary>Script do bloco respeita o tempo máximo de execução.</summary>
+        /// <summary>
+        /// The block script is interrupted at the maximum execution time and sends no order card. Scenario
+        /// "Script do bloco respeita o tempo máximo de execução" of the Payments regression suite.
+        /// </summary>
         [Fact]
         public async Task BlockScriptShouldRespectMaximumExecutionTime()
         {

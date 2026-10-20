@@ -11,7 +11,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock
 {
     /// <summary>
     /// Runs the Payments block v1 on the Builder engine, with the checkout-api and the checkout-auth-api simulated, and compares
-    /// the message sent to the customer with the approved reference in <c>PaymentBlock/Referencias/</c>, through the
+    /// the message sent to the customer with the approved reference in <c>PaymentBlock/References/</c>, through the
     /// <see cref="ReferenceComparer"/>. The references are used by the payment-application to prove it generates the same messages
     /// when the block logic leaves the front end.
     /// </summary>
@@ -21,11 +21,15 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock
     public sealed class PaymentBlockV1MessageTests : IDisposable
     {
         private const string CATEGORY = "Category";
+
+        // These three traits mirror the Gherkin tags of the IPAY-1 decision, shared by every Payments repository
+        // (--filter Category=regressao), so they keep their original names.
         private const string REGRESSION = "regressao";
         private const string PAYMENT_BLOCK = "bloco-pagamento";
         private const string V1_REFERENCE = "referencia-v1";
+
         private const string REFERENCE_FLOW = "checkout-v1";
-        private const string FEEDBACK_CONFIGURATION = "checkout-link-e-pix";
+        private const string FEEDBACK_CONFIGURATION = "checkout-link-and-pix";
         private const string BUCKET_ID = "checkout-secret";
 
         private readonly BuilderEngineHarness _harness = new BuilderEngineHarness();
@@ -35,17 +39,20 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock
             _harness.Dispose();
         }
 
-        /// <summary>Mensagem do pedido para cada configuração do bloco.</summary>
+        /// <summary>
+        /// The order message matches the approved reference for each block configuration. Scenario outline
+        /// "Mensagem do pedido para cada configuração do bloco" of the Payments regression suite.
+        /// </summary>
         [Theory]
         [InlineData("checkout-link", "v1-checkout-link")]
         [InlineData("checkout-pix", "v1-checkout-pix")]
-        [InlineData("checkout-link-e-pix", "v1-checkout-link-e-pix")]
-        [InlineData("checkout-link-com-cartao-salvo", "v1-checkout-cta-cartao")]
-        [InlineData("proprio-pix-cpf", "v1-proprio-pix-cpf")]
-        [InlineData("proprio-pix-aleatoria", "v1-proprio-pix-aleatoria")]
-        [InlineData("proprio-link", "v1-proprio-link")]
-        [InlineData("proprio-boleto", "v1-proprio-boleto")]
-        [InlineData("produto-fisico-dois-itens", "v1-fisico-dois-itens")]
+        [InlineData("checkout-link-and-pix", "v1-checkout-link-and-pix")]
+        [InlineData("checkout-link-with-saved-card", "v1-checkout-saved-card-cta")]
+        [InlineData("own-pix-cpf", "v1-own-pix-cpf")]
+        [InlineData("own-pix-random-key", "v1-own-pix-random-key")]
+        [InlineData("own-link", "v1-own-link")]
+        [InlineData("own-boleto", "v1-own-boleto")]
+        [InlineData("physical-product-two-items", "v1-physical-two-items")]
         public async Task OrderMessageShouldMatchApprovedReference(string configuration, string reference)
         {
             // Arrange
@@ -62,15 +69,17 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock
         }
 
         /// <summary>
-        /// Mensagem de status para cada resultado do pagamento. The customer reaches the block and the engine receives, without real
-        /// waiting, the input expiration it scheduled: the end of the feedback time, which triggers the payment query.
+        /// The status message matches the approved reference for each payment result. Scenario outline
+        /// "Mensagem de status para cada resultado do pagamento" of the Payments regression suite. The customer reaches the block
+        /// and the engine receives, without real waiting, the input expiration it scheduled: the end of the feedback time, which
+        /// triggers the payment query.
         /// </summary>
         [Theory]
-        [InlineData("PIX", "Succeeded", "v1-status-pix-pago")]
-        [InlineData("CreditCard", "Succeeded", "v1-status-cartao-pago")]
-        [InlineData("CreditCard", "Denied", "v1-status-negado")]
-        [InlineData("PIX", "Pending", "v1-status-pendente")]
-        [InlineData("PIX", "Created", "v1-status-criado")]
+        [InlineData("PIX", "Succeeded", "v1-status-pix-paid")]
+        [InlineData("CreditCard", "Succeeded", "v1-status-card-paid")]
+        [InlineData("CreditCard", "Denied", "v1-status-denied")]
+        [InlineData("PIX", "Pending", "v1-status-pending")]
+        [InlineData("PIX", "Created", "v1-status-created")]
         public async Task StatusMessageShouldMatchApprovedReference(string paymentMethod, string status, string reference)
         {
             // Arrange

@@ -3,13 +3,13 @@
     "id": "payment:<id>",
     "$invalid": false,
     "$contentActions": {
-      "$fixture": "checkout-v1-conteudo.json"
+      "$fixture": "checkout-v1-content-actions.json"
     },
     "$enteringCustomActions": {
       "$fixture": "checkout-v1.json"
     },
     "$leavingCustomActions": {
-      "$fixture": "checkout-v1-acoes-saida.json"
+      "$fixture": "checkout-v1-leaving-actions.json"
     },
     "$afterStateChangedActions": [],
     "$localCustomActions": [],
@@ -105,11 +105,11 @@
       "$fixture": "checkout-v1.json"
     },
     "input": {
-      "$fixture": "checkout-v1-conteudo.json",
+      "$fixture": "checkout-v1-content-actions.json",
       "$path": "[0].input"
     },
     "outputActions": {
-      "$fixture": "checkout-v1-acoes-saida.json"
+      "$fixture": "checkout-v1-leaving-actions.json"
     },
     "afterStateChangedActions": [],
     "localCustomActions": [],

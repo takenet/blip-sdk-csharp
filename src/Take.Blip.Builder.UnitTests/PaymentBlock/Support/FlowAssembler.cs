@@ -9,8 +9,8 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
 {
     /// <summary>
     /// Assembles in memory the flow the engine runs from <c>PaymentBlock/Fixtures/</c>, following the state assembly described
-    /// in <c>ORIGEM.md</c>: the <c>model</c> of <c>&lt;flow&gt;-estado.json</c> with the <c>$fixture</c>/<c>$path</c> references
-    /// resolved, the configuration SetVariable actions filled with a row of <c>configuracoes-v1.json</c>, an initial state
+    /// in <c>ORIGIN.md</c>: the <c>model</c> of <c>&lt;flow&gt;-state.json</c> with the <c>$fixture</c>/<c>$path</c> references
+    /// resolved, the configuration SetVariable actions filled with a row of <c>configurations-v1.json</c>, an initial state
     /// that leads to the block and an exit state for each block output without a destination. The files do not change.
     /// </summary>
     public static class FlowAssembler
@@ -22,16 +22,16 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
         public const string FIXTURES_FOLDER = "Fixtures";
 
         /// <summary>Block configuration matrix.</summary>
-        public const string CONFIGURATIONS_FILE = "configuracoes-v1.json";
+        public const string CONFIGURATIONS_FILE = "configurations-v1.json";
 
         /// <summary>Root state of the assembled flow: waits for the customer message and moves on to the block.</summary>
-        public const string ENTRY_STATE_ID = "inicio";
+        public const string ENTRY_STATE_ID = "start";
 
-        private const string STATE_FILE_SUFFIX = "-estado.json";
+        private const string STATE_FILE_SUFFIX = "-state.json";
         private const string FIXTURE_REFERENCE = "$fixture";
         private const string FIXTURE_PATH = "$path";
-        private const string EXIT_STATE_PREFIX = "saida-";
-        private const string DEFAULT_EXIT_NAME = "padrao";
+        private const string EXIT_STATE_PREFIX = "exit-";
+        private const string DEFAULT_EXIT_NAME = "default";
         private const string STATE_ID = "stateId";
         private const string SETTINGS = "settings";
 
@@ -49,7 +49,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
         }
 
         /// <summary>
-        /// Row of <c>configuracoes-v1.json</c> with the given <paramref name="configuration"/> (<c>configuracao</c> column) and
+        /// Row of <c>configurations-v1.json</c> with the given <paramref name="configuration"/> (<c>configuration</c> column) and
         /// <paramref name="feedback"/>.
         /// </summary>
         public static JObject LoadConfiguration(string configuration, bool feedback)
@@ -61,7 +61,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
 
             foreach (var row in rows.Children<JObject>())
             {
-                if (string.Equals((string)row["configuracao"], configuration, StringComparison.Ordinal)
+                if (string.Equals((string)row["configuration"], configuration, StringComparison.Ordinal)
                     && (bool?)row["feedback"] == feedback)
                 {
                     return row;

@@ -11,20 +11,20 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
 {
     /// <summary>
     /// Compares the output of an engine run, normalized by <see cref="JsonNormalizer"/>, with the approved reference
-    /// <c>PaymentBlock/Referencias/&lt;name&gt;.json</c>. A difference in a non-volatile field or a missing reference fails the test.
-    /// With <c>REFERENCIAS_GRAVAR=1</c>, <c>Take.Blip.Builder.UnitTests</c> writes the normalized version to the source folder instead
+    /// <c>PaymentBlock/References/&lt;name&gt;.json</c>. A difference in a non-volatile field or a missing reference fails the test.
+    /// With <c>RECORD_REFERENCES=1</c>, <c>Take.Blip.Builder.UnitTests</c> writes the normalized version to the source folder instead
     /// of comparing; compiled with <c>ENGINE_PACKAGE</c>, it never writes.
     /// </summary>
     public sealed class ReferenceComparer
     {
         /// <summary>Environment variable that, set to <c>1</c>, writes the references instead of comparing.</summary>
-        public const string RECORD_VARIABLE = "REFERENCIAS_GRAVAR";
+        public const string RECORD_VARIABLE = "RECORD_REFERENCES";
 
         /// <summary>Folder of the Payments block files, in the build output and in the test project.</summary>
         public const string PAYMENT_BLOCK_FOLDER = "PaymentBlock";
 
         /// <summary>References folder, inside <see cref="PAYMENT_BLOCK_FOLDER"/>.</summary>
-        public const string REFERENCES_FOLDER = "Referencias";
+        public const string REFERENCES_FOLDER = "References";
 
         private const string JSON_EXTENSION = ".json";
         private const int MAX_REPORTED_DIFFERENCES = 20;
@@ -70,8 +70,8 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         public bool IsRecording { get; }
 
         /// <summary>
-        /// Default comparer: reads <c>PaymentBlock/Referencias/</c> from the build output and, with <c>REFERENCIAS_GRAVAR=1</c> in
-        /// <c>Take.Blip.Builder.UnitTests</c>, writes to <c>src/Take.Blip.Builder.UnitTests/PaymentBlock/Referencias/</c>.
+        /// Default comparer: reads <c>PaymentBlock/References/</c> from the build output and, with <c>RECORD_REFERENCES=1</c> in
+        /// <c>Take.Blip.Builder.UnitTests</c>, writes to <c>src/Take.Blip.Builder.UnitTests/PaymentBlock/References/</c>.
         /// </summary>
         public static ReferenceComparer FromBuildOutput()
         {

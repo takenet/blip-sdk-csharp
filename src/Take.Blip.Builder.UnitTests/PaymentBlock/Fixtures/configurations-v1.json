@@ -1,8 +1,8 @@
 [
   {
-    "configuracao": "checkout-link",
+    "configuration": "checkout-link",
     "feedback": false,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
@@ -69,9 +69,9 @@
     }
   },
   {
-    "configuracao": "checkout-pix",
+    "configuration": "checkout-pix",
     "feedback": false,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
@@ -138,9 +138,9 @@
     }
   },
   {
-    "configuracao": "checkout-link-e-pix",
+    "configuration": "checkout-link-and-pix",
     "feedback": false,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
@@ -207,9 +207,9 @@
     }
   },
   {
-    "configuracao": "checkout-link-com-cartao-salvo",
+    "configuration": "checkout-link-with-saved-card",
     "feedback": false,
-    "cartaoSalvo": true,
+    "savedCard": true,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
@@ -276,9 +276,9 @@
     }
   },
   {
-    "configuracao": "proprio-pix-cpf",
+    "configuration": "own-pix-cpf",
     "feedback": false,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
@@ -345,9 +345,9 @@
     }
   },
   {
-    "configuracao": "proprio-pix-aleatoria",
+    "configuration": "own-pix-random-key",
     "feedback": false,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
@@ -414,9 +414,9 @@
     }
   },
   {
-    "configuracao": "proprio-link",
+    "configuration": "own-link",
     "feedback": false,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
@@ -483,9 +483,9 @@
     }
   },
   {
-    "configuracao": "proprio-boleto",
+    "configuration": "own-boleto",
     "feedback": false,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
@@ -552,9 +552,9 @@
     }
   },
   {
-    "configuracao": "produto-fisico-dois-itens",
+    "configuration": "physical-product-two-items",
     "feedback": false,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "fisico",
@@ -621,9 +621,9 @@
     }
   },
   {
-    "configuracao": "checkout-link-e-pix",
+    "configuration": "checkout-link-and-pix",
     "feedback": true,
-    "cartaoSalvo": false,
+    "savedCard": false,
     "configurationData": {
       "referenceId": "pedido-teste-v1",
       "productType": "digital",
