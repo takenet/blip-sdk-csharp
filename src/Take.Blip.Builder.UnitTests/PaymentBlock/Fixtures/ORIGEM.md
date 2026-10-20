@@ -1,8 +1,8 @@
 # Origin of the Payments block v1 fixtures
 
-- Source repository: `portal-submodule-builder`, PR `portal-submodule-builder#164` (NOT merged yet).
-  If #164 changes during review, re-sync these files from the new SHA, with the same method.
-- SHA: `843c51c6aedf3916973154ad67dbfa80dd515510` (branch `test/ipay-14-caracterizacao-bloco-builder`).
+- Source repository: `portal-submodule-builder`, PR `portal-submodule-builder#164`, merged on 2026-10-19 into `main`.
+- SHA: `df193fcd7590c85b70140c424f32ccef3d22d681` (squash commit of #164 on `main`). The files were first produced from the PR head `843c51c6aedf3916973154ad67dbfa80dd515510` and come out identical from `df193fc`.
+- If these source files change on `main`, re-sync the fixtures from the new SHA, with the same method.
 - Read only with `git show`/`git archive` of that SHA, extracting to an empty folder outside the checkouts.
 - Nothing here runs Node at test time: the files are static JSON.
 
@@ -10,7 +10,7 @@
 
 | File | Origin in the SHA | Method |
 | --- | --- | --- |
-| `checkout-v1.json` | `templates/builder/payment/features/referencias/checkout-v1.json` | byte-for-byte copy (`git show <SHA>:<path>`, 34677 bytes) |
+| `checkout-v1.json` | `templates/builder/payment/features/references/checkout-v1.json` | byte-for-byte copy (`git show <SHA>:<path>`, 34677 bytes) |
 | `checkout-v1-acoes-saida.json` | `templates/builder/payment/state/Actions.ts`, `leavingPaymentActions(urlCheckout, urlAuth)` | generated |
 | `checkout-v1-conteudo.json` | `templates/builder/payment/state/Actions.ts`, `contentActionsPayment(textContent)` | generated |
 | `checkout-v1-outputs.json` | `templates/builder/payment/state/Outputs.ts`, `conditionOutputPayment` | generated |
@@ -31,7 +31,7 @@
    - URLs `https://checkout.hmg.example.test` and `https://auth.hmg.example.test`, the same as in the reference;
    - title `PaymentConstants.DEFAULT_BLOCK_TITLE` (`Payment`);
    - `textContent` = the key `builder-tabs-content.media.userInput`. The portal passes the translation of that key, which lives in blip-portal, outside the SHA.
-5. Normalization equal to the one in `templates/builder/payment/features/__tests__/regressao.steps.test.ts`: `JSON.parse(JSON.stringify(x))` and every `$id` replaced with `"<id>"`. Written with `JSON.stringify(x, null, 2)` plus `\n`.
+5. Normalization equal to the one in `templates/builder/payment/features/__tests__/regression.steps.test.ts`: `JSON.parse(JSON.stringify(x))` and every `$id` replaced with `"<id>"`. Written with `JSON.stringify(x, null, 2)` plus `\n`.
 6. Fidelity proof: the same generator reproduces `checkout-v1.json` byte for byte (`cmp` against the blob in the SHA).
 
 ## State assembly (`checkout-v1-estado.json`)
