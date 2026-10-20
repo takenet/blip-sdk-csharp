@@ -12,8 +12,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
     /// <summary>
     /// Compares the output of an engine run, normalized by <see cref="JsonNormalizer"/>, with the approved reference
     /// <c>PaymentBlock/References/&lt;name&gt;.json</c>. A difference in a non-volatile field or a missing reference fails the test.
-    /// With <c>RECORD_REFERENCES=1</c>, <c>Take.Blip.Builder.UnitTests</c> writes the normalized version to the source folder instead
-    /// of comparing; compiled with <c>ENGINE_PACKAGE</c>, it never writes.
+    /// With <c>RECORD_REFERENCES=1</c>, it writes the normalized version to the source folder instead of comparing.
     /// </summary>
     public sealed class ReferenceComparer
     {
@@ -27,24 +26,22 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         public const string REFERENCES_FOLDER = "References";
 
         private const string JSON_EXTENSION = ".json";
+        private const string PROJECT_FILE = "Take.Blip.Builder.UnitTests.csproj";
         private const int MAX_REPORTED_DIFFERENCES = 20;
         private static readonly TimeSpan REGEX_TIMEOUT = TimeSpan.FromSeconds(1);
+        private static readonly Encoding UTF8_WITHOUT_BOM = new UTF8Encoding(false, true);
         private static readonly Regex NAME_PATTERN = new Regex("^[a-z0-9]+(?:-[a-z0-9]+)*$", RegexOptions.CultureInvariant, REGEX_TIMEOUT);
         private static readonly Regex IDENTIFIER_PATTERN = new Regex("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.CultureInvariant, REGEX_TIMEOUT);
 
         private readonly string _referenceDirectory;
-#if !ENGINE_PACKAGE
-        private const string PROJECT_FILE = "Take.Blip.Builder.UnitTests.csproj";
-        private static readonly Encoding UTF8_WITHOUT_BOM = new UTF8Encoding(false, true);
         private readonly string _recordDirectory;
-#endif
 
         /// <summary>
         /// Creates the comparer.
         /// </summary>
         /// <param name="referenceDirectory">Folder the references are read from.</param>
         /// <param name="recordDirectory">Folder the references are written to when <paramref name="record"/> is true.</param>
-        /// <param name="record">Writes the normalized version instead of comparing. Ignored when compiled with <c>ENGINE_PACKAGE</c>.</param>
+        /// <param name="record">Writes the normalized version instead of comparing.</param>
         public ReferenceComparer(string referenceDirectory, string recordDirectory = null, bool record = false)
         {
             if (string.IsNullOrWhiteSpace(referenceDirectory))
@@ -58,12 +55,8 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
             }
 
             _referenceDirectory = referenceDirectory;
-#if ENGINE_PACKAGE
-            IsRecording = false;
-#else
             _recordDirectory = recordDirectory;
             IsRecording = record;
-#endif
         }
 
         /// <summary>True when the comparer writes the references instead of comparing.</summary>
@@ -76,12 +69,8 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         public static ReferenceComparer FromBuildOutput()
         {
             var referenceDirectory = Path.Combine(AppContext.BaseDirectory, PAYMENT_BLOCK_FOLDER, REFERENCES_FOLDER);
-#if ENGINE_PACKAGE
-            return new ReferenceComparer(referenceDirectory);
-#else
             var record = string.Equals(Environment.GetEnvironmentVariable(RECORD_VARIABLE), "1", StringComparison.Ordinal);
             return new ReferenceComparer(referenceDirectory, record ? FindSourceReferenceDirectory() : null, record);
-#endif
         }
 
         /// <summary>
@@ -104,14 +93,13 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
             }
 
             var canonicalText = JsonNormalizer.ToCanonicalText(JsonNormalizer.Normalize(actual, runSecrets));
-#if !ENGINE_PACKAGE
             if (IsRecording)
             {
                 Directory.CreateDirectory(_recordDirectory);
                 File.WriteAllText(Path.Combine(_recordDirectory, name + JSON_EXTENSION), canonicalText, UTF8_WITHOUT_BOM);
                 return;
             }
-#endif
+
             var referencePath = Path.Combine(_referenceDirectory, name + JSON_EXTENSION);
             if (!File.Exists(referencePath))
             {
@@ -130,7 +118,6 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
             }
         }
 
-#if !ENGINE_PACKAGE
         private static string FindSourceReferenceDirectory()
         {
             for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory != null; directory = directory.Parent)
@@ -145,7 +132,6 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
                 RECORD_VARIABLE + "=1 requires running Take.Blip.Builder.UnitTests inside the repository: " + PROJECT_FILE + " was not found above "
                 + AppContext.BaseDirectory + ".");
         }
-#endif
 
         private static void CollectDifferences(JToken expected, JToken actual, string path, DifferenceLog differences)
         {

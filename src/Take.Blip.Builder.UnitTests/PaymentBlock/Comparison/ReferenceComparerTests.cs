@@ -16,6 +16,7 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         private const string VOLATILE_PASSES = "comparer-volatile-passes";
         private const string DIFFERENCE_FAILS = "comparer-difference-fails";
         private const string MISSING_FAILS = "comparer-missing-fails";
+        private const string RECORDING_WRITES = "comparer-recording-writes";
         private const string REFERENCE_NAME = "v1-comparer";
         private const string CHECKOUT_URI = "/payments/checkout";
 
@@ -23,17 +24,21 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
         private static readonly Regex GUID_PATTERN = new Regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, REGEX_TIMEOUT);
         private static readonly Regex DATE_TIME_PATTERN = new Regex("[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}", RegexOptions.CultureInvariant, REGEX_TIMEOUT);
         private static readonly string ZERO_GUID = Guid.Empty.ToString();
+        private static readonly byte[] UTF8_BOM = { 0xEF, 0xBB, 0xBF };
 
         private readonly DirectoryInfo _referenceDirectory;
+        private readonly DirectoryInfo _recordDirectory;
 
         public ReferenceComparerTests()
         {
             _referenceDirectory = Directory.CreateTempSubdirectory("paymentblock-references-");
+            _recordDirectory = Directory.CreateTempSubdirectory("paymentblock-recording-");
         }
 
         public void Dispose()
         {
             _referenceDirectory.Delete(true);
+            _recordDirectory.Delete(true);
         }
 
         [Fact]
@@ -197,6 +202,34 @@ namespace Take.Blip.Builder.UnitTests.PaymentBlock.Comparison
             // Assert
             exception.Message.ShouldContain(ReferenceComparer.RECORD_VARIABLE + "=1");
             Directory.Exists(missingFolder).ShouldBeFalse();
+        }
+
+        [Fact]
+        [Trait(CATEGORY, COMPARER)]
+        [Trait(CATEGORY, RECORDING_WRITES)]
+        public void RecordingShouldWriteCanonicalReferenceWithoutComparing()
+        {
+            // Arrange
+            var run = SyntheticRun.Create(TimeSpan.Zero, CHECKOUT_URI);
+            var recordFolder = Path.Combine(_recordDirectory.FullName, ReferenceComparer.REFERENCES_FOLDER);
+            var recordedPath = Path.Combine(recordFolder, REFERENCE_NAME + ".json");
+            var comparer = new ReferenceComparer(_referenceDirectory.FullName, recordFolder, record: true);
+
+            // Act
+            var act = new Action(() => comparer.AssertMatches(REFERENCE_NAME, run.Json, run.Secrets));
+
+            // Assert
+            Should.NotThrow(act);
+            comparer.IsRecording.ShouldBeTrue();
+            File.Exists(recordedPath).ShouldBeTrue();
+            var bytes = File.ReadAllBytes(recordedPath);
+            bytes.Length.ShouldBeGreaterThan(UTF8_BOM.Length);
+            bytes.AsSpan(0, UTF8_BOM.Length).SequenceEqual(UTF8_BOM).ShouldBeFalse("the recorded reference starts with a UTF-8 BOM");
+            var text = Encoding.UTF8.GetString(bytes);
+            text.ShouldBe(Canonical(run));
+            text.ShouldNotContain(run.Token);
+            text.ShouldNotContain(run.Secret);
+            _referenceDirectory.GetFileSystemInfos().ShouldBeEmpty();
         }
 
         private void WriteReference(SyntheticRun run)
