@@ -1,0 +1,69 @@
+[
+  {
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "paymentGenerateComponent",
+        "comparison": "equals",
+        "values": [
+          "Loopback"
+        ]
+      }
+    ],
+    "stateId": "self",
+    "$invalid": false,
+    "$isPaymentInternalOutput": true
+  },
+  {
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "paymentGenerateComponent",
+        "comparison": "equals",
+        "values": [
+          "Error"
+        ]
+      }
+    ],
+    "stateId": "",
+    "$invalid": false
+  },
+  {
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "paymentGenerateComponent",
+        "comparison": "equals",
+        "values": [
+          "Success",
+          "WithoutComponent"
+        ]
+      },
+      {
+        "source": "context",
+        "variable": "paymentStatusFeedbackTime",
+        "comparison": "equals",
+        "values": [
+          "0"
+        ]
+      }
+    ],
+    "stateId": "",
+    "$invalid": false
+  },
+  {
+    "conditions": [
+      {
+        "source": "context",
+        "variable": "paymentGenerateComponent",
+        "comparison": "equals",
+        "values": [
+          "UnexpectedInput"
+        ]
+      }
+    ],
+    "stateId": "",
+    "$invalid": false,
+    "$isPaymentInternalOutput": true
+  }
+]
