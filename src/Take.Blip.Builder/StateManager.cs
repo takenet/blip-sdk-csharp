@@ -13,6 +13,7 @@ namespace Take.Blip.Builder
         private const string PREVIOUS_STATE_PREFIX = "previous";
         private const string STATE_ID_KEY = "stateId";
         private const string MASTER_STATE = "master-state";
+        private const string DESK_STATE_PREFIX = "desk:";
         private const string CURRENT_FLOW_SESSION_KEY = "currentflowsession";
         public Task<string> GetStateIdAsync(IContext context, CancellationToken cancellationToken)
         {
@@ -36,7 +37,10 @@ namespace Take.Blip.Builder
 
         public Task SetStateIdAsync(IContext context, string stateId, CancellationToken cancellationToken)
         {
-            var expiration = context.Flow?.BuilderConfiguration?.StateExpiration ?? default;
+            // Desk states must not expire by the global state expiration: the Desk removes the state when the attendance ends.
+            var expiration = IsDeskState(stateId)
+                ? default
+                : context.Flow?.BuilderConfiguration?.StateExpiration ?? default;
             return context.SetVariableAsync(GetStateKey(context.Flow.Id), stateId, cancellationToken, expiration);
         }
 
@@ -70,6 +74,9 @@ namespace Take.Blip.Builder
                 DeleteCurrentFlowSessionAsync(context, cancellationToken),
                 DeleteParentStateIdAsync(context, cancellationToken));
         }
+
+        private static bool IsDeskState(string stateId) =>
+            stateId != null && stateId.StartsWith(DESK_STATE_PREFIX, StringComparison.OrdinalIgnoreCase);
 
         private static string GetStateKey(string flowId) => $"{STATE_ID_KEY}@{flowId}";
 
