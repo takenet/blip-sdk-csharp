@@ -53,7 +53,7 @@ Each **message receiver** can have the follow properties:
 |-------------|----------------------------------------------------------------------------------|-------------------------|
 | type        | The name of .NET type to receive messages. This type must implements the `IMessageReceiver` interface. If the type is located on a different **assembly** of `application.json` file please provide a qualify name with **assembly**. | PlainTextMessageReceiver |
 | mediaType   | Define a filter of message types that the **receiver** can process. Only messages with this type will be delivered to the receiver. | text/plain |
-| content     | Define a regular expression to filter the messages contents that the **receiver** can process. Only messages that satisfy this expression will be delivered to the receiver. | Olá mundo |
+| content     | Define a regular expression to filter the messages contents that the **receiver** can process. Only messages that satisfy this expression will be delivered to the receiver. | Hello world |
 | sender     | Define a regular expression to filter the messages originators that the **receiver** can procces. Only messages that satisfy this expression will be delivered to the receiver. | sender@domain.com |
 | destination     | Define a regular expression to filter the messages originators that the **receiver** can procces. Only messages that satisfy this expression will be delivered to the receiver. | destination@domain.com |
 | settings    | General settings of receiver with key-value format. This value is injected on created types. To receive the values the constructor of the types must have a instance of `IDictionary<string, object>` type. | { "mySetting": "xyzabcd" }   |

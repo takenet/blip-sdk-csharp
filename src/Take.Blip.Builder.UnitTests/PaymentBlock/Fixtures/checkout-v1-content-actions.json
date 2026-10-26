@@ -1,0 +1,30 @@
+[
+  {
+    "input": {
+      "bypass": false,
+      "conditions": [
+        {
+          "source": "context",
+          "variable": "shouldWaitForInput",
+          "comparison": "equals",
+          "values": [
+            "true"
+          ]
+        }
+      ],
+      "expiration": "0:1",
+      "variable": "inputCheckout",
+      "$cardContent": {
+        "editable": false,
+        "deletable": false,
+        "document": {
+          "id": "<id>",
+          "type": "text/plain",
+          "textContent": "builder-tabs-content.media.userInput"
+        },
+        "position": "right",
+        "editing": false
+      }
+    }
+  }
+]

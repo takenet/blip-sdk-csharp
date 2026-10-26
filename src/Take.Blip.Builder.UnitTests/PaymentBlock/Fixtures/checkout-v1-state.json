@@ -1,0 +1,174 @@
+{
+  "viewModel": {
+    "id": "payment:<id>",
+    "$invalid": false,
+    "$contentActions": {
+      "$fixture": "checkout-v1-content-actions.json"
+    },
+    "$enteringCustomActions": {
+      "$fixture": "checkout-v1.json"
+    },
+    "$leavingCustomActions": {
+      "$fixture": "checkout-v1-leaving-actions.json"
+    },
+    "$afterStateChangedActions": [],
+    "$localCustomActions": [],
+    "$conditionOutputs": [
+      {
+        "conditions": [
+          {
+            "source": "context",
+            "variable": "paymentGenerateComponent",
+            "comparison": "equals",
+            "values": [
+              "Loopback"
+            ]
+          }
+        ],
+        "stateId": "payment:<id>",
+        "$invalid": false,
+        "$isPaymentInternalOutput": true
+      },
+      {
+        "conditions": [
+          {
+            "source": "context",
+            "variable": "paymentGenerateComponent",
+            "comparison": "equals",
+            "values": [
+              "Error"
+            ]
+          }
+        ],
+        "stateId": "",
+        "$invalid": false
+      },
+      {
+        "conditions": [
+          {
+            "source": "context",
+            "variable": "paymentGenerateComponent",
+            "comparison": "equals",
+            "values": [
+              "Success",
+              "WithoutComponent"
+            ]
+          },
+          {
+            "source": "context",
+            "variable": "paymentStatusFeedbackTime",
+            "comparison": "equals",
+            "values": [
+              "0"
+            ]
+          }
+        ],
+        "stateId": "",
+        "$invalid": false
+      },
+      {
+        "conditions": [
+          {
+            "source": "context",
+            "variable": "paymentGenerateComponent",
+            "comparison": "equals",
+            "values": [
+              "UnexpectedInput"
+            ]
+          }
+        ],
+        "stateId": "",
+        "$invalid": false,
+        "$isPaymentInternalOutput": true
+      }
+    ],
+    "$defaultOutput": {
+      "stateId": "payment:<id>"
+    },
+    "$inputSuggestions": [],
+    "$toolActionsMapping": {
+      "builder": {
+        "uuid": "<id>"
+      }
+    },
+    "stateVersion": "0.1",
+    "root": false,
+    "$title": "Payment",
+    "$tags": [],
+    "isAiGenerated": false
+  },
+  "model": {
+    "id": "payment:<id>",
+    "name": "Payment",
+    "root": false,
+    "inputActions": {
+      "$fixture": "checkout-v1.json"
+    },
+    "input": {
+      "$fixture": "checkout-v1-content-actions.json",
+      "$path": "[0].input"
+    },
+    "outputActions": {
+      "$fixture": "checkout-v1-leaving-actions.json"
+    },
+    "afterStateChangedActions": [],
+    "localCustomActions": [],
+    "outputs": [
+      {
+        "conditions": [
+          {
+            "source": "context",
+            "variable": "paymentGenerateComponent",
+            "comparison": "equals",
+            "values": [
+              "Loopback"
+            ]
+          }
+        ],
+        "stateId": "payment:<id>",
+        "$invalid": false,
+        "$isPaymentInternalOutput": true
+      },
+      {
+        "conditions": [
+          {
+            "source": "context",
+            "variable": "paymentGenerateComponent",
+            "comparison": "equals",
+            "values": [
+              "Error"
+            ]
+          }
+        ],
+        "stateId": "",
+        "$invalid": false
+      },
+      {
+        "conditions": [
+          {
+            "source": "context",
+            "variable": "paymentGenerateComponent",
+            "comparison": "equals",
+            "values": [
+              "Success",
+              "WithoutComponent"
+            ]
+          },
+          {
+            "source": "context",
+            "variable": "paymentStatusFeedbackTime",
+            "comparison": "equals",
+            "values": [
+              "0"
+            ]
+          }
+        ],
+        "stateId": "",
+        "$invalid": false
+      },
+      {
+        "stateId": "payment:<id>"
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "content": {
+    "interactive": {
+      "action": {
+        "name": "review_order",
+        "parameters": {
+          "order": {
+            "status": "completed"
+          },
+          "payment": {
+            "status": "captured",
+            "timestamp": "<epoch-s>"
+          },
+          "reference_id": "pedido-teste-v1"
+        }
+      },
+      "body": {
+        "text": "Pagamento aprovado via PIX (mensagem fictícia de teste)"
+      },
+      "type": "order_status"
+    },
+    "recipient_type": "individual",
+    "type": "interactive"
+  },
+  "id": "<envelope-id>",
+  "metadata": {},
+  "to": "cliente-de-teste@wa.gw.msging.net",
+  "type": "application/json"
+}

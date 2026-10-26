@@ -44,8 +44,6 @@ namespace Take.Blip.Builder.Hosting
 
         long ExecuteScriptV2MaxRuntimeStackUsage { get; }
 
-        bool IsMonitoringDetailedEnabled { get; }
-
         Dictionary<string, string> ProcessCommandMetadatasToInsert { get; }
     }
 }

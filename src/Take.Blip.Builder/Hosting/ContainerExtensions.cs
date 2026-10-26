@@ -12,6 +12,7 @@ using Take.Blip.Builder.Actions.ExecuteScriptV2;
 using Take.Blip.Builder.Actions.ExecuteTemplate;
 using Take.Blip.Builder.Actions.ManageList;
 using Take.Blip.Builder.Actions.MergeContact;
+using Take.Blip.Builder.Actions.PassThreadControl;
 using Take.Blip.Builder.Actions.ProcessCommand;
 using Take.Blip.Builder.Actions.ProcessContentAssistant;
 using Take.Blip.Builder.Actions.ProcessHttp;
@@ -24,6 +25,7 @@ using Take.Blip.Builder.Actions.SetBucket;
 using Take.Blip.Builder.Actions.SetVariable;
 using Take.Blip.Builder.Actions.TrackEvent;
 using Take.Blip.Builder.Actions.TrackContactsJourney;
+using Take.Blip.Builder.Actions.TakeThreadControl;
 using Take.Blip.Builder.Diagnostics;
 using Take.Blip.Builder.Storage;
 using Take.Blip.Builder.Storage.Memory;
@@ -100,8 +102,10 @@ namespace Take.Blip.Builder.Hosting
                     typeof(DeleteVariableAction),
                     typeof(ProcessContentAssistantAction),
                     typeof(TrackContactsJourneyAction),
-                    typeof(ExecuteTemplateAction)
-                });
+                    typeof(ExecuteTemplateAction),
+                    typeof(PassThreadControlAction),
+                    typeof(TakeThreadControlAction)
+                 });
 
             return container;
         }
@@ -167,11 +171,12 @@ namespace Take.Blip.Builder.Hosting
 
         private static Container RegisterExternal(this Container container)
         {
-            container.RegisterSingleton<IDocumentTypeResolver>( () => {
+            container.RegisterSingleton<IDocumentTypeResolver>(() =>
+            {
                 var documentTypeResolver = new DocumentTypeResolver().WithBlipDocuments();
                 documentTypeResolver.RegisterDocument<InputExpiration>();
                 return documentTypeResolver;
-                });
+            });
             container.RegisterSingleton<IEnvelopeSerializer, EnvelopeSerializer>();
             container.RegisterSingleton<IDocumentSerializer, DocumentSerializer>();
             container.RegisterSingleton<ILogger>(() => LoggerProvider.Logger);

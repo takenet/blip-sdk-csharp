@@ -1,0 +1,66 @@
+{
+  "content": {
+    "interactive": {
+      "action": {
+        "name": "review_and_pay",
+        "parameters": {
+          "currency": "BRL",
+          "order": {
+            "items": [
+              {
+                "amount": {
+                  "offset": 100,
+                  "value": 4990
+                },
+                "name": "Produto de teste 1",
+                "quantity": 1,
+                "retailer_id": "produto-teste-1"
+              },
+              {
+                "amount": {
+                  "offset": 100,
+                  "value": 1550
+                },
+                "name": "Produto de teste 2",
+                "quantity": 2,
+                "retailer_id": "produto-teste-2"
+              }
+            ],
+            "status": "pending",
+            "subtotal": {
+              "offset": 100,
+              "value": 8090
+            }
+          },
+          "payment_settings": [
+            {
+              "payment_link": {
+                "uri": "https://checkout.hmg.example.test/pagamento?id=compra-de-teste-0001"
+              },
+              "type": "payment_link"
+            }
+          ],
+          "payment_type": "br",
+          "reference_id": "pedido-teste-v1",
+          "total_amount": {
+            "offset": 100,
+            "value": 8090
+          },
+          "type": "physical-goods"
+        }
+      },
+      "body": {
+        "text": "Confira o seu pedido de teste"
+      },
+      "footer": {
+        "text": "Rodapé fictício de teste"
+      },
+      "type": "order_details"
+    },
+    "type": "interactive"
+  },
+  "id": "<envelope-id>",
+  "metadata": {},
+  "to": "cliente-de-teste@wa.gw.msging.net",
+  "type": "application/json"
+}
