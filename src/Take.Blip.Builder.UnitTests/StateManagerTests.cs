@@ -30,7 +30,6 @@ namespace Take.Blip.Builder.UnitTests
                     { "builder:stateExpiration", stateExpiration }
                 };
             }
-
             return flow;
         }
 
@@ -82,6 +81,44 @@ namespace Take.Blip.Builder.UnitTests
                 "onboarding",
                 Arg.Any<CancellationToken>(),
                 default(TimeSpan));
+        }
+
+        [Fact]
+        public async Task RenewStateExpirationAsync_WhenStateExists_ShouldRenewWithSameValueAndConfiguredExpiration()
+        {
+            // Arrange
+            const string stateId = "subflow:currentState";
+            const string stateKey = "stateId@flow-id";
+            _context
+                .GetContextVariableAsync(stateKey, Arg.Any<CancellationToken>())
+                .Returns(stateId);
+
+            // Act
+            await _target.RenewStateExpirationAsync(_context, CancellationToken.None);
+
+            // Assert
+            await _context
+                .Received(1)
+                .SetVariableAsync(stateKey, stateId, Arg.Any<CancellationToken>(), StateExpiration);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task RenewStateExpirationAsync_WhenStateDoesNotExist_ShouldNotSetVariable(string storedStateId)
+        {
+            // Arrange
+            _context
+                .GetContextVariableAsync("stateId@flow-id", Arg.Any<CancellationToken>())
+                .Returns(storedStateId);
+
+            // Act
+            await _target.RenewStateExpirationAsync(_context, CancellationToken.None);
+
+            // Assert
+            await _context
+                .DidNotReceive()
+                .SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>(), Arg.Any<TimeSpan>());
         }
     }
 }
