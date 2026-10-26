@@ -1,0 +1,692 @@
+[
+  {
+    "configuration": "checkout-link",
+    "feedback": false,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": false,
+      "selectedProvider1": "checkout",
+      "selectedProvider2": "",
+      "selectedMerchant1": "merchant-de-teste",
+      "selectedMerchant2": "",
+      "method1": {
+        "type": "paymentlink",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "merchant-de-teste",
+          "merchantName": "Loja de Teste",
+          "source": "bot-de-teste",
+          "provider": "checkout",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  },
+  {
+    "configuration": "checkout-pix",
+    "feedback": false,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": false,
+      "selectedProvider1": "checkout",
+      "selectedProvider2": "",
+      "selectedMerchant1": "merchant-de-teste",
+      "selectedMerchant2": "",
+      "method1": {
+        "type": "pixcopycode",
+        "config": {
+          "business": "Loja de Teste",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "merchant-de-teste",
+          "merchantName": "Loja de Teste",
+          "source": "bot-de-teste",
+          "provider": "checkout",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  },
+  {
+    "configuration": "checkout-link-and-pix",
+    "feedback": false,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": true,
+      "selectedProvider1": "checkout",
+      "selectedProvider2": "checkout",
+      "selectedMerchant1": "merchant-de-teste",
+      "selectedMerchant2": "merchant-de-teste",
+      "method1": {
+        "type": "paymentlink",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "merchant-de-teste",
+          "merchantName": "Loja de Teste",
+          "source": "bot-de-teste",
+          "provider": "checkout",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "pixcopycode",
+        "config": {
+          "business": "Loja de Teste",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "merchant-de-teste",
+          "merchantName": "Loja de Teste",
+          "source": "bot-de-teste",
+          "provider": "checkout",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  },
+  {
+    "configuration": "checkout-link-with-saved-card",
+    "feedback": false,
+    "savedCard": true,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": false,
+      "selectedProvider1": "checkout",
+      "selectedProvider2": "",
+      "selectedMerchant1": "merchant-de-teste",
+      "selectedMerchant2": "",
+      "method1": {
+        "type": "paymentlink",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "merchant-de-teste",
+          "merchantName": "Loja de Teste",
+          "source": "bot-de-teste",
+          "provider": "checkout",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  },
+  {
+    "configuration": "own-pix-cpf",
+    "feedback": false,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": false,
+      "selectedProvider1": "own",
+      "selectedProvider2": "",
+      "selectedMerchant1": "",
+      "selectedMerchant2": "",
+      "method1": {
+        "type": "pixcopycode",
+        "config": {
+          "business": "Loja de Teste",
+          "keyType": "cpf",
+          "pixKey": "000.000.000-00",
+          "pixCode": "codigo-pix-ficticio-de-teste",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "own",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  },
+  {
+    "configuration": "own-pix-random-key",
+    "feedback": false,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": false,
+      "selectedProvider1": "own",
+      "selectedProvider2": "",
+      "selectedMerchant1": "",
+      "selectedMerchant2": "",
+      "method1": {
+        "type": "pixcopycode",
+        "config": {
+          "business": "Loja de Teste",
+          "keyType": "random",
+          "pixKey": "00000000-0000-0000-0000-000000000000",
+          "pixCode": "codigo-pix-ficticio-de-teste",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "own",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  },
+  {
+    "configuration": "own-link",
+    "feedback": false,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": false,
+      "selectedProvider1": "own",
+      "selectedProvider2": "",
+      "selectedMerchant1": "",
+      "selectedMerchant2": "",
+      "method1": {
+        "type": "paymentlink",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "https://pagamento.example.test/pedido/pedido-teste-v1",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "own",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  },
+  {
+    "configuration": "own-boleto",
+    "feedback": false,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": false,
+      "selectedProvider1": "own",
+      "selectedProvider2": "",
+      "selectedMerchant1": "",
+      "selectedMerchant2": "",
+      "method1": {
+        "type": "boleto",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "00000.00000 00000.000000 00000.000000 0 00000000000000",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "own",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  },
+  {
+    "configuration": "physical-product-two-items",
+    "feedback": false,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "fisico",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1},{\"retailer_product_id\":\"produto-teste-2\",\"name\":\"Produto de teste 2\",\"amount\":{\"value\":15.5},\"quantity\":2}]",
+      "value": ""
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": "Rodapé fictício de teste"
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": false,
+      "selectedProvider1": "checkout",
+      "selectedProvider2": "",
+      "selectedMerchant1": "merchant-de-teste",
+      "selectedMerchant2": "",
+      "method1": {
+        "type": "paymentlink",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "merchant-de-teste",
+          "merchantName": "Loja de Teste",
+          "source": "bot-de-teste",
+          "provider": "checkout",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      },
+      "method2": {
+        "type": "",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "",
+          "merchantName": "",
+          "source": "bot-de-teste",
+          "provider": "",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": false,
+            "paymentSuccessMessage": "",
+            "paymentDeniedMessage": "",
+            "paymentProcessingMessage": "",
+            "paymentCreatedMessage": ""
+          }
+        }
+      }
+    }
+  },
+  {
+    "configuration": "checkout-link-and-pix",
+    "feedback": true,
+    "savedCard": false,
+    "configurationData": {
+      "referenceId": "pedido-teste-v1",
+      "productType": "digital",
+      "items": "[{\"retailer_product_id\":\"produto-teste-1\",\"name\":\"Produto de teste 1\",\"amount\":{\"value\":49.9},\"quantity\":1}]",
+      "value": ""
+    },
+    "paymentMethodData": {
+      "tenant": "tenant-de-teste",
+      "showMethod2": true,
+      "selectedProvider1": "checkout",
+      "selectedProvider2": "checkout",
+      "selectedMerchant1": "merchant-de-teste",
+      "selectedMerchant2": "merchant-de-teste",
+      "method1": {
+        "type": "paymentlink",
+        "config": {
+          "business": "",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "merchant-de-teste",
+          "merchantName": "Loja de Teste",
+          "source": "bot-de-teste",
+          "provider": "checkout",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": true,
+            "paymentSuccessMessage": "Pagamento aprovado via link (mensagem fictícia de teste)",
+            "paymentDeniedMessage": "Pagamento negado via link (mensagem fictícia de teste)",
+            "paymentProcessingMessage": "Pagamento em processamento via link (mensagem fictícia de teste)",
+            "paymentCreatedMessage": "Pagamento criado via link (mensagem fictícia de teste)"
+          }
+        }
+      },
+      "method2": {
+        "type": "pixcopycode",
+        "config": {
+          "business": "Loja de Teste",
+          "keyType": "",
+          "pixKey": "",
+          "pixCode": "",
+          "httpsLink": "",
+          "boletoCode": "",
+          "merchantId": "merchant-de-teste",
+          "merchantName": "Loja de Teste",
+          "source": "bot-de-teste",
+          "provider": "checkout",
+          "paymentReturn": {
+            "paymentStatusFeedbackTime": 1,
+            "feedbackReturnPayment": true,
+            "paymentSuccessMessage": "Pagamento aprovado via PIX (mensagem fictícia de teste)",
+            "paymentDeniedMessage": "Pagamento negado via PIX (mensagem fictícia de teste)",
+            "paymentProcessingMessage": "Pagamento em processamento via PIX (mensagem fictícia de teste)",
+            "paymentCreatedMessage": "Pagamento criado via PIX (mensagem fictícia de teste)"
+          }
+        }
+      }
+    },
+    "customizeData": {
+      "textBody": "Confira o seu pedido de teste",
+      "textFooter": ""
+    }
+  }
+]

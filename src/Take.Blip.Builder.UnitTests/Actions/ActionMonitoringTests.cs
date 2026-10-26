@@ -44,6 +44,11 @@ namespace Take.Blip.Builder.UnitTests.Actions
             };
         }
 
+        private void SetCurrentState(string stateId = "state-1")
+        {
+            _inputContext[ContextExtensions.CURRENT_STATE_ID_KEY] = stateId;
+        }
+
         // ──────────────────────────────────────────────────────────────────
         // SetVariableAction
         // ──────────────────────────────────────────────────────────────────
@@ -52,6 +57,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task SetVariable_SuccessPath_LogsActionIdAndTitle()
         {
             SetActionTrace("action-001", "Set Name");
+            SetCurrentState();
             var settings = new SetVariableSettings { Variable = "name", Value = "Bob" };
             var target = new SetVariableAction(_blipLogger);
 
@@ -64,6 +70,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task SetVariable_ErrorPath_LogsActionIdAndTitle()
         {
             SetActionTrace("action-001", "Set Name");
+            SetCurrentState();
             var settings = new SetVariableSettings { Variable = "name", Value = "Bob" };
             Context.SetVariableAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<System.Threading.CancellationToken>(), Arg.Any<TimeSpan>())
                    .Returns<System.Threading.Tasks.Task>(_ => throw new InvalidOperationException("fail"));
@@ -77,6 +84,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         [Fact]
         public async Task SetVariable_WhenNoActionTrace_LogsNullActionIdAndTitle()
         {
+            SetCurrentState();
             var settings = new SetVariableSettings { Variable = "x", Value = "y" };
             var target = new SetVariableAction(_blipLogger);
 
@@ -93,6 +101,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task DeleteVariable_SuccessPath_LogsActionIdAndTitle()
         {
             SetActionTrace("action-002", "Clear Var");
+            SetCurrentState();
             var settings = new DeleteVariableSettings { Variable = "name" };
             var target = new DeleteVariableAction(_blipLogger);
 
@@ -105,6 +114,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task DeleteVariable_ErrorPath_LogsActionIdAndTitle()
         {
             SetActionTrace("action-002", "Clear Var");
+            SetCurrentState();
             var settings = new DeleteVariableSettings { Variable = "name" };
             Context.DeleteVariableAsync(Arg.Any<string>(), Arg.Any<System.Threading.CancellationToken>())
                    .Returns<System.Threading.Tasks.Task>(_ => throw new InvalidOperationException("fail"));
@@ -120,9 +130,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
         // ──────────────────────────────────────────────────────────────────
 
         [Fact]
-        public async Task SendMessage_SuccessPath_LogsActionIdAndTitle()
+        public async Task SendMessage_SuccessPath_DoesNotEmitMonitoringLog()
         {
             SetActionTrace("action-003", "Send Welcome");
+            SetCurrentState();
             var sender = Substitute.For<ISender>();
             var settings = JObject.FromObject(new
             {
@@ -133,13 +144,16 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             await target.ExecuteAsync(Context, settings, CancellationToken);
 
-            _blipLogger.Received(1).MessageDelivery(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().ActionExecution(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().MessageDelivery(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().ErrorEvents(Arg.Any<LogInput>(), Arg.Any<Exception>());
         }
 
         [Fact]
         public async Task SendMessage_ErrorPath_LogsActionIdAndTitle()
         {
             SetActionTrace("action-003", "Send Welcome");
+            SetCurrentState();
             var sender = Substitute.For<ISender>();
             sender.SendMessageAsync(Arg.Any<Message>(), Arg.Any<System.Threading.CancellationToken>())
                   .Returns<System.Threading.Tasks.Task>(_ => throw new InvalidOperationException("send fail"));
@@ -160,9 +174,10 @@ namespace Take.Blip.Builder.UnitTests.Actions
         // ──────────────────────────────────────────────────────────────────
 
         [Fact]
-        public async Task SendRawMessage_SuccessPath_LogsActionIdAndTitle()
+        public async Task SendRawMessage_SuccessPath_DoesNotEmitMonitoringLog()
         {
             SetActionTrace("action-004", "Raw Msg");
+            SetCurrentState();
             var sender = Substitute.For<ISender>();
             var resolver = new DocumentTypeResolver().WithBlipDocuments();
             var serializer = new DocumentSerializer(resolver);
@@ -175,7 +190,9 @@ namespace Take.Blip.Builder.UnitTests.Actions
 
             await target.ExecuteAsync(Context, JObject.FromObject(settings), CancellationToken);
 
-            _blipLogger.Received(1).MessageDelivery(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().ActionExecution(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().MessageDelivery(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().ErrorEvents(Arg.Any<LogInput>(), Arg.Any<Exception>());
         }
 
         // ──────────────────────────────────────────────────────────────────
@@ -183,16 +200,19 @@ namespace Take.Blip.Builder.UnitTests.Actions
         // ──────────────────────────────────────────────────────────────────
 
         [Fact]
-        public async Task TrackEvent_SuccessPath_LogsActionIdAndTitle()
+        public async Task TrackEvent_SuccessPath_DoesNotEmitMonitoringLog()
         {
             SetActionTrace("action-005", "Track Purchase");
+            SetCurrentState();
             var extension = Substitute.For<IEventTrackExtension>();
             var settings = new TrackEventSettings { Category = "ecommerce", Action = "buy" };
             var target = new TrackEventAction(extension, _blipLogger);
 
             await target.ExecuteAsync(Context, settings, CancellationToken);
 
-            _blipLogger.Received(1).ActionExecution(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().ActionExecution(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().MessageDelivery(Arg.Any<LogInput>());
+            _blipLogger.DidNotReceive().ErrorEvents(Arg.Any<LogInput>(), Arg.Any<Exception>());
         }
 
         // ──────────────────────────────────────────────────────────────────
@@ -203,6 +223,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         public async Task SetVariable_Success_LoggerCalledExactlyOnce()
         {
             SetActionTrace("id", "title");
+            SetCurrentState();
             var settings = new SetVariableSettings { Variable = "v", Value = "1" };
             var target = new SetVariableAction(_blipLogger);
 

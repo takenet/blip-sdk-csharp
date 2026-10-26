@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -9,25 +10,77 @@ namespace Take.Blip.Builder.UnitTests
 {
     public class StateManagerTests
     {
-        private readonly IContext _context;
-        private readonly StateManager _target;
-        private readonly Flow _flow;
+        private static readonly TimeSpan StateExpiration = TimeSpan.FromSeconds(10);
+
+        private readonly StateManager _target = new StateManager();
+        private readonly IContext _context = Substitute.For<IContext>();
 
         public StateManagerTests()
         {
-            _flow = new Flow
+            _context.Flow = CreateFlow(StateExpiration.ToString());
+        }
+
+        private static Flow CreateFlow(string stateExpiration)
+        {
+            var flow = new Flow { Id = "flow-id" };
+            if (stateExpiration != null)
             {
-                Id = Guid.NewGuid().ToString(),
-                Configuration = new System.Collections.Generic.Dictionary<string, string>
+                flow.Configuration = new Dictionary<string, string>
                 {
-                    ["builder:stateExpiration"] = TimeSpan.FromHours(24).ToString()
-                }
-            };
+                    { "builder:stateExpiration", stateExpiration }
+                };
+            }
+            return flow;
+        }
 
-            _context = Substitute.For<IContext>();
-            _context.Flow.Returns(_flow);
+        [Theory]
+        [InlineData("desk:ed0ff839-c619-47a2-9991-83776a4e3e6d")]
+        [InlineData("DESK:ed0ff839")]
+        public async Task SetStateIdAsyncShouldNotApplyExpirationForDeskState(string stateId)
+        {
+            // Act
+            await _target.SetStateIdAsync(_context, stateId, CancellationToken.None);
 
-            _target = new StateManager();
+            // Assert
+            await _context.Received(1).SetVariableAsync(
+                "stateId@flow-id",
+                stateId,
+                Arg.Any<CancellationToken>(),
+                default(TimeSpan));
+        }
+
+        [Theory]
+        [InlineData("onboarding")]
+        [InlineData("fallback")]
+        [InlineData("subflow:subflowTest")]
+        public async Task SetStateIdAsyncShouldApplyExpirationForNonDeskState(string stateId)
+        {
+            // Act
+            await _target.SetStateIdAsync(_context, stateId, CancellationToken.None);
+
+            // Assert
+            await _context.Received(1).SetVariableAsync(
+                "stateId@flow-id",
+                stateId,
+                Arg.Any<CancellationToken>(),
+                StateExpiration);
+        }
+
+        [Fact]
+        public async Task SetStateIdAsyncShouldUseDefaultExpirationWhenNotConfigured()
+        {
+            // Arrange
+            _context.Flow = CreateFlow(null);
+
+            // Act
+            await _target.SetStateIdAsync(_context, "onboarding", CancellationToken.None);
+
+            // Assert
+            await _context.Received(1).SetVariableAsync(
+                "stateId@flow-id",
+                "onboarding",
+                Arg.Any<CancellationToken>(),
+                default(TimeSpan));
         }
 
         [Fact]
@@ -35,7 +88,7 @@ namespace Take.Blip.Builder.UnitTests
         {
             // Arrange
             const string stateId = "subflow:currentState";
-            var stateKey = $"stateId@{_flow.Id}";
+            const string stateKey = "stateId@flow-id";
             _context
                 .GetContextVariableAsync(stateKey, Arg.Any<CancellationToken>())
                 .Returns(stateId);
@@ -46,7 +99,7 @@ namespace Take.Blip.Builder.UnitTests
             // Assert
             await _context
                 .Received(1)
-                .SetVariableAsync(stateKey, stateId, Arg.Any<CancellationToken>(), _flow.BuilderConfiguration.StateExpiration.Value);
+                .SetVariableAsync(stateKey, stateId, Arg.Any<CancellationToken>(), StateExpiration);
         }
 
         [Theory]
@@ -55,9 +108,8 @@ namespace Take.Blip.Builder.UnitTests
         public async Task RenewStateExpirationAsync_WhenStateDoesNotExist_ShouldNotSetVariable(string storedStateId)
         {
             // Arrange
-            var stateKey = $"stateId@{_flow.Id}";
             _context
-                .GetContextVariableAsync(stateKey, Arg.Any<CancellationToken>())
+                .GetContextVariableAsync("stateId@flow-id", Arg.Any<CancellationToken>())
                 .Returns(storedStateId);
 
             // Act

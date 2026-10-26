@@ -1,0 +1,114 @@
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
+using Lime.Messaging.Contents;
+using Lime.Protocol;
+using Take.Blip.Client;
+
+namespace Take.Blip.Builder.UnitTests.PaymentBlock.Support
+{
+    /// <summary>
+    /// Simulated <see cref="ISender"/>: records in the sequence of the <see cref="BuilderEngineHarness.InteractionLog"/> each command,
+    /// message and notification the engine sends, and answers in memory the bucket read commands
+    /// (<c>get /buckets/&lt;id&gt;</c>). Nothing goes out to the network.
+    /// </summary>
+    public sealed class SimulatedSender : ISender
+    {
+        private const string BUCKETS_PREFIX = "/buckets/";
+
+        private readonly BuilderEngineHarness.InteractionLog _log;
+        private readonly ConcurrentDictionary<string, string> _buckets =
+            new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>Creates the simulated sender recording to the given sequence.</summary>
+        public SimulatedSender(BuilderEngineHarness.InteractionLog log)
+        {
+            _log = log ?? throw new ArgumentNullException(nameof(log));
+        }
+
+        /// <summary>Stores a text in the bucket <paramref name="bucketId"/>, returned on <c>get /buckets/&lt;id&gt;</c>.</summary>
+        public void SetBucketText(string bucketId, string value)
+        {
+            if (string.IsNullOrWhiteSpace(bucketId))
+            {
+                throw new ArgumentException("The bucket id is required.", nameof(bucketId));
+            }
+
+            _buckets[bucketId] = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <inheritdoc />
+        public Task SendMessageAsync(Message message, CancellationToken cancellationToken)
+        {
+            Record(BuilderEngineHarness.InteractionKind.Message, message, cancellationToken);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken)
+        {
+            Record(BuilderEngineHarness.InteractionKind.Notification, notification, cancellationToken);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public Task SendCommandAsync(Command command, CancellationToken cancellationToken)
+        {
+            Record(BuilderEngineHarness.InteractionKind.Command, command, cancellationToken);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public Task<Command> ProcessCommandAsync(Command requestCommand, CancellationToken cancellationToken)
+        {
+            Record(BuilderEngineHarness.InteractionKind.Command, requestCommand, cancellationToken);
+            return Task.FromResult(CreateResponse(requestCommand));
+        }
+
+        private void Record(BuilderEngineHarness.InteractionKind kind, Envelope envelope, CancellationToken cancellationToken)
+        {
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            _log.Add(kind).Envelope = envelope;
+        }
+
+        private Command CreateResponse(Command request)
+        {
+            var response = new Command
+            {
+                Id = request.Id,
+                From = request.To,
+                To = request.From,
+                Method = request.Method,
+                Status = CommandStatus.Success,
+            };
+
+            var uri = request.Uri?.ToString();
+            if (request.Method != CommandMethod.Get
+                || uri == null
+                || !uri.StartsWith(BUCKETS_PREFIX, StringComparison.OrdinalIgnoreCase))
+            {
+                return response;
+            }
+
+            if (_buckets.TryGetValue(uri.Substring(BUCKETS_PREFIX.Length), out var text))
+            {
+                response.Resource = new PlainText { Text = text };
+                return response;
+            }
+
+            response.Status = CommandStatus.Failure;
+            response.Reason = new Reason
+            {
+                Code = ReasonCodes.COMMAND_RESOURCE_NOT_FOUND,
+                Description = "The requested resource was not found",
+            };
+            return response;
+        }
+    }
+}

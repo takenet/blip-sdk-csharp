@@ -1,0 +1,33 @@
+{
+  "content": {
+    "interactive": {
+      "action": {
+        "buttons": [
+          {
+            "reply": {
+              "id": "PAY_ONE_CLICK_cartao-de-teste-0001",
+              "title": "Cartão final 0000"
+            },
+            "type": "reply"
+          },
+          {
+            "reply": {
+              "id": "ACCESS_PAYMENT_LINK",
+              "title": "Outra forma"
+            },
+            "type": "reply"
+          }
+        ]
+      },
+      "body": {
+        "text": "🛒 Resumo do seu pedido\n\n*Produto de teste 1*\n1 x R$ 49,90 = R$ 49,90\n\n-------------------------------\n*Valor total: R$ 49,90*\n-------------------------------\n\nComo deseja pagar?\n\n"
+      },
+      "type": "button"
+    },
+    "type": "interactive"
+  },
+  "id": "<envelope-id>",
+  "metadata": {},
+  "to": "cliente-de-teste@wa.gw.msging.net",
+  "type": "application/json"
+}
