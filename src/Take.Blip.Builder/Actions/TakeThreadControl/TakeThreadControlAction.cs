@@ -13,15 +13,15 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
 {
     public class TakeThreadControlAction : ActionBase<TakeThreadControlSettings>
     {
+        private const string MultiPartnerConversationControlTakeType = "application/vnd.iris.multi-partner-conversation-control-take+json";
         private readonly ISender _sender;
-        private readonly IRedirectManager _redirectManager;
         private readonly IBlipLogger _blipMonitoringLogger;
 
         public TakeThreadControlAction(ISender sender, IRedirectManager redirectManager, IBlipLogger? blipMonitoringLogger = null)
             : base(nameof(TakeThreadControl))
         {
             _sender = sender;
-            _redirectManager = redirectManager;
+            _ = redirectManager;
             _blipMonitoringLogger = blipMonitoringLogger ?? new NullBlipLogger();
         }
 
@@ -30,18 +30,27 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
             var sw = Stopwatch.StartNew();
             try
             {
+                if (ShouldSkipTakeCommand(context))
+                {
+                    this.LogExecution(_blipMonitoringLogger, context, new JObject
+                    {
+                        ["controlType"] = ThreadControlType.Take.ToString(),
+                        ["skipped"] = true,
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    });
+
+                    return;
+                }
+
                 var resource = BuildThreadControlResource(context, settings);
 
                 var command = ThreadControlCommandFactory.CreateSetCommand(resource);
                 var response = await _sender.ProcessCommandAsync(command, cancellationToken);
                 ThrowIfFailure(response);
 
-                await RedirectAsync(context, settings, cancellationToken);
-
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["controlType"] = ThreadControlType.Take.ToString(),
-                    ["service"] = settings.Service,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
             }
@@ -50,7 +59,6 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
                 this.LogError(_blipMonitoringLogger, context, new JObject
                 {
                     ["controlType"] = ThreadControlType.Take.ToString(),
-                    ["service"] = settings.Service,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 }, ex);
                 throw;
@@ -71,30 +79,42 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
             return resource;
         }
 
-        private async Task RedirectAsync(IContext context, TakeThreadControlSettings settings, CancellationToken cancellationToken)
+        private static bool ShouldSkipTakeCommand(IContext context)
         {
-            if (string.IsNullOrWhiteSpace(settings.Service))
+            var message = context?.Input?.Message;
+            var contentMediaType = message?.Content?.GetMediaType()?.ToString();
+            if (IsTakeControlPayloadType(contentMediaType))
             {
-                return;
+                return true;
             }
 
-            var redirectSettings = new JObject
+            if (string.IsNullOrWhiteSpace(context?.Input?.SerializedMessage))
             {
-                ["address"] = settings.Service
-            };
-
-            if (!string.IsNullOrWhiteSpace(settings.Message))
-            {
-                redirectSettings["context"] = new JObject
-                {
-                    ["type"] = "text/plain",
-                    ["value"] = settings.Message,
-                };
+                return false;
             }
 
-            var redirect = redirectSettings.ToObject<Lime.Messaging.Contents.Redirect>(LimeSerializerContainer.Serializer);
-            await _redirectManager.RedirectUserAsync(context, redirect, cancellationToken);
+            JObject envelope;
+            try
+            {
+                envelope = JObject.Parse(context.Input.SerializedMessage);
+            }
+            catch
+            {
+                return false;
+            }
+
+            var envelopeType = envelope.SelectToken("type")?.Value<string>();
+            if (IsTakeControlPayloadType(envelopeType))
+            {
+                return true;
+            }
+
+            var documentContainerType = envelope.SelectToken("content.documentContainer.type")?.Value<string>();
+            return IsTakeControlPayloadType(documentContainerType);
         }
+
+        private static bool IsTakeControlPayloadType(string type) =>
+            string.Equals(type, MultiPartnerConversationControlTakeType, StringComparison.OrdinalIgnoreCase);
 
         private static void ThrowIfFailure(Command response)
         {

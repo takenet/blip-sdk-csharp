@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
@@ -104,25 +105,15 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await _sender.DidNotReceive().ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>());
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData(" ")]
-        [InlineData("Continue the conversation")]
-        public async Task TakeShouldSendCommandAndRedirect(string message)
+        [Fact]
+        public async Task TakeShouldSendCommandWithoutRedirect()
         {
             var target = new TakeThreadControlAction(_sender, _redirectManager);
             var settings = JObject.FromObject(new
             {
-                metadata = "takeover-reason",
-                service = "support@msging.net",
-                message
+                metadata = "takeover-reason"
             });
 
-            Redirect redirect = null;
-            _redirectManager.RedirectUserAsync(
-                Context, Arg.Do<Redirect>(r => redirect = r), CancellationToken)
-                .Returns(Task.CompletedTask);
             Command sentCommand = null;
             _sender.ProcessCommandAsync(Arg.Do<Command>(c => sentCommand = c), Arg.Any<CancellationToken>())
                 .Returns(new Command { Status = CommandStatus.Success });
@@ -136,35 +127,43 @@ namespace Take.Blip.Builder.UnitTests.Actions
             serialized["resource"]["metadata"]?.Value<string>().ShouldBe("takeover-reason");
             serialized["resource"]["targetRole"].ShouldBeNull();
 
-            await _redirectManager.Received(1).RedirectUserAsync(
-                Context, redirect, CancellationToken);
-            redirect.ShouldNotBeNull();
-            redirect.Address.ShouldBe(Node.Parse("support@msging.net"));
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                redirect.Context.ShouldBeNull();
-            }
-            else
-            {
-                redirect.Context.Type.ToString().ShouldBe("text/plain");
-                ((PlainText)redirect.Context.Value).Text.ShouldBe(message);
-            }
+            await _redirectManager.DidNotReceive().RedirectUserAsync(
+                Arg.Any<IContext>(), Arg.Any<Redirect>(), Arg.Any<CancellationToken>());
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData(" ")]
-        public async Task TakeWithoutServiceShouldThrowBeforeSending(string service)
+        [Fact]
+        public async Task TakeWithoutServiceShouldSendCommand()
         {
             var target = new TakeThreadControlAction(_sender, _redirectManager);
-            var settings = JObject.FromObject(new
-            {
-                service,
-                metadata = "x"
-            });
+            var settings = JObject.FromObject(new { metadata = "x" });
 
-            await Assert.ThrowsAsync<ValidationException>(() => target.ExecuteAsync(Context, settings, CancellationToken));
+            Command sentCommand = null;
+            _sender.ProcessCommandAsync(Arg.Do<Command>(c => sentCommand = c), Arg.Any<CancellationToken>())
+                .Returns(new Command { Status = CommandStatus.Success });
+
+            await target.ExecuteAsync(Context, settings, CancellationToken);
+
+            AssertCommand(sentCommand, "take");
+            await _sender.Received(1).ProcessCommandAsync(sentCommand, CancellationToken);
+            await _redirectManager.DidNotReceive().RedirectUserAsync(
+                Arg.Any<IContext>(), Arg.Any<Redirect>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task TakeWithControlTakePayloadShouldNotSendCommand()
+        {
+            var target = new TakeThreadControlAction(_sender, _redirectManager);
+            Message.Content = new JsonDocument(
+                new Dictionary<string, object>
+                {
+                    ["documentContainer"] = new Dictionary<string, object>
+                    {
+                        ["type"] = "application/vnd.iris.multi-partner-conversation-control-take+json"
+                    }
+                },
+                new MediaType("application", "vnd.iris.multi-partner-conversation", "json"));
+
+            await target.ExecuteAsync(Context, CreateSettings("Take"), CancellationToken);
 
             await _sender.DidNotReceive().ProcessCommandAsync(Arg.Any<Command>(), Arg.Any<CancellationToken>());
             await _redirectManager.DidNotReceive().RedirectUserAsync(
@@ -325,7 +324,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         }
 
         [Fact]
-        public async Task TakeShouldWaitForGatewaySuccessBeforeRedirecting()
+        public async Task TakeShouldWaitForGatewaySuccessBeforeFinishing()
         {
             var target = new TakeThreadControlAction(_sender, _redirectManager);
             var response = new TaskCompletionSource<Command>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -341,25 +340,22 @@ namespace Take.Blip.Builder.UnitTests.Actions
             await execution;
 
             await _sender.Received(1).ProcessCommandAsync(Arg.Any<Command>(), CancellationToken);
-            await _redirectManager.Received(1).RedirectUserAsync(Context, Arg.Any<Redirect>(), CancellationToken);
+            await _redirectManager.DidNotReceive().RedirectUserAsync(
+                Arg.Any<IContext>(), Arg.Any<Redirect>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
-        public async Task RedirectExceptionShouldPropagateAfterTakingControl()
+        public async Task TakeShouldNotInvokeRedirectManager()
         {
             var target = new TakeThreadControlAction(_sender, _redirectManager);
-            var exception = new InvalidOperationException("redirect failed");
             _sender.ProcessCommandAsync(Arg.Any<Command>(), CancellationToken)
                 .Returns(new Command { Status = CommandStatus.Success });
-            _redirectManager.RedirectUserAsync(Context, Arg.Any<Redirect>(), CancellationToken)
-                .Returns(Task.FromException(exception));
 
-            var actual = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => target.ExecuteAsync(Context, CreateSettings("Take"), CancellationToken));
+            await target.ExecuteAsync(Context, CreateSettings("Take"), CancellationToken);
 
-            actual.ShouldBeSameAs(exception);
             await _sender.Received(1).ProcessCommandAsync(Arg.Any<Command>(), CancellationToken);
-            await _redirectManager.Received(1).RedirectUserAsync(Context, Arg.Any<Redirect>(), CancellationToken);
+            await _redirectManager.DidNotReceive().RedirectUserAsync(
+                Arg.Any<IContext>(), Arg.Any<Redirect>(), Arg.Any<CancellationToken>());
         }
 
         private IAction CreateAction(string operation)
@@ -372,7 +368,7 @@ namespace Take.Blip.Builder.UnitTests.Actions
         private static JObject CreateSettings(string operation)
         {
             return operation == "Take"
-                ? JObject.FromObject(new { service = "support@msging.net" })
+                ? new JObject()
                 : operation == "Release"
                     ? JObject.FromObject(new { controlType = "release" })
                     : JObject.FromObject(new { controlType = "pass", targetRole = "utility" });
