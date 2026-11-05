@@ -1,16 +1,16 @@
 ### Installation
 
-The BLiP C# SDK enables the construction of scalable chatbots in a simple and agile way. Its code is [open in Github](https://github.com/takenet/blip-sdk-csharp) and uses the **.NET Core**, which supports several platforms, such as **Windows** , **Linux**, and **Mac**.
+The BLiP C# SDK enables the construction of scalable chatbots in a simple and agile way. Its code is [open in Github](https://github.com/takenet/blip-sdk-csharp) and uses **.NET**, which supports several platforms, such as **Windows** , **Linux**, and **Mac**.
 
-The required version of the .NET Core SDK is 2.0 or higher, which is available for installation [here](https://dot.net/core).
+The SDK packages target **.NET 8.0** (`net8.0`), so the required version of the .NET SDK is 8.0 or higher, which is available for installation [here](https://dotnet.microsoft.com/download).
 
-To check the installed .NET Core version, run the following command in your operating system's command line interpreter (`Powershell`,` cmd`, `bash`,` terminal`, etc.):
+To check the installed .NET SDK version, run the following command in your operating system's command line interpreter (`Powershell`,` cmd`, `bash`,` terminal`, etc.):
 
 ```
 dotnet --version
 ```
 
-The result should be `2.0.0` or newer.
+The result should be `8.0.100` or newer.
 
 #### Using the project template
 
