@@ -32,6 +32,11 @@ namespace Take.Blip.Builder.Models
         public int Version { get; set; } = 1;
 
         /// <summary>
+        /// Defines the flow layout representation.
+        /// </summary>
+        public string Layout { get; set; }
+
+        /// <summary>
         /// Type of flow
         /// </summary>
         public FlowType Type { get; set; } = FlowType.Flow;
