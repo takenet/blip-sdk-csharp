@@ -14,6 +14,9 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
     public class TakeThreadControlAction : ActionBase<TakeThreadControlSettings>
     {
         private const string MultiPartnerConversationControlTakeType = "application/vnd.iris.multi-partner-conversation-control-take+json";
+        private const string TakeThreadControlExecutionContextVariable = "takeThreadControl_executed";
+        private const double DefaultTakeThreadControlExpirationInSeconds = 60;
+
         private readonly ISender _sender;
         private readonly IBlipLogger _blipMonitoringLogger;
 
@@ -36,6 +39,20 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
                     {
                         ["controlType"] = ThreadControlType.Take.ToString(),
                         ["skipped"] = true,
+                        ["skipReason"] = "takeControlPayload",
+                        ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
+                    });
+
+                    return;
+                }
+
+                if (await ShouldSkipByRecentExecutionAsync(context, cancellationToken))
+                {
+                    this.LogExecution(_blipMonitoringLogger, context, new JObject
+                    {
+                        ["controlType"] = ThreadControlType.Take.ToString(),
+                        ["skipped"] = true,
+                        ["skipReason"] = "alreadyExecuted",
                         ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                     });
 
@@ -48,9 +65,17 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
                 var response = await _sender.ProcessCommandAsync(command, cancellationToken);
                 ThrowIfFailure(response);
 
+                var expiration = ResolveExpiration(settings);
+                await context.SetVariableAsync(
+                    TakeThreadControlExecutionContextVariable,
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                    cancellationToken,
+                    expiration);
+
                 this.LogExecution(_blipMonitoringLogger, context, new JObject
                 {
                     ["controlType"] = ThreadControlType.Take.ToString(),
+                    ["expiration"] = expiration.TotalSeconds,
                     ["elapsedMilliseconds"] = sw.ElapsedMilliseconds,
                 });
             }
@@ -115,6 +140,22 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
 
         private static bool IsTakeControlPayloadType(string type) =>
             string.Equals(type, MultiPartnerConversationControlTakeType, StringComparison.OrdinalIgnoreCase);
+
+        private static TimeSpan ResolveExpiration(TakeThreadControlSettings settings)
+        {
+            if (settings?.Expiration.HasValue == true && settings.Expiration.Value > 0)
+            {
+                return TimeSpan.FromSeconds(settings.Expiration.Value);
+            }
+
+            return TimeSpan.FromSeconds(DefaultTakeThreadControlExpirationInSeconds);
+        }
+
+        private static async Task<bool> ShouldSkipByRecentExecutionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var value = await context.GetContextVariableAsync(TakeThreadControlExecutionContextVariable, cancellationToken);
+            return !string.IsNullOrWhiteSpace(value);
+        }
 
         private static void ThrowIfFailure(Command response)
         {
