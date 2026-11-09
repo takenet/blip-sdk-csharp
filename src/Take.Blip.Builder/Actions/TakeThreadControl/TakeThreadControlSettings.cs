@@ -13,6 +13,11 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
         public string Metadata { get; set; }
 
         /// <summary>
+        /// Gets or sets the expiration time, in seconds, that prevents repeated take operations for the same user.
+        /// </summary>
+        public double? Expiration { get; set; }
+
+        /// <summary>
         /// Validates the settings instance ensuring prohibited fields are absent and mutual dependencies are met.
         /// </summary>
         public void Validate()
