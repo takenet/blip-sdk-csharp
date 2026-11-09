@@ -14,7 +14,7 @@ namespace Take.Blip.Builder.Actions.TakeThreadControl
     public class TakeThreadControlAction : ActionBase<TakeThreadControlSettings>
     {
         private const string MultiPartnerConversationControlTakeType = "application/vnd.iris.multi-partner-conversation-control-take+json";
-        private const string TakeThreadControlExecutionContextVariable = "takeThreadControl_executed";
+        private const string TakeThreadControlExecutionContextVariable = "thread-control-executed";
         private const double DefaultTakeThreadControlExpirationInSeconds = 60;
 
         private readonly ISender _sender;
